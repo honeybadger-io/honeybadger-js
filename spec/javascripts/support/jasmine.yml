@@ -1,5 +1,7 @@
 src_files:
-  - '**/*.js'
+  - 'lib/stacktrace-0.4.js'
+  - 'honeybadger.js'
+  - 'configuration.js'
 
 helpers:
   - 'support/**/*.js'
