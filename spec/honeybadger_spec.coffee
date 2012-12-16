@@ -1,5 +1,8 @@
 describe 'Honeybadger', ->
-  it 'has a configuration instance', ->
+  beforeEach: ->
+    Honeybadger.configuration.reset()
+
+  it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
 
   it 'is configurable via #configure', ->

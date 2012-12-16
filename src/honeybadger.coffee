@@ -1,7 +1,7 @@
 window.Honeybadger = class Honeybadger
   @version: '0.0.1'
 
-  @configuration:
+  @default_configuration:
     api_key: null
     host: 'api.honeybadger.io'
     ssl: true
@@ -10,9 +10,16 @@ window.Honeybadger = class Honeybadger
     component: null
     action: null
 
+  # TODO: Test partial override
   @configure: (options = {}) ->
     for k,v of options
       @configuration[k] = v
+
+  @configuration:
+    reset: =>
+      @configure(@default_configuration)
+
+  @configuration.reset()
 
   @notify: (error) ->
     notice = new this.Notice
