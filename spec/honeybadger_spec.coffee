@@ -14,9 +14,14 @@ describe 'Honeybadger', ->
     expect(Honeybadger.notify).toBeDefined()
 
   describe 'notify', ->
-    it 'logs the stack trace', ->
-      spyOn(console, 'log')
+    it 'logs the notice JSON', ->
+      spyOn(console, 'log').andCallThrough()
       expected_error = null
+
+      Honeybadger.configure
+        api_key: 'asdf'
+        ssl: false
+        host: 'api.honeybadger.dev'
 
       try
         'foo'.bar()
@@ -24,4 +29,5 @@ describe 'Honeybadger', ->
         expected_error = error
         Honeybadger.notify(error)
 
-      expect(console.log).toHaveBeenCalledWith(printStackTrace({e: expected_error}))
+      notice = new Honeybadger.Notice({ error: expected_error })
+      expect(console.log).toHaveBeenCalledWith(notice.toJSON())

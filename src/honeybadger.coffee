@@ -3,5 +3,14 @@ window.Honeybadger = class Honeybadger
     @configuration = new @Configuration(args)
 
   @notify: (error) ->
-    trace = printStackTrace({e: error})
-    console.log trace
+    notice = new this.Notice
+      error: error
+    @sendRequest(notice.toJSON())
+
+  @sendRequest: (data) ->
+    request = new XMLHttpRequest()
+    url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices'
+    request.open('POST', url, true)
+    request.setRequestHeader('Content-Type', 'application/json')
+    request.setRequestHeader('X-API-Key', @configuration.api_key)
+    request.send((data))

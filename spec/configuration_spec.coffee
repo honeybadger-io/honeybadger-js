@@ -24,3 +24,35 @@ describe 'Configuration', ->
   it 'sets the ssl option', ->
     subject.ssl = false
     expect(subject.ssl).toBe(false)
+
+  it 'has project_root', ->
+    expect(subject.project_root).toBeDefined()
+    expect(subject.project_root).toEqual('http://localhost:8888')
+
+  it 'sets the project_root', ->
+    subject.project_root = 'http://foo.bar'
+    expect(subject.project_root).toEqual('http://foo.bar')
+
+  it 'has environment', ->
+    expect(subject.environment).toBeDefined()
+    expect(subject.environment).toEqual('production')
+
+  it 'sets the environment', ->
+    subject.environment = 'staging'
+    expect(subject.environment).toEqual('staging')
+
+  it 'has component', ->
+    expect(subject.component).toBeDefined()
+    expect(subject.component).toEqual(null)
+
+  it 'sets the component', ->
+    subject.component = 'n00bs'
+    expect(subject.component).toEqual('n00bs')
+
+  it 'has action', ->
+    expect(subject.action).toBeDefined()
+    expect(subject.action).toEqual(null)
+
+  it 'sets the action', ->
+    subject.action = 'pwn'
+    expect(subject.action).toEqual('pwn')

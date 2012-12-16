@@ -1,7 +1,8 @@
 src_files:
-  - 'lib/stacktrace-0.4.js'
+  - 'lib/*'
   - 'honeybadger.js'
   - 'configuration.js'
+  - 'notice.js'
 
 helpers:
   - 'support/**/*.js'
