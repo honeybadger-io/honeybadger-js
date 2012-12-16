@@ -1,5 +1,5 @@
 describe 'Configuration', ->
-  subject = new Honeybadger.Configuration
+  subject = Honeybadger.configuration
 
   it 'has an api key', ->
     expect(subject.api_key).toBeDefined()
