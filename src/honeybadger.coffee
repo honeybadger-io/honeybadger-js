@@ -8,6 +8,7 @@ window.Honeybadger = class Honeybadger
     @sendRequest(notice.toJSON())
 
   @sendRequest: (data) ->
+    # http://www.w3.org/TR/cors/
     request = new XMLHttpRequest()
     url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices'
     request.open('POST', url, true)

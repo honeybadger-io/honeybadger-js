@@ -1,6 +1,6 @@
-Honeybadger.Notice = class Notice
+class Honeybadger.Notice
   constructor: (@options = {}) ->
-    @error = @options.error
+    @error = @options?.error
     @trace = if @error then printStackTrace({e: @error}) else null
     @class = @error?.name
     @message = @error?.message

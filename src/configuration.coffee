@@ -1,9 +1,13 @@
-Honeybadger.Configuration = class Configuration
+class Honeybadger.Configuration
   api_key: null
   host: 'api.honeybadger.io'
   ssl: true
   project_root: window.location.protocol + '//' + window.location.host
   environment: 'production'
+
+  # TODO: move component and action to some other options array, since
+  # they may change without re-configuring - or make #configure merge
+  # options rather than replace configuration
   component: null
   action: null
 
@@ -17,4 +21,4 @@ Honeybadger.Configuration = class Configuration
     this.component = @options.component || @component
     this.component = @options.component || @component
 
-Honeybadger.configuration = new Configuration
+Honeybadger.configuration = new Honeybadger.Configuration
