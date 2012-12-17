@@ -1,6 +1,6 @@
 class Honeybadger.Notice
   constructor: (@options = {}) ->
-    @error = @options?.error
+    @error = @options.error
     @trace = if @error then printStackTrace({e: @error}) else null
     @class = @error?.name
     @message = @error?.message
@@ -9,6 +9,14 @@ class Honeybadger.Notice
     @environment = Honeybadger.configuration.environment
     @component = Honeybadger.configuration.component
     @action = Honeybadger.configuration.action
+
+    @context = {}
+    for k,v of Honeybadger.context
+      @context[k] = v
+    if @options.context
+      for k,v of @options.context
+        @context[k] = v
+
     console.log @toJSON()
 
   toJSON: ->
@@ -25,6 +33,7 @@ class Honeybadger.Notice
         url: @url
         component: @component
         action: @action
+        context: @context
       server:
         project_root: @project_root
         environment_name: @environment

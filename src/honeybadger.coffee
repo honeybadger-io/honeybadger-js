@@ -14,12 +14,24 @@ window.Honeybadger = class Honeybadger
   @configure: (options = {}) ->
     for k,v of options
       @configuration[k] = v
+    this
 
   @configuration:
     reset: =>
       @configure(@default_configuration)
 
   @configuration.reset()
+
+  @context: {}
+
+  @reset_context: (options = {}) ->
+    @context = options
+    this
+
+  @set_context: (options = {}) ->
+    for k,v of options
+      @context[k] = v
+    this
 
   @notify: (error) ->
     notice = new this.Notice
