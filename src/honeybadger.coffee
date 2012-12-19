@@ -33,9 +33,10 @@ window.Honeybadger = class Honeybadger
       @context[k] = v
     this
 
-  @notify: (error) ->
-    notice = new this.Notice
-      error: error
+  # TODO: Test setting options from notify
+  @notify: (error, options = {}) ->
+    options['error'] = error if error
+    notice = new this.Notice(options)
     @_sendRequest(notice.toJSON())
 
   # http://www.w3.org/TR/cors/

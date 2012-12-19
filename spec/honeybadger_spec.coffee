@@ -55,7 +55,7 @@ describe 'Honeybadger', ->
       expected_error = null
 
       Honeybadger.configure
-        api_key: 'asdf'
+        api_key: '780b8d0c'
         ssl: false
         host: 'api.honeybadger.dev'
 
