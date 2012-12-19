@@ -1,7 +1,7 @@
 class Honeybadger.Notice
   constructor: (@options = {}) ->
     @error = @options.error
-    @trace = if @error then printStackTrace({e: @error}) else null
+    @trace = if @error then @_parseBacktrace(printStackTrace({e: @error})) else null
     @class = @error?.name
     @message = @error?.message
     @url = document.URL
@@ -37,3 +37,12 @@ class Honeybadger.Notice
       server:
         project_root: @project_root
         environment_name: @environment
+
+  _parseBacktrace: (lines) ->
+    lines.map (line) ->
+      [method, file, number] = line.match(/^(.+)\s\((.+):(\d+):(\d+)\)$/)[1..3]
+      {
+        file: file,
+        number: number,
+        method: method
+      }
