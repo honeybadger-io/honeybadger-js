@@ -17,8 +17,6 @@ class Honeybadger.Notice
       for k,v of @options.context
         @context[k] = v
 
-    console.log @toJSON()
-
   toJSON: ->
     JSON.stringify
       notifier:
@@ -39,10 +37,11 @@ class Honeybadger.Notice
         environment_name: @environment
 
   _parseBacktrace: (lines) ->
-    lines.map (line) ->
+    backtrace = []
+    for line in lines
       [method, file, number] = line.match(/^(.+)\s\((.+):(\d+):(\d+)\)$/)[1..3]
-      {
+      backtrace.push
         file: file.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]'),
         number: number,
         method: method
-      }
+    backtrace

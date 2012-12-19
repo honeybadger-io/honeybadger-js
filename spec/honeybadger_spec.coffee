@@ -50,8 +50,8 @@ describe 'Honeybadger', ->
     expect(Honeybadger.notify).toBeDefined()
 
   describe '.notify', ->
-    it 'logs the notice JSON', ->
-      spyOn(console, 'log').andCallThrough()
+    it 'delivers the notice', ->
+      spyOn(Honeybadger, '_sendRequest').andCallThrough()
       expected_error = null
 
       Honeybadger.configure
@@ -63,7 +63,8 @@ describe 'Honeybadger', ->
         'foo'.bar()
       catch error
         expected_error = error
+        alert printStackTrace({e: expected_error})
         Honeybadger.notify(error)
 
       notice = new Honeybadger.Notice({ error: expected_error })
-      expect(console.log).toHaveBeenCalledWith(notice.toJSON())
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON())
