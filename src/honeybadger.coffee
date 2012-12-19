@@ -36,10 +36,10 @@ window.Honeybadger = class Honeybadger
   @notify: (error) ->
     notice = new this.Notice
       error: error
-    @sendRequest(notice.toJSON())
+    @_sendRequest(notice.toJSON())
 
   # http://www.w3.org/TR/cors/
-  @sendRequest: (data) ->
+  @_sendRequest: (data) ->
     request = new XMLHttpRequest()
     url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices'
     request.open('POST', url, true)
