@@ -20,31 +20,31 @@ describe 'Honeybadger', ->
   it 'has a context object', ->
     expect(Honeybadger.context).toBeDefined()
 
-  describe '.set_context', ->
+  describe '.setContext', ->
     it 'merges existing context', ->
-      Honeybadger.set_context({ user_id: '1' })
-      Honeybadger.set_context({ foo: 'bar' })
+      Honeybadger.setContext({ user_id: '1' })
+      Honeybadger.setContext({ foo: 'bar' })
       expect(Honeybadger.context.user_id).toBeDefined()
       expect(Honeybadger.context['user_id']).toEqual('1')
       expect(Honeybadger.context.foo).toBeDefined()
       expect(Honeybadger.context['foo']).toEqual('bar')
 
     it 'is chainable', ->
-      expect(Honeybadger.set_context({ user_id: 1 })).toBe(Honeybadger)
+      expect(Honeybadger.setContext({ user_id: 1 })).toBe(Honeybadger)
 
-  describe '.reset_context', ->
+  describe '.resetContext', ->
     it 'empties the context with no arguments', ->
-      Honeybadger.set_context({ user_id: '1' })
-      Honeybadger.reset_context()
+      Honeybadger.setContext({ user_id: '1' })
+      Honeybadger.resetContext()
       expect(Honeybadger.context).toEqual({})
 
     it 'replaces the context with arguments', ->
-      Honeybadger.set_context({ user_id: '1' })
-      Honeybadger.reset_context({ foo: 'bar' })
+      Honeybadger.setContext({ user_id: '1' })
+      Honeybadger.resetContext({ foo: 'bar' })
       expect(Honeybadger.context).toEqual({ foo: 'bar' })
 
     it 'is chainable', ->
-      expect(Honeybadger.reset_context()).toBe(Honeybadger)
+      expect(Honeybadger.resetContext()).toBe(Honeybadger)
 
   it 'responds to notify', ->
     expect(Honeybadger.notify).toBeDefined()

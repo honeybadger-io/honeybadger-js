@@ -24,11 +24,11 @@ window.Honeybadger = class Honeybadger
 
   @context: {}
 
-  @reset_context: (options = {}) ->
+  @resetContext: (options = {}) ->
     @context = options
     this
 
-  @set_context: (options = {}) ->
+  @setContext: (options = {}) ->
     for k,v of options
       @context[k] = v
     this
