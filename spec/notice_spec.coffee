@@ -17,6 +17,12 @@ describe 'Notice', ->
       lines = ['method (file:43:23)']
       expect(notice._parseBacktrace(lines)).toEqual([{ method: 'method', file: 'file', number: '43' }])
 
+    it 'applies [PROJECT_ROOT] filter', ->
+      Honeybadger.configuration.project_root = 'http://www.project_root.foo'
+      notice = new Honeybadger.Notice()
+      lines = ['method (http://www.project_root.foo/file.js:43:23)']
+      expect(notice._parseBacktrace(lines)).toEqual([{ method: 'method', file: '[PROJECT_ROOT]/file.js', number: '43' }])
+
   describe '#toJSON()', ->
     it 'is defined', ->
       notice = new Honeybadger.Notice

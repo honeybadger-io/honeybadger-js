@@ -1,5 +1,5 @@
 describe 'Honeybadger', ->
-  beforeEach: ->
+  beforeEach () ->
     Honeybadger.configuration.reset()
 
   it 'has a configuration object', ->

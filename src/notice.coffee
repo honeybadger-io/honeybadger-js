@@ -42,7 +42,7 @@ class Honeybadger.Notice
     lines.map (line) ->
       [method, file, number] = line.match(/^(.+)\s\((.+):(\d+):(\d+)\)$/)[1..3]
       {
-        file: file,
+        file: file.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]'),
         number: number,
         method: method
       }
