@@ -63,7 +63,6 @@ describe 'Honeybadger', ->
         'foo'.bar()
       catch error
         expected_error = error
-        alert printStackTrace({e: expected_error})
         Honeybadger.notify(error)
 
       notice = new Honeybadger.Notice({ error: expected_error })
