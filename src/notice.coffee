@@ -39,9 +39,15 @@ class Honeybadger.Notice
   _parseBacktrace: (lines) ->
     backtrace = []
     for line in lines
-      [method, file, number] = line.match(/^(.+)\s\((.+):(\d+):(\d+)\)$/)[1..3]
+      [method, file, number] = @_parseBacktraceLine(line)
       backtrace.push
         file: file.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]'),
         number: number,
         method: method
     backtrace
+
+  _parseBacktraceLine: (line) ->
+    line = line.replace(' (', '@(')
+    line += '@unsupported.js:0' if line.indexOf('@') == -1
+    match = line.match(/^(.*)@\(?(.*):(\d+)(?:\:\d+)\)?.*$/) || line.match(/^(.*)@(.*):(\d+)$/)
+    if match then match[1..3] else null
