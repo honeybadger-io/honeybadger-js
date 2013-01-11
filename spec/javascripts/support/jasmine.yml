@@ -1,7 +1,6 @@
 src_files:
-  - 'lib/*'
+  - '__vendor__/tracekit.js'
   - 'honeybadger.js'
-  - 'configuration.js'
   - 'notice.js'
 
 helpers:

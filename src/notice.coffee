@@ -1,9 +1,9 @@
 class Honeybadger.Notice
   constructor: (@options = {}) ->
-    @error = @options.error
-    @trace = if @error then @_parseBacktrace(printStackTrace({e: @error})) else null
-    @class = @error?.name
-    @message = @error?.message
+    @stackInfo = @options.stackInfo || (@options.error && TraceKit.computeStackTrace(@options.error))
+    @trace = @_parseBacktrace(@stackInfo?.stack)
+    @class = @stackInfo?.name
+    @message = @stackInfo?.message
     @url = document.URL
     @project_root = Honeybadger.configuration.project_root
     @environment = Honeybadger.configuration.environment
@@ -36,18 +36,11 @@ class Honeybadger.Notice
         project_root: @project_root
         environment_name: @environment
 
-  _parseBacktrace: (lines) ->
+  _parseBacktrace: (stack = []) ->
     backtrace = []
-    for line in lines
-      [method, file, number] = @_parseBacktraceLine(line)
+    for trace in stack
       backtrace.push
-        file: file.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]'),
-        number: number,
-        method: method
+        file: trace.url.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]'),
+        number: trace.line,
+        method: trace.func
     backtrace
-
-  _parseBacktraceLine: (line) ->
-    line = line.replace(' (', '@(')
-    line += '@unsupported.js:0' if line.indexOf('@') == -1
-    match = line.match(/^(.*)@\(?(.*):(\d+)(?:\:\d+)\)?.*$/) || line.match(/^(.*)@(.*):(\d+)$/)
-    if match then match[1..3] else null

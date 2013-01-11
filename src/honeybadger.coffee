@@ -1,5 +1,11 @@
+#= require 'json2'
+#= require 'tracekit'
+
 window.Honeybadger = class Honeybadger
   @version: '0.0.1'
+
+  TraceKit.report.subscribe (stackInfo) ->
+    @notify(null, { stackInfo: stackInfo })
 
   @default_configuration:
     api_key: null
@@ -41,9 +47,34 @@ window.Honeybadger = class Honeybadger
 
   # http://www.w3.org/TR/cors/
   @_sendRequest: (data) ->
-    request = new XMLHttpRequest()
     url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices'
-    request.open('POST', url, true)
-    request.setRequestHeader('Content-Type', 'application/json')
-    request.setRequestHeader('X-API-Key', @configuration.api_key)
-    request.send((data))
+    @_crossDomainPost(url, data)
+
+  # http://www.markandey.com/2011/10/design-of-cross-domain-post-api-in.html
+  @_crossDomainPost = (url, payload) ->
+    iframe = document.createElement('iframe')
+    uniqueNameOfFrame = '_hb_' + (new Date).getTime()
+    document.body.appendChild iframe
+    iframe.style.display = 'none'
+    iframe.contentWindow.name = uniqueNameOfFrame
+
+    form = document.createElement('form')
+    form.target = uniqueNameOfFrame
+    form.action = url
+    form.method = 'POST'
+
+    input = document.createElement('input')
+    input.type = 'hidden'
+    input.name = "payload"
+    input.value = payload
+    form.appendChild input
+    document.body.appendChild form
+
+    input = document.createElement('input')
+    input.type = 'hidden'
+    input.name = "api_key"
+    input.value = @configuration.api_key
+    form.appendChild input
+    document.body.appendChild form
+
+    form.submit()
