@@ -43,7 +43,6 @@ class Honeybadger
     notice = new Notice(options)
     @_sendRequest(notice.toJSON())
 
-  # http://www.w3.org/TR/cors/
   @_sendRequest: (data) ->
     url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices'
     @_crossDomainPost(url, data)
@@ -66,15 +65,14 @@ class Honeybadger
     input.name = "payload"
     input.value = payload
     form.appendChild input
-    document.body.appendChild form
 
     input = document.createElement('input')
     input.type = 'hidden'
     input.name = "api_key"
     input.value = @configuration.api_key
     form.appendChild input
-    document.body.appendChild form
 
+    document.body.appendChild form
     form.submit()
 
   @_handleTraceKitSubscription: (stackInfo) =>
