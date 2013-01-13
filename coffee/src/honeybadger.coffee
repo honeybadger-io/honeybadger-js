@@ -49,7 +49,7 @@ class Honeybadger
     @_crossDomainPost(url, data)
 
   # http://www.markandey.com/2011/10/design-of-cross-domain-post-api-in.html
-  @_crossDomainPost = (url, payload) ->
+  @_crossDomainPost: (url, payload) ->
     iframe = document.createElement('iframe')
     uniqueNameOfFrame = '_hb_' + (new Date).getTime()
     document.body.appendChild iframe
@@ -77,8 +77,10 @@ class Honeybadger
 
     form.submit()
 
-TraceKit.report.subscribe (stackInfo) ->
-  Honeybadger.notify(null, { stackInfo: stackInfo })
+  @_handleTraceKitSubscription: (stackInfo) =>
+    @notify(null, { stackInfo: stackInfo })
+
+TraceKit.report.subscribe Honeybadger._handleTraceKitSubscription
 
 # make sure to export the modules you want to expose,
 # otherwise they won't be accessible by clients.

@@ -59,18 +59,25 @@ describe 'Honeybadger', ->
       notice = null
 
       Honeybadger.configure
-        api_key: '780b8d0c'
-        ssl: false
-        host: 'api.honeybadger.dev'
+        api_key: 'asdf'
 
       try
         'foo'.bar()
-      catch error
-        Honeybadger.notify(error)
-        notice = new Notice({ error: error })
+      catch e
+        Honeybadger.notify(e)
+        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON())
 
-   describe 'unhandled exceptions', ->
-     it 'notifies Honeybadger of unhandled exceptions'
-       # FIXME
+   describe '._handleTraceKitSubscription', ->
+     it 'notifies Honeybadger of unhandled exceptions', ->
+
+       spyOn Honeybadger, 'notify'
+
+       Honeybadger.configure
+         api_key: 'asdf'
+
+       stackInfo = 'foo'
+       Honeybadger._handleTraceKitSubscription(stackInfo)
+
+       expect(Honeybadger.notify).toHaveBeenCalledWith(null, { stackInfo: stackInfo })
