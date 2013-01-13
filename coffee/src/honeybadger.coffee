@@ -5,9 +5,6 @@ goog.require 'notice'
 class Honeybadger
   @version: '0.0.1'
 
-  TraceKit.report.subscribe (stackInfo) ->
-    Honeybadger.notify(null, { stackInfo: stackInfo })
-
   @default_configuration:
     api_key: null
     host: 'api.honeybadger.io'
@@ -79,6 +76,9 @@ class Honeybadger
     document.body.appendChild form
 
     form.submit()
+
+TraceKit.report.subscribe (stackInfo) ->
+  Honeybadger.notify(null, { stackInfo: stackInfo })
 
 # make sure to export the modules you want to expose,
 # otherwise they won't be accessible by clients.

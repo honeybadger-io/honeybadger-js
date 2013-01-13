@@ -70,3 +70,7 @@ describe 'Honeybadger', ->
         notice = new Notice({ error: error })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON())
+
+   describe 'unhandled exceptions', ->
+     it 'notifies Honeybadger of unhandled exceptions'
+       # FIXME
