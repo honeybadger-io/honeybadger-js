@@ -4,15 +4,85 @@ A JavaScript library for integrating apps with the :zap: [Honeybadger Rails Erro
 
 ## Usage
 
-        Honeybadger.configure({
-          api_key: 'your api key'
-        });
+    Honeybadger.configure({
+      api_key: 'your api key'
+    });
 
-        try {
-          ...error producing code...
-        } catch(e) {
-          Honeybadger.notify(e);
-        }
+    try {
+      ...error producing code...
+    } catch(e) {
+      Honeybadger.notify(e);
+    }
+
+## Advanced Configuration
+
+`Honeybadger.configure` may be called multiple times to set/update
+configuration options. Existing configuration will be merged. In most
+cases configuration will be set once, however the `action` and
+`component` options may change semi-frequently for client-side
+frameworks like Backbone and Ember.
+
+    Honeybadger.configure({
+      // Honeybadger API key (required)
+      api_key: '',
+
+      // Collector Host
+      host: 'api.honeybadger.io',
+
+      // Use SSL?
+      ssl: true,
+
+      // Project root
+      project_root: 'http://my-app.com',
+
+      // Environment
+      environment: 'production',
+
+      // Component (optional)
+      component: '',
+
+      // Action (optional)
+      action: ''
+    });
+
+## Sending Custom Data
+
+Honeybadger allows you to send custom data using
+`Honeybadger.setContext` And `Honeybadger.resetContext`:
+
+    // On load
+    Honeybadger.setContext({
+      user_id: '<%= current_user.id %>'
+    });
+
+    // Later
+    Honeybadger.setContext({
+      backbone_view: 'tracks'
+    });
+
+    // Honeybadger.context => { user_id: 1, backbone_view: 'tracks' }
+
+    Honeybadger.resetContext({
+      some_other_data: 'foo'
+    });
+
+    // Honeybadger.context == { some_other_data: 'foo' }
+
+You can also add context to a specific exception by passing an
+associative array to the `notify` method. Global context will be
+merged locally:
+
+    Honeybadger.setContext({
+      user_id: '<%= current_user.id %>'
+    });
+
+    try {
+      ...error producing code...
+    } catch(e) {
+      Honeybadger.notify(e, { context: { some_other_data: 'foo' } });
+    }
+
+    // Honeybadger.context == { user_id: 1 }
 
 ## Development
 
