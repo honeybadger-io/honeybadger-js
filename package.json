@@ -1,18 +1,18 @@
 {
-  "name": "projectname",
-  "description": "project description",
+  "name": "honeybadger",
+  "description": "A JavaScript library for integrating apps with the Honeybadger Rails Error Notifier.",
   "version": "0.0.1",
-  "homepage": "https://github.com/<username>/<reponame>",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js",
   "author": {
-    "name": "<full name>",
-    "email": "<email>"
+    "name": "Joshua Wood",
+    "email": "josh@honeybadger.io"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/<username>/<reponame>.git"
+    "url": "git@github.com:honeybadger-io/honeybadger-js.git"
   },
   "bugs": {
-    "url": "https://github.com/<username>/<reponame>/issues"
+    "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "scripts": {
     "test": "grunt --config Gruntfile.coffee test"
