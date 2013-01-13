@@ -84,7 +84,13 @@ merged locally:
 
     // Honeybadger.context == { user_id: 1 }
 
-## Development
+## Contributing
+
+1. Fork it.
+2. Create a topic branch `git checkout -b my_branch`
+3. Commit your changes `git commit -am "Boom"`
+3. Push to your branch `git push origin my_branch`
+4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)
 
 honeybadger-js is inspired by [saucer, the coffeescript boilerplate](https://github.com/jbenet/saucer).
 
@@ -193,3 +199,7 @@ You can run the tests from the commandline (using phantomjs):
 You can also run the tests in the browser:
 
     grunt --config Gruntfile.coffee server
+
+## License
+
+Honeybadger-js is Copyright 2013 © Honeybadger Industries LLC. It is free software, and may be redistributed under the terms specified in the MIT-LICENSE file.
