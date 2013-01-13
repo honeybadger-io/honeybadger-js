@@ -1,4 +1,4 @@
-# Honeybadger
+# Honeybadger-js
 
 A JavaScript library for integrating apps with the :zap: [Honeybadger Rails Error Notifier](http://honeybadger.io).
 
