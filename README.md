@@ -36,12 +36,7 @@ It gets you up and running with the following tools:
 
 and the frontend libs:
 
-* [jquery](http://jquery.com/) for dom manipulation
 * [underscore](http://underscorejs.org) for awesome utilities
-* [backbone](http://backbonejs.org/) for awesome mvc apps
-* [bootstrap](twitter.github.com/bootstrap/) for awesome style
-
-(if you don't need any of these, you can just delete them).
 
 ### install
 
