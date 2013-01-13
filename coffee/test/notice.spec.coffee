@@ -28,6 +28,7 @@ describe 'Notice', ->
       #expect(notice._parseBacktrace(lines)).toEqual([{ method: 'method', file: '[PROJECT_ROOT]/file.js', number: '43' }])
 
     it 'skips traces in honeybadger.js'
+    it 'skips traces in honeybadger.min.js'
 
   describe '#toJSON()', ->
     it 'is defined', ->

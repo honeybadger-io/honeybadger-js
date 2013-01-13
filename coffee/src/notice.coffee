@@ -41,7 +41,7 @@ class Notice
   _parseBacktrace: (stack = []) ->
     backtrace = []
     for trace in stack
-      continue if trace.url.match /honeybadger\.js/
+      continue if trace.url.match /honeybadger(?:\.min)?\.js/
       backtrace.push
         file: trace.url.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]'),
         number: trace.line,
