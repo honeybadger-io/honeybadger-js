@@ -1,11 +1,12 @@
-#= require 'json2'
-#= require 'tracekit'
+goog.provide 'honeybadger'
 
-window.Honeybadger = class Honeybadger
+goog.require 'notice'
+
+class Honeybadger
   @version: '0.0.1'
 
   TraceKit.report.subscribe (stackInfo) ->
-    @notify(null, { stackInfo: stackInfo })
+    Honeybadger.notify(null, { stackInfo: stackInfo })
 
   @default_configuration:
     api_key: null
@@ -42,7 +43,7 @@ window.Honeybadger = class Honeybadger
   # TODO: Test setting options from notify
   @notify: (error, options = {}) ->
     options['error'] = error if error
-    notice = new this.Notice(options)
+    notice = new Notice(options)
     @_sendRequest(notice.toJSON())
 
   # http://www.w3.org/TR/cors/
@@ -78,3 +79,7 @@ window.Honeybadger = class Honeybadger
     document.body.appendChild form
 
     form.submit()
+
+# make sure to export the modules you want to expose,
+# otherwise they won't be accessible by clients.
+(exports ? this).Honeybadger = Honeybadger

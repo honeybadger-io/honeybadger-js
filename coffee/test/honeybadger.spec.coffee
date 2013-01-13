@@ -1,3 +1,7 @@
+goog.provide 'honeybadger.spec'
+
+goog.require 'honeybadger'
+
 describe 'Honeybadger', ->
   beforeEach () ->
     Honeybadger.configuration.reset()
@@ -52,7 +56,7 @@ describe 'Honeybadger', ->
   describe '.notify', ->
     it 'delivers the notice', ->
       spyOn(Honeybadger, '_sendRequest').andCallThrough()
-      expected_error = null
+      notice = null
 
       Honeybadger.configure
         api_key: '780b8d0c'
@@ -62,8 +66,7 @@ describe 'Honeybadger', ->
       try
         'foo'.bar()
       catch error
-        expected_error = error
         Honeybadger.notify(error)
+        notice = new Notice({ error: error })
 
-      notice = new Honeybadger.Notice({ error: expected_error })
       expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON())

@@ -1,4 +1,6 @@
-class Honeybadger.Notice
+goog.provide 'notice'
+
+class Notice
   constructor: (@options = {}) ->
     @stackInfo = @options.stackInfo || (@options.error && TraceKit.computeStackTrace(@options.error))
     @trace = @_parseBacktrace(@stackInfo?.stack)
@@ -39,6 +41,7 @@ class Honeybadger.Notice
   _parseBacktrace: (stack = []) ->
     backtrace = []
     for trace in stack
+      continue if trace.url.match /honeybadger\.js/
       backtrace.push
         file: trace.url.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]'),
         number: trace.line,

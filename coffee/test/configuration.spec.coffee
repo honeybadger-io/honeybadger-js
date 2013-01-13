@@ -1,3 +1,7 @@
+goog.provide 'configuration.spec'
+
+goog.require 'honeybadger'
+
 describe 'Configuration', ->
   subject = Honeybadger.configuration
 
@@ -27,7 +31,7 @@ describe 'Configuration', ->
 
   it 'has project_root', ->
     expect(subject.project_root).toBeDefined()
-    expect(subject.project_root).toEqual('http://localhost:8888')
+    expect(subject.project_root).toEqual('http://127.0.0.1:8888')
 
   it 'sets the project_root', ->
     subject.project_root = 'http://foo.bar'
