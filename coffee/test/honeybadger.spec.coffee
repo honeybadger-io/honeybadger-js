@@ -55,7 +55,7 @@ describe 'Honeybadger', ->
 
   describe '.notify', ->
     it 'delivers the notice', ->
-      spyOn(Honeybadger, '_sendRequest').andCallThrough()
+      spyOn(Honeybadger, '_sendRequest')
       notice = null
 
       Honeybadger.configure
