@@ -69,7 +69,7 @@ Honeybadger allows you to send custom data using
     // Honeybadger.context == { some_other_data: 'foo' }
 
 You can also add context to a specific exception by passing an
-associative array to the `notify` method. Global context will be
+associative array to the `notify` function. Global context will be
 merged locally:
 
     Honeybadger.setContext({
