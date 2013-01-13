@@ -2,6 +2,11 @@
 
 A JavaScript library for integrating apps with the :zap: [Honeybadger Rails Error Notifier](http://honeybadger.io).
 
+## A quick disclaimer
+
+This library is young. So please report bugs, and don't be surprised
+when you encounter one :).
+
 ## Usage
 
     Honeybadger.configure({
