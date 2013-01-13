@@ -53,3 +53,6 @@ describe 'Notice', ->
 
         it 'has backtrace', ->
           expect(output.error.backtrace).toBeDefined()
+
+        it 'has source extract', ->
+          expect(output.error.source).toBeDefined()

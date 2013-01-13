@@ -6,6 +6,7 @@ class Notice
     @trace = @_parseBacktrace(@stackInfo?.stack)
     @class = @stackInfo?.name
     @message = @stackInfo?.message
+    @source = @stackInfo && @_extractSource(@stackInfo.stack)
     @url = document.URL
     @project_root = Honeybadger.configuration.project_root
     @environment = Honeybadger.configuration.environment
@@ -29,6 +30,7 @@ class Notice
         class: @class
         message: @message
         backtrace: @trace
+        source: @source
       request:
         url: @url
         component: @component
@@ -47,3 +49,9 @@ class Notice
         number: trace.line,
         method: trace.func
     backtrace
+
+  _extractSource: (stack = []) ->
+    source = {}
+    for line, i in (stack[0]?.context ? [])
+      source[i] = line
+    source
