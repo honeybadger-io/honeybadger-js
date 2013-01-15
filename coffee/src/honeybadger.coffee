@@ -44,7 +44,7 @@ class Honeybadger
     @_sendRequest(notice.toJSON())
 
   @_sendRequest: (data) ->
-    url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices'
+    url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices.html'
     @_crossDomainPost(url, data)
 
   # http://www.markandey.com/2011/10/design-of-cross-domain-post-api-in.html
