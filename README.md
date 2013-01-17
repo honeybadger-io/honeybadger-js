@@ -9,8 +9,11 @@ when you encounter one :).
 
 ## Usage
 
+Locate your public API key on the JavaScript setup tab of your project
+settings page.
+
     Honeybadger.configure({
-      api_key: 'your api key'
+      api_key: 'your public api key'
     });
 
     try {
