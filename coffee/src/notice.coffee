@@ -36,6 +36,7 @@ class Notice
         component: @component
         action: @action
         context: @context
+        cgi_data: @_cgiData()
       server:
         project_root: @project_root
         environment_name: @environment
@@ -55,3 +56,13 @@ class Notice
     for line, i in (stack[0]?.context ? [])
       source[i] = line
     source
+
+  _cgiData: () ->
+    data = {}
+    for k,v of navigator
+      unless typeof v == 'object'
+        data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v
+    data['HTTP_USER_AGENT'] = data['USER_AGENT']
+    delete data['USER_AGENT']
+    data['HTTP_REFERER'] = document.referrer if document.referrer.match /\S/
+    data
