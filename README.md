@@ -1,6 +1,7 @@
 # Honeybadger-js
 
-[![Build Status](https://travis-ci.org/honeybadger-io/honeybadger-js.png?branch=master)](https://travis-ci.org/honeybadger-io/honeybadger-js)
+[![Build
+Status](https://travis-ci.org/honeybadger-io/honeybadger-js.png?branch=master&1)](https://travis-ci.org/honeybadger-io/honeybadger-js)
 
 A JavaScript library for integrating apps with the :zap: [Honeybadger Rails Error Notifier](http://honeybadger.io).
 
