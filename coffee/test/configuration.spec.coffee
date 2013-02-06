@@ -5,6 +5,9 @@ goog.require 'honeybadger'
 describe 'Configuration', ->
   subject = Honeybadger.configuration
 
+  beforeEach () ->
+    subject.reset()
+
   it 'has an api key', ->
     expect(subject.api_key).toBeDefined()
     expect(subject.api_key).toBeNull()
