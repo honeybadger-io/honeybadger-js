@@ -18,6 +18,21 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger.configuration.api_key).toEqual('asdf')
 
+    it 'enables notifications on first call', ->
+      expect(Honeybadger.configuration.disabled).toEqual(true)
+      Honeybadger.configure
+          api_key: 'asdf'
+      expect(Honeybadger.configuration.disabled).toEqual(false)
+
+    it 'leaves notifications disabled on subsequent call', ->
+      expect(Honeybadger.configuration.disabled).toEqual(true)
+      Honeybadger.configure
+          api_key: 'asdf'
+          disabled: true
+      Honeybadger.configure
+          api_key: 'zxcv'
+      expect(Honeybadger.configuration.disabled).toEqual(true)
+
     it 'is chainable', ->
       expect(Honeybadger.configure({})).toBe(Honeybadger)
 
@@ -54,10 +69,11 @@ describe 'Honeybadger', ->
     expect(Honeybadger.notify).toBeDefined()
 
   describe '.notify', ->
-    it 'delivers the notice', ->
+    beforeEach () ->
       spyOn(Honeybadger, '_sendRequest')
       notice = null
 
+    it 'delivers the notice when enabled', ->
       Honeybadger.configure
         api_key: 'asdf'
 
@@ -69,15 +85,36 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON())
 
-   describe '._handleTraceKitSubscription', ->
-     it 'notifies Honeybadger of unhandled exceptions', ->
+    it 'does not deliver notice when not configured', ->
+      try
+        'foo'.bar()
+      catch e
+        Honeybadger.notify(e)
+        notice = new Notice({ error: e })
 
-       spyOn Honeybadger, 'notify'
+      expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
-       Honeybadger.configure
-         api_key: 'asdf'
+    it 'does not deliver notice when disabled', ->
+      Honeybadger.configure
+        api_key: 'asdf',
+        disabled: true
 
-       stackInfo = 'foo'
-       Honeybadger._handleTraceKitSubscription(stackInfo)
+      try
+        'foo'.bar()
+      catch e
+        Honeybadger.notify(e)
+        notice = new Notice({ error: e })
 
-       expect(Honeybadger.notify).toHaveBeenCalledWith(null, { stackInfo: stackInfo })
+      expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
+
+  describe '._handleTraceKitSubscription', ->
+    it 'notifies Honeybadger of unhandled exceptions', ->
+      spyOn Honeybadger, 'notify'
+
+      Honeybadger.configure
+       api_key: 'asdf'
+
+      stackInfo = 'foo'
+      Honeybadger._handleTraceKitSubscription(stackInfo)
+
+      expect(Honeybadger.notify).toHaveBeenCalledWith(null, { stackInfo: stackInfo })

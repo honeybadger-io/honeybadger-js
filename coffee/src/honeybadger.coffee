@@ -13,16 +13,24 @@ class Honeybadger
     environment: 'production'
     component: null
     action: null
+    disabled: true
+
+  @configured: false
 
   # TODO: Test partial override
   @configure: (options = {}) ->
+    if @configured == false
+      options['disabled'] = false if typeof options.disabled == 'undefined'
+      @configured = true
     for k,v of options
       @configuration[k] = v
     this
 
   @configuration:
     reset: =>
-      @configure(@default_configuration)
+      @configured = false
+      for k,v of @default_configuration
+        @configuration[k] = v
 
   @configuration.reset()
 
@@ -39,6 +47,7 @@ class Honeybadger
 
   # TODO: Test setting options from notify
   @notify: (error, options = {}) ->
+    return false if @configuration.disabled == true
     options['error'] = error if error
     notice = new Notice(options)
     @_sendRequest(notice.toJSON())

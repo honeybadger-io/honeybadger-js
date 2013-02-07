@@ -54,6 +54,9 @@ frameworks like Backbone and Ember.
 
       // Action (optional)
       action: ''
+
+      // Disable notifications?
+      disabled: false
     });
 
 ## Sending Custom Data
