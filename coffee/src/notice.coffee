@@ -26,6 +26,7 @@ class Notice
         name: 'honeybadger.js'
         url: 'https://github.com/honeybadger-io/honeybadger-js'
         version: Honeybadger.version
+        language: 'javascript'
       error:
         class: @class
         message: @message
