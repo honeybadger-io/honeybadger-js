@@ -3,7 +3,7 @@ goog.provide 'honeybadger'
 goog.require 'notice'
 
 class Honeybadger
-  @version: '0.0.1'
+  @version: '0.0.2'
 
   @default_configuration:
     api_key: null
