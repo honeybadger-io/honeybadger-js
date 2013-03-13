@@ -14,6 +14,7 @@ class Honeybadger
     component: null
     action: null
     disabled: true
+    onerror: false
 
   @configured: false
 
@@ -85,7 +86,8 @@ class Honeybadger
     form.submit()
 
   @_handleTraceKitSubscription: (stackInfo) =>
-    @notify(null, { stackInfo: stackInfo })
+    if @configuration.onerror
+      @notify(null, { stackInfo: stackInfo })
 
 TraceKit.report.subscribe Honeybadger._handleTraceKitSubscription
 

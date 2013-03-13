@@ -108,13 +108,22 @@ describe 'Honeybadger', ->
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
   describe '._handleTraceKitSubscription', ->
-    it 'notifies Honeybadger of unhandled exceptions', ->
+    beforeEach () ->
       spyOn Honeybadger, 'notify'
 
-      Honeybadger.configure
-       api_key: 'asdf'
+    describe 'default behavior', ->
+      it 'ignores unhandled errors', ->
+        Honeybadger._handleTraceKitSubscription({})
+        expect(Honeybadger.notify).not.toHaveBeenCalled()
 
-      stackInfo = 'foo'
-      Honeybadger._handleTraceKitSubscription(stackInfo)
+    describe 'when onerror is enabled', ->
+      beforeEach () ->
+        Honeybadger.configure
+          api_key: 'asdf',
+          onerror: true
 
-      expect(Honeybadger.notify).toHaveBeenCalledWith(null, { stackInfo: stackInfo })
+      it 'notifies Honeybadger of unhandled exceptions', ->
+        stackInfo = 'foo'
+        Honeybadger._handleTraceKitSubscription(stackInfo)
+
+        expect(Honeybadger.notify).toHaveBeenCalledWith(null, { stackInfo: stackInfo })

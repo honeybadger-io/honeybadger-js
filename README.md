@@ -55,6 +55,9 @@ frameworks like Backbone and Ember.
       // Action (optional)
       action: ''
 
+      // Should unhandled (window.onerror) notifications be sent?
+      onerror: false
+
       // Disable notifications?
       disabled: false
     });
@@ -97,6 +100,20 @@ merged locally:
     }
 
     // Honeybadger.context == { user_id: 1 }
+
+## Unhandled errors via (window.onerror)
+
+By default, honeybadger-js does not track unhandled errors. This is
+because `window.onerror` is a very limited method of error handling, and
+does not usually yield useful information. It is our official
+recommendation to always use try/catch explicitly to notify Honeybadger.
+If you still want to automatically catch errors via `window.onerror`,
+you can set the `onerror` configuration option to true:
+
+    Honeybadger.configure({
+      api_key: 'your public api key',
+      onerror: true
+    });
 
 ## Contributing
 
