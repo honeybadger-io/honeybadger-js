@@ -32,6 +32,11 @@ describe 'Notice', ->
       stack = [{ url: 'http://www.project_root.foo/honeybadger.min.js', line: '43', func: 'function' }]
       expect(notice._parseBacktrace(stack)).toEqual([])
 
+    it 'returns unknown line when url is missing', ->
+      notice = new Notice()
+      stack = [{ line: '43', func: 'function' }]
+      expect(notice._parseBacktrace(stack)).toEqual([{ file: 'unknown', number: '43', method: 'function' }])
+
   describe '#toJSON()', ->
     it 'is defined', ->
       notice = new Notice
