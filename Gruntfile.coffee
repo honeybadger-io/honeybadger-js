@@ -30,7 +30,6 @@ module.exports = (grunt) ->
     # libraries to load in the frontend
     frontend_libs: [
       'lib/closure/library/closure/goog/base.js',     # for dependencies
-      'node_modules/json3/lib/json3.js',              # cross-browser JSON support
       'vendor/tracekit.js'                            # awesome stack traces
     ]
 
@@ -58,7 +57,6 @@ module.exports = (grunt) ->
   #   `'dest': 'src'`  copies `src` to `<paths.build_dir>/dest`
   #   `'dest/': 'src/**'` copies `src` to `<paths.build_dir>/dest/src`
   paths.build_includes =
-    'js/vendor/json3.js'    :  'node_modules/json3/lib/json3.js'
     'js/vendor/tracekit.js' :  'vendor/tracekit.js'
 
   # prepend all dst paths with the build dir.
