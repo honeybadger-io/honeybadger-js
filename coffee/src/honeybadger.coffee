@@ -10,11 +10,12 @@ class Honeybadger
     host: 'api.honeybadger.io'
     ssl: true
     project_root: window.location.protocol + '//' + window.location.host
-    environment: 'production'
+    environment: 'development'
     component: null
     action: null
     disabled: true
     onerror: false
+    development_environments: ['development','test','cucumber']
 
   @configured: false
 
@@ -22,6 +23,7 @@ class Honeybadger
   @configure: (options = {}) ->
     if @configured == false
       options['disabled'] = false if typeof options.disabled == 'undefined'
+      options['disabled'] = true if options.environment in options.development_environments
       @configured = true
     for k,v of options
       @configuration[k] = v

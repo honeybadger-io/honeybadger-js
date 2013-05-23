@@ -42,7 +42,7 @@ describe 'Configuration', ->
 
   it 'has environment', ->
     expect(subject.environment).toBeDefined()
-    expect(subject.environment).toEqual('production')
+    expect(subject.environment).toEqual('development')
 
   it 'sets the environment', ->
     subject.environment = 'staging'
