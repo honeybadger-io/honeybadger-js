@@ -10,7 +10,7 @@ class Honeybadger
     host: 'api.honeybadger.io'
     ssl: true
     project_root: window.location.protocol + '//' + window.location.host
-    environment: 'production'
+    environment: 'development'
     component: null
     action: null
     disabled: true
