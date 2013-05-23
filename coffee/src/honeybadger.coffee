@@ -22,6 +22,7 @@ class Honeybadger
   @configure: (options = {}) ->
     if @configured == false
       options['disabled'] = false if typeof options.disabled == 'undefined'
+      options['disabled'] = true if options.environment in ['development','test','cucumber']
       @configured = true
     for k,v of options
       @configuration[k] = v
