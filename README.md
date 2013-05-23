@@ -60,6 +60,9 @@ frameworks like Backbone and Ember.
 
       // Disable notifications?
       disabled: false
+
+      // Development environments (don't send notices)
+      development_environments: ['development','test','cucumber']
     });
 
 ## Sending Custom Data
