@@ -15,21 +15,12 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "scripts": {
-    "test": "grunt --config Gruntfile.coffee test"
+    "test": "ant test"
   },
   "devDependencies": {
-    "grunt": "~0.3.17",
-    "grunt-coffee": "0.0.6",
-    "grunt-contrib-clean": "~0.3.1",
-    "grunt-closure-tools": "0.6.11",
-    "grunt-jasmine-runner": "~0.6.0",
-    "grunt-jasmine-spec-server": "0.0.2",
     "coffee-script": "~1.3.3",
-    "phantomjs": "~0.2.3",
-    "underscore": "~1.4.3",
-    "grunt-exec": "~0.3.0",
-    "grunt-cli": "~0.1.2",
-    "grunt-contrib-copy": "~0.3.2"
+    "connect": "~2.7.11",
+    "phantom-jasmine": "~0.3.0"
   },
   "readmeFilename": "README.md"
 }

@@ -1,5 +1,3 @@
-goog.provide 'notice'
-
 class Notice
   constructor: (@options = {}) ->
     @stackInfo = @options.stackInfo || (@options.error && TraceKit.computeStackTrace(@options.error))

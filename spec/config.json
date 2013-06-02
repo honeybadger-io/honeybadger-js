@@ -1,0 +1,4 @@
+[ 
+  "vendor/tracekit.js",
+  "build/src/*.js"
+]

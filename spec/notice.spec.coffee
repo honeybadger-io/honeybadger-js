@@ -1,7 +1,3 @@
-goog.provide 'notice.spec'
-
-goog.require 'honeybadger'
-
 describe 'Notice', ->
   describe 'context option', ->
     it 'allows setting context from options array', ->

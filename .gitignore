@@ -1,3 +1,4 @@
 build/
 node_modules/
 lib/closure/compiler.jar
+spec/pid.txt

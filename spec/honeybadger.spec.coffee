@@ -1,7 +1,3 @@
-goog.provide 'honeybadger.spec'
-
-goog.require 'honeybadger'
-
 describe 'Honeybadger', ->
   beforeEach () ->
     Honeybadger.configuration.reset()

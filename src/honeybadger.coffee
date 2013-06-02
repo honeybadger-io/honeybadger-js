@@ -1,7 +1,3 @@
-goog.provide 'honeybadger'
-
-goog.require 'notice'
-
 class Honeybadger
   @version: '0.0.2'
 
