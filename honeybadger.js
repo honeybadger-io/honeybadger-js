@@ -1,22 +1,68 @@
+/*
+  honeybadger-js
+  A JavaScript Notifier for Honeybadger
+  https://github.com/honeybadger-io/honeybadger-js
+  https://www.honeybadger.io/
+  MIT license
+*/
 (function() {
-/**! @preserve
- * Original CrashKit code Copyright (c) 2009 Andrey Tarantsov, YourSway LLC (http://crashkitapp.appspot.com/)
- * Copyright (c) 2010 Colin Snover (http://zetafleet.com)
- *
- * Released under the ISC License.
- * http://opensource.org/licenses/isc-license.txt
- */
+/*
+ TraceKit - Cross brower stack traces - github.com/occ/TraceKit
+ MIT license
+*/
+
+;(function(window, undefined) {
+
+
 var TraceKit = {};
+var _oldTraceKit = window.TraceKit;
+
+// global reference to slice
+var _slice = [].slice;
+var UNKNOWN_FUNCTION = '?';
+
 
 /**
- * TraceKit._has, a better form of hasOwnProperty
- * Example: TraceKit._has(MainHostObject, property) === true/false
+ * _has, a better form of hasOwnProperty
+ * Example: _has(MainHostObject, property) === true/false
  *
  * @param {Object} host object to check property
  * @param {string} key to check
  */
-TraceKit._has = function _has(object, key) {
+function _has(object, key) {
     return Object.prototype.hasOwnProperty.call(object, key);
+}
+
+function _isUndefined(what) {
+    return typeof what === 'undefined';
+}
+
+/**
+ * TraceKit.noConflict: Export TraceKit out to another variable
+ * Example: var TK = TraceKit.noConflict()
+ */
+TraceKit.noConflict = function noConflict() {
+    window.TraceKit = _oldTraceKit;
+    return TraceKit;
+};
+
+/**
+ * TraceKit.wrap: Wrap any function in a TraceKit reporter
+ * Example: func = TraceKit.wrap(func);
+ *
+ * @param {Function} func Function to be wrapped
+ * @return {Function} The wrapped func
+ */
+TraceKit.wrap = function traceKitWrapper(func) {
+    function wrapped() {
+        try {
+            return func.apply(this, arguments);
+        } catch (e) {
+            TraceKit.report(e);
+            throw e;
+        }
+    }
+    return wrapped;
 };
 
 /**
@@ -68,6 +114,7 @@ TraceKit.report = (function reportModuleWrapper() {
      * @param {Function} handler
      */
     function subscribe(handler) {
+        installGlobalHandler();
         handlers.push(handler);
     }
 
@@ -93,9 +140,9 @@ TraceKit.report = (function reportModuleWrapper() {
           return;
         }
         for (var i in handlers) {
-            if (TraceKit._has(handlers, i)) {
+            if (_has(handlers, i)) {
                 try {
-                    handlers[i].apply(null, [stack].concat(Array.prototype.slice.call(arguments, 2)));
+                    handlers[i].apply(null, [stack].concat(_slice.call(arguments, 2)));
                 } catch (inner) {
                     exception = inner;
                 }
@@ -107,7 +154,7 @@ TraceKit.report = (function reportModuleWrapper() {
         }
     }
 
-    var _oldOnerrorHandler = window.onerror;
+    var _oldOnerrorHandler, _onErrorHandlerInstalled;
 
     /**
      * Ensures all global unhandled exceptions are recorded.
@@ -117,7 +164,7 @@ TraceKit.report = (function reportModuleWrapper() {
      * @param {(number|string)} lineNo The line number at which the error
      * occurred.
      */
-    window.onerror = function traceKitWindowOnError(message, url, lineNo) {
+    function traceKitWindowOnError(message, url, lineNo) {
         var stack = null;
 
         if (lastExceptionStack) {
@@ -148,14 +195,24 @@ TraceKit.report = (function reportModuleWrapper() {
         }
 
         return false;
-    };
+    }
+
+    function installGlobalHandler ()
+    {
+        if (_onErrorHandlerInstalled === true) {
+            return;
+        }
+        _oldOnerrorHandler = window.onerror;
+        window.onerror = traceKitWindowOnError;
+        _onErrorHandlerInstalled = true;
+    }
 
     /**
      * Reports an unhandled Error to TraceKit.
      * @param {Error} ex
      */
     function report(ex) {
-        var args = Array.prototype.slice.call(arguments, 1);
+        var args = _slice.call(arguments, 1);
         if (lastExceptionStack) {
             if (lastException === ex) {
                 return; // already caught by an inner catch block, ignore
@@ -273,29 +330,16 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
             return '';
         }
         try {
-            var XMLHttpRequestWrapper;
-
-            if (typeof (XMLHttpRequest) === 'undefined') { // IE 5.x-6.x:
-                XMLHttpRequestWrapper = function IEXMLHttpRequestSub() {
-                    try {
-                        return new ActiveXObject('Msxml2.XMLHTTP.6.0');
-                    } catch (e) {}
-                    try {
-                        return new ActiveXObject('Msxml2.XMLHTTP.3.0');
-                    } catch (e) {}
-                    try {
-                        return new ActiveXObject('Msxml2.XMLHTTP');
-                    } catch (e) {}
-                    try {
-                        return new ActiveXObject('Microsoft.XMLHTTP');
-                    } catch (e) {}
-                    throw new Error('No XHR.');
-                };
-            } else {
-                XMLHttpRequestWrapper = XMLHttpRequest;
+            function getXHR() {
+                try {
+                    return new window.XMLHttpRequest();
+                } catch (e) {
+                    // explicitly bubble up the exception if not found
+                    return new window.ActiveXObject('Microsoft.XMLHTTP');
+                }
             }
-    
-            var request = new XMLHttpRequestWrapper();
+
+            var request = getXHR();
             request.open('GET', url, false);
             request.send('');
             return request.responseText;
@@ -310,16 +354,14 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
      * @return {Array.<string>} Source contents.
      */
     function getSource(url) {
-        if (!TraceKit._has(sourceCache, url)) {
+        if (!_has(sourceCache, url)) {
             // URL needs to be able to fetched within the acceptable domain.  Otherwise,
             // cross-domain errors will be triggered.
-            var source;
+            var source = '';
             if (url.indexOf(document.domain) !== -1) {
                 source = loadSource(url);
-            } else {
-                source = [];
             }
-            sourceCache[url] = source.length ? source.split('\n') : [];
+            sourceCache[url] = source ? source.split('\n') : [];
         }
 
         return sourceCache[url];
@@ -342,7 +384,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
             m;
 
         if (!source.length) {
-            return '?';
+            return UNKNOWN_FUNCTION;
         }
 
         // Walk backwards from the first line in the function until we find the line which
@@ -350,7 +392,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
         for (var i = 0; i < maxLines; ++i) {
             line = source[lineNo - i] + line;
 
-            if (line !== undefined) {
+            if (!_isUndefined(line)) {
                 if ((m = reGuessFunction.exec(line))) {
                     return m[1];
                 } else if ((m = reFunctionArgNames.exec(line))) {
@@ -359,7 +401,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
             }
         }
 
-        return '?';
+        return UNKNOWN_FUNCTION;
     }
 
     /**
@@ -389,7 +431,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
         line -= 1; // convert to 0-based index
 
         for (var i = start; i < end; ++i) {
-            if (typeof (source[i]) !== 'undefined') {
+            if (!_isUndefined(source[i])) {
                 context.push(source[i]);
             }
         }
@@ -584,7 +626,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
             return null;
         }
 
-        var chrome = /^\s*at ((?:\[object object\])?\S+) \(((?:file|http|https):.*?):(\d+)(?::(\d+))?\)\s*$/i,
+        var chrome = /^\s*at (?:((?:\[object object\])?\S+(?: \[as \S+\])?) )?\(?((?:file|http|https):.*?):(\d+)(?::(\d+))?\)?\s*$/i,
             gecko = /^\s*(\S*)(?:\((.*?)\))?@((?:file|http|https).*?):(\d+)(?::(\d+))?\s*$/i,
             lines = ex.stack.split('\n'),
             stack = [],
@@ -596,7 +638,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
             if ((parts = gecko.exec(lines[i]))) {
                 element = {
                     'url': parts[3],
-                    'func': parts[1],
+                    'func': parts[1] || UNKNOWN_FUNCTION,
                     'args': parts[2] ? parts[2].split(',') : '',
                     'line': +parts[4],
                     'column': parts[5] ? +parts[5] : null
@@ -604,7 +646,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
             } else if ((parts = chrome.exec(lines[i]))) {
                 element = {
                     'url': parts[2],
-                    'func': parts[1],
+                    'func': parts[1] || UNKNOWN_FUNCTION,
                     'line': +parts[3],
                     'column': parts[4] ? +parts[4] : null
                 };
@@ -740,7 +782,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
             source;
 
         for (i in scripts) {
-            if (TraceKit._has(scripts, i) && !scripts[i].src) {
+            if (_has(scripts, i) && !scripts[i].src) {
                 inlineScriptBlocks.push(scripts[i]);
             }
         }
@@ -894,7 +936,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
 
             item = {
                 'url': null,
-                'func': '?',
+                'func': UNKNOWN_FUNCTION,
                 'line': null,
                 'column': null
             };
@@ -909,7 +951,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
                 item.url = source.url;
                 item.line = source.line;
 
-                if (item.func === '?') {
+                if (item.func === UNKNOWN_FUNCTION) {
                     item.func = guessFunctionName(item.url, item.line);
                 }
 
@@ -1035,22 +1077,15 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
  * Extends support for global error handling for asynchronous browser
  * functions. Adopted from Closure Library's errorhandler.js
  */
-(function extendToAsynchronousCallbacks(w) {
+(function extendToAsynchronousCallbacks() {
     var _helper = function _helper(fnName) {
-        var originalFn = w[fnName];
-        w[fnName] = function traceKitAsyncExtension() {
+        var originalFn = window[fnName];
+        window[fnName] = function traceKitAsyncExtension() {
             // Make a copy of the arguments
-            var args = Array.prototype.slice.call(arguments, 0);
+            var args = _slice.call(arguments);
             var originalCallback = args[0];
             if (typeof (originalCallback) === 'function') {
-                args[0] = function traceKitArgsZero() {
-                    try {
-                        originalCallback.apply(this, arguments);
-                    } catch (e) {
-                        TraceKit.report(e);
-                        throw e;
-                    }
-                };
+                args[0] = TraceKit.wrap(originalCallback);
             }
             // IE < 9 doesn't support .call/.apply on setInterval/setTimeout, but it
             // also only supports 2 argument and doesn't care what "this" is, so we
@@ -1065,120 +1100,7 @@ TraceKit.computeStackTrace = (function computeStackTraceWrapper() {
 
     _helper('setTimeout');
     _helper('setInterval');
-}(window));
-
-/**
- * Extended support for backtraces and global error handling for most
- * asynchronous jQuery functions.
- */
-(function traceKitAsyncForjQuery($) {
-
-    // quit if jQuery isn't on the page
-    if (!$) {
-        return;
-    }
-
-    var _oldEventAdd = $.event.add;
-    $.event.add = function traceKitEventAdd(elem, types, handler, data, selector) {
-        var _handler;
-
-        if (handler.handler) {
-            _handler = handler.handler;
-            handler.handler = function traceKitHandler() {
-                try {
-                    return _handler.apply(this, arguments);
-                } catch (e) {
-                    TraceKit.report(e);
-                    throw e;
-                }
-            };
-        } else {
-            _handler = handler;
-            handler = function apply_handler() {
-                try {
-                    return _handler.apply(this, arguments);
-                } catch (e) {
-                    TraceKit.report(e);
-                    throw e;
-                }
-            };
-        }
-
-        // If the handler we are attaching doesn’t have the same guid as
-        // the original, it will never be removed when someone tries to
-        // unbind the original function later. Technically as a result of
-        // this our guids are no longer globally unique, but whatever, that
-        // never hurt anybody RIGHT?!
-        if (_handler.guid) {
-            handler.guid = _handler.guid;
-        } else {
-            handler.guid = _handler.guid = $.guid++;
-        }
-
-        return _oldEventAdd.call(this, elem, types, handler, data, selector);
-    };
-
-    var _oldReady = $.fn.ready;
-    $.fn.ready = function traceKitjQueryReadyWrapper(fn) {
-        var _fn = function () {
-            try {
-                return fn.apply(this, arguments);
-            } catch (e) {
-                TraceKit.report(e);
-                throw e;
-            }
-        };
-
-        return _oldReady.call(this, _fn);
-    };
-
-    var _oldAjax = $.ajax;
-    $.fn.ajax = function traceKitAjaxWrapper(s) {
-        if ($.isFunction(s.complete)) {
-            var _oldComplete = s.complete;
-            s.complete = function traceKitjQueryComplete() {
-                try {
-                    return _oldComplete.apply(this, arguments);
-                } catch (e) {
-                    TraceKit.report(e);
-                    throw e;
-                }
-            };
-        }
-
-        if ($.isFunction(s.error)) {
-            var _oldError = s.error;
-            s.error = function traceKitjQueryError() {
-                try {
-                    return _oldError.apply(this, arguments);
-                } catch (e) {
-                    TraceKit.report(e);
-                    throw e;
-                }
-            };
-        }
-
-        if ($.isFunction(s.success)) {
-            var _oldSuccess = s.success;
-            s.success = function traceKitjQuerySuccess() {
-                try {
-                    return _oldSuccess.apply(this, arguments);
-                } catch (e) {
-                    TraceKit.report(e);
-                    throw e;
-                }
-            };
-        }
-
-        try {
-            return _oldAjax.call(this, s);
-        } catch (e) {
-            TraceKit.report(e);
-            throw e;
-        }
-    };
-
-}(window.jQuery));
+}());
 
 //Default options:
 if (!TraceKit.remoteFetching) {
@@ -1191,6 +1113,13 @@ if (!TraceKit.linesOfContext || TraceKit.linesOfContext < 1) {
   // 5 lines before, the offending line, 5 lines after
   TraceKit.linesOfContext = 11;
 }
+
+
+
+// Export to global object
+window.TraceKit = TraceKit;
+
+}(window));
 // Generated by CoffeeScript 1.6.2
 var Notice;
 
@@ -1349,21 +1278,22 @@ Honeybadger = (function() {
       v = options[k];
       this.configuration[k] = v;
     }
+    TraceKit.collectWindowErrors = this.configuration.onerror;
     return this;
   };
 
   Honeybadger.configuration = {
     reset: function() {
-      var k, v, _ref, _results;
+      var k, v, _ref;
 
       Honeybadger.configured = false;
       _ref = Honeybadger.default_configuration;
-      _results = [];
       for (k in _ref) {
         v = _ref[k];
-        _results.push(Honeybadger.configuration[k] = v);
+        Honeybadger.configuration[k] = v;
       }
-      return _results;
+      TraceKit.collectWindowErrors = Honeybadger.configuration.onerror;
+      return Honeybadger;
     }
   };
 
@@ -1442,11 +1372,9 @@ Honeybadger = (function() {
   };
 
   Honeybadger._handleTraceKitSubscription = function(stackInfo) {
-    if (Honeybadger.configuration.onerror) {
-      return Honeybadger.notify(null, {
-        stackInfo: stackInfo
-      });
-    }
+    return Honeybadger.notify(null, {
+      stackInfo: stackInfo
+    });
   };
 
   return Honeybadger;

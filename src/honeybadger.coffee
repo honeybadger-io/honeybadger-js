@@ -21,6 +21,7 @@ class Honeybadger
       @configured = true
     for k,v of options
       @configuration[k] = v
+    TraceKit.collectWindowErrors = @configuration.onerror
     this
 
   @configuration:
@@ -28,6 +29,8 @@ class Honeybadger
       @configured = false
       for k,v of @default_configuration
         @configuration[k] = v
+      TraceKit.collectWindowErrors = @configuration.onerror
+      this
 
   @configuration.reset()
 
@@ -82,8 +85,7 @@ class Honeybadger
     form.submit()
 
   @_handleTraceKitSubscription: (stackInfo) =>
-    if @configuration.onerror
-      @notify(null, { stackInfo: stackInfo })
+    @notify(null, { stackInfo: stackInfo })
 
 TraceKit.report.subscribe Honeybadger._handleTraceKitSubscription
 

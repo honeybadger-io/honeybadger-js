@@ -109,7 +109,7 @@ describe 'Honeybadger', ->
 
     describe 'default behavior', ->
       it 'ignores unhandled errors', ->
-        Honeybadger._handleTraceKitSubscription({})
+        window.onerror 'testing', 'http://foo.bar', '123'
         expect(Honeybadger.notify).not.toHaveBeenCalled()
 
     describe 'when onerror is enabled', ->
@@ -120,6 +120,6 @@ describe 'Honeybadger', ->
 
       it 'notifies Honeybadger of unhandled exceptions', ->
         stackInfo = 'foo'
-        Honeybadger._handleTraceKitSubscription(stackInfo)
+        window.onerror 'testing', 'http://foo.bar', '123'
 
-        expect(Honeybadger.notify).toHaveBeenCalledWith(null, { stackInfo: stackInfo })
+        expect(Honeybadger.notify).toHaveBeenCalledWith(null, jasmine.any(Object))
