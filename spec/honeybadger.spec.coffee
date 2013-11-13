@@ -1,6 +1,7 @@
 describe 'Honeybadger', ->
   beforeEach () ->
     Honeybadger.configuration.reset()
+    Honeybadger.resetContext()
 
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
@@ -47,6 +48,15 @@ describe 'Honeybadger', ->
     it 'is chainable', ->
       expect(Honeybadger.setContext({ user_id: 1 })).toBe(Honeybadger)
 
+    it 'does not accept non-objects', ->
+      Honeybadger.setContext('foo')
+      expect(Honeybadger.context).toEqual({})
+
+    it 'keeps previous context when called with non-object', ->
+      Honeybadger.setContext({ foo: 'bar' })
+      Honeybadger.setContext(false)
+      expect(Honeybadger.context).toEqual({ foo: 'bar' })
+
   describe '.resetContext', ->
     it 'empties the context with no arguments', ->
       Honeybadger.setContext({ user_id: '1' })
@@ -57,6 +67,11 @@ describe 'Honeybadger', ->
       Honeybadger.setContext({ user_id: '1' })
       Honeybadger.resetContext({ foo: 'bar' })
       expect(Honeybadger.context).toEqual({ foo: 'bar' })
+
+    it 'empties the context with non-object argument', ->
+      Honeybadger.setContext({ foo: 'bar' })
+      Honeybadger.resetContext('foo')
+      expect(Honeybadger.context).toEqual({})
 
     it 'is chainable', ->
       expect(Honeybadger.resetContext()).toBe(Honeybadger)

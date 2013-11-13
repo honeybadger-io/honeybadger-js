@@ -37,12 +37,13 @@ class Honeybadger
   @context: {}
 
   @resetContext: (options = {}) ->
-    @context = options
+    @context = if typeof(options) == 'object' then options else {}
     this
 
   @setContext: (options = {}) ->
-    for k,v of options
-      @context[k] = v
+    if typeof(options) == 'object'
+      for k,v of options
+        @context[k] = v
     this
 
   # TODO: Test setting options from notify
