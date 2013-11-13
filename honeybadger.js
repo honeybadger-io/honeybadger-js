@@ -1305,7 +1305,7 @@ Honeybadger = (function() {
     if (options == null) {
       options = {};
     }
-    this.context = options;
+    this.context = typeof options === 'object' ? options : {};
     return this;
   };
 
@@ -1315,9 +1315,11 @@ Honeybadger = (function() {
     if (options == null) {
       options = {};
     }
-    for (k in options) {
-      v = options[k];
-      this.context[k] = v;
+    if (typeof options === 'object') {
+      for (k in options) {
+        v = options[k];
+        this.context[k] = v;
+      }
     }
     return this;
   };
