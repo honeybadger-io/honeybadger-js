@@ -1128,7 +1128,8 @@ Notice = (function() {
     var k, v, _ref, _ref1, _ref2, _ref3, _ref4;
 
     this.options = options != null ? options : {};
-    this.stackInfo = this.options.stackInfo || (this.options.error && TraceKit.computeStackTrace(this.options.error));
+    this.error = this.options.error;
+    this.stackInfo = this.options.stackInfo || (this.error && TraceKit.computeStackTrace(this.error));
     this.trace = this._parseBacktrace((_ref = this.stackInfo) != null ? _ref.stack : void 0);
     this["class"] = (_ref1 = this.stackInfo) != null ? _ref1.name : void 0;
     this.message = (_ref2 = this.stackInfo) != null ? _ref2.message : void 0;
@@ -1257,8 +1258,7 @@ Honeybadger = (function() {
     component: null,
     action: null,
     disabled: true,
-    onerror: false,
-    beforeNotify: null
+    onerror: false
   };
 
   Honeybadger.configured = false;
@@ -1325,19 +1325,32 @@ Honeybadger = (function() {
     return this;
   };
 
+  Honeybadger.beforeNotifyHandlers = [];
+
+  Honeybadger.beforeNotify = function(handler) {
+    return this.beforeNotifyHandlers.push(handler);
+  };
+
   Honeybadger.notify = function(error, options) {
-    var notice, _base;
+    var handler, notice, _i, _len, _ref;
 
     if (options == null) {
       options = {};
     }
-    if (this.configuration.disabled === true || (typeof (_base = this.configuration).beforeNotify === "function" ? _base.beforeNotify(error, options) : void 0) === false) {
+    if (this.configuration.disabled === true) {
       return false;
     }
     if (error) {
       options['error'] = error;
     }
     notice = new Notice(options);
+    _ref = this.beforeNotifyHandlers;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      handler = _ref[_i];
+      if (handler(notice) === false) {
+        return false;
+      }
+    }
     return this._sendRequest(notice.toJSON());
   };
 
