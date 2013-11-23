@@ -49,9 +49,10 @@ class Honeybadger
 
   # TODO: Test setting options from notify
   @notify: (error, options = {}) ->
-    return false if (@configuration.disabled == true || @configuration.beforeNotify?(error, options) == false)
+    return false if @configuration.disabled == true
     options['error'] = error if error
     notice = new Notice(options)
+    return false if @configuration.beforeNotify?(notice) == false
     @_sendRequest(notice.toJSON())
 
   @_sendRequest: (data) ->

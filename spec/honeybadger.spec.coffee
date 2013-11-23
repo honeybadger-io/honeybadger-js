@@ -118,6 +118,45 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
+    it 'does not deliver notice when beforeNotify returns false', ->
+      Honeybadger.configure
+        api_key: 'asdf',
+        beforeNotify: () -> false
+
+      try
+        'foo'.bar()
+      catch e
+        Honeybadger.notify(e)
+        notice = new Notice({ error: e })
+
+      expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
+
+    it 'delivers notice when beforeNotify returns true', ->
+      Honeybadger.configure
+        api_key: 'asdf',
+        beforeNotify: () -> true
+
+      try
+        'foo'.bar()
+      catch e
+        Honeybadger.notify(e)
+        notice = new Notice({ error: e })
+
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
+
+    it 'delivers notice when beforeNotify has no return', ->
+      Honeybadger.configure
+        api_key: 'asdf',
+        beforeNotify: () ->
+
+      try
+        'foo'.bar()
+      catch e
+        Honeybadger.notify(e)
+        notice = new Notice({ error: e })
+
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
+
   describe '._handleTraceKitSubscription', ->
     beforeEach () ->
       spyOn Honeybadger, 'notify'

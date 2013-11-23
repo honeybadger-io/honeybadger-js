@@ -1257,7 +1257,8 @@ Honeybadger = (function() {
     component: null,
     action: null,
     disabled: true,
-    onerror: false
+    onerror: false,
+    beforeNotify: null
   };
 
   Honeybadger.configured = false;
@@ -1325,12 +1326,12 @@ Honeybadger = (function() {
   };
 
   Honeybadger.notify = function(error, options) {
-    var notice;
+    var notice, _base;
 
     if (options == null) {
       options = {};
     }
-    if (this.configuration.disabled === true) {
+    if (this.configuration.disabled === true || (typeof (_base = this.configuration).beforeNotify === "function" ? _base.beforeNotify(error, options) : void 0) === false) {
       return false;
     }
     if (error) {
