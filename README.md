@@ -101,6 +101,28 @@ merged locally:
 
     // Honeybadger.context == { user_id: 1 }
 
+## Before notification handlers
+
+Passing a function to `Honeybadger.beforeNotify` will add the function
+to a list of before notify handlers. If the function includes a
+parameter, the `Notice` object will be passed as an argument.  Multiple
+handlers may be added in this fashion:
+
+```javascript
+// See src/notice.coffee options available on Notice class
+Honeybadger.beforeNotify(function(notice) {
+  notice.message = 'My custom message';
+});
+```
+
+To halt notification, return false from any `beforeNotify` handler:
+
+```javascript
+Honeybadger.beforeNotify(function(notice) {
+  if (notice.class == 'MyCustomError') return false;
+});
+```
+
 ## Unhandled errors via (window.onerror)
 
 By default, honeybadger-js does not track unhandled errors. This is

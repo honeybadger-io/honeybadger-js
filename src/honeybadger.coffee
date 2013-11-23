@@ -11,7 +11,6 @@ class Honeybadger
     action: null
     disabled: true
     onerror: false
-    beforeNotify: null
 
   @configured: false
 
@@ -47,12 +46,16 @@ class Honeybadger
         @context[k] = v
     this
 
+  @beforeNotifyHandlers = []
+  @beforeNotify: (handler) ->
+    @beforeNotifyHandlers.push handler
+
   # TODO: Test setting options from notify
   @notify: (error, options = {}) ->
     return false if @configuration.disabled == true
     options['error'] = error if error
     notice = new Notice(options)
-    return false if @configuration.beforeNotify?(notice) == false
+    (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
     @_sendRequest(notice.toJSON())
 
   @_sendRequest: (data) ->
