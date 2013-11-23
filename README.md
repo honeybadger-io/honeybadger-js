@@ -101,7 +101,7 @@ merged locally:
 
     // Honeybadger.context == { user_id: 1 }
 
-## Before notification handlers
+## Notification handlers
 
 Passing a function to `Honeybadger.beforeNotify` will add the function
 to a list of before notify handlers. If the function includes a
