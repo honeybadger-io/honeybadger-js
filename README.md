@@ -147,6 +147,16 @@ Honeybadger.configure({
 });
 ```
 
+## Using with Ember.js
+
+To use with Ember.js, add the following before your app initializes:
+
+```javascript
+Ember.onerror = function(error) {
+  Honeybadger.notify(error)
+};
+```
+
 ## Contributing
 
 1. Fork it.
