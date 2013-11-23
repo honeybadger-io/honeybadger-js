@@ -16,15 +16,15 @@ Locate your public API key on the JavaScript setup tab of your project
 settings page.
 
 ```javascript
-    Honeybadger.configure({
-      api_key: 'your public api key'
-    });
+Honeybadger.configure({
+  api_key: 'your public api key'
+});
 
-    try {
-      ...error producing code...
-    } catch(e) {
-      Honeybadger.notify(e);
-    }
+try {
+  ...error producing code...
+} catch(e) {
+  Honeybadger.notify(e);
+}
 ```
 
 ## Advanced Configuration
