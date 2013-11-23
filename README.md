@@ -114,6 +114,17 @@ you can set the `onerror` configuration option to true:
       api_key: 'your public api key',
       onerror: true
     });
+    
+## Using with Ember.js
+
+To use with Ember.js, add the following before your app initializes:
+
+```javascript
+Ember.onerror = function(error) {
+  Honeybadger.notify(error)
+};
+```
+
 
 ## Contributing
 
