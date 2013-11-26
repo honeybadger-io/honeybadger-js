@@ -1145,7 +1145,7 @@ Notice = (function() {
       v = _ref3[k];
       this.context[k] = v;
     }
-    if (this.options.context) {
+    if (this.options.context && typeof this.options.context === 'object') {
       _ref4 = this.options.context;
       for (k in _ref4) {
         v = _ref4[k];

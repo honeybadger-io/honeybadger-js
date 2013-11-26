@@ -15,7 +15,7 @@ class Notice
     @context = {}
     for k,v of Honeybadger.context
       @context[k] = v
-    if @options.context
+    if @options.context && typeof(@options.context) == 'object'
       for k,v of @options.context
         @context[k] = v
 
