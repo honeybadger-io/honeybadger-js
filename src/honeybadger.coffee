@@ -54,6 +54,7 @@ class Honeybadger
   @notify: (error, options = {}) ->
     return false if @configuration.disabled == true
     options['error'] = error if error
+    return false if (k for own k of options).length == 0
     notice = new Notice(options)
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
     @_sendRequest(notice.toJSON())

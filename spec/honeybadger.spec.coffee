@@ -118,6 +118,16 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
+    it 'does not deliver notice without arguments', ->
+      Honeybadger.configure
+        api_key: 'asdf'
+
+      Honeybadger.notify()
+      Honeybadger.notify(null)
+      Honeybadger.notify(null, {})
+
+      expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
+
   describe 'beforeNotify', ->
     beforeEach () ->
       notice = null
