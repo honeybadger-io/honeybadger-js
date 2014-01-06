@@ -1,0 +1,26 @@
+{
+  "name": "honeybadger-js",
+  "version": "0.0.2",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js",
+  "authors": [
+    "Joshua Wood <josh@honeybadger.io>"
+  ],
+  "description": "A JavaScript library for integrating apps with the Honeybadger Rails Error Notifier.",
+  "main": "honeybadger.js",
+  "keywords": [
+    "error",
+    "logging"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "spec",
+    "src",
+    "vendor",
+    "Makefile",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
