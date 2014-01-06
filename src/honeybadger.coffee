@@ -1,5 +1,5 @@
 class Honeybadger
-  @version: '0.0.2'
+  @version: '0.0.3'
 
   @default_configuration:
     api_key: null

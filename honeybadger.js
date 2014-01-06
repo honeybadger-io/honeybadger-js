@@ -1248,7 +1248,7 @@ Honeybadger = (function() {
 
   function Honeybadger() {}
 
-  Honeybadger.version = '0.0.2';
+  Honeybadger.version = '0.0.3';
 
   Honeybadger.default_configuration = {
     api_key: null,
