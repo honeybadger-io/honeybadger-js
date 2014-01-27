@@ -128,6 +128,25 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
+  describe '.wrap', ->
+    beforeEach () ->
+      Honeybadger.configure
+        api_key: 'asdf'
+      spyOn(Honeybadger, 'notify')
+
+    it 'notifies Honeybadger of errors and re-throws', ->
+      func = () ->
+        'foo'.bar()
+      error = null
+
+      try
+        Honeybadger.wrap(func)()
+      catch e
+        error = e
+
+      expect(error).toEqual(jasmine.any(Error))
+      expect(Honeybadger.notify).toHaveBeenCalledWith(error)
+
   describe 'beforeNotify', ->
     beforeEach () ->
       notice = null

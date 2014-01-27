@@ -40,6 +40,14 @@ Honeybadger =
    (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
    @_sendRequest(notice.toJSON())
 
+  wrap: (func) ->
+    () ->
+      try
+        func.apply(this, arguments)
+      catch e
+        Honeybadger.notify(e)
+        throw e
+
   reset: () ->
     @resetContext()
     @configuration.reset()

@@ -1374,6 +1374,19 @@ Honeybadger = {
     }
     return this._sendRequest(notice.toJSON());
   },
+  wrap: function(func) {
+    return function() {
+      var e;
+
+      try {
+        return func.apply(this, arguments);
+      } catch (_error) {
+        e = _error;
+        Honeybadger.notify(e);
+        throw e;
+      }
+    };
+  },
   reset: function() {
     this.resetContext();
     this.configuration.reset();
