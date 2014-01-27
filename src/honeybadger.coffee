@@ -5,7 +5,6 @@ Honeybadger =
 
   configured: false
 
-  # TODO: Test partial override
   configure: (options = {}) ->
    if @configured == false
      options['disabled'] = false if typeof options.disabled == 'undefined'
@@ -33,7 +32,6 @@ Honeybadger =
   beforeNotify: (handler) ->
     @beforeNotifyHandlers.push handler
 
-  # TODO: Test setting options from notify
   notify: (error, options = {}) ->
    return false if !@configured || @configuration.disabled == true
    options['error'] = error if error
