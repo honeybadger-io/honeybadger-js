@@ -5,6 +5,7 @@ describe 'Honeybadger', ->
 
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
+    expect(Honeybadger.configuration).toEqual(jasmine.any(Configuration))
 
   describe '.configure', ->
     it 'configures Honeybadger', ->

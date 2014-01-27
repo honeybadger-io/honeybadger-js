@@ -1,8 +1,7 @@
 describe 'Configuration', ->
-  subject = Honeybadger.configuration
-
+  subject = null
   beforeEach () ->
-    subject.reset()
+    subject = new Configuration()
 
   it 'has an api key', ->
     expect(subject.api_key).toBeDefined()
