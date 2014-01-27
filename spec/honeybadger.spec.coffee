@@ -1,6 +1,6 @@
 describe 'Honeybadger', ->
   beforeEach () ->
-    Honeybadger.configuration.reset()
+    Honeybadger.reset()
     Honeybadger.resetContext()
 
   it 'has a configuration object', ->
@@ -171,6 +171,7 @@ describe 'Honeybadger', ->
 
   describe '._handleTraceKitSubscription', ->
     beforeEach () ->
+      Honeybadger.install()
       spyOn Honeybadger, 'notify'
 
     describe 'default behavior', ->

@@ -5,6 +5,7 @@ MINIFIED=honeybadger.min.js
 
 BUILD_FILES = src/header.txt \
 							vendor/tracekit.js \
+							build/src/configuration.js \
 							build/src/notice.js \
               build/src/honeybadger.js \
 							src/footer.txt

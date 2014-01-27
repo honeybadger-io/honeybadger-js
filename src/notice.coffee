@@ -1,7 +1,7 @@
 class Notice
   constructor: (@options = {}) ->
     @error = @options.error
-    @stackInfo = @options.stackInfo || (@error && TraceKit.computeStackTrace(@error))
+    @stackInfo = @options.stackInfo || (@error && Honeybadger.TraceKit.computeStackTrace(@error))
     @trace = @_parseBacktrace(@stackInfo?.stack)
     @class = @stackInfo?.name
     @message = @stackInfo?.message
