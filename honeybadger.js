@@ -1291,7 +1291,7 @@ var Honeybadger,
   __hasProp = {}.hasOwnProperty;
 
 Honeybadger = {
-  version: '0.0.3',
+  version: '0.0.4',
   TraceKit: TraceKit.noConflict(),
   configured: false,
   configure: function(options) {
