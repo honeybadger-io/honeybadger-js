@@ -129,7 +129,7 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
-    it 'creates a genric Error from string', ->
+    it 'creates a generic Error from string', ->
       Honeybadger.configure
         api_key: 'asdf'
 
