@@ -60,7 +60,7 @@ class Notice
   _cgiData: () ->
     data = {}
     for k,v of navigator
-      unless typeof v == 'object'
+      unless v instanceof Object
         data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v
     data['HTTP_USER_AGENT'] = data['USER_AGENT']
     delete data['USER_AGENT']

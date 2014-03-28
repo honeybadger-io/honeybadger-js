@@ -19,11 +19,11 @@ Honeybadger =
   context: {}
 
   resetContext: (options = {}) ->
-    @context = if typeof(options) == 'object' then options else {}
+    @context = if options instanceof Object then options else {}
     @
 
   setContext: (options = {}) ->
-    if typeof(options) == 'object'
+    if options instanceof Object
       for k,v of options
         @context[k] = v
     @

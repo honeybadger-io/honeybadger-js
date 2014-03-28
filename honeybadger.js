@@ -1271,7 +1271,7 @@ Notice = (function() {
     data = {};
     for (k in navigator) {
       v = navigator[k];
-      if (typeof v !== 'object') {
+      if (!(v instanceof Object)) {
         data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v;
       }
     }
@@ -1319,7 +1319,7 @@ Honeybadger = {
     if (options == null) {
       options = {};
     }
-    this.context = typeof options === 'object' ? options : {};
+    this.context = options instanceof Object ? options : {};
     return this;
   },
   setContext: function(options) {
@@ -1328,7 +1328,7 @@ Honeybadger = {
     if (options == null) {
       options = {};
     }
-    if (typeof options === 'object') {
+    if (options instanceof Object) {
       for (k in options) {
         v = options[k];
         this.context[k] = v;
