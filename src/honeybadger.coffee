@@ -34,7 +34,15 @@ Honeybadger =
 
   notify: (error, options = {}) ->
     return false if !@configured || @configuration.disabled == true
-    options['error'] = error if error
+
+    if error instanceof Error
+      options['error'] = error
+    else if typeof(error) == 'string'
+      options['error'] = new Error(error)
+    else if error instanceof Object
+      for k,v of error
+        options[k] = v
+
     return false if (k for own k of options).length == 0
     notice = new Notice(options)
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
@@ -93,4 +101,4 @@ Honeybadger =
     form.submit()
 
   _handleTraceKitSubscription: (stackInfo) ->
-    Honeybadger.notify(null, { stackInfo: stackInfo })
+    Honeybadger.notify(stackInfo: stackInfo)

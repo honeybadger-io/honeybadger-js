@@ -129,6 +129,25 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
+    it 'creates a genric Error from string', ->
+      Honeybadger.configure
+        api_key: 'asdf'
+
+      expected_notice = new Notice({ error: new Error("Honeybadger don't care, but you might.") })
+      Honeybadger.notify("Honeybadger don't care, but you might.")
+
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON())
+
+    it 'accepts options as first argument', ->
+      Honeybadger.configure
+        api_key: 'asdf'
+
+      error = new Error("Honeybadger don't care, but you might.")
+      expected_notice = new Notice({ error: error })
+      Honeybadger.notify(error: error)
+
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON())
+
   describe '.wrap', ->
     beforeEach () ->
       Honeybadger.configure
@@ -209,4 +228,4 @@ describe 'Honeybadger', ->
         stackInfo = 'foo'
         window.onerror 'testing', 'http://foo.bar', '123'
 
-        expect(Honeybadger.notify).toHaveBeenCalledWith(null, jasmine.any(Object))
+        expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(Object))
