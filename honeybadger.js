@@ -1341,7 +1341,7 @@ Honeybadger = {
     return this.beforeNotifyHandlers.push(handler);
   },
   notify: function(error, options) {
-    var handler, k, notice, _i, _len, _ref;
+    var handler, k, notice, v, _i, _len, _ref;
 
     if (options == null) {
       options = {};
@@ -1349,8 +1349,15 @@ Honeybadger = {
     if (!this.configured || this.configuration.disabled === true) {
       return false;
     }
-    if (error) {
+    if (error instanceof Error) {
       options['error'] = error;
+    } else if (typeof error === 'string') {
+      options['error'] = new Error(error);
+    } else if (error instanceof Object) {
+      for (k in error) {
+        v = error[k];
+        options[k] = v;
+      }
     }
     if (((function() {
       var _results;
@@ -1431,7 +1438,7 @@ Honeybadger = {
     return form.submit();
   },
   _handleTraceKitSubscription: function(stackInfo) {
-    return Honeybadger.notify(null, {
+    return Honeybadger.notify({
       stackInfo: stackInfo
     });
   }
