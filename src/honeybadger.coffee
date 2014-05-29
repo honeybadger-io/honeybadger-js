@@ -11,9 +11,13 @@ Honeybadger =
 
     if @configured == false
       options['disabled'] = false if typeof options.disabled == 'undefined'
-      @configured = true
     for k,v of options
       @configuration[app][k] = v
+
+    if @configured == false
+      @configured = true
+      @configuration.default = @configuration[app]
+
     @TraceKit.collectWindowErrors = @configuration[app].onerror
     @
 
