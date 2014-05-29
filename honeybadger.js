@@ -1351,6 +1351,7 @@ Honeybadger = {
     }
     if (app instanceof Object) {
       options = app;
+      app = void 0;
     }
     if (error instanceof Error) {
       options['error'] = error;

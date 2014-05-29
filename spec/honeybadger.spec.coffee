@@ -151,6 +151,16 @@ describe 'Honeybadger', ->
 
         expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON(), 'default')
 
+      it 'accepts error string and options', ->
+        Honeybadger.configure
+          api_key: 'asdf'
+
+        error = new Error("Honeybadger don't care, but you might.")
+        expected_notice = new Notice({ error: error })
+        Honeybadger.notify("Honeybadger don't care, but you might.", user: "123")
+
+        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON(), 'default')
+
     describe '.wrap', ->
       beforeEach () ->
         Honeybadger.configure

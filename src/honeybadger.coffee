@@ -46,6 +46,7 @@ Honeybadger =
 
     if app instanceof Object
       options = app
+      app     = undefined
 
     if error instanceof Error
       options['error'] = error
