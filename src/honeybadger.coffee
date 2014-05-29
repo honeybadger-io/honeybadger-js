@@ -10,11 +10,13 @@ Honeybadger =
       options['disabled'] = false if typeof options.disabled == 'undefined'
       @configured = true
     for k,v of options
-      @configuration[k] = v
-    @TraceKit.collectWindowErrors = @configuration.onerror
+      @configuration.default[k] = v
+    @TraceKit.collectWindowErrors = @configuration.default.onerror
     @
 
-  configuration: new Configuration()
+  configuration:
+    default:
+      new Configuration()
 
   context: {}
 
@@ -33,7 +35,7 @@ Honeybadger =
     @beforeNotifyHandlers.push handler
 
   notify: (error, options = {}) ->
-    return false if !@configured || @configuration.disabled == true
+    return false if !@configured || @configuration.default.disabled == true
 
     if error instanceof Error
       options['error'] = error
@@ -58,18 +60,18 @@ Honeybadger =
 
   reset: () ->
     @resetContext()
-    @configuration.reset()
-    @TraceKit.collectWindowErrors = @configuration.onerror
+    @configuration.default.reset()
+    @TraceKit.collectWindowErrors = @configuration.default.onerror
     @configured = false
     @
 
   install: () ->
-    @TraceKit.collectWindowErrors = @configuration.onerror
+    @TraceKit.collectWindowErrors = @configuration.default.onerror
     @TraceKit.report.subscribe @_handleTraceKitSubscription
     @
 
   _sendRequest: (data) ->
-    url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices.html'
+    url = 'http' + ((@configuration.default.ssl && 's') || '' ) + '://' + @configuration.default.host + '/v1/notices.html'
     @_crossDomainPost(url, data)
 
   # http://www.markandey.com/2011/10/design-of-cross-domain-post-api-in.html
@@ -94,7 +96,7 @@ Honeybadger =
     input = document.createElement('input')
     input.type = 'hidden'
     input.name = "api_key"
-    input.value = @configuration.api_key
+    input.value = @configuration.default.api_key
     form.appendChild input
 
     document.body.appendChild form

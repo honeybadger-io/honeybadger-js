@@ -5,34 +5,37 @@ describe 'Honeybadger', ->
 
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
-    expect(Honeybadger.configuration).toEqual(jasmine.any(Configuration))
+    expect(Honeybadger.configuration).toEqual(jasmine.any(Object))
+    expect(Honeybadger.configuration.default).toBeDefined()
+    expect(Honeybadger.configuration.default).toEqual(jasmine.any(Configuration))
 
   describe '.configure', ->
-    it 'configures Honeybadger', ->
-      expect(Honeybadger.configure).toBeDefined()
+    describe 'default app', ->
+      it 'configures Honeybadger', ->
+        expect(Honeybadger.configure).toBeDefined()
 
-      Honeybadger.configure
-        api_key: 'asdf'
-
-      expect(Honeybadger.configuration.api_key).toEqual('asdf')
-
-    it 'enables notifications on first call', ->
-      expect(Honeybadger.configuration.disabled).toEqual(true)
-      Honeybadger.configure
+        Honeybadger.configure
           api_key: 'asdf'
-      expect(Honeybadger.configuration.disabled).toEqual(false)
 
-    it 'leaves notifications disabled on subsequent call', ->
-      expect(Honeybadger.configuration.disabled).toEqual(true)
-      Honeybadger.configure
-          api_key: 'asdf'
-          disabled: true
-      Honeybadger.configure
-          api_key: 'zxcv'
-      expect(Honeybadger.configuration.disabled).toEqual(true)
+        expect(Honeybadger.configuration.default.api_key).toEqual('asdf')
 
-    it 'is chainable', ->
-      expect(Honeybadger.configure({})).toBe(Honeybadger)
+      it 'enables notifications on first call', ->
+        expect(Honeybadger.configuration.default.disabled).toEqual(true)
+        Honeybadger.configure
+            api_key: 'asdf'
+        expect(Honeybadger.configuration.default.disabled).toEqual(false)
+
+      it 'leaves notifications disabled on subsequent call', ->
+        expect(Honeybadger.configuration.default.disabled).toEqual(true)
+        Honeybadger.configure
+            api_key: 'asdf'
+            disabled: true
+        Honeybadger.configure
+            api_key: 'zxcv'
+        expect(Honeybadger.configuration.default.disabled).toEqual(true)
+
+      it 'is chainable', ->
+        expect(Honeybadger.configure({})).toBe(Honeybadger)
 
   it 'has a context object', ->
     expect(Honeybadger.context).toBeDefined()
