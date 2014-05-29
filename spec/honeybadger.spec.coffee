@@ -168,7 +168,7 @@ describe 'Honeybadger', ->
           error = e
 
         expect(error).toEqual(jasmine.any(Error))
-        expect(Honeybadger.notify).toHaveBeenCalledWith(error)
+        expect(Honeybadger.notify).toHaveBeenCalledWith(error, 'default')
 
     describe 'beforeNotify', ->
       beforeEach () ->
@@ -347,84 +347,22 @@ describe 'Honeybadger', ->
 
         expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON(), 'pivotal')
 
-    # describe '.wrap', ->
-      # beforeEach () ->
-        # Honeybadger.configure
-          # api_key: 'asdf'
-        # spyOn(Honeybadger, 'notify')
+    describe '.wrap', ->
+      beforeEach () ->
+        Honeybadger.configure
+          app:     'pivotal'
+          api_key: 'asdf'
+        spyOn(Honeybadger, 'notify')
 
-      # it 'notifies Honeybadger of errors and re-throws', ->
-        # func = () ->
-          # 'foo'.bar()
-        # error = null
+      it 'notifies Honeybadger of errors and re-throws', ->
+        func = () ->
+          'foo'.bar()
+        error = null
 
-        # try
-          # Honeybadger.wrap(func)()
-        # catch e
-          # error = e
+        try
+          Honeybadger.wrap(func, 'pivotal')()
+        catch e
+          error = e
 
-        # expect(error).toEqual(jasmine.any(Error))
-        # expect(Honeybadger.notify).toHaveBeenCalledWith(error)
-
-    # describe 'beforeNotify', ->
-      # beforeEach () ->
-        # notice = null
-        # Honeybadger.beforeNotifyHandlers.length = 0
-        # Honeybadger.configure
-          # api_key: 'asdf'
-        # spyOn(Honeybadger, '_sendRequest')
-
-      # it 'does not deliver notice when  beforeNotify callback returns false', ->
-        # Honeybadger.beforeNotify () -> false
-
-        # try
-          # 'foo'.bar()
-        # catch e
-          # Honeybadger.notify(e)
-          # notice = new Notice({ error: e })
-
-        # expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
-
-      # it 'delivers notice when beforeNotify returns true', ->
-        # Honeybadger.beforeNotify () -> true
-
-        # try
-          # 'foo'.bar()
-        # catch e
-          # Honeybadger.notify(e)
-          # notice = new Notice({ error: e })
-
-        # expect(Honeybadger._sendRequest).toHaveBeenCalled()
-
-      # it 'delivers notice when beforeNotify has no return', ->
-        # Honeybadger.beforeNotify () ->
-
-        # try
-          # 'foo'.bar()
-        # catch e
-          # Honeybadger.notify(e)
-          # notice = new Notice({ error: e })
-
-        # expect(Honeybadger._sendRequest).toHaveBeenCalled()
-
-    # describe '._handleTraceKitSubscription', ->
-      # beforeEach () ->
-        # Honeybadger.install()
-        # spyOn Honeybadger, 'notify'
-
-      # describe 'default behavior', ->
-        # it 'ignores unhandled errors', ->
-          # window.onerror 'testing', 'http://foo.bar', '123'
-          # expect(Honeybadger.notify).not.toHaveBeenCalled()
-
-      # describe 'when onerror is enabled', ->
-        # beforeEach () ->
-          # Honeybadger.configure
-            # api_key: 'asdf',
-            # onerror: true
-
-        # it 'notifies Honeybadger of unhandled exceptions', ->
-          # stackInfo = 'foo'
-          # window.onerror 'testing', 'http://foo.bar', '123'
-
-          # expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(Object))
+        expect(error).toEqual(jasmine.any(Error))
+        expect(Honeybadger.notify).toHaveBeenCalledWith(error, 'pivotal')
