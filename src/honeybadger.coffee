@@ -6,12 +6,15 @@ Honeybadger =
   configured: false
 
   configure: (options = {}) ->
+    app = options.app || 'default'
+    @configuration[app] ||= new Configuration()
+
     if @configured == false
       options['disabled'] = false if typeof options.disabled == 'undefined'
       @configured = true
     for k,v of options
-      @configuration.default[k] = v
-    @TraceKit.collectWindowErrors = @configuration.default.onerror
+      @configuration[app][k] = v
+    @TraceKit.collectWindowErrors = @configuration[app].onerror
     @
 
   configuration:

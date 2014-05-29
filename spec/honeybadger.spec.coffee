@@ -37,6 +37,33 @@ describe 'Honeybadger', ->
       it 'is chainable', ->
         expect(Honeybadger.configure({})).toBe(Honeybadger)
 
+    describe 'with app name', ->
+      it 'configures Honeybadger for a specific app', ->
+        expect(Honeybadger.configure).toBeDefined()
+
+        Honeybadger.configure
+          app:     'pivotal'
+          api_key: 'asdf'
+
+        expect(Honeybadger.configuration.pivotal).toBeDefined()
+        expect(Honeybadger.configuration.pivotal.api_key).toEqual('asdf')
+
+      it 'enables notifications on first call for a specific app', ->
+        Honeybadger.configure
+          app:     'pivotal'
+          api_key: 'asdf'
+        expect(Honeybadger.configuration.pivotal.disabled).toEqual(false)
+
+      it 'leaves notifications disabled on subsequent call for a specific app', ->
+        Honeybadger.configure
+          app:      'pivotal'
+          api_key:  'asdf'
+          disabled: true
+        Honeybadger.configure
+          app:     'pivotal'
+          api_key: 'zxcv'
+        expect(Honeybadger.configuration.pivotal.disabled).toEqual(true)
+
   it 'has a context object', ->
     expect(Honeybadger.context).toBeDefined()
 
