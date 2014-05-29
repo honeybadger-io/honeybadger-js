@@ -41,8 +41,11 @@ Honeybadger =
   beforeNotify: (handler) ->
     @beforeNotifyHandlers.push handler
 
-  notify: (error, options = {}) ->
+  notify: (error, app, options = {}) ->
     return false if !@configured || @configuration.default.disabled == true
+
+    if app instanceof Object
+      options = app
 
     if error instanceof Error
       options['error'] = error
@@ -52,10 +55,12 @@ Honeybadger =
       for k,v of error
         options[k] = v
 
+    app ||= options.app || 'default'
+
     return false if (k for own k of options).length == 0
     notice = new Notice(options)
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
-    @_sendRequest(notice.toJSON())
+    @_sendRequest(notice.toJSON(), app)
 
   wrap: (func) ->
     () ->
@@ -77,12 +82,15 @@ Honeybadger =
     @TraceKit.report.subscribe @_handleTraceKitSubscription
     @
 
-  _sendRequest: (data) ->
-    url = 'http' + ((@configuration.default.ssl && 's') || '' ) + '://' + @configuration.default.host + '/v1/notices.html'
-    @_crossDomainPost(url, data)
+  _sendRequest: (data, app) ->
+    app ||= 'default'
+    url = 'http' + ((@configuration[app].ssl && 's') || '' ) + '://' + @configuration[app].host + '/v1/notices.html'
+    @_crossDomainPost(url, data, app)
 
   # http://www.markandey.com/2011/10/design-of-cross-domain-post-api-in.html
-  _crossDomainPost: (url, payload) ->
+  _crossDomainPost: (url, payload, app) ->
+    app ||= 'default'
+
     iframe = document.createElement('iframe')
     uniqueNameOfFrame = '_hb_' + (new Date).getTime()
     document.body.appendChild iframe
@@ -103,7 +111,7 @@ Honeybadger =
     input = document.createElement('input')
     input.type = 'hidden'
     input.name = "api_key"
-    input.value = @configuration.default.api_key
+    input.value = @configuration[app].api_key
     form.appendChild input
 
     document.body.appendChild form

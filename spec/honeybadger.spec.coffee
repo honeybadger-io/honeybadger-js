@@ -98,7 +98,7 @@ describe 'Honeybadger', ->
           Honeybadger.notify(e)
           notice = new Notice({ error: e })
 
-        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON())
+        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON(), 'default')
 
       it 'does not deliver notice when not configured', ->
         try
@@ -139,7 +139,7 @@ describe 'Honeybadger', ->
         expected_notice = new Notice({ error: new Error("Honeybadger don't care, but you might.") })
         Honeybadger.notify("Honeybadger don't care, but you might.")
 
-        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON())
+        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON(), 'default')
 
       it 'accepts options as first argument', ->
         Honeybadger.configure
@@ -149,7 +149,7 @@ describe 'Honeybadger', ->
         expected_notice = new Notice({ error: error })
         Honeybadger.notify(error: error)
 
-        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON())
+        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON(), 'default')
 
     describe '.wrap', ->
       beforeEach () ->
@@ -274,119 +274,78 @@ describe 'Honeybadger', ->
           api_key: 'zxcv'
         expect(Honeybadger.configuration.pivotal.disabled).toEqual(true)
 
-    # it 'has a context object', ->
-      # expect(Honeybadger.context).toBeDefined()
+    describe '.notify', ->
+      beforeEach () ->
+        spyOn(Honeybadger, '_sendRequest')
+        notice = null
 
-    # describe '.setContext', ->
-      # it 'merges existing context', ->
-        # Honeybadger.setContext({ user_id: '1' })
-        # Honeybadger.setContext({ foo: 'bar' })
-        # expect(Honeybadger.context.user_id).toBeDefined()
-        # expect(Honeybadger.context['user_id']).toEqual('1')
-        # expect(Honeybadger.context.foo).toBeDefined()
-        # expect(Honeybadger.context['foo']).toEqual('bar')
+      it 'delivers the notice when enabled', ->
+        Honeybadger.configure
+          app:     'pivotal'
+          api_key: 'asdf'
 
-      # it 'is chainable', ->
-        # expect(Honeybadger.setContext({ user_id: 1 })).toBe(Honeybadger)
+        try
+          'foo'.bar()
+        catch e
+          Honeybadger.notify(e, 'pivotal')
+          notice = new Notice({ error: e })
 
-      # it 'does not accept non-objects', ->
-        # Honeybadger.setContext('foo')
-        # expect(Honeybadger.context).toEqual({})
+        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON(), 'pivotal')
 
-      # it 'keeps previous context when called with non-object', ->
-        # Honeybadger.setContext({ foo: 'bar' })
-        # Honeybadger.setContext(false)
-        # expect(Honeybadger.context).toEqual({ foo: 'bar' })
+      it 'does not deliver notice when not configured', ->
+        try
+          'foo'.bar()
+        catch e
+          Honeybadger.notify(e, 'pivotal')
+          notice = new Notice({ error: e })
 
-    # describe '.resetContext', ->
-      # it 'empties the context with no arguments', ->
-        # Honeybadger.setContext({ user_id: '1' })
-        # Honeybadger.resetContext()
-        # expect(Honeybadger.context).toEqual({})
+        expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
-      # it 'replaces the context with arguments', ->
-        # Honeybadger.setContext({ user_id: '1' })
-        # Honeybadger.resetContext({ foo: 'bar' })
-        # expect(Honeybadger.context).toEqual({ foo: 'bar' })
+      it 'does not deliver notice when disabled', ->
+        Honeybadger.configure
+          app:      'pivotal'
+          api_key:  'asdf'
+          disabled: true
 
-      # it 'empties the context with non-object argument', ->
-        # Honeybadger.setContext({ foo: 'bar' })
-        # Honeybadger.resetContext('foo')
-        # expect(Honeybadger.context).toEqual({})
+        try
+          'foo'.bar()
+        catch e
+          Honeybadger.notify(e, 'pivotal')
+          notice = new Notice({ error: e })
 
-      # it 'is chainable', ->
-        # expect(Honeybadger.resetContext()).toBe(Honeybadger)
+        expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
-    # it 'responds to notify', ->
-      # expect(Honeybadger.notify).toBeDefined()
+      it 'does not deliver notice without arguments', ->
+        Honeybadger.configure
+          app:     'pivotal'
+          api_key: 'asdf'
 
-    # describe '.notify', ->
-      # beforeEach () ->
-        # spyOn(Honeybadger, '_sendRequest')
-        # notice = null
+        Honeybadger.notify()
+        Honeybadger.notify(null, 'pivotal')
+        Honeybadger.notify(null, {}, 'pivotal')
 
-      # it 'delivers the notice when enabled', ->
-        # Honeybadger.configure
-          # api_key: 'asdf'
+        expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
-        # try
-          # 'foo'.bar()
-        # catch e
-          # Honeybadger.notify(e)
-          # notice = new Notice({ error: e })
+      it 'creates a generic Error from string', ->
+        Honeybadger.configure
+          app:     'pivotal'
+          api_key: 'asdf'
 
-        # expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON())
+        expected_notice = new Notice({ error: new Error("Honeybadger don't care, but you might.") })
+        Honeybadger.notify("Honeybadger don't care, but you might.", 'pivotal')
 
-      # it 'does not deliver notice when not configured', ->
-        # try
-          # 'foo'.bar()
-        # catch e
-          # Honeybadger.notify(e)
-          # notice = new Notice({ error: e })
+        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON(), 'pivotal')
 
-        # expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
+      it 'accepts options as first argument', ->
+        Honeybadger.configure
+          app:     'pivotal'
+          api_key: 'asdf'
 
-      # it 'does not deliver notice when disabled', ->
-        # Honeybadger.configure
-          # api_key: 'asdf',
-          # disabled: true
+        error = new Error("Honeybadger don't care, but you might.")
+        expected_notice = new Notice({ error: error })
+        Honeybadger.notify(error: error, app: 'pivotal')
 
-        # try
-          # 'foo'.bar()
-        # catch e
-          # Honeybadger.notify(e)
-          # notice = new Notice({ error: e })
-
-        # expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
-
-      # it 'does not deliver notice without arguments', ->
-        # Honeybadger.configure
-          # api_key: 'asdf'
-
-        # Honeybadger.notify()
-        # Honeybadger.notify(null)
-        # Honeybadger.notify(null, {})
-
-        # expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
-
-      # it 'creates a generic Error from string', ->
-        # Honeybadger.configure
-          # api_key: 'asdf'
-
-        # expected_notice = new Notice({ error: new Error("Honeybadger don't care, but you might.") })
-        # Honeybadger.notify("Honeybadger don't care, but you might.")
-
-        # expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON())
-
-      # it 'accepts options as first argument', ->
-        # Honeybadger.configure
-          # api_key: 'asdf'
-
-        # error = new Error("Honeybadger don't care, but you might.")
-        # expected_notice = new Notice({ error: error })
-        # Honeybadger.notify(error: error)
-
-        # expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON())
+        expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON(), 'pivotal')
 
     # describe '.wrap', ->
       # beforeEach () ->
