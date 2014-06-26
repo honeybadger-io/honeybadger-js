@@ -207,25 +207,3 @@ describe 'Honeybadger', ->
         notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalled()
-
-  describe '._handleTraceKitSubscription', ->
-    beforeEach () ->
-      Honeybadger.install()
-      spyOn Honeybadger, 'notify'
-
-    describe 'default behavior', ->
-      it 'ignores unhandled errors', ->
-        window.onerror 'testing', 'http://foo.bar', '123'
-        expect(Honeybadger.notify).not.toHaveBeenCalled()
-
-    describe 'when onerror is enabled', ->
-      beforeEach () ->
-        Honeybadger.configure
-          api_key: 'asdf',
-          onerror: true
-
-      it 'notifies Honeybadger of unhandled exceptions', ->
-        stackInfo = 'foo'
-        window.onerror 'testing', 'http://foo.bar', '123'
-
-        expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(Object))

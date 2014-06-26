@@ -1,7 +1,5 @@
 Honeybadger =
-  version: '0.0.4'
-
-  TraceKit: TraceKit.noConflict()
+  version: '0.1.0'
 
   configured: false
 
@@ -11,7 +9,6 @@ Honeybadger =
       @configured = true
     for k,v of options
       @configuration[k] = v
-    @TraceKit.collectWindowErrors = @configuration.onerror
     @
 
   configuration: new Configuration()
@@ -59,13 +56,11 @@ Honeybadger =
   reset: () ->
     @resetContext()
     @configuration.reset()
-    @TraceKit.collectWindowErrors = @configuration.onerror
     @configured = false
     @
 
   install: () ->
-    @TraceKit.collectWindowErrors = @configuration.onerror
-    @TraceKit.report.subscribe @_handleTraceKitSubscription
+    # Install window.onerror handler
     @
 
   _sendRequest: (data) ->
@@ -99,6 +94,3 @@ Honeybadger =
 
     document.body.appendChild form
     form.submit()
-
-  _handleTraceKitSubscription: (stackInfo) ->
-    Honeybadger.notify(stackInfo: stackInfo)

@@ -1,11 +1,10 @@
 class Notice
   constructor: (@options = {}) ->
     @error = @options.error
-    @stackInfo = @options.stackInfo || (@error && Honeybadger.TraceKit.computeStackTrace(@error))
-    @trace = @_parseBacktrace(@stackInfo?.stack)
-    @class = @stackInfo?.name
-    @message = @stackInfo?.message
-    @source = @stackInfo && @_extractSource(@stackInfo.stack)
+    @stack = @error?.stack
+    @class = @error?.name
+    @message = @error?.message
+    @source = null
     @url = document.URL
     @project_root = Honeybadger.configuration.project_root
     @environment = Honeybadger.configuration.environment
@@ -29,7 +28,7 @@ class Notice
       error:
         class: @class
         message: @message
-        backtrace: @trace
+        backtrace: @stack
         source: @source
       request:
         url: @url
