@@ -60,7 +60,10 @@ Honeybadger =
     @
 
   install: () ->
-    # Install window.onerror handler
+    return if @installed == true
+    @_oldOnErrorHandler = window.onerror
+    window.onerror = @_windowOnErrorHandler
+    @_installed = true
     @
 
   _sendRequest: (data) ->
@@ -94,3 +97,18 @@ Honeybadger =
 
     document.body.appendChild form
     form.submit()
+
+  _windowOnErrorHandler: (msg, url, line, col, error) ->
+    if Honeybadger.configuration.onerror
+      unless error
+        # Default to v8 stack format
+        stack = msg
+        stack += '\n    at HTMLDocument.<anonymous> (' + url + ':' + line
+        stack += ':' + col if col?
+        stack += ')'
+        error = new Error(msg)
+        error.stack = stack
+      Honeybadger.notify(error)
+    if @_oldOnErrorHandler
+      return @_oldOnErrorHandler.apply(this, arguments)
+    false

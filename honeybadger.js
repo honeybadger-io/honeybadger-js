@@ -273,6 +273,12 @@ Honeybadger = {
     return this;
   },
   install: function() {
+    if (this.installed === true) {
+      return;
+    }
+    this._oldOnErrorHandler = window.onerror;
+    window.onerror = this._windowOnErrorHandler;
+    this._installed = true;
     return this;
   },
   _sendRequest: function(data) {
@@ -303,6 +309,26 @@ Honeybadger = {
     form.appendChild(input);
     document.body.appendChild(form);
     return form.submit();
+  },
+  _windowOnErrorHandler: function(msg, url, line, col, error) {
+    var stack;
+    if (Honeybadger.configuration.onerror) {
+      if (!error) {
+        stack = msg;
+        stack += '\n    at HTMLDocument.<anonymous> (' + url + ':' + line;
+        if (col != null) {
+          stack += ':' + col;
+        }
+        stack += ')';
+        error = new Error(msg);
+        error.stack = stack;
+      }
+      Honeybadger.notify(error);
+    }
+    if (this._oldOnErrorHandler) {
+      return this._oldOnErrorHandler.apply(this, arguments);
+    }
+    return false;
   }
 };
   window.Honeybadger = Honeybadger;
