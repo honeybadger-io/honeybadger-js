@@ -103,7 +103,7 @@ Honeybadger =
       unless error
         # Default to v8 stack format
         stack = msg
-        stack += '\n    at HTMLDocument.<anonymous> (' + url + ':' + line
+        stack += '\n    at ? (' + url + ':' + line
         stack += ':' + col if col?
         stack += ')'
         error = new Error(msg)

@@ -315,7 +315,7 @@ Honeybadger = {
     if (Honeybadger.configuration.onerror) {
       if (!error) {
         stack = msg;
-        stack += '\n    at HTMLDocument.<anonymous> (' + url + ':' + line;
+        stack += '\n    at ? (' + url + ':' + line;
         if (col != null) {
           stack += ':' + col;
         }
