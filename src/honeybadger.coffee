@@ -46,7 +46,7 @@ Honeybadger =
     @_sendRequest(notice.toJSON())
 
   wrap: (func) ->
-    () ->
+    honeybadgerWrapper = () ->
       try
         func.apply(this, arguments)
       catch e
