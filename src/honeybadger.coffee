@@ -51,6 +51,7 @@ Honeybadger =
         func.apply(this, arguments)
       catch e
         Honeybadger.notify(e)
+        throw e
 
   reset: () ->
     @resetContext()
