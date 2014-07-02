@@ -101,14 +101,24 @@ Honeybadger =
   _windowOnErrorHandler: (msg, url, line, col, error) ->
     if Honeybadger.configuration.onerror
       unless error
-        # Default to v8 stack format
-        stack = msg
-        stack += '\n    at ? (' + url + ':' + line
-        stack += ':' + col if col?
-        stack += ')'
-        error = new Error(msg)
-        error.stack = stack
+        error = new UncaughtError(msg, url, line, col)
       Honeybadger.notify(error)
     if @_oldOnErrorHandler
       return @_oldOnErrorHandler.apply(this, arguments)
     false
+
+# Invoked from window.onerror handler, and uses v8 stack format.
+class UncaughtError extends Error
+  constructor: (message, url, line, column) ->
+    @name = 'UncaughtError'
+    @message = message || 'An unknown error was caught by window.onerror.'
+    @stack = [
+      @message
+      '\n    at ? ('
+      (url || 'unknown')
+      ':'
+      (line || 0)
+      ':'
+      (column || 0)
+      ')'
+    ].join('')
