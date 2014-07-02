@@ -11,28 +11,6 @@ describe 'Notice', ->
       expect(notice.context).toEqual({ user_id: '1', user_name: 'Jack' })
       expect(Honeybadger.context).toEqual({ user_id: '2', user_name: 'Jack' })
 
-  describe '#_parseBacktrace', ->
-    it 'applies [PROJECT_ROOT] filter', ->
-      Honeybadger.configuration.project_root = 'http://www.project_root.foo'
-      notice = new Notice()
-      stack = [{ url: 'http://www.project_root.foo/file.js', line: '43', func: 'function' }]
-      expect(notice._parseBacktrace(stack)).toEqual([{ file: '[PROJECT_ROOT]/file.js', number: '43', method: 'function' }])
-
-    it 'skips traces in honeybadger.js', ->
-      notice = new Notice()
-      stack = [{ url: 'http://www.project_root.foo/honeybadger.js', line: '43', func: 'function' }]
-      expect(notice._parseBacktrace(stack)).toEqual([])
-
-    it 'skips traces in honeybadger.min.js', ->
-      notice = new Notice()
-      stack = [{ url: 'http://www.project_root.foo/honeybadger.min.js', line: '43', func: 'function' }]
-      expect(notice._parseBacktrace(stack)).toEqual([])
-
-    it 'returns unknown line when url is missing', ->
-      notice = new Notice()
-      stack = [{ line: '43', func: 'function' }]
-      expect(notice._parseBacktrace(stack)).toEqual([{ file: 'unknown', number: '43', method: 'function' }])
-
   describe '#toJSON()', ->
     it 'is defined', ->
       notice = new Notice

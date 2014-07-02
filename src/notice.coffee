@@ -40,22 +40,6 @@ class Notice
         project_root: @project_root
         environment_name: @environment
 
-  _parseBacktrace: (stack = []) ->
-    backtrace = []
-    for trace in stack
-      continue if trace.url?.match /honeybadger(?:\.min)?\.js/
-      backtrace.push
-        file: trace.url?.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]') || 'unknown',
-        number: trace.line,
-        method: trace.func
-    backtrace
-
-  _extractSource: (stack = []) ->
-    source = {}
-    for line, i in (stack[0]?.context ? [])
-      source[i] = line
-    source
-
   _cgiData: () ->
     data = {}
     for k,v of navigator
