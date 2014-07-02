@@ -111,40 +111,6 @@ Notice = (function() {
     });
   };
 
-  Notice.prototype._parseBacktrace = function(stack) {
-    var backtrace, trace, _i, _len, _ref, _ref1;
-    if (stack == null) {
-      stack = [];
-    }
-    backtrace = [];
-    for (_i = 0, _len = stack.length; _i < _len; _i++) {
-      trace = stack[_i];
-      if ((_ref = trace.url) != null ? _ref.match(/honeybadger(?:\.min)?\.js/) : void 0) {
-        continue;
-      }
-      backtrace.push({
-        file: ((_ref1 = trace.url) != null ? _ref1.replace(Honeybadger.configuration.project_root, '[PROJECT_ROOT]') : void 0) || 'unknown',
-        number: trace.line,
-        method: trace.func
-      });
-    }
-    return backtrace;
-  };
-
-  Notice.prototype._extractSource = function(stack) {
-    var i, line, source, _i, _len, _ref, _ref1, _ref2;
-    if (stack == null) {
-      stack = [];
-    }
-    source = {};
-    _ref2 = (_ref = (_ref1 = stack[0]) != null ? _ref1.context : void 0) != null ? _ref : [];
-    for (i = _i = 0, _len = _ref2.length; _i < _len; i = ++_i) {
-      line = _ref2[i];
-      source[i] = line;
-    }
-    return source;
-  };
-
   Notice.prototype._cgiData = function() {
     var data, k, v;
     data = {};
@@ -256,14 +222,14 @@ Honeybadger = {
     return this._sendRequest(notice.toJSON());
   },
   wrap: function(func) {
-    return function() {
+    var honeybadgerWrapper;
+    return honeybadgerWrapper = function() {
       var e;
       try {
         return func.apply(this, arguments);
       } catch (_error) {
         e = _error;
-        Honeybadger.notify(e);
-        throw e;
+        return Honeybadger.notify(e);
       }
     };
   },
