@@ -1,3 +1,5 @@
+[currentError, currentNotice] = [null, null]
+
 Honeybadger =
   version: '0.1.0'
 
@@ -40,10 +42,25 @@ Honeybadger =
       for k,v of error
         options[k] = v
 
+    if currentNotice
+      if options.error == currentError
+        return # Already caught by inner catch block, ignore.
+      else
+        # Report old error immediately since this is a new error.
+        n = currentNotice
+        [currentError, currentNotice] = [null, null]
+        @_sendRequest(n.toJSON())
+
     return false if (k for own k of options).length == 0
     notice = new Notice(options)
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
-    @_sendRequest(notice.toJSON())
+
+    [currentError, currentNotice] = [options.error, notice]
+
+    window.setTimeout () =>
+      if options.error == currentError
+        [currentError, currentNotice] = [null, null]
+        @_sendRequest(notice.toJSON())
 
   wrap: (func) ->
     honeybadgerWrapper = () ->
@@ -99,7 +116,7 @@ Honeybadger =
     form.submit()
 
   _windowOnErrorHandler: (msg, url, line, col, error) ->
-    if Honeybadger.configuration.onerror
+    if !currentNotice && Honeybadger.configuration.onerror
       unless error
         error = new UncaughtError(msg, url, line, col)
       Honeybadger.notify(error)

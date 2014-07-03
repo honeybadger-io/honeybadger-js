@@ -3,6 +3,10 @@ describe 'Honeybadger', ->
     Honeybadger.reset()
     Honeybadger.resetContext()
 
+    # Perform immediately.
+    window.setTimeout = (f) ->
+      f.apply(this, arguments)
+
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
     expect(Honeybadger.configuration).toEqual(jasmine.any(Configuration))

@@ -8,7 +8,7 @@
 
   *@joshuap*
 
-* Wrap no longer re-throws errors
+* Nested try/catch blocks and window.onerror will now report error only once.
 
   *@joshuap*
 
