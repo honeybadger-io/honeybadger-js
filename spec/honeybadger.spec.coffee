@@ -7,6 +7,10 @@ describe 'Honeybadger', ->
     window.setTimeout = (f) ->
       f.apply(this, arguments)
 
+  it 'exposes it\' prototype', ->
+    new_honeybadger = new Honeybadger.Client
+    expect(new_honeybadger).toEqual(jasmine.any(Client))
+
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
     expect(Honeybadger.configuration).toEqual(jasmine.any(Configuration))

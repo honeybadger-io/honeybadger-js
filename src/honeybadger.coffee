@@ -1,6 +1,9 @@
 [currentError, currentNotice] = [null, null]
 
-Honeybadger =
+class Client
+  constructor: (options = {}) ->
+    @configure(options)
+
   version: '0.1.0'
 
   configured: false
@@ -139,3 +142,6 @@ class UncaughtError extends Error
       (column || 0)
       ')'
     ].join('')
+
+Honeybadger = new Client
+Honeybadger.Client = Client
