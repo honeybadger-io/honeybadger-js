@@ -18,7 +18,7 @@ Configuration = (function() {
     environment: 'production',
     component: null,
     action: null,
-    disabled: true,
+    disabled: false,
     onerror: false
   };
 
@@ -148,18 +148,10 @@ Client = (function() {
 
   Client.prototype.version = '0.1.0';
 
-  Client.prototype.configured = false;
-
   Client.prototype.configure = function(options) {
     var k, v;
     if (options == null) {
       options = {};
-    }
-    if (this.configured === false) {
-      if (typeof options.disabled === 'undefined') {
-        options['disabled'] = false;
-      }
-      this.configured = true;
     }
     for (k in options) {
       v = options[k];
@@ -205,7 +197,7 @@ Client = (function() {
     if (options == null) {
       options = {};
     }
-    if (!this.configured || this.configuration.disabled === true) {
+    if (!this._validConfig() || this.configuration.disabled === true) {
       return false;
     }
     if (error instanceof Error) {
@@ -275,7 +267,6 @@ Client = (function() {
   Client.prototype.reset = function() {
     this.resetContext();
     this.configuration.reset();
-    this.configured = false;
     return this;
   };
 
@@ -287,6 +278,15 @@ Client = (function() {
     window.onerror = this._windowOnErrorHandler;
     this._installed = true;
     return this;
+  };
+
+  Client.prototype._validConfig = function() {
+    var _ref1;
+    if ((_ref1 = this.configuration.api_key) != null ? _ref1.match(/\S/) : void 0) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   Client.prototype._sendRequest = function(data) {

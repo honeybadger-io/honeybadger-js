@@ -24,21 +24,6 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger.configuration.api_key).toEqual('asdf')
 
-    it 'enables notifications on first call', ->
-      expect(Honeybadger.configuration.disabled).toEqual(true)
-      Honeybadger.configure
-          api_key: 'asdf'
-      expect(Honeybadger.configuration.disabled).toEqual(false)
-
-    it 'leaves notifications disabled on subsequent call', ->
-      expect(Honeybadger.configuration.disabled).toEqual(true)
-      Honeybadger.configure
-          api_key: 'asdf'
-          disabled: true
-      Honeybadger.configure
-          api_key: 'zxcv'
-      expect(Honeybadger.configuration.disabled).toEqual(true)
-
     it 'is chainable', ->
       expect(Honeybadger.configure({})).toBe(Honeybadger)
 

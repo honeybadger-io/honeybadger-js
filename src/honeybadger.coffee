@@ -6,12 +6,7 @@ class Client
 
   version: '0.1.0'
 
-  configured: false
-
   configure: (options = {}) ->
-    if @configured == false
-      options['disabled'] = false if typeof options.disabled == 'undefined'
-      @configured = true
     for k,v of options
       @configuration[k] = v
     @
@@ -35,7 +30,7 @@ class Client
     @beforeNotifyHandlers.push handler
 
   notify: (error, options = {}) ->
-    return false if !@configured || @configuration.disabled == true
+    return false if !@_validConfig() || @configuration.disabled == true
 
     if error instanceof Error
       options['error'] = error
@@ -76,7 +71,6 @@ class Client
   reset: () ->
     @resetContext()
     @configuration.reset()
-    @configured = false
     @
 
   install: () ->
@@ -85,6 +79,9 @@ class Client
     window.onerror = @_windowOnErrorHandler
     @_installed = true
     @
+
+  _validConfig: () ->
+    if @configuration.api_key?.match(/\S/) then true else false
 
   _sendRequest: (data) ->
     url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices.html'

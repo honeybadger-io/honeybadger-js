@@ -7,7 +7,7 @@ class Configuration
      environment: 'production'
      component: null
      action: null
-     disabled: true
+     disabled: false
      onerror: false
 
   constructor: (options = {}) ->
