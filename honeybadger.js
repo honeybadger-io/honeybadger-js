@@ -1,5 +1,5 @@
 /*
-  honeybadger-js
+  honeybadger-js v0.1.0
   A JavaScript Notifier for Honeybadger
   https://github.com/honeybadger-io/honeybadger-js
   https://www.honeybadger.io/
