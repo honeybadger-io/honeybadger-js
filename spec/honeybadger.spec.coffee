@@ -11,6 +11,18 @@ describe 'Honeybadger', ->
     new_honeybadger = new Honeybadger.Client
     expect(new_honeybadger).toEqual(jasmine.any(Client))
 
+  it 'is not loaded by default', ->
+    expect(Honeybadger._loaded).toEqual(false)
+
+  describe '._domReady', ->
+    beforeEach () ->
+      spyOn(Honeybadger, 'log')
+
+    it 'logs once', ->
+      Honeybadger._domReady()
+      Honeybadger._domReady()
+      expect(Honeybadger.log.calls.length).toEqual(1)
+
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
     expect(Honeybadger.configuration).toEqual(jasmine.any(Configuration))

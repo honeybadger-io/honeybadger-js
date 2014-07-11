@@ -58,25 +58,23 @@ class Client
     if currentNotice
       if options.error == currentError
         return # Already caught by inner catch block, ignore.
-      else
+      else if @_loaded # otherwise it's already in the queue
         # Report old error immediately since this is a new error.
-        n = currentNotice
-        [currentError, currentNotice] = [null, null]
-        @_sendRequest(n.toJSON())
+        @_send(currentNotice)
 
     return false if (k for own k of options).length == 0
     notice = new Notice(options)
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
 
-    @log('Sending notice', notice)
-
     [currentError, currentNotice] = [options.error, notice]
 
-    window.setTimeout () =>
-      if options.error == currentError
-        @log('Delivering notice', currentNotice)
-        [currentError, currentNotice] = [null, null]
-        @_sendRequest(notice.toJSON())
+    if ! @_loaded
+      @log('Queuing notice', notice)
+      @_queue.push(notice)
+    else
+      @log('Defering notice', notice)
+      window.setTimeout () =>
+        @_send(notice) if options.error == currentError
 
   wrap: (func) ->
     honeybadgerWrapper = () ->
@@ -97,8 +95,32 @@ class Client
       @log('Installing window.onerror handler')
       @_oldOnErrorHandler = window.onerror
       window.onerror = @_windowOnErrorHandler
+    if @_loaded
+      @log('honeybadger.js ' + @version + ' ready')
+    else
+      @log('Installing ready handler')
+      if document.addEventListener
+        document.addEventListener('DOMContentLoaded', @_domReady, true)
+        window.addEventListener('load', @_domReady, true)
+      else
+        window.attachEvent('onload', @_domReady)
     @_installed = true
     @
+
+  _queue: []
+
+  _loaded: (document.readyState == 'complete')
+
+  _domReady: () =>
+    return if @_loaded
+    @_loaded = true
+    @log('honeybadger.js ' + @version + ' ready')
+    @_send(notice) while notice = @_queue.pop()
+
+  _send: (notice) ->
+    @log('Sending notice', notice)
+    [currentError, currentNotice] = [null, null]
+    @_sendRequest(notice.toJSON())
 
   _validConfig: () ->
     if @configuration.api_key?.match(/\S/) then true else false
