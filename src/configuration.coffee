@@ -9,6 +9,7 @@ class Configuration
      action: null
      disabled: false
      onerror: false
+     debug: false
 
   constructor: (options = {}) ->
     for k,v of @constructor.defaults

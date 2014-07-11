@@ -1,10 +1,25 @@
 [currentError, currentNotice] = [null, null]
 
 class Client
+  version: '0.1.0'
+
   constructor: (options = {}) ->
+    @log('Initializing honeybadger.js ' + @version)
     @configure(options)
 
-  version: '0.1.0'
+  # Debug logging
+  #
+  # http://paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
+  #
+  # Example
+  #   log('inside coolFunc',this,arguments);
+  #
+  # Returns nothing
+  log: () ->
+    @log.history = @log.history || [] # store logs to an array for reference
+    @log.history.push(arguments)
+    if @configuration.debug && window.console
+      console.log(Array.prototype.slice.call(arguments))
 
   configure: (options = {}) ->
     for k,v of options
@@ -53,10 +68,13 @@ class Client
     notice = new Notice(options)
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
 
+    @log('Sending notice', notice)
+
     [currentError, currentNotice] = [options.error, notice]
 
     window.setTimeout () =>
       if options.error == currentError
+        @log('Delivering notice', currentNotice)
         [currentError, currentNotice] = [null, null]
         @_sendRequest(notice.toJSON())
 
@@ -75,8 +93,10 @@ class Client
 
   install: () ->
     return if @installed == true
-    @_oldOnErrorHandler = window.onerror
-    window.onerror = @_windowOnErrorHandler
+    unless window.onerror == @_windowOnErrorHandler
+      @log('Installing window.onerror handler')
+      @_oldOnErrorHandler = window.onerror
+      window.onerror = @_windowOnErrorHandler
     @_installed = true
     @
 
@@ -115,11 +135,12 @@ class Client
     document.body.appendChild form
     form.submit()
 
-  _windowOnErrorHandler: (msg, url, line, col, error) ->
-    if !currentNotice && Honeybadger.configuration.onerror
+  _windowOnErrorHandler: (msg, url, line, col, error) =>
+    if !currentNotice && @configuration.onerror
+      @log('Error caught by window.onerror', msg, url, line, col, error)
       unless error
         error = new UncaughtError(msg, url, line, col)
-      Honeybadger.notify(error)
+      @notify(error)
     if @_oldOnErrorHandler
       return @_oldOnErrorHandler.apply(this, arguments)
     false
