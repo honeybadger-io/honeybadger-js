@@ -11,6 +11,9 @@ describe 'Honeybadger', ->
     new_honeybadger = new Honeybadger.Client
     expect(new_honeybadger).toEqual(jasmine.any(Client))
 
+  it 'is not configured by default', ->
+    expect(Honeybadger._configured).toEqual(false)
+
   it 'is not loaded by default', ->
     expect(Honeybadger._loaded).toEqual(false)
 
@@ -38,6 +41,12 @@ describe 'Honeybadger', ->
 
     it 'is chainable', ->
       expect(Honeybadger.configure({})).toBe(Honeybadger)
+
+    it 'changes _configured to true', ->
+      expect(Honeybadger._configured).toEqual(false)
+      Honeybadger.configure
+        api_key: 'asdf'
+      expect(Honeybadger._configured).toEqual(true)
 
   it 'has a context object', ->
     expect(Honeybadger.context).toBeDefined()

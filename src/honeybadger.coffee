@@ -3,9 +3,9 @@
 class Client
   version: '0.1.0'
 
-  constructor: (options = {}) ->
+  constructor: (options) ->
     @log('Initializing honeybadger.js ' + @version)
-    @configure(options)
+    @configure(options) if options
 
   # Debug logging
   #
@@ -24,6 +24,9 @@ class Client
   configure: (options = {}) ->
     for k,v of options
       @configuration[k] = v
+    if !@_configured && @configuration.debug && window.console
+      console.log(Array.prototype.slice.call(args)) for args in @log.history
+    @_configured = true
     @
 
   configuration: new Configuration()
@@ -87,6 +90,7 @@ class Client
   reset: () ->
     @resetContext()
     @configuration.reset()
+    @_configured = false
     @
 
   install: () ->
@@ -111,6 +115,8 @@ class Client
 
   _loaded: (document.readyState == 'complete')
 
+  _configured: false
+
   _domReady: () =>
     return if @_loaded
     @_loaded = true
@@ -123,6 +129,7 @@ class Client
     @_sendRequest(notice.toJSON())
 
   _validConfig: () ->
+    return false unless @_configured
     if @configuration.api_key?.match(/\S/) then true else false
 
   _sendRequest: (data) ->

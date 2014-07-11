@@ -144,13 +144,12 @@ Client = (function() {
   Client.prototype.version = '0.1.0';
 
   function Client(options) {
-    if (options == null) {
-      options = {};
-    }
     this._windowOnErrorHandler = __bind(this._windowOnErrorHandler, this);
     this._domReady = __bind(this._domReady, this);
     this.log('Initializing honeybadger.js ' + this.version);
-    this.configure(options);
+    if (options) {
+      this.configure(options);
+    }
   }
 
   Client.prototype.log = function() {
@@ -162,7 +161,7 @@ Client = (function() {
   };
 
   Client.prototype.configure = function(options) {
-    var k, v;
+    var args, k, v, _i, _len, _ref1;
     if (options == null) {
       options = {};
     }
@@ -170,6 +169,14 @@ Client = (function() {
       v = options[k];
       this.configuration[k] = v;
     }
+    if (!this._configured && this.configuration.debug && window.console) {
+      _ref1 = this.log.history;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        args = _ref1[_i];
+        console.log(Array.prototype.slice.call(args));
+      }
+    }
+    this._configured = true;
     return this;
   };
 
@@ -282,6 +289,7 @@ Client = (function() {
   Client.prototype.reset = function() {
     this.resetContext();
     this.configuration.reset();
+    this._configured = false;
     return this;
   };
 
@@ -313,6 +321,8 @@ Client = (function() {
 
   Client.prototype._loaded = document.readyState === 'complete';
 
+  Client.prototype._configured = false;
+
   Client.prototype._domReady = function() {
     var notice, _results;
     if (this._loaded) {
@@ -336,6 +346,9 @@ Client = (function() {
 
   Client.prototype._validConfig = function() {
     var _ref1;
+    if (!this._configured) {
+      return false;
+    }
     if ((_ref1 = this.configuration.api_key) != null ? _ref1.match(/\S/) : void 0) {
       return true;
     } else {
