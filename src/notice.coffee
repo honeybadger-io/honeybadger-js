@@ -1,7 +1,7 @@
 class Notice
   constructor: (@options = {}) ->
     @error = @options.error
-    @stack = @error?.stack
+    @stack = @error?.stack || @error?.stacktrace
     @class = @error?.name
     @message = @error?.message
     @source = null
