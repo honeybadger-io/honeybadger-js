@@ -57,12 +57,12 @@ var Notice;
 
 Notice = (function() {
   function Notice(options) {
-    var k, v, _ref, _ref1, _ref2, _ref3, _ref4;
+    var k, v, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
     this.options = options != null ? options : {};
     this.error = this.options.error;
-    this.stack = (_ref = this.error) != null ? _ref.stack : void 0;
-    this["class"] = (_ref1 = this.error) != null ? _ref1.name : void 0;
-    this.message = (_ref2 = this.error) != null ? _ref2.message : void 0;
+    this.stack = ((_ref = this.error) != null ? _ref.stack : void 0) || ((_ref1 = this.error) != null ? _ref1.stacktrace : void 0);
+    this["class"] = (_ref2 = this.error) != null ? _ref2.name : void 0;
+    this.message = (_ref3 = this.error) != null ? _ref3.message : void 0;
     this.source = null;
     this.url = document.URL;
     this.project_root = Honeybadger.configuration.project_root;
@@ -70,15 +70,15 @@ Notice = (function() {
     this.component = Honeybadger.configuration.component;
     this.action = Honeybadger.configuration.action;
     this.context = {};
-    _ref3 = Honeybadger.context;
-    for (k in _ref3) {
-      v = _ref3[k];
+    _ref4 = Honeybadger.context;
+    for (k in _ref4) {
+      v = _ref4[k];
       this.context[k] = v;
     }
     if (this.options.context && typeof this.options.context === 'object') {
-      _ref4 = this.options.context;
-      for (k in _ref4) {
-        v = _ref4[k];
+      _ref5 = this.options.context;
+      for (k in _ref5) {
+        v = _ref5[k];
         this.context[k] = v;
       }
     }
