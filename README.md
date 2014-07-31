@@ -5,6 +5,22 @@ Status](https://travis-ci.org/honeybadger-io/honeybadger-js.png?branch=master&1)
 
 A JavaScript library for integrating apps with the :zap: [Honeybadger Rails Error Notifier](http://honeybadger.io).
 
+## Installation
+
+Place the following code between the `<head></head>` tags of your page:
+
+  ```html
+  <script src="//js.honeybadger.io/v0.1/honeybadger.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    Honeybadger.configure({
+      api_key: 'public api key',
+      environment: 'production'
+    });
+  </script>
+  ```
+
+See the documentation for usage examples.
+
 ## Documentation
 
 [View the Documentation](http://docs.honeybadger.io/article/66-client-side-javascript-documentation)
