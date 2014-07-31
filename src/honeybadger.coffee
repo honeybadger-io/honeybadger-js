@@ -78,6 +78,7 @@ class Client
       @log('Defering notice', notice)
       window.setTimeout () =>
         @_send(notice) if options.error == currentError
+    notice
 
   wrap: (func) ->
     honeybadgerWrapper = () ->

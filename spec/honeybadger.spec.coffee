@@ -147,10 +147,11 @@ describe 'Honeybadger', ->
       Honeybadger.configure
         api_key: 'asdf'
 
-      expected_notice = new Notice({ error: new Error("Honeybadger don't care, but you might.") })
-      Honeybadger.notify("Honeybadger don't care, but you might.")
+      notice = Honeybadger.notify("Honeybadger don't care, but you might.")
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON())
+      expect(notice.error).toEqual(jasmine.any(Error))
+      expect(notice.error.message).toEqual("Honeybadger don't care, but you might.")
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
     it 'accepts options as first argument', ->
       Honeybadger.configure

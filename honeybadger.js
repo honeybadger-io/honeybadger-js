@@ -259,10 +259,10 @@ Client = (function() {
     _ref2 = [options.error, notice], currentError = _ref2[0], currentNotice = _ref2[1];
     if (!this._loaded) {
       this.log('Queuing notice', notice);
-      return this._queue.push(notice);
+      this._queue.push(notice);
     } else {
       this.log('Defering notice', notice);
-      return window.setTimeout((function(_this) {
+      window.setTimeout((function(_this) {
         return function() {
           if (options.error === currentError) {
             return _this._send(notice);
@@ -270,6 +270,7 @@ Client = (function() {
         };
       })(this));
     }
+    return notice;
   };
 
   Client.prototype.wrap = function(func) {
