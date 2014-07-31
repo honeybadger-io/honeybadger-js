@@ -43,8 +43,8 @@ class Notice
     data = {}
     if navigator?
       for k,v of navigator
-        if k? and v? and (v not instanceof Object)
-          data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v
+        if k? and v? and !(typeof v is 'object')
+          data[k.replace(/(?=[A-Z][a-z]*)/g, '_').toUpperCase()] = v
       data['HTTP_USER_AGENT'] = data['USER_AGENT']
       delete data['USER_AGENT']
     data['HTTP_REFERER'] = document.referrer if document.referrer.match /\S/

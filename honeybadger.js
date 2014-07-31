@@ -118,8 +118,8 @@ Notice = (function() {
     if (typeof navigator !== "undefined" && navigator !== null) {
       for (k in navigator) {
         v = navigator[k];
-        if ((k != null) && (v != null) && (!(v instanceof Object))) {
-          data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v;
+        if ((k != null) && (v != null) && !(typeof v === 'object')) {
+          data[k.replace(/(?=[A-Z][a-z]*)/g, '_').toUpperCase()] = v;
         }
       }
       data['HTTP_USER_AGENT'] = data['USER_AGENT'];
