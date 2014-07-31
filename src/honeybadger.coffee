@@ -139,7 +139,7 @@ class Client
 
   _request: (url, payload) ->
     img = new Image()
-    img.src = url + "?" + @_serialize(api_key: @configuration.api_key, notice: payload, t: new Date().getTime())
+    img.src = url + '?' + @_serialize(api_key: @configuration.api_key, notice: payload, t: new Date().getTime())
 
   _serialize: (obj, prefix) ->
     ret = []
