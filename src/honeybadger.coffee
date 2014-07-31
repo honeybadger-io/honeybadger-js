@@ -7,14 +7,15 @@ class Client
     @log('Initializing honeybadger.js ' + @version)
     @configure(options) if options
 
-  # Debug logging
+  # Debug logging.
   #
   # http://paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
   #
   # Example
+  #
   #   log('inside coolFunc',this,arguments);
   #
-  # Returns nothing
+  # Returns nothing.
   log: () ->
     @log.history = @log.history || [] # store logs to an array for reference
     @log.history.push(arguments)
