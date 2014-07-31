@@ -60,7 +60,7 @@ Notice = (function() {
     var k, v, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
     this.options = options != null ? options : {};
     this.error = this.options.error;
-    this.stack = ((_ref = this.error) != null ? _ref.stack : void 0) || ((_ref1 = this.error) != null ? _ref1.stacktrace : void 0);
+    this.stack = ((_ref = this.error) != null ? _ref.stack : void 0) || ((_ref1 = this.error) != null ? _ref1.stacktrace : void 0) || null;
     this["class"] = (_ref2 = this.error) != null ? _ref2.name : void 0;
     this.message = (_ref3 = this.error) != null ? _ref3.message : void 0;
     this.source = null;
@@ -115,14 +115,16 @@ Notice = (function() {
   Notice.prototype._cgiData = function() {
     var data, k, v;
     data = {};
-    for (k in navigator) {
-      v = navigator[k];
-      if (!(v instanceof Object)) {
-        data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v;
+    if (typeof navigator !== "undefined" && navigator !== null) {
+      for (k in navigator) {
+        v = navigator[k];
+        if ((k != null) && (v != null) && (!(v instanceof Object))) {
+          data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v;
+        }
       }
+      data['HTTP_USER_AGENT'] = data['USER_AGENT'];
+      delete data['USER_AGENT'];
     }
-    data['HTTP_USER_AGENT'] = data['USER_AGENT'];
-    delete data['USER_AGENT'];
     if (document.referrer.match(/\S/)) {
       data['HTTP_REFERER'] = document.referrer;
     }
@@ -360,54 +362,30 @@ Client = (function() {
   Client.prototype._sendRequest = function(data) {
     var url;
     url = 'http' + ((this.configuration.ssl && 's') || '') + '://' + this.configuration.host + '/v1/notices.gif';
-    return this._imgGet(url, data);
+    return this._request(url, data);
   };
 
-  Client.prototype._imgGet = function(url, payload) {
+  Client.prototype._request = function(url, payload) {
     var img;
     img = new Image();
     return img.src = url + "?" + this._serialize({
       api_key: this.configuration.api_key,
-      notice: payload
-    }) + "&t=" + new Date().getTime();
+      notice: payload,
+      t: new Date().getTime()
+    });
   };
 
   Client.prototype._serialize = function(obj, prefix) {
-    var k, p, str, v;
-    str = [];
-    for (p in obj) {
-      if (obj.hasOwnProperty(p) && (p != null) && (obj[p] != null)) {
-        k = (prefix ? prefix + "[" + p + "]" : p);
-        v = obj[p];
-        str.push((typeof v === "object" ? this._serialize(v, k) : encodeURIComponent(k) + "=" + encodeURIComponent(v)));
+    var k, pk, ret, v;
+    ret = [];
+    for (k in obj) {
+      v = obj[k];
+      if (obj.hasOwnProperty(k) && (k != null) && (v != null)) {
+        pk = (prefix ? prefix + '[' + k + ']' : k);
+        ret.push(typeof v === 'object' ? this._serialize(v, pk) : encodeURIComponent(pk) + '=' + encodeURIComponent(v));
       }
     }
-    return str.join("&");
-  };
-
-  Client.prototype._crossDomainPost = function(url, payload) {
-    var form, iframe, input, uniqueNameOfFrame;
-    iframe = document.createElement('iframe');
-    uniqueNameOfFrame = '_hb_' + (new Date).getTime();
-    document.body.appendChild(iframe);
-    iframe.style.display = 'none';
-    iframe.contentWindow.name = uniqueNameOfFrame;
-    form = document.createElement('form');
-    form.target = uniqueNameOfFrame;
-    form.action = url;
-    form.method = 'POST';
-    input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = "payload";
-    input.value = payload;
-    form.appendChild(input);
-    input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = "api_key";
-    input.value = this.configuration.api_key;
-    form.appendChild(input);
-    document.body.appendChild(form);
-    return form.submit();
+    return ret.join('&');
   };
 
   Client.prototype._windowOnErrorHandler = function(msg, url, line, col, error) {

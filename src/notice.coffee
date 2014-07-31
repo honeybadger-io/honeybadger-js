@@ -1,7 +1,7 @@
 class Notice
   constructor: (@options = {}) ->
     @error = @options.error
-    @stack = @error?.stack || @error?.stacktrace
+    @stack = @error?.stack || @error?.stacktrace || null
     @class = @error?.name
     @message = @error?.message
     @source = null
@@ -41,10 +41,11 @@ class Notice
 
   _cgiData: () ->
     data = {}
-    for k,v of navigator
-      unless v instanceof Object
-        data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v
-    data['HTTP_USER_AGENT'] = data['USER_AGENT']
-    delete data['USER_AGENT']
+    if navigator?
+      for k,v of navigator
+        if k? and v? and (v not instanceof Object)
+          data[k.split(/(?=[A-Z][a-z]*)/).join('_').toUpperCase()] = v
+      data['HTTP_USER_AGENT'] = data['USER_AGENT']
+      delete data['USER_AGENT']
     data['HTTP_REFERER'] = document.referrer if document.referrer.match /\S/
     data

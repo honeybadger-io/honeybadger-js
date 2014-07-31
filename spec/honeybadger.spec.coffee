@@ -229,6 +229,9 @@ describe 'Honeybadger', ->
     it 'serializes an object to a query string', ->
       expect(Honeybadger._serialize(obj)).toEqual('foo=foo&bar%5Bbaz%5D=baz')
 
+    it 'drops null values', ->
+      expect(Honeybadger._serialize({foo: null, bar: 'baz'})).toEqual('bar=baz')
+
   describe '._windowOnErrorHandler', ->
     beforeEach () ->
       Honeybadger.install()
