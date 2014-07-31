@@ -11,10 +11,10 @@ describe 'Notice', ->
       expect(notice.context).toEqual({ user_id: '1', user_name: 'Jack' })
       expect(Honeybadger.context).toEqual({ user_id: '2', user_name: 'Jack' })
 
-  describe '#toJSON()', ->
+  describe '#payload()', ->
     it 'is defined', ->
       notice = new Notice
-      expect(notice.toJSON).toBeDefined()
+      expect(notice.payload).toBeDefined()
 
     describe 'error is present', ->
       [error, notice, output] = [null, null, null]
@@ -26,7 +26,11 @@ describe 'Notice', ->
           error = e
 
         notice = new Notice({ error: error })
-        output = JSON.parse(notice.toJSON())
+        output = notice.payload()
+
+      describe 'server', ->
+        it 'exists', ->
+          expect(output.server).toBeDefined()
 
       describe 'error', ->
         it 'exists', ->

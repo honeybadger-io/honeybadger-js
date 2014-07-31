@@ -109,7 +109,7 @@ describe 'Honeybadger', ->
         Honeybadger.notify(e)
         notice = new Notice({ error: e })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.toJSON())
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
 
     it 'does not deliver notice when not configured', ->
       try
@@ -161,7 +161,7 @@ describe 'Honeybadger', ->
       expected_notice = new Notice({ error: error })
       Honeybadger.notify(error: error)
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.toJSON())
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.payload())
 
   describe '.wrap', ->
     beforeEach () ->
@@ -222,6 +222,12 @@ describe 'Honeybadger', ->
         notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalled()
+
+  describe '#_serialize()', ->
+    obj = {foo: 'foo', bar: {baz: 'baz'}}
+
+    it 'serializes an object to a query string', ->
+      expect(Honeybadger._serialize(obj)).toEqual('foo=foo&bar%5Bbaz%5D=baz')
 
   describe '._windowOnErrorHandler', ->
     beforeEach () ->

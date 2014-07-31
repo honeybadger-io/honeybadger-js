@@ -18,27 +18,26 @@ class Notice
       for k,v of @options.context
         @context[k] = v
 
-  toJSON: ->
-    JSON.stringify
-      notifier:
-        name: 'honeybadger.js'
-        url: 'https://github.com/honeybadger-io/honeybadger-js'
-        version: Honeybadger.version
-        language: 'javascript'
-      error:
-        class: @class
-        message: @message
-        backtrace: @stack
-        source: @source
-      request:
-        url: @url
-        component: @component
-        action: @action
-        context: @context
-        cgi_data: @_cgiData()
-      server:
-        project_root: @project_root
-        environment_name: @environment
+  payload: ->
+    notifier:
+      name: 'honeybadger.js'
+      url: 'https://github.com/honeybadger-io/honeybadger-js'
+      version: Honeybadger.version
+      language: 'javascript'
+    error:
+      class: @class
+      message: @message
+      backtrace: @stack
+      source: @source
+    request:
+      url: @url
+      component: @component
+      action: @action
+      context: @context
+      cgi_data: @_cgiData()
+    server:
+      project_root: @project_root
+      environment_name: @environment
 
   _cgiData: () ->
     data = {}

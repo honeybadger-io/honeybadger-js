@@ -127,43 +127,27 @@ class Client
   _send: (notice) ->
     @log('Sending notice', notice)
     [currentError, currentNotice] = [null, null]
-    @_sendRequest(notice.toJSON())
+    @_sendRequest(notice.payload())
 
   _validConfig: () ->
     return false unless @_configured
     if @configuration.api_key?.match(/\S/) then true else false
 
   _sendRequest: (data) ->
-    url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices.html'
-    @_crossDomainPost(url, data)
+    url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices.gif'
+    @_request(url, data)
 
-  # http://www.markandey.com/2011/10/design-of-cross-domain-post-api-in.html
-  _crossDomainPost: (url, payload) ->
-    iframe = document.createElement('iframe')
-    uniqueNameOfFrame = '_hb_' + (new Date).getTime()
-    document.body.appendChild iframe
-    iframe.style.display = 'none'
-    iframe.contentWindow.name = uniqueNameOfFrame
+  _request: (url, payload) ->
+    img = new Image()
+    img.src = url + "?" + @_serialize(api_key: @configuration.api_key, notice: payload, t: new Date().getTime())
 
-    form = document.createElement('form')
-    form.target = uniqueNameOfFrame
-    form.action = url
-    form.method = 'POST'
-
-    input = document.createElement('input')
-    input.type = 'hidden'
-    input.name = "payload"
-    input.value = payload
-    form.appendChild input
-
-    input = document.createElement('input')
-    input.type = 'hidden'
-    input.name = "api_key"
-    input.value = @configuration.api_key
-    form.appendChild input
-
-    document.body.appendChild form
-    form.submit()
+  _serialize: (obj, prefix) ->
+    ret = []
+    for k,v of obj
+      if obj.hasOwnProperty(k) and k? and v?
+        pk = (if prefix then prefix + '[' + k + ']' else k)
+        ret.push(if typeof v is 'object' then @_serialize(v, pk) else encodeURIComponent(pk) + '=' + encodeURIComponent(v))
+    ret.join '&'
 
   _windowOnErrorHandler: (msg, url, line, col, error) =>
     if !currentNotice && @configuration.onerror

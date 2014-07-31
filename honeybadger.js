@@ -84,8 +84,8 @@ Notice = (function() {
     }
   }
 
-  Notice.prototype.toJSON = function() {
-    return JSON.stringify({
+  Notice.prototype.payload = function() {
+    return {
       notifier: {
         name: 'honeybadger.js',
         url: 'https://github.com/honeybadger-io/honeybadger-js',
@@ -109,7 +109,7 @@ Notice = (function() {
         project_root: this.project_root,
         environment_name: this.environment
       }
-    });
+    };
   };
 
   Notice.prototype._cgiData = function() {
@@ -342,7 +342,7 @@ Client = (function() {
     var _ref1;
     this.log('Sending notice', notice);
     _ref1 = [null, null], currentError = _ref1[0], currentNotice = _ref1[1];
-    return this._sendRequest(notice.toJSON());
+    return this._sendRequest(notice.payload());
   };
 
   Client.prototype._validConfig = function() {
@@ -359,8 +359,30 @@ Client = (function() {
 
   Client.prototype._sendRequest = function(data) {
     var url;
-    url = 'http' + ((this.configuration.ssl && 's') || '') + '://' + this.configuration.host + '/v1/notices.html';
-    return this._crossDomainPost(url, data);
+    url = 'http' + ((this.configuration.ssl && 's') || '') + '://' + this.configuration.host + '/v1/notices.gif';
+    return this._imgGet(url, data);
+  };
+
+  Client.prototype._imgGet = function(url, payload) {
+    var img;
+    img = new Image();
+    return img.src = url + "?" + this._serialize({
+      api_key: this.configuration.api_key,
+      notice: payload
+    }) + "&t=" + new Date().getTime();
+  };
+
+  Client.prototype._serialize = function(obj, prefix) {
+    var k, p, str, v;
+    str = [];
+    for (p in obj) {
+      if (obj.hasOwnProperty(p) && (p != null) && (obj[p] != null)) {
+        k = (prefix ? prefix + "[" + p + "]" : p);
+        v = obj[p];
+        str.push((typeof v === "object" ? this._serialize(v, k) : encodeURIComponent(k) + "=" + encodeURIComponent(v)));
+      }
+    }
+    return str.join("&");
   };
 
   Client.prototype._crossDomainPost = function(url, payload) {
