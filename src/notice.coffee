@@ -1,7 +1,7 @@
 class Notice
   constructor: (@options = {}) ->
     @error = @options.error
-    @stack = @error?.stack || @error?.stacktrace || null
+    @stack = @_stackTrace(@error)
     @class = @error?.name
     @message = @error?.message
     @source = null
@@ -10,6 +10,7 @@ class Notice
     @environment = Honeybadger.configuration.environment
     @component = Honeybadger.configuration.component
     @action = Honeybadger.configuration.action
+    @cgi_data = @_cgiData()
 
     @context = {}
     for k,v of Honeybadger.context
@@ -34,10 +35,15 @@ class Notice
       component: @component
       action: @action
       context: @context
-      cgi_data: @_cgiData()
+      cgi_data: @cgi_data
     server:
       project_root: @project_root
       environment_name: @environment
+
+  _stackTrace: (error) ->
+    # From TraceKit: Opera 10 *destroys* its stacktrace property if you try to
+    # access the stack property first!!
+    error?.stacktrace || error?.stack || null
 
   _cgiData: () ->
     data = {}

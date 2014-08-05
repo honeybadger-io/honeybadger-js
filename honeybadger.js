@@ -57,28 +57,29 @@ var Notice;
 
 Notice = (function() {
   function Notice(options) {
-    var k, v, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+    var k, v, _ref, _ref1, _ref2, _ref3;
     this.options = options != null ? options : {};
     this.error = this.options.error;
-    this.stack = ((_ref = this.error) != null ? _ref.stack : void 0) || ((_ref1 = this.error) != null ? _ref1.stacktrace : void 0) || null;
-    this["class"] = (_ref2 = this.error) != null ? _ref2.name : void 0;
-    this.message = (_ref3 = this.error) != null ? _ref3.message : void 0;
+    this.stack = this._stackTrace(this.error);
+    this["class"] = (_ref = this.error) != null ? _ref.name : void 0;
+    this.message = (_ref1 = this.error) != null ? _ref1.message : void 0;
     this.source = null;
     this.url = document.URL;
     this.project_root = Honeybadger.configuration.project_root;
     this.environment = Honeybadger.configuration.environment;
     this.component = Honeybadger.configuration.component;
     this.action = Honeybadger.configuration.action;
+    this.cgi_data = this._cgiData();
     this.context = {};
-    _ref4 = Honeybadger.context;
-    for (k in _ref4) {
-      v = _ref4[k];
+    _ref2 = Honeybadger.context;
+    for (k in _ref2) {
+      v = _ref2[k];
       this.context[k] = v;
     }
     if (this.options.context && typeof this.options.context === 'object') {
-      _ref5 = this.options.context;
-      for (k in _ref5) {
-        v = _ref5[k];
+      _ref3 = this.options.context;
+      for (k in _ref3) {
+        v = _ref3[k];
         this.context[k] = v;
       }
     }
@@ -103,13 +104,17 @@ Notice = (function() {
         component: this.component,
         action: this.action,
         context: this.context,
-        cgi_data: this._cgiData()
+        cgi_data: this.cgi_data
       },
       server: {
         project_root: this.project_root,
         environment_name: this.environment
       }
     };
+  };
+
+  Notice.prototype._stackTrace = function(error) {
+    return (error != null ? error.stacktrace : void 0) || (error != null ? error.stack : void 0) || null;
   };
 
   Notice.prototype._cgiData = function() {
@@ -368,7 +373,7 @@ Client = (function() {
   Client.prototype._request = function(url, payload) {
     var img;
     img = new Image();
-    return img.src = url + "?" + this._serialize({
+    return img.src = url + '?' + this._serialize({
       api_key: this.configuration.api_key,
       notice: payload,
       t: new Date().getTime()
