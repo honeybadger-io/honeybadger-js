@@ -21,7 +21,7 @@ Configuration = (function() {
     disabled: false,
     onerror: false,
     debug: false,
-    timeout: 100
+    timeout: false
   };
 
   function Configuration(options) {
@@ -149,7 +149,7 @@ var Client, Honeybadger, UncaughtError, currentError, currentNotice, _ref,
 _ref = [null, null], currentError = _ref[0], currentNotice = _ref[1];
 
 Client = (function() {
-  Client.prototype.version = '0.1.0';
+  Client.prototype.version = '0.1.1';
 
   function Client(options) {
     this._windowOnErrorHandler = __bind(this._windowOnErrorHandler, this);
@@ -372,8 +372,19 @@ Client = (function() {
   };
 
   Client.prototype._request = function(url, payload) {
-    var img, timeout;
-    img = new Image();
+    var img, timeout, _ref1;
+    _ref1 = [new Image(), null], img = _ref1[0], timeout = _ref1[1];
+    img.onabort = img.onerror = function() {
+      if (timeout) {
+        window.clearTimeout(timeout);
+      }
+      return this.log('Request failed.', url, payload);
+    };
+    img.onload = function() {
+      if (timeout) {
+        return window.clearTimeout(timeout);
+      }
+    };
     img.src = url + '?' + this._serialize({
       api_key: this.configuration.api_key,
       notice: payload,
@@ -386,9 +397,6 @@ Client = (function() {
           return _this.log('Request timed out.', url, payload);
         };
       })(this)), this.configuration.timeout);
-      img.onload = function() {
-        return window.clearTimeout(timeout);
-      };
     }
     return true;
   };
