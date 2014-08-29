@@ -20,7 +20,8 @@ Configuration = (function() {
     action: null,
     disabled: false,
     onerror: false,
-    debug: false
+    debug: false,
+    timeout: 100
   };
 
   function Configuration(options) {
@@ -371,13 +372,25 @@ Client = (function() {
   };
 
   Client.prototype._request = function(url, payload) {
-    var img;
+    var img, timeout;
     img = new Image();
-    return img.src = url + '?' + this._serialize({
+    img.src = url + '?' + this._serialize({
       api_key: this.configuration.api_key,
       notice: payload,
       t: new Date().getTime()
     });
+    if (this.configuration.timeout) {
+      timeout = window.setTimeout(((function(_this) {
+        return function() {
+          img.src = '';
+          return _this.log('Request timed out.', url, payload);
+        };
+      })(this)), this.configuration.timeout);
+      img.onload = function() {
+        return window.clearTimeout(timeout);
+      };
+    }
+    return true;
   };
 
   Client.prototype._serialize = function(obj, prefix) {

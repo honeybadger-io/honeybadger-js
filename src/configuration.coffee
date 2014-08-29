@@ -10,6 +10,7 @@ class Configuration
      disabled: false
      onerror: false
      debug: false
+     timeout: false
 
   constructor: (options = {}) ->
     for k,v of @constructor.defaults

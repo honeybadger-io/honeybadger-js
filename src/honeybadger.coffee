@@ -139,8 +139,19 @@ class Client
     @_request(url, data)
 
   _request: (url, payload) ->
-    img = new Image()
+    [img, timeout] = [new Image(), null]
+    img.onabort = img.onerror = ->
+      window.clearTimeout(timeout) if timeout
+      @log('Request failed.', url, payload)
+    img.onload = ->
+      window.clearTimeout(timeout) if timeout
     img.src = url + '?' + @_serialize(api_key: @configuration.api_key, notice: payload, t: new Date().getTime())
+    if @configuration.timeout
+      timeout = window.setTimeout((() =>
+        img.src = ''
+        @log('Request timed out.', url, payload)
+      ), @configuration.timeout)
+    true
 
   _serialize: (obj, prefix) ->
     ret = []
