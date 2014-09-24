@@ -374,17 +374,21 @@ Client = (function() {
   Client.prototype._request = function(url, payload) {
     var img, timeout, _ref1;
     _ref1 = [new Image(), null], img = _ref1[0], timeout = _ref1[1];
-    img.onabort = img.onerror = function() {
-      if (timeout) {
-        window.clearTimeout(timeout);
-      }
-      return this.log('Request failed.', url, payload);
-    };
-    img.onload = function() {
-      if (timeout) {
-        return window.clearTimeout(timeout);
-      }
-    };
+    img.onabort = img.onerror = (function(_this) {
+      return function() {
+        if (timeout) {
+          window.clearTimeout(timeout);
+        }
+        return _this.log('Request failed.', url, payload);
+      };
+    })(this);
+    img.onload = (function(_this) {
+      return function() {
+        if (timeout) {
+          return window.clearTimeout(timeout);
+        }
+      };
+    })(this);
     img.src = url + '?' + this._serialize({
       api_key: this.configuration.api_key,
       notice: payload,

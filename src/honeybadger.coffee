@@ -140,10 +140,10 @@ class Client
 
   _request: (url, payload) ->
     [img, timeout] = [new Image(), null]
-    img.onabort = img.onerror = ->
+    img.onabort = img.onerror = =>
       window.clearTimeout(timeout) if timeout
       @log('Request failed.', url, payload)
-    img.onload = ->
+    img.onload = =>
       window.clearTimeout(timeout) if timeout
     img.src = url + '?' + @_serialize(api_key: @configuration.api_key, notice: payload, t: new Date().getTime())
     if @configuration.timeout
