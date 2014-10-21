@@ -1,4 +1,13 @@
 describe 'Notice', ->
+  mockError = () ->
+    error = null
+    try
+      'foo'.bar()
+    catch e
+      error = e
+    error
+
+
   describe 'context option', ->
     it 'allows setting context from options array', ->
       Honeybadger.resetContext()
@@ -20,11 +29,7 @@ describe 'Notice', ->
       [error, notice, output] = [null, null, null]
 
       beforeEach () ->
-        try
-          'foo'.bar()
-        catch e
-          error = e
-
+        error = mockError()
         notice = new Notice({ error: error })
         output = notice.payload()
 
@@ -41,3 +46,14 @@ describe 'Notice', ->
 
         it 'has source extract', ->
           expect(output.error.source).toBeDefined()
+
+        it 'doesn\'t have a fingerprint by default', ->
+          expect(output.error.fingerprint).toEqual(null)
+
+  describe 'with a fingerprint', ->
+    describe '#payload()', ->
+      it 'has a fingerprint', ->
+        notice = new Notice({ error: mockError(), fingerprint: 'asdf' })
+        output = notice.payload()
+        expect(output.error.fingerprint).toBeDefined()
+        expect(output.error.fingerprint).toEqual('asdf')

@@ -71,6 +71,7 @@ Notice = (function() {
     this.component = Honeybadger.configuration.component;
     this.action = Honeybadger.configuration.action;
     this.cgi_data = this._cgiData();
+    this.fingerprint = this.options.fingerprint;
     this.context = {};
     _ref2 = Honeybadger.context;
     for (k in _ref2) {
@@ -98,7 +99,8 @@ Notice = (function() {
         "class": this["class"],
         message: this.message,
         backtrace: this.stack,
-        source: this.source
+        source: this.source,
+        fingerprint: this.fingerprint
       },
       request: {
         url: this.url,

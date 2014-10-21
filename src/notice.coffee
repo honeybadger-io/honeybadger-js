@@ -11,6 +11,7 @@ class Notice
     @component = Honeybadger.configuration.component
     @action = Honeybadger.configuration.action
     @cgi_data = @_cgiData()
+    @fingerprint = @options.fingerprint
 
     @context = {}
     for k,v of Honeybadger.context
@@ -30,6 +31,7 @@ class Notice
       message: @message
       backtrace: @stack
       source: @source
+      fingerprint: @fingerprint
     request:
       url: @url
       component: @component
