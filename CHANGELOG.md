@@ -1,3 +1,9 @@
+## honeybadger-js v0.2.0 ##
+
+* Improved error grouping.
+
+  *@joshuap*
+
 ## honeybadger-js v0.1.0 ##
 
 * Stop parsing stack-traces client-side (removes TraceKit)

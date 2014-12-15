@@ -5,14 +5,14 @@ Status](https://travis-ci.org/honeybadger-io/honeybadger-js.png?branch=master&1)
 
 A JavaScript library for integrating apps with the :zap: [Honeybadger Rails Error Notifier](http://honeybadger.io).
 
-## Upgrading from 0.0.x
+## Upgrading
 
 It is recommended that you use our CDN, as outlined under
 [installation](#installation). The API is 100% backwards compatible, so no other
 code changes are required.
 
-*Note: 0.1 makes significant improvements to error grouping. As a result, new
-errors may be grouped differently than old.*
+*Note: 0.1 and 0.2 make significant improvements to error grouping. As a result,
+new errors may be grouped differently than old.*
 
 ## Installation
 

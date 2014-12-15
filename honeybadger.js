@@ -1,5 +1,5 @@
 /*
-  honeybadger.js v0.1.2
+  honeybadger.js v0.2.0-alpha
   A JavaScript Notifier for Honeybadger
   https://github.com/honeybadger-io/honeybadger-js
   https://www.honeybadger.io/
@@ -151,7 +151,7 @@ var Client, Honeybadger, UncaughtError, currentError, currentNotice, _ref,
 _ref = [null, null], currentError = _ref[0], currentNotice = _ref[1];
 
 Client = (function() {
-  Client.prototype.version = '0.1.2';
+  Client.prototype.version = '0.2.0-alpha';
 
   function Client(options) {
     this._windowOnErrorHandler = __bind(this._windowOnErrorHandler, this);

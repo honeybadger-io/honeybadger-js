@@ -1,6 +1,6 @@
 {
   "name": "honeybadger-js",
-  "version": "0.1.2",
+  "version": "0.2.0-alpha",
   "homepage": "https://github.com/honeybadger-io/honeybadger-js",
   "authors": [
     "Joshua Wood <josh@honeybadger.io>"
