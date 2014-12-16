@@ -258,6 +258,9 @@ describe 'Honeybadger', ->
     it 'drops null values', ->
       expect(Honeybadger._serialize({foo: null, bar: 'baz'})).toEqual('bar=baz')
 
+    it 'drops undefined values', ->
+      expect(Honeybadger._serialize({foo: undefined, bar: 'baz'})).toEqual('bar=baz')
+
   describe '._windowOnErrorHandler', ->
     beforeEach () ->
       Honeybadger.install()
