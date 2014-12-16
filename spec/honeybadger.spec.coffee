@@ -107,7 +107,7 @@ describe 'Honeybadger', ->
         'foo'.bar()
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
+        notice = new Notice({ stack: e.stack, message: e.message, name: e.name })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
 
@@ -116,7 +116,6 @@ describe 'Honeybadger', ->
         'foo'.bar()
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
@@ -129,7 +128,6 @@ describe 'Honeybadger', ->
         'foo'.bar()
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
@@ -140,38 +138,41 @@ describe 'Honeybadger', ->
       Honeybadger.notify()
       Honeybadger.notify(null)
       Honeybadger.notify(null, {})
+      Honeybadger.notify({})
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
-    it 'creates a generic Error from string', ->
+    it 'generates a stack trace without an error', ->
       Honeybadger.configure
         api_key: 'asdf'
 
       notice = Honeybadger.notify("Honeybadger don't care, but you might.")
 
-      expect(notice.error).toEqual(jasmine.any(Error))
-      expect(notice.error.message).toEqual("Honeybadger don't care, but you might.")
+      expect(notice.stack).toEqual(jasmine.any(String))
+      expect(notice.message).toEqual("Honeybadger don't care, but you might.")
       expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
     it 'accepts options as first argument', ->
       Honeybadger.configure
         api_key: 'asdf'
 
-      error = new Error("Honeybadger don't care, but you might.")
-      expected_notice = new Notice({ error: error })
-      Honeybadger.notify(error: error)
+      try
+        throw new Error("Honeybadger don't care, but you might.")
+      catch e
+        Honeybadger.notify(error: e)
+        notice = new Notice({ stack: e.stack, message: e.message, name: e.name })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
 
     it 'accepts name as second argument', ->
       Honeybadger.configure
         api_key: 'asdf'
 
       try
-        'foo'.bar()
+        throw new Error("Honeybadger don't care, but you might.")
       catch e
         Honeybadger.notify(e, 'CustomError')
-        notice = new Notice({ error: e, name: 'CustomError' })
+        notice = new Notice({ stack: e.stack, message: e.message, name: 'CustomError' })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
 
@@ -179,11 +180,13 @@ describe 'Honeybadger', ->
       Honeybadger.configure
         api_key: 'asdf'
 
-      error = new Error("Honeybadger don't care, but you might.")
-      expected_notice = new Notice({ error: error, name: 'CustomError', message: 'Custom message' })
-      Honeybadger.notify(error, 'CustomError', { message: 'Custom message' })
+      try
+        throw new Error("Honeybadger don't care, but you might.")
+      catch e
+        notice = new Notice({ stack: e.stack, name: 'CustomError', message: 'Custom message' })
+        Honeybadger.notify(e, 'CustomError', { message: 'Custom message' })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
 
   describe '.wrap', ->
     beforeEach () ->

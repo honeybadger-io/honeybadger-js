@@ -57,26 +57,33 @@ class Client
     else if name?
       options['name'] = name
 
+    if error instanceof Object && error.error?
+      error = error.error
+
     if error instanceof Error
-      options['error'] = error
+      options['stack'] = @_stackTrace(error) || @_generateStackTrace()
+      options['name'] ||= error.name
+      options['message'] ||= error.message
     else if typeof(error) == 'string'
-      options['error'] = new Error(error)
+      options['stack'] = @_generateStackTrace()
+      options['message'] = error
     else if error instanceof Object
       for k,v of error
         options[k] = v
+      options['stack'] = @_generateStackTrace()
 
     if currentNotice
-      if options.error == currentError
+      if error == currentError
         return # Already caught by inner catch block, ignore.
       else if @_loaded # otherwise it's already in the queue
         # Report old error immediately since this is a new error.
         @_send(currentNotice)
 
-    return false if (k for own k of options).length == 0
+    return false if (k for own k of options).length < 2
     notice = new Notice(options)
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
 
-    [currentError, currentNotice] = [options.error, notice]
+    [currentError, currentNotice] = [error, notice]
 
     if ! @_loaded
       @log('Queuing notice', notice)
@@ -84,7 +91,7 @@ class Client
     else
       @log('Defering notice', notice)
       window.setTimeout () =>
-        @_send(notice) if options.error == currentError
+        @_send(notice) if error == currentError
     notice
 
   wrap: (func) ->
@@ -118,6 +125,21 @@ class Client
         window.attachEvent('onload', @_domReady)
     @_installed = true
     @
+
+  _generateStackTrace: () ->
+    stack = null
+
+    try
+      throw new Error('')
+    catch e
+      stack = @_stackTrace(e)
+
+    stack
+
+  _stackTrace: (error) ->
+    # From TraceKit: Opera 10 *destroys* its stacktrace property if you try to
+    # access the stack property first!!
+    error?.stacktrace || error?.stack || null
 
   _queue: []
 

@@ -58,12 +58,11 @@ var Notice;
 
 Notice = (function() {
   function Notice(options) {
-    var k, v, _ref, _ref1, _ref2, _ref3;
+    var k, v, _ref, _ref1;
     this.options = options != null ? options : {};
-    this.error = this.options.error;
-    this.stack = this._stackTrace(this.error);
-    this["class"] = this.options.name || ((_ref = this.error) != null ? _ref.name : void 0) || 'Error';
-    this.message = this.options.message || ((_ref1 = this.error) != null ? _ref1.message : void 0) || 'No message provided';
+    this.stack = this.options.stack;
+    this["class"] = this.options.name || 'Error';
+    this.message = this.options.message || 'No message provided';
     this.source = null;
     this.url = document.URL;
     this.project_root = Honeybadger.configuration.project_root;
@@ -73,15 +72,15 @@ Notice = (function() {
     this.cgi_data = this._cgiData();
     this.fingerprint = this.options.fingerprint;
     this.context = {};
-    _ref2 = Honeybadger.context;
-    for (k in _ref2) {
-      v = _ref2[k];
+    _ref = Honeybadger.context;
+    for (k in _ref) {
+      v = _ref[k];
       this.context[k] = v;
     }
     if (this.options.context && typeof this.options.context === 'object') {
-      _ref3 = this.options.context;
-      for (k in _ref3) {
-        v = _ref3[k];
+      _ref1 = this.options.context;
+      for (k in _ref1) {
+        v = _ref1[k];
         this.context[k] = v;
       }
     }
@@ -114,10 +113,6 @@ Notice = (function() {
         environment_name: this.environment
       }
     };
-  };
-
-  Notice.prototype._stackTrace = function(error) {
-    return (error != null ? error.stacktrace : void 0) || (error != null ? error.stack : void 0) || null;
   };
 
   Notice.prototype._cgiData = function() {
@@ -236,18 +231,25 @@ Client = (function() {
     } else if (name != null) {
       options['name'] = name;
     }
+    if (error instanceof Object && (error.error != null)) {
+      error = error.error;
+    }
     if (error instanceof Error) {
-      options['error'] = error;
+      options['stack'] = this._stackTrace(error) || this._generateStackTrace();
+      options['name'] || (options['name'] = error.name);
+      options['message'] || (options['message'] = error.message);
     } else if (typeof error === 'string') {
-      options['error'] = new Error(error);
+      options['stack'] = this._generateStackTrace();
+      options['message'] = error;
     } else if (error instanceof Object) {
       for (k in error) {
         v = error[k];
         options[k] = v;
       }
+      options['stack'] = this._generateStackTrace();
     }
     if (currentNotice) {
-      if (options.error === currentError) {
+      if (error === currentError) {
         return;
       } else if (this._loaded) {
         this._send(currentNotice);
@@ -261,7 +263,7 @@ Client = (function() {
         _results.push(k);
       }
       return _results;
-    })()).length === 0) {
+    })()).length < 2) {
       return false;
     }
     notice = new Notice(options);
@@ -272,7 +274,7 @@ Client = (function() {
         return false;
       }
     }
-    _ref2 = [options.error, notice], currentError = _ref2[0], currentNotice = _ref2[1];
+    _ref2 = [error, notice], currentError = _ref2[0], currentNotice = _ref2[1];
     if (!this._loaded) {
       this.log('Queuing notice', notice);
       this._queue.push(notice);
@@ -280,7 +282,7 @@ Client = (function() {
       this.log('Defering notice', notice);
       window.setTimeout((function(_this) {
         return function() {
-          if (options.error === currentError) {
+          if (error === currentError) {
             return _this._send(notice);
           }
         };
@@ -332,6 +334,22 @@ Client = (function() {
     }
     this._installed = true;
     return this;
+  };
+
+  Client.prototype._generateStackTrace = function() {
+    var e, stack;
+    stack = null;
+    try {
+      throw new Error('');
+    } catch (_error) {
+      e = _error;
+      stack = this._stackTrace(e);
+    }
+    return stack;
+  };
+
+  Client.prototype._stackTrace = function(error) {
+    return (error != null ? error.stacktrace : void 0) || (error != null ? error.stack : void 0) || null;
   };
 
   Client.prototype._queue = [];

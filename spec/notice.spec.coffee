@@ -29,8 +29,8 @@ describe 'Notice', ->
       [error, notice, output] = [null, null, null]
 
       beforeEach () ->
-        error = mockError()
-        notice = new Notice({ error: error })
+        e = mockError()
+        notice = new Notice({ stack: e.stack, message: e.message, name: e.name })
         output = notice.payload()
 
       describe 'server', ->
@@ -53,7 +53,7 @@ describe 'Notice', ->
   describe 'with a fingerprint', ->
     describe '#payload()', ->
       it 'has a fingerprint', ->
-        notice = new Notice({ error: mockError(), fingerprint: 'asdf' })
+        notice = new Notice({ fingerprint: 'asdf' })
         output = notice.payload()
         expect(output.error.fingerprint).toBeDefined()
         expect(output.error.fingerprint).toEqual('asdf')

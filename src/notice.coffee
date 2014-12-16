@@ -1,9 +1,8 @@
 class Notice
   constructor: (@options = {}) ->
-    @error = @options.error
-    @stack = @_stackTrace(@error)
-    @class = @options.name || @error?.name || 'Error'
-    @message = @options.message || @error?.message || 'No message provided'
+    @stack = @options.stack
+    @class = @options.name || 'Error'
+    @message = @options.message || 'No message provided'
     @source = null
     @url = document.URL
     @project_root = Honeybadger.configuration.project_root
@@ -41,11 +40,6 @@ class Notice
     server:
       project_root: @project_root
       environment_name: @environment
-
-  _stackTrace: (error) ->
-    # From TraceKit: Opera 10 *destroys* its stacktrace property if you try to
-    # access the stack property first!!
-    error?.stacktrace || error?.stack || null
 
   _cgiData: () ->
     data = {}
