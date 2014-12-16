@@ -163,6 +163,28 @@ describe 'Honeybadger', ->
 
       expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.payload())
 
+    it 'accepts name as second argument', ->
+      Honeybadger.configure
+        api_key: 'asdf'
+
+      try
+        'foo'.bar()
+      catch e
+        Honeybadger.notify(e, 'CustomError')
+        notice = new Notice({ error: e, name: 'CustomError' })
+
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+
+    it 'accepts options as third argument', ->
+      Honeybadger.configure
+        api_key: 'asdf'
+
+      error = new Error("Honeybadger don't care, but you might.")
+      expected_notice = new Notice({ error: error, name: 'CustomError', message: 'Custom message' })
+      Honeybadger.notify(error, 'CustomError', { message: 'Custom message' })
+
+      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(expected_notice.payload())
+
   describe '.wrap', ->
     beforeEach () ->
       Honeybadger.configure

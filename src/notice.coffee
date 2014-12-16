@@ -2,8 +2,8 @@ class Notice
   constructor: (@options = {}) ->
     @error = @options.error
     @stack = @_stackTrace(@error)
-    @class = @error?.name
-    @message = @error?.message
+    @class = @options.name || @error?.name || 'Error'
+    @message = @options.message || @error?.message || 'No message provided'
     @source = null
     @url = document.URL
     @project_root = Honeybadger.configuration.project_root

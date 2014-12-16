@@ -62,8 +62,8 @@ Notice = (function() {
     this.options = options != null ? options : {};
     this.error = this.options.error;
     this.stack = this._stackTrace(this.error);
-    this["class"] = (_ref = this.error) != null ? _ref.name : void 0;
-    this.message = (_ref1 = this.error) != null ? _ref1.message : void 0;
+    this["class"] = this.options.name || ((_ref = this.error) != null ? _ref.name : void 0) || 'Error';
+    this.message = this.options.message || ((_ref1 = this.error) != null ? _ref1.message : void 0) || 'No message provided';
     this.source = null;
     this.url = document.URL;
     this.project_root = Honeybadger.configuration.project_root;
@@ -222,13 +222,19 @@ Client = (function() {
     return this.beforeNotifyHandlers.push(handler);
   };
 
-  Client.prototype.notify = function(error, options) {
+  Client.prototype.notify = function(error, name, options) {
     var handler, k, notice, v, _i, _len, _ref1, _ref2;
     if (options == null) {
       options = {};
     }
     if (!this._validConfig() || this.configuration.disabled === true) {
       return false;
+    }
+    if (name instanceof Object) {
+      options = name;
+      name = void 0;
+    } else if (name != null) {
+      options['name'] = name;
     }
     if (error instanceof Error) {
       options['error'] = error;

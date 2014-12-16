@@ -48,8 +48,14 @@ class Client
   beforeNotify: (handler) ->
     @beforeNotifyHandlers.push handler
 
-  notify: (error, options = {}) ->
+  notify: (error, name, options = {}) ->
     return false if !@_validConfig() || @configuration.disabled == true
+
+    if name instanceof Object
+      options = name
+      name = undefined
+    else if name?
+      options['name'] = name
 
     if error instanceof Error
       options['error'] = error
