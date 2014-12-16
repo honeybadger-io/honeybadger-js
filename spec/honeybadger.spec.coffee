@@ -149,6 +149,7 @@ describe 'Honeybadger', ->
       notice = Honeybadger.notify("Honeybadger don't care, but you might.")
 
       expect(notice.stack).toEqual(jasmine.any(String))
+      expect(notice.generator).toEqual('throw')
       expect(notice.message).toEqual("Honeybadger don't care, but you might.")
       expect(Honeybadger._sendRequest).toHaveBeenCalled()
 

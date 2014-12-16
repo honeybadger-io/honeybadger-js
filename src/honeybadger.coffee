@@ -48,29 +48,29 @@ class Client
   beforeNotify: (handler) ->
     @beforeNotifyHandlers.push handler
 
-  notify: (error, name, options = {}) ->
+  notify: (error, name, opts = {}) ->
     return false if !@_validConfig() || @configuration.disabled == true
 
+    [stack, generator] = [undefined, undefined]
+
     if name instanceof Object
-      options = name
+      opts = name
       name = undefined
     else if name?
-      options['name'] = name
+      opts['name'] = name
 
     if error instanceof Object && error.error?
       error = error.error
 
     if error instanceof Error
-      options['stack'] = @_stackTrace(error) || @_generateStackTrace()
-      options['name'] ||= error.name
-      options['message'] ||= error.message
+      stack = @_stackTrace(error)
+      opts['name'] ||= error.name
+      opts['message'] ||= error.message
     else if typeof(error) == 'string'
-      options['stack'] = @_generateStackTrace()
-      options['message'] = error
+      opts['message'] = error
     else if error instanceof Object
       for k,v of error
-        options[k] = v
-      options['stack'] = @_generateStackTrace()
+        opts[k] = v
 
     if currentNotice
       if error == currentError
@@ -79,8 +79,20 @@ class Client
         # Report old error immediately since this is a new error.
         @_send(currentNotice)
 
-    return false if (k for own k of options).length < 2
-    notice = new Notice(options)
+    return false if (k for own k of opts).length == 0
+
+    unless stack
+      [stack, generator] = @_generateStackTrace()
+
+    notice = new Notice({
+      stack: stack,
+      generator: generator,
+      message: opts['message'],
+      name: opts['name'],
+      fingerprint: opts['fingerprint'],
+      context: opts['context']
+    })
+
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
 
     [currentError, currentNotice] = [error, notice]
@@ -127,14 +139,13 @@ class Client
     @
 
   _generateStackTrace: () ->
-    stack = null
-
     try
       throw new Error('')
     catch e
-      stack = @_stackTrace(e)
+      if stack = @_stackTrace(e)
+        return [stack, 'throw']
 
-    stack
+    return []
 
   _stackTrace: (error) ->
     # From TraceKit: Opera 10 *destroys* its stacktrace property if you try to

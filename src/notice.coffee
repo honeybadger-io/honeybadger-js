@@ -1,6 +1,7 @@
 class Notice
   constructor: (@options = {}) ->
     @stack = @options.stack
+    @generator = @options.generator
     @class = @options.name || 'Error'
     @message = @options.message || 'No message provided'
     @source = null
@@ -29,6 +30,7 @@ class Notice
       class: @class
       message: @message
       backtrace: @stack
+      generator: @generator
       source: @source
       fingerprint: @fingerprint
     request:

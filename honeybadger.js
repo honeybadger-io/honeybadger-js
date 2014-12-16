@@ -61,6 +61,7 @@ Notice = (function() {
     var k, v, _ref, _ref1;
     this.options = options != null ? options : {};
     this.stack = this.options.stack;
+    this.generator = this.options.generator;
     this["class"] = this.options.name || 'Error';
     this.message = this.options.message || 'No message provided';
     this.source = null;
@@ -98,6 +99,7 @@ Notice = (function() {
         "class": this["class"],
         message: this.message,
         backtrace: this.stack,
+        generator: this.generator,
         source: this.source,
         fingerprint: this.fingerprint
       },
@@ -217,36 +219,35 @@ Client = (function() {
     return this.beforeNotifyHandlers.push(handler);
   };
 
-  Client.prototype.notify = function(error, name, options) {
-    var handler, k, notice, v, _i, _len, _ref1, _ref2;
-    if (options == null) {
-      options = {};
+  Client.prototype.notify = function(error, name, opts) {
+    var generator, handler, k, notice, stack, v, _i, _len, _ref1, _ref2, _ref3, _ref4;
+    if (opts == null) {
+      opts = {};
     }
     if (!this._validConfig() || this.configuration.disabled === true) {
       return false;
     }
+    _ref1 = [void 0, void 0], stack = _ref1[0], generator = _ref1[1];
     if (name instanceof Object) {
-      options = name;
+      opts = name;
       name = void 0;
     } else if (name != null) {
-      options['name'] = name;
+      opts['name'] = name;
     }
     if (error instanceof Object && (error.error != null)) {
       error = error.error;
     }
     if (error instanceof Error) {
-      options['stack'] = this._stackTrace(error) || this._generateStackTrace();
-      options['name'] || (options['name'] = error.name);
-      options['message'] || (options['message'] = error.message);
+      stack = this._stackTrace(error);
+      opts['name'] || (opts['name'] = error.name);
+      opts['message'] || (opts['message'] = error.message);
     } else if (typeof error === 'string') {
-      options['stack'] = this._generateStackTrace();
-      options['message'] = error;
+      opts['message'] = error;
     } else if (error instanceof Object) {
       for (k in error) {
         v = error[k];
-        options[k] = v;
+        opts[k] = v;
       }
-      options['stack'] = this._generateStackTrace();
     }
     if (currentNotice) {
       if (error === currentError) {
@@ -258,23 +259,33 @@ Client = (function() {
     if (((function() {
       var _results;
       _results = [];
-      for (k in options) {
-        if (!__hasProp.call(options, k)) continue;
+      for (k in opts) {
+        if (!__hasProp.call(opts, k)) continue;
         _results.push(k);
       }
       return _results;
-    })()).length < 2) {
+    })()).length === 0) {
       return false;
     }
-    notice = new Notice(options);
-    _ref1 = this.beforeNotifyHandlers;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      handler = _ref1[_i];
+    if (!stack) {
+      _ref2 = this._generateStackTrace(), stack = _ref2[0], generator = _ref2[1];
+    }
+    notice = new Notice({
+      stack: stack,
+      generator: generator,
+      message: opts['message'],
+      name: opts['name'],
+      fingerprint: opts['fingerprint'],
+      context: opts['context']
+    });
+    _ref3 = this.beforeNotifyHandlers;
+    for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+      handler = _ref3[_i];
       if (handler(notice) === false) {
         return false;
       }
     }
-    _ref2 = [error, notice], currentError = _ref2[0], currentNotice = _ref2[1];
+    _ref4 = [error, notice], currentError = _ref4[0], currentNotice = _ref4[1];
     if (!this._loaded) {
       this.log('Queuing notice', notice);
       this._queue.push(notice);
@@ -338,14 +349,15 @@ Client = (function() {
 
   Client.prototype._generateStackTrace = function() {
     var e, stack;
-    stack = null;
     try {
       throw new Error('');
     } catch (_error) {
       e = _error;
-      stack = this._stackTrace(e);
+      if (stack = this._stackTrace(e)) {
+        return [stack, 'throw'];
+      }
     }
-    return stack;
+    return [];
   };
 
   Client.prototype._stackTrace = function(error) {
