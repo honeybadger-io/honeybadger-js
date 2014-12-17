@@ -91,8 +91,8 @@ class Client
       name: opts['name'],
       fingerprint: opts['fingerprint'],
       context: opts['context'],
-      component: opts['component'] || @configuration.component,
-      action: opts['action'] || @configuration.action
+      component: opts['component'],
+      action: opts['action']
     }, @configuration)
 
     (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
