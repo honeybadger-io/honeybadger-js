@@ -1,15 +1,15 @@
 class Notice
-  constructor: (@options = {}) ->
+  constructor: (@options = {}, config = Honeybadger.configuration) ->
     @stack = @options.stack
     @generator = @options.generator
     @class = @options.name || 'Error'
     @message = @options.message || 'No message provided'
     @source = null
     @url = document.URL
-    @project_root = Honeybadger.configuration.project_root
-    @environment = Honeybadger.configuration.environment
-    @component = Honeybadger.configuration.component
-    @action = Honeybadger.configuration.action
+    @project_root = config.project_root
+    @environment = config.environment
+    @component = @options.component || config.component
+    @action = @options.action || config.action
     @cgi_data = @_cgiData()
     @fingerprint = @options.fingerprint
 

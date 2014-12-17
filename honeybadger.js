@@ -57,19 +57,22 @@ Configuration = (function() {
 var Notice;
 
 Notice = (function() {
-  function Notice(options) {
+  function Notice(options, config) {
     var k, v, _ref, _ref1;
     this.options = options != null ? options : {};
+    if (config == null) {
+      config = Honeybadger.configuration;
+    }
     this.stack = this.options.stack;
     this.generator = this.options.generator;
     this["class"] = this.options.name || 'Error';
     this.message = this.options.message || 'No message provided';
     this.source = null;
     this.url = document.URL;
-    this.project_root = Honeybadger.configuration.project_root;
-    this.environment = Honeybadger.configuration.environment;
-    this.component = Honeybadger.configuration.component;
-    this.action = Honeybadger.configuration.action;
+    this.project_root = config.project_root;
+    this.environment = config.environment;
+    this.component = this.options.component || config.component;
+    this.action = this.options.action || config.action;
     this.cgi_data = this._cgiData();
     this.fingerprint = this.options.fingerprint;
     this.context = {};
@@ -276,8 +279,10 @@ Client = (function() {
       message: opts['message'],
       name: opts['name'],
       fingerprint: opts['fingerprint'],
-      context: opts['context']
-    });
+      context: opts['context'],
+      component: opts['component'] || this.configuration.component,
+      action: opts['action'] || this.configuration.action
+    }, this.configuration);
     _ref3 = this.beforeNotifyHandlers;
     for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
       handler = _ref3[_i];
