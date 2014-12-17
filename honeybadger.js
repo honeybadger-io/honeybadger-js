@@ -57,32 +57,34 @@ Configuration = (function() {
 var Notice;
 
 Notice = (function() {
-  function Notice(options, config) {
+  function Notice(opts, config) {
     var k, v, _ref, _ref1;
-    this.options = options != null ? options : {};
+    if (opts == null) {
+      opts = {};
+    }
     if (config == null) {
       config = Honeybadger.configuration;
     }
-    this.stack = this.options.stack;
-    this.generator = this.options.generator;
-    this["class"] = this.options.name || 'Error';
-    this.message = this.options.message || 'No message provided';
+    this.stack = opts.stack;
+    this.generator = opts.generator;
+    this["class"] = opts.name || 'Error';
+    this.message = opts.message || 'No message provided';
     this.source = null;
     this.url = document.URL;
     this.project_root = config.project_root;
     this.environment = config.environment;
-    this.component = this.options.component || config.component;
-    this.action = this.options.action || config.action;
+    this.component = opts.component || config.component;
+    this.action = opts.action || config.action;
     this.cgi_data = this._cgiData();
-    this.fingerprint = this.options.fingerprint;
+    this.fingerprint = opts.fingerprint;
     this.context = {};
     _ref = Honeybadger.context;
     for (k in _ref) {
       v = _ref[k];
       this.context[k] = v;
     }
-    if (this.options.context && typeof this.options.context === 'object') {
-      _ref1 = this.options.context;
+    if (opts.context && typeof opts.context === 'object') {
+      _ref1 = opts.context;
       for (k in _ref1) {
         v = _ref1[k];
         this.context[k] = v;
@@ -223,7 +225,7 @@ Client = (function() {
   };
 
   Client.prototype.notify = function(error, name, opts) {
-    var generator, handler, k, notice, stack, v, _i, _len, _ref1, _ref2, _ref3, _ref4;
+    var generator, k, notice, stack, v, _ref1, _ref2, _ref3, _ref4;
     if (opts == null) {
       opts = {};
     }
@@ -239,6 +241,7 @@ Client = (function() {
     }
     if (error instanceof Object && (error.error != null)) {
       error = error.error;
+      error['error'] = void 0;
     }
     if (error instanceof Error) {
       stack = this._stackTrace(error);
@@ -273,22 +276,10 @@ Client = (function() {
     if (!stack) {
       _ref2 = this._generateStackTrace(), stack = _ref2[0], generator = _ref2[1];
     }
-    notice = new Notice({
-      stack: stack,
-      generator: generator,
-      message: opts['message'],
-      name: opts['name'],
-      fingerprint: opts['fingerprint'],
-      context: opts['context'],
-      component: opts['component'] || this.configuration.component,
-      action: opts['action'] || this.configuration.action
-    }, this.configuration);
-    _ref3 = this.beforeNotifyHandlers;
-    for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-      handler = _ref3[_i];
-      if (handler(notice) === false) {
-        return false;
-      }
+    _ref3 = [stack, generator], opts['stack'] = _ref3[0], opts['generator'] = _ref3[1];
+    notice = this._buildNotice(opts);
+    if (this._checkHandlers(this.beforeNotifyHandlers, notice)) {
+      return false;
     }
     _ref4 = [error, notice], currentError = _ref4[0], currentNotice = _ref4[1];
     if (!this._loaded) {
@@ -352,23 +343,6 @@ Client = (function() {
     return this;
   };
 
-  Client.prototype._generateStackTrace = function() {
-    var e, stack;
-    try {
-      throw new Error('');
-    } catch (_error) {
-      e = _error;
-      if (stack = this._stackTrace(e)) {
-        return [stack, 'throw'];
-      }
-    }
-    return [];
-  };
-
-  Client.prototype._stackTrace = function(error) {
-    return (error != null ? error.stacktrace : void 0) || (error != null ? error.stack : void 0) || null;
-  };
-
   Client.prototype._queue = [];
 
   Client.prototype._loaded = document.readyState === 'complete';
@@ -387,6 +361,47 @@ Client = (function() {
       _results.push(this._send(notice));
     }
     return _results;
+  };
+
+  Client.prototype._generateStackTrace = function() {
+    var e, stack;
+    try {
+      throw new Error('');
+    } catch (_error) {
+      e = _error;
+      if (stack = this._stackTrace(e)) {
+        return [stack, 'throw'];
+      }
+    }
+    return [];
+  };
+
+  Client.prototype._stackTrace = function(error) {
+    return (error != null ? error.stacktrace : void 0) || (error != null ? error.stack : void 0) || null;
+  };
+
+  Client.prototype._checkHandlers = function(handlers, notice) {
+    var handler, _i, _len;
+    for (_i = 0, _len = handlers.length; _i < _len; _i++) {
+      handler = handlers[_i];
+      if (handler(notice) === false) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  Client.prototype._buildNotice = function(opts) {
+    return new Notice({
+      stack: opts['stack'],
+      generator: opts['generator'],
+      message: opts['message'],
+      name: opts['name'],
+      fingerprint: opts['fingerprint'],
+      context: opts['context'],
+      component: opts['component'],
+      action: opts['action']
+    }, this.configuration);
   };
 
   Client.prototype._send = function(notice) {

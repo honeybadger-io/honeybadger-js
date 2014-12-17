@@ -53,14 +53,17 @@ class Client
 
     [stack, generator] = [undefined, undefined]
 
+    # Fetch options from name if being called like `Honeybadger.notify(e, { context: {} })`.
     if name instanceof Object
       opts = name
       name = undefined
     else if name?
       opts['name'] = name
 
+    # Fetch error from options if being called like `Honeybadger.notify({ error: e })`.
     if error instanceof Object && error.error?
       error = error.error
+      error['error'] = undefined
 
     if error instanceof Error
       stack = @_stackTrace(error)
@@ -72,6 +75,7 @@ class Client
       for k,v of error
         opts[k] = v
 
+    # Check if a notice is already being processed, or is waiting to be deferred.
     if currentNotice
       if error == currentError
         return # Already caught by inner catch block, ignore.
@@ -81,24 +85,16 @@ class Client
 
     return false if (k for own k of opts).length == 0
 
-    unless stack
-      [stack, generator] = @_generateStackTrace()
+    [stack, generator] = @_generateStackTrace() unless stack
 
-    notice = new Notice({
-      stack: stack,
-      generator: generator,
-      message: opts['message'],
-      name: opts['name'],
-      fingerprint: opts['fingerprint'],
-      context: opts['context'],
-      component: opts['component'],
-      action: opts['action']
-    }, @configuration)
+    # Override stack/generator in options (these are never user-configurable).
+    [opts['stack'], opts['generator']] = [stack, generator]
 
-    (if handler(notice) == false then return false) for handler in @beforeNotifyHandlers
+    notice = @_buildNotice(opts)
+
+    return false if @_checkHandlers(@beforeNotifyHandlers, notice)
 
     [currentError, currentNotice] = [error, notice]
-
     if ! @_loaded
       @log('Queuing notice', notice)
       @_queue.push(notice)
@@ -106,7 +102,8 @@ class Client
       @log('Defering notice', notice)
       window.setTimeout () =>
         @_send(notice) if error == currentError
-    notice
+
+    return notice
 
   wrap: (func) ->
     honeybadgerWrapper = () ->
@@ -140,6 +137,18 @@ class Client
     @_installed = true
     @
 
+  _queue: []
+
+  _loaded: (document.readyState == 'complete')
+
+  _configured: false
+
+  _domReady: () =>
+    return if @_loaded
+    @_loaded = true
+    @log('honeybadger.js ' + @version + ' ready')
+    @_send(notice) while notice = @_queue.pop()
+
   _generateStackTrace: () ->
     try
       throw new Error('')
@@ -154,17 +163,32 @@ class Client
     # access the stack property first!!
     error?.stacktrace || error?.stack || null
 
-  _queue: []
+  # Internal: Check result of handlers.
+  #
+  # handlers - The Array handlers to be checked.
+  # notice   - The Notice to be passed to handlers.
+  #
+  # Returns false if any of the handlers return false, otherwise true.
+  _checkHandlers: (handlers, notice) ->
+    (if handler(notice) == false then return true) for handler in handlers
+    false
 
-  _loaded: (document.readyState == 'complete')
-
-  _configured: false
-
-  _domReady: () =>
-    return if @_loaded
-    @_loaded = true
-    @log('honeybadger.js ' + @version + ' ready')
-    @_send(notice) while notice = @_queue.pop()
+  # Internal: Build a Notice from user-defined options Object.
+  #
+  # opts - The Object containing options to pass to Notice.
+  #
+  # Returns built Notice.
+  _buildNotice: (opts) ->
+    new Notice({
+      stack: opts['stack'],
+      generator: opts['generator'],
+      message: opts['message'],
+      name: opts['name'],
+      fingerprint: opts['fingerprint'],
+      context: opts['context'],
+      component: opts['component'],
+      action: opts['action']
+    }, @configuration)
 
   _send: (notice) ->
     @log('Sending notice', notice)
