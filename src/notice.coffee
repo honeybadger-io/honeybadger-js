@@ -1,23 +1,23 @@
 class Notice
-  constructor: (@options = {}, config = Honeybadger.configuration) ->
-    @stack = @options.stack
-    @generator = @options.generator
-    @class = @options.name || 'Error'
-    @message = @options.message || 'No message provided'
+  constructor: (opts = {}, config = Honeybadger.configuration) ->
+    @stack = opts.stack
+    @generator = opts.generator
+    @class = opts.name || 'Error'
+    @message = opts.message || 'No message provided'
     @source = null
     @url = document.URL
     @project_root = config.project_root
     @environment = config.environment
-    @component = @options.component || config.component
-    @action = @options.action || config.action
+    @component = opts.component || config.component
+    @action = opts.action || config.action
     @cgi_data = @_cgiData()
-    @fingerprint = @options.fingerprint
+    @fingerprint = opts.fingerprint
 
     @context = {}
     for k,v of Honeybadger.context
       @context[k] = v
-    if @options.context && typeof(@options.context) == 'object'
-      for k,v of @options.context
+    if opts.context && typeof(opts.context) == 'object'
+      for k,v of opts.context
         @context[k] = v
 
   payload: ->
