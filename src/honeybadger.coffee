@@ -48,6 +48,39 @@ class Client
   beforeNotify: (handler) ->
     @beforeNotifyHandlers.push handler
 
+  # Public: Send an error notification to Honeybadger.
+  #
+  # error - The Error or String error to be sent.
+  # name  - The String name to override error class name (optional).
+  # opts  - The Object options for notification (default: {}):
+  #         message     - The String error message (optional).
+  #         name        - The String error class name (optional).
+  #         fingerprint - The String fingerprint of error for grouping (optional).
+  #         context     - Merge the Object context for error (optional).
+  #         component   - Override the String component of page (optional).
+  #         action      - Override the String action of page (optional).
+  #
+  # Examples
+  #
+  #   // Notifying Honeybadger of caught errors:
+  #
+  #   try {
+  #     throw new Error('Badgers!');
+  #   } catch(e) {
+  #     Honeybadger.notify(e);
+  #     Honeybadger.notify(e, { context: { foo: 'bar' } });
+  #     Honeybadger.notify(e, 'DescriptiveClass');
+  #     Honeybadger.notify(e, 'DescriptiveClass', { ... });
+  #   }
+  #
+  #   // Notifying Honeybadger of other events:
+  #
+  #   Honeybadger.notify('Badgers!');
+  #   Honeybadger.notify('Badgers!', { ... });
+  #   Honeybadger.notify('Badgers!', 'CustomClass');
+  #   Honeybadger.notify('Badgers!', 'CustomClass', { ... });
+  #
+  # Returns false if halted (see below), otherwise sent Notice.
   notify: (error, name, opts = {}) ->
     return false if !@_validConfig() || @configuration.disabled == true
 
