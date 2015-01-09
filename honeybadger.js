@@ -498,7 +498,7 @@ UncaughtError = (function(_super) {
   __extends(UncaughtError, _super);
 
   function UncaughtError(message, url, line, column) {
-    this.name = 'UncaughtError';
+    this.name = 'window.onerror';
     this.message = message || 'An unknown error was caught by window.onerror.';
     this.stack = [this.message, '\n    at ? (', url || 'unknown', ':', line || 0, ':', column || 0, ')'].join('');
   }

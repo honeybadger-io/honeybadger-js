@@ -3,7 +3,7 @@ describe 'UncaughtError', ->
     expect(new UncaughtError()).toEqual(jasmine.any(Error))
 
   it 'assigns name', ->
-    expect(new UncaughtError().name).toEqual('UncaughtError')
+    expect(new UncaughtError().name).toEqual('window.onerror')
 
   it 'constructs a stack', ->
     expect(new UncaughtError('Message', 'file', 1, 2).stack).toEqual('Message\n    at ? (file:1:2)')

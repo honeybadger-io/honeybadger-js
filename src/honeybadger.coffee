@@ -272,7 +272,7 @@ class Client
 # Invoked from window.onerror handler, and uses v8 stack format.
 class UncaughtError extends Error
   constructor: (message, url, line, column) ->
-    @name = 'UncaughtError'
+    @name = 'window.onerror'
     @message = message || 'An unknown error was caught by window.onerror.'
     @stack = [
       @message
