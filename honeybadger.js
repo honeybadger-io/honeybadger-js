@@ -423,21 +423,29 @@ Client = (function() {
     }
   };
 
-  Client.prototype._sendRequest = function(data) {
-    var url;
-    url = 'http' + ((this.configuration.ssl && 's') || '') + '://' + this.configuration.host + '/v1/notices.gif';
-    return this._request(url, data);
+  Client.prototype._baseURL = function() {
+    return 'http' + ((this.configuration.ssl && 's') || '') + '://' + this.configuration.host;
   };
 
-  Client.prototype._request = function(url, payload) {
-    var img, timeout, _ref1;
+  Client.prototype._sendRequest = function(data) {
+    return this._xhrRequest(data) || this._imageRequest(data);
+  };
+
+  Client.prototype._imageRequest = function(data) {
+    var endpoint, img, timeout, url, _ref1;
+    endpoint = this._baseURL() + '/v1/notices/js.gif';
+    url = endpoint + '?' + this._serialize({
+      api_key: this.configuration.api_key,
+      notice: data,
+      t: new Date().getTime()
+    });
     _ref1 = [new Image(), null], img = _ref1[0], timeout = _ref1[1];
     img.onabort = img.onerror = (function(_this) {
       return function() {
         if (timeout) {
           window.clearTimeout(timeout);
         }
-        return _this.log('Request failed.', url, payload);
+        return _this.log('Request failed.', url, data);
       };
     })(this);
     img.onload = (function(_this) {
@@ -447,20 +455,68 @@ Client = (function() {
         }
       };
     })(this);
-    img.src = url + '?' + this._serialize({
-      api_key: this.configuration.api_key,
-      notice: payload,
-      t: new Date().getTime()
-    });
+    img.src = url;
     if (this.configuration.timeout) {
       timeout = window.setTimeout(((function(_this) {
         return function() {
           img.src = '';
-          return _this.log('Request timed out.', url, payload);
+          return _this.log('Request timed out.', url, data);
         };
       })(this)), this.configuration.timeout);
     }
     return true;
+  };
+
+  Client.prototype._xhrRequest = function(data) {
+    var method, url, xhr;
+    if (typeof XMLHttpRequest === 'undefined') {
+      return false;
+    }
+    if (typeof JSON === 'undefined') {
+      return false;
+    }
+    method = 'POST';
+    url = this._baseURL() + '/v1/notices/js?api_key=' + this.configuration.api_key;
+    xhr = new XMLHttpRequest();
+    if ('withCredentials' in xhr) {
+      xhr.open(method, url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-Api-Key', this.configuration.api_key);
+    } else if (typeof XDomainRequest !== 'undefined') {
+      xhr = new XDomainRequest();
+      xhr.open(method, url);
+    } else {
+      xhr = null;
+    }
+    if (xhr) {
+      if (this.configuration.timeout) {
+        xhr.timeout = this.configuration.timeout;
+      }
+      xhr.onerror = (function(_this) {
+        return function() {
+          return _this.log('Request failed.', data, xhr);
+        };
+      })(this);
+      xhr.ontimeout = (function(_this) {
+        return function() {
+          return _this.log('Request timed out.', data, xhr);
+        };
+      })(this);
+      xhr.onreadystatechange = (function(_this) {
+        return function() {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 201) {
+              return _this.log('Request succeeded.', xhr.status, data, xhr);
+            } else {
+              return _this.log('Request rejected by server.', xhr.status, data, xhr);
+            }
+          }
+        };
+      })(this);
+      xhr.send(JSON.stringify(data));
+      return true;
+    }
+    return false;
   };
 
   Client.prototype._serialize = function(obj, prefix) {

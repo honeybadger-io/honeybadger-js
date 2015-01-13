@@ -232,24 +232,70 @@ class Client
     return false unless @_configured
     if @configuration.api_key?.match(/\S/) then true else false
 
-  _sendRequest: (data) ->
-    url = 'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host + '/v1/notices.gif'
-    @_request(url, data)
+  # Internal: Constructs the base URL from configuration.
+  _baseURL: () ->
+    'http' + ((@configuration.ssl && 's') || '' ) + '://' + @configuration.host
 
-  _request: (url, payload) ->
+  _sendRequest: (data) ->
+    @_xhrRequest(data) || @_imageRequest(data)
+
+  _imageRequest: (data) ->
+    endpoint = @_baseURL() + '/v1/notices/js.gif'
+    url = endpoint + '?' + @_serialize(api_key: @configuration.api_key, notice: data, t: new Date().getTime())
     [img, timeout] = [new Image(), null]
     img.onabort = img.onerror = =>
       window.clearTimeout(timeout) if timeout
-      @log('Request failed.', url, payload)
+      @log('Request failed.', url, data)
     img.onload = =>
       window.clearTimeout(timeout) if timeout
-    img.src = url + '?' + @_serialize(api_key: @configuration.api_key, notice: payload, t: new Date().getTime())
+    img.src = url
     if @configuration.timeout
       timeout = window.setTimeout((() =>
         img.src = ''
-        @log('Request timed out.', url, payload)
+        @log('Request timed out.', url, data)
       ), @configuration.timeout)
     true
+
+  _xhrRequest: (data) ->
+    return false if typeof XMLHttpRequest is 'undefined'
+    return false if typeof JSON is 'undefined'
+
+    method = 'POST'
+    url = @_baseURL() + '/v1/notices/js?api_key=' + @configuration.api_key
+
+    xhr = new XMLHttpRequest()
+    if 'withCredentials' of xhr
+      # Check if the XMLHttpRequest object has a "withCredentials" property.
+      # "withCredentials" only exists on XMLHTTPRequest2 objects.
+      xhr.open(method, url, true)
+      xhr.setRequestHeader('Content-Type', 'application/json')
+      xhr.setRequestHeader('X-Api-Key', @configuration.api_key)
+    else unless typeof XDomainRequest is 'undefined'
+      # Otherwise, check if XDomainRequest.
+      # XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+      xhr = new XDomainRequest()
+      xhr.open(method, url)
+    else
+      # Otherwise, CORS is not supported by the browser.
+      xhr = null
+
+    if xhr
+      # These instructions are common to both XMLHttpRequest and XDomainRequest.
+      xhr.timeout = @configuration.timeout if @configuration.timeout
+      xhr.onerror = () =>
+        @log('Request failed.', data, xhr)
+      xhr.ontimeout = () =>
+        @log('Request timed out.', data, xhr)
+      xhr.onreadystatechange = () =>
+        if xhr.readyState == 4
+          if xhr.status == 201
+            @log('Request succeeded.', xhr.status, data, xhr)
+          else
+            @log('Request rejected by server.', xhr.status, data, xhr)
+      xhr.send(JSON.stringify(data))
+      return true
+
+    false
 
   _serialize: (obj, prefix) ->
     ret = []

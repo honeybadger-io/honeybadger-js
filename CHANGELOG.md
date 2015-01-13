@@ -1,5 +1,9 @@
 ## honeybadger-js v0.2.0 ##
 
+* Use CORS to send data via POST when available.
+
+  *@joshuap*
+
 * Improved error grouping.
 
   *@joshuap*
