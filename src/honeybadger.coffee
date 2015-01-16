@@ -1,7 +1,7 @@
 [currentError, currentNotice] = [null, null]
 
 class Client
-  version: '0.2.0-alpha'
+  version: '0.2.0'
 
   constructor: (options) ->
     @log('Initializing honeybadger.js ' + @version)
