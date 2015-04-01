@@ -1,7 +1,12 @@
 PHANTOM = node_modules/phantomjs/bin/phantomjs
 
 FINAL=honeybadger.js
+
+VERSION=v$(shell cat package.json | ruby -r json -e "puts JSON.parse(ARGF.read)['version'][/\d\.\d/]")
+BUILD_DIR=build/$(VERSION)
+CDN=//js.honeybadger.io/$(VERSION)
 MINIFIED=honeybadger.min.js
+SOURCE_MAP=honeybadger.min.js.map
 
 BUILD_FILES = src/header.txt \
 							build/src/configuration.js \
@@ -21,7 +26,8 @@ concat: $(BUILD_FILES)
 	cat $^ >$(FINAL)
 
 minify:
-	uglifyjs -o $(MINIFIED) $(FINAL)
+	mkdir -p $(BUILD_DIR)
+	uglifyjs --source-map $(BUILD_DIR)/$(SOURCE_MAP) --source-map-url $(CDN)/$(SOURCE_MAP) -o $(BUILD_DIR)/$(MINIFIED) $(FINAL)
 
 server:
 	node spec/server.js &
