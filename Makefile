@@ -26,9 +26,11 @@ concat: $(BUILD_FILES)
 	cat $^ >$(FINAL)
 
 minify:
+	uglifyjs --source-map $(SOURCE_MAP) --source-map-url $(CDN)/$(SOURCE_MAP) -o $(MINIFIED) $(FINAL)
 	mkdir -p $(BUILD_DIR)
 	cp $(FINAL) $(BUILD_DIR)
-	uglifyjs --source-map $(BUILD_DIR)/$(SOURCE_MAP) --source-map-url $(CDN)/$(SOURCE_MAP) -o $(BUILD_DIR)/$(MINIFIED) $(FINAL)
+	mv $(MINIFIED) $(BUILD_DIR)
+	mv $(SOURCE_MAP) $(BUILD_DIR)
 
 server:
 	node spec/server.js &
