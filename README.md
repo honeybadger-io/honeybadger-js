@@ -91,7 +91,6 @@ parameter, the `Notice` object will be passed as an argument.  Multiple
 handlers may be added in this fashion:
 
 ```javascript
-// See src/notice.coffee options available on Notice class
 Honeybadger.beforeNotify(function(notice) {
   notice.message = 'My custom message';
 });
@@ -104,6 +103,21 @@ Honeybadger.beforeNotify(function(notice) {
   if (notice.class == 'MyCustomError') return false;
 });
 ```
+
+### Notice Attributes
+
+The following notice attributes may be modified by your notification handlers:
+
+* stack - The stack trace
+* class - The exception class name
+* message - The error message
+* url - The current url
+* project_root - The root url
+* environment - Name of the environment. example: "production"
+* component - Similar to a rails controller name. example: "users"
+* action - Similar to a rails action name. example: "create"
+* fingerprint - A unique fingerprint, used to customize grouping of errors in Honeybadger.
+* context - The context object.
 
 ## Unhandled errors via (window.onerror)
 
