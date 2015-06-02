@@ -164,13 +164,16 @@ Honeybadger.configure({
   component: '',
 
   // Action (optional)
-  action: ''
+  action: '',
 
   // Should unhandled (window.onerror) notifications be sent?
-  onerror: false
+  onerror: false,
 
   // Disable notifications?
-  disabled: false
+  disabled: false,
+
+  // Timeout (in milliseconds) when making requests.
+  timeout: false
 });
 ```
 
