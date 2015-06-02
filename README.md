@@ -135,7 +135,7 @@ Honeybadger can automatically un-minify your code if you provide a [sourcemap](h
 
 In order to make this work you must include a special comment at the bottom of your minified file which points to the corresponding sourcemap file. To see what this comment should look like, [see the comment at the bottom of honeybadger.js](https://js.honeybadger.io/v0.2/honeybadger.min.js). If you upload the original source files along with the sourcemap, Honeybadger will link to those files when displaying the stack trace.
 
-All files must be publically accessible online so that Honeybadger's servers can download and parse them. For the full specification, see the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit)/.
+All files must be publically accessible online so that Honeybadger's servers can download and parse them. For the full specification, see the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
 
 ### Linking stack traces to source files
 
@@ -144,14 +144,14 @@ Honeybadger supports an optional `sourceRoot` comment, which should point to the
 ```js
 // ...minified code...
 //# sourceMappingURL=application.min.js.map
-//# sourceRoot=https://sources.my-domain-com/src
+//# sourceRoot=https://sources.my-domain.com/src
 ```
 
 This option may also be specified as a top-level key in the JSON sourcemap file itself:
 
 ```js
 {
-  "sourceRoot" : "https://sources.my-domain-com/src",
+  "sourceRoot" : "https://sources.my-domain.com/src",
   // ...sourcemap...
 }
 ```
