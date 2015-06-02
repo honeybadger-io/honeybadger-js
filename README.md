@@ -40,6 +40,16 @@ try {
 }
 ```
 
+JavaScript often uses generic class names -- such as `Error` -- which are uninformative and also cause unrelated errors to be grouped together. To get around this issue it's a good practice to send a custom error class when notifying Honeybadger:
+
+```javascript
+try {
+  // ...error producing code...
+} catch(e) {
+  Honeybadger.notify(e, 'DescriptiveClass');
+}
+```
+
 ## Sending Custom Data
 
 Honeybadger allows you to send custom data using
