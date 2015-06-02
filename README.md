@@ -129,6 +129,47 @@ The following notice attributes may be modified by your notification handlers:
 * fingerprint - A unique fingerprint, used to customize grouping of errors in Honeybadger.
 * context - The context object.
 
+## Sourcemaps
+
+Honeybadger can automatically un-minify your code if you provide a [sourcemap](http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) along with your minified JavaScript files.
+
+In order to make this work you must include a special comment at the bottom of your minified file which points to the corresponding sourcemap file. To see what this comment should look like, [see the comment at the bottom of honeybadger.js](https://js.honeybadger.io/v0.2/honeybadger.min.js). If you upload the original source files along with the sourcemap, Honeybadger will link to those files when displaying the stack trace.
+
+All files must be publically accessible online so that Honeybadger's servers can download and parse them. For the full specification, see the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit)/.
+
+### Linking stack traces to source files
+
+Honeybadger supports an optional `sourceRoot` comment, which should point to the root path of the original source files online. For example:
+
+```js
+// ...minified code...
+//# sourceMappingURL=application.min.js.map
+//# sourceRoot=https://sources.my-domain-com/src
+```
+
+This option may also be specified as a top-level key in the JSON sourcemap file itself:
+
+```js
+{
+  "sourceRoot" : "https://sources.my-domain-com/src",
+  // ...sourcemap...
+}
+```
+
+To customize this setting *just* for Honeybadger, use `honeybadgerSourceRoot` instead.
+
+#### Linking stack traces to GitHub
+
+If you're using the GitHub integration, you can also link to source files on GitHub by substituting a special `[PROJECT_ROOT]` token for the root of your GitHub repository:
+
+```js
+// ...minified code...
+//# sourceMappingURL=honeybadger.min.js.map
+//# honeybadgerSourceRoot=[PROJECT_ROOT]/src
+```
+
+This is the only situation in which the source root is not required to be a valid URL.
+
 ## Unhandled errors via (window.onerror)
 
 By default, honeybadger.js does not track unhandled errors. This is
