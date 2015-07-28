@@ -1,5 +1,6 @@
 class Notice
   constructor: (opts = {}, config = Honeybadger.configuration) ->
+    @log = opts.log || ()->
     @stack = opts.stack
     @generator = opts.generator
     @class = opts.name || 'Error'
@@ -21,27 +22,28 @@ class Notice
         @context[k] = v
 
   payload: ->
-    notifier:
-      name: 'honeybadger.js'
-      url: 'https://github.com/honeybadger-io/honeybadger-js'
-      version: Honeybadger.version
-      language: 'javascript'
-    error:
-      class: @class
-      message: @message
-      backtrace: @stack
-      generator: @generator
-      source: @source
-      fingerprint: @fingerprint
-    request:
-      url: @url
-      component: @component
-      action: @action
-      context: @context
-      cgi_data: @cgi_data
-    server:
-      project_root: @project_root
-      environment_name: @environment
+    @_sanitize
+      notifier:
+        name: 'honeybadger.js'
+        url: 'https://github.com/honeybadger-io/honeybadger-js'
+        version: Honeybadger.version
+        language: 'javascript'
+      error:
+        class: @class
+        message: @message
+        backtrace: @stack
+        generator: @generator
+        source: @source
+        fingerprint: @fingerprint
+      request:
+        url: @url
+        component: @component
+        action: @action
+        context: @context
+        cgi_data: @cgi_data
+      server:
+        project_root: @project_root
+        environment_name: @environment
 
   _cgiData: () ->
     data = {}
@@ -53,3 +55,17 @@ class Notice
       delete data['USER_AGENT']
     data['HTTP_REFERER'] = document.referrer if document.referrer.match /\S/
     data
+
+  _sanitize: (obj, seen = []) ->
+    new_obj = {}
+    for k,v of obj
+      if v instanceof Object
+        if v in seen
+          @log("Dropping circular data structure.", k, v, obj)
+          new_obj[k] = "[CIRCULAR DATA STRUCTURE]"
+          continue
+        seen.push(v)
+        new_obj[k] = @_sanitize(v, seen)
+      else
+        new_obj[k] = v
+    new_obj

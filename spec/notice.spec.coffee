@@ -50,6 +50,15 @@ describe 'Notice', ->
         it 'doesn\'t have a fingerprint by default', ->
           expect(output.error.fingerprint).toEqual(null)
 
+      describe "cyclic structures in payload", ->
+        it "converts cyclic structures", ->
+          e = mockError()
+          c = { "foo": "bar" }
+          c["c"] = c
+          notice = new Notice({ stack: e.stack, message: e.message, name: e.name, context: c })
+          json = JSON.stringify(notice.payload()) # shouldn't cause error.
+          expect(json.match(/CIRCULAR DATA STRUCTURE/g).length).toEqual(1)
+
   describe 'with a fingerprint', ->
     describe '#payload()', ->
       it 'has a fingerprint', ->

@@ -16,7 +16,7 @@ class Client
   #   log('inside coolFunc',this,arguments);
   #
   # Returns nothing.
-  log: () ->
+  log: () =>
     @log.history = @log.history || [] # store logs to an array for reference
     @log.history.push(arguments)
     if @configuration.debug && window.console
@@ -213,6 +213,7 @@ class Client
   # Returns built Notice.
   _buildNotice: (opts) ->
     new Notice({
+      log: @log,
       stack: opts['stack'],
       generator: opts['generator'],
       message: opts['message'],
