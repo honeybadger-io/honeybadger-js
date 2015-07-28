@@ -19,7 +19,7 @@ new errors may be grouped differently than old.*
 Place the following code between the `<head></head>` tags of your page:
 
 ```html
-<script src="//js.honeybadger.io/v0.2/honeybadger.min.js" type="text/javascript"></script>
+<script src="//js.honeybadger.io/v0.3/honeybadger.min.js" type="text/javascript"></script>
 <script type="text/javascript">
   Honeybadger.configure({
     api_key: 'project api key',
@@ -133,7 +133,7 @@ The following notice attributes may be modified by your notification handlers:
 
 Honeybadger can automatically un-minify your code if you provide a [sourcemap](http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) along with your minified JavaScript files.
 
-In order to make this work you must include a special comment at the bottom of your minified file which points to the corresponding sourcemap file. To see what this comment should look like, [see the comment at the bottom of honeybadger.js](https://js.honeybadger.io/v0.2/honeybadger.min.js). If you upload the original source files along with the sourcemap, Honeybadger will link to those files when displaying the stack trace.
+In order to make this work you must include a special comment at the bottom of your minified file which points to the corresponding sourcemap file. To see what this comment should look like, [see the comment at the bottom of honeybadger.js](https://js.honeybadger.io/v0.3/honeybadger.min.js). If you upload the original source files along with the sourcemap, Honeybadger will link to those files when displaying the stack trace.
 
 All files must be publically accessible online so that Honeybadger's servers can download and parse them. For the full specification, see the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
 
