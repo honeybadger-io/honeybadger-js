@@ -56,16 +56,24 @@ class Notice
     data['HTTP_REFERER'] = document.referrer if document.referrer.match /\S/
     data
 
+  _sanitizeValue: (v, k, seen, new_obj) ->
+    if v instanceof Object
+      if v in seen
+        @log("Dropping circular data structure.", k, v, new_obj)
+        new_obj[k] = "[CIRCULAR DATA STRUCTURE]"
+        return
+      seen.push(v)
+      new_obj[k] = @_sanitize(v, seen)
+    else
+      new_obj[k] = v
+
   _sanitize: (obj, seen = []) ->
-    new_obj = {}
-    for k,v of obj
-      if v instanceof Object
-        if v in seen
-          @log("Dropping circular data structure.", k, v, obj)
-          new_obj[k] = "[CIRCULAR DATA STRUCTURE]"
-          continue
-        seen.push(v)
-        new_obj[k] = @_sanitize(v, seen)
-      else
-        new_obj[k] = v
+    if obj instanceof Array
+      new_obj = []
+      for v, i in obj
+        @_sanitizeValue(v, i, seen, new_obj)
+    else
+      new_obj = {}
+      for k,v of obj
+        @_sanitizeValue(v, k, seen, new_obj)
     new_obj
