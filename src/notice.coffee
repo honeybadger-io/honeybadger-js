@@ -58,6 +58,8 @@ class Notice
 
   _sanitize: (obj, seen = []) ->
     if obj instanceof Object
+      # Object equality is determined by reference which means this should pass
+      # on unique objects with the same (or empty) values. {} != {}.
       if obj in seen
         @log("Dropping circular data structure.", k, v, obj)
         return "[CIRCULAR DATA STRUCTURE]"
