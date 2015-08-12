@@ -71,8 +71,11 @@ class Notice
         return obj.map (v) => @_sanitize(v, seen)
       else
         new_obj = {}
-        for k,v of obj
-          new_obj[k] = @_sanitize(v, seen)
+        try
+          for k,v of obj
+            new_obj[k] = @_sanitize(v, seen)
+        catch e
+          return { error: "Honeybadger was unable to read this object: " + String(e) }
         return new_obj
 
     obj

@@ -122,6 +122,10 @@ describe 'Notice', ->
       o = { foo: () -> console.log("foo") }
       expect(sanitize(o)).toEqual({ foo: "[FUNC]" })
 
+    it 'traverses deeply nested objects', ->
+      o = { foo: "bar", bar: { baz: "badgers", cobras: { traits: ['deadly', 'fast'], bite: { badgers: { care: false } } } } }
+      expect(sanitize(o)).toEqual(o)
+
   describe 'context option', ->
     it 'allows setting context from options array', ->
       Honeybadger.resetContext()
