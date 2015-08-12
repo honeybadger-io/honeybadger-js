@@ -99,3 +99,7 @@ describe 'Notice', ->
     it 'converts arrays', ->
       c = { "foo": ['boo'], 'bar': ['baz'] }
       expect(sanitize(c)).toEqual(c)
+
+    it 'converts functions', ->
+      o = { foo: () -> console.log("foo") }
+      expect(sanitize(o)).toEqual({ foo: "[FUNC]" })

@@ -57,7 +57,9 @@ class Notice
     data
 
   _sanitize: (obj, seen = []) =>
-    if obj instanceof Object
+    if obj instanceof Function
+      return "[FUNC]"
+    else if obj instanceof Object
       # Object equality is determined by reference which means this should pass
       # on unique objects with the same (or empty) values. {} != {}.
       if obj in seen
