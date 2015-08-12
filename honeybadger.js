@@ -160,7 +160,7 @@ Notice = (function() {
   };
 
   Notice.prototype._sanitize = function(obj, seen) {
-    var k, new_obj, v;
+    var e, k, new_obj, v;
     if (seen == null) {
       seen = [];
     }
@@ -180,9 +180,16 @@ Notice = (function() {
         })(this));
       } else {
         new_obj = {};
-        for (k in obj) {
-          v = obj[k];
-          new_obj[k] = this._sanitize(v, seen);
+        try {
+          for (k in obj) {
+            v = obj[k];
+            new_obj[k] = this._sanitize(v, seen);
+          }
+        } catch (_error) {
+          e = _error;
+          return {
+            error: "Honeybadger was unable to read this object: " + String(e)
+          };
         }
         return new_obj;
       }
