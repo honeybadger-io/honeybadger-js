@@ -1,18 +1,18 @@
 class Notice
   constructor: (opts = {}, config = Honeybadger.configuration) ->
     @log = opts.log || ()->
-    @stack = opts.stack
-    @generator = opts.generator
-    @class = opts.name || 'Error'
-    @message = opts.message || 'No message provided'
+    @stack = helpers.String(opts.stack)
+    @generator = helpers.String(opts.generator)
+    @class = helpers.String(opts.name, 'Error')
+    @message = helpers.String(opts.message, 'No message provided')
     @source = null
-    @url = document.URL
-    @project_root = config.project_root
-    @environment = config.environment
-    @component = opts.component || config.component
-    @action = opts.action || config.action
+    @url = helpers.String(document.URL)
+    @project_root = helpers.String(config.project_root)
+    @environment = helpers.String(config.environment)
+    @component = helpers.String(opts.component || config.component)
+    @action = helpers.String(opts.action || config.action)
     @cgi_data = @_cgiData()
-    @fingerprint = opts.fingerprint
+    @fingerprint = helpers.String(opts.fingerprint)
 
     @context = {}
     for k,v of Honeybadger.context

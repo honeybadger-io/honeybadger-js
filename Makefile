@@ -9,6 +9,7 @@ MINIFIED=honeybadger.min.js
 SOURCE_MAP=honeybadger.min.js.map
 
 BUILD_FILES = src/header.txt \
+							build/src/helpers.js \
 							build/src/configuration.js \
 							build/src/notice.js \
               build/src/honeybadger.js \
