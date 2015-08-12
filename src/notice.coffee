@@ -56,7 +56,7 @@ class Notice
     data['HTTP_REFERER'] = document.referrer if document.referrer.match /\S/
     data
 
-  _sanitize: (obj, seen = []) ->
+  _sanitize: (obj, seen = []) =>
     if obj instanceof Object
       # Object equality is determined by reference which means this should pass
       # on unique objects with the same (or empty) values. {} != {}.

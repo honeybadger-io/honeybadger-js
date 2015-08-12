@@ -74,3 +74,28 @@ describe 'Notice', ->
         output = notice.payload()
         expect(output.error.fingerprint).toBeDefined()
         expect(output.error.fingerprint).toEqual('asdf')
+
+  describe "#_sanitize()", ->
+    notice = new Notice()
+    sanitize = notice._sanitize
+
+    it "rejects cyclic objects", ->
+      o = {}
+      o.foo = o
+      expect(sanitize(o)).toEqual({ foo: "[CIRCULAR DATA STRUCTURE]" })
+
+      a = []
+      a.push(a)
+      expect(sanitize(a)).toEqual([ "[CIRCULAR DATA STRUCTURE]" ])
+
+    it "doesn't reject similar objects", ->
+      o = {}
+      o.foo = {}
+      expect(sanitize(o)).toEqual(o)
+      a = []
+      a.push([])
+      expect(sanitize(a)).toEqual(a)
+
+    it 'converts arrays', ->
+      c = { "foo": ['boo'], 'bar': ['baz'] }
+      expect(sanitize(c)).toEqual(c)
