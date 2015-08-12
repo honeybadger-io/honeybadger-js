@@ -59,6 +59,14 @@ describe 'Notice', ->
           json = JSON.stringify(notice.payload()) # shouldn't cause error.
           expect(json.match(/CIRCULAR DATA STRUCTURE/g).length).toEqual(1)
 
+        it 'converts arrays in context', ->
+          Array.prototype.blah = -> 'whatevs'
+          e = mockError()
+          c = { "foo": ['boo'], 'bar': ['baz'] }
+          notice = new Notice({ stack: e.stack, message: e.message, name: e.name, context: c })
+          json = JSON.stringify(notice.payload()) # shouldn't cause error.
+          expect(json.match(/CIRCULAR DATA STRUCTURE/g)).toBeNull()
+
   describe 'with a fingerprint', ->
     describe '#payload()', ->
       it 'has a fingerprint', ->

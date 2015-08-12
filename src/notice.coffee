@@ -57,15 +57,18 @@ class Notice
     data
 
   _sanitize: (obj, seen = []) ->
-    new_obj = {}
-    for k,v of obj
-      if v instanceof Object
-        if v in seen
-          @log("Dropping circular data structure.", k, v, obj)
-          new_obj[k] = "[CIRCULAR DATA STRUCTURE]"
-          continue
-        seen.push(v)
-        new_obj[k] = @_sanitize(v, seen)
+    if obj instanceof Object
+      if obj in seen
+        @log("Dropping circular data structure.", k, v, obj)
+        return "[CIRCULAR DATA STRUCTURE]"
+
+      seen.push(obj)
+      if obj instanceof Array
+        return obj.map (v) => @_sanitize(v, seen)
       else
-        new_obj[k] = v
-    new_obj
+        new_obj = {}
+        for k,v of obj
+          new_obj[k] = @_sanitize(v, seen)
+        return new_obj
+
+    obj
