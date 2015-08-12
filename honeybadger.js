@@ -16,7 +16,7 @@ helpers.String = function(obj, fallback) {
     return String(fallback);
   }
   if (obj == null) {
-    return void 0;
+    return null;
   }
   return String(obj);
 };
