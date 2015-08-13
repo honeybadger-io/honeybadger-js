@@ -1,3 +1,19 @@
+## honeybadger-js v0.3.1 ##
+
+* Sanitization bugfixes.
+
+  *@joshuap*
+
+## honeybadger-js v0.3.0 ##
+
+* Sanitize circular data structures.
+
+  *@joshuap*
+
+* Generate source map.
+
+  *@joshuap*
+
 ## honeybadger-js v0.2.0 ##
 
 * Use CORS to send data via POST when available.
