@@ -209,7 +209,7 @@ var Client, Honeybadger, UncaughtError, currentError, currentNotice, ref,
 ref = [null, null], currentError = ref[0], currentNotice = ref[1];
 
 Client = (function() {
-  Client.prototype.version = '0.2.0';
+  Client.prototype.version = '0.3.1';
 
   function Client(options) {
     this._windowOnErrorHandler = bind(this._windowOnErrorHandler, this);
