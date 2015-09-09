@@ -50,6 +50,24 @@ try {
 }
 ```
 
+## Catching errors in callbacks
+
+`Honeybadger.wrap` takes an anonymous function as it's argument and returns a new function which is wrapped in a try/catch which reports any errors to Honeybadger. You can use it like this:
+
+```javascript
+Honeybadger.wrap(function(){
+  throw "oops";
+})();
+```
+
+You can also omit the () on the end (which immediately calls the returned function) and use it to wrap your callbacks, like so:
+
+```javascript
+$(document).on("click", "#myElement", Honeybadger.wrap(function(){ throw "oops"; }));
+```
+
+Please note that with `Honeybadger.wrap` the default class name is always reported as there is no way differentiate between different types of errors.
+
 ## Sending Custom Data
 
 Honeybadger allows you to send custom data using
