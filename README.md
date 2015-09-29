@@ -1,20 +1,16 @@
-# Honeybadger Client Side Javascript Library
+# Honeybadger Client-Side Javascript Library
 
 [![Build
 Status](https://travis-ci.org/honeybadger-io/honeybadger-js.png?branch=master&1)](https://travis-ci.org/honeybadger-io/honeybadger-js)
 
-A JavaScript library for integrating apps with the :zap: [Honeybadger Rails Error Notifier](http://honeybadger.io).
-
-## Upgrading
-
-It is recommended that you use our CDN, as outlined under
-[installation](#installation). The API is 100% backwards compatible, so no other
-code changes are required.
+A client-side JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io). For server-side javascript, check out our [NodeJS library](https://github.com/honeybadger-io/honeybadger-node).
 
 *Note: 0.1 and 0.2 make significant improvements to error grouping. As a result,
 new errors may be grouped differently than old.*
 
-## Installation
+## Getting Started
+
+### 1. Include the JS library
 
 Place the following code between the `<head></head>` tags of your page:
 
@@ -28,7 +24,17 @@ Place the following code between the `<head></head>` tags of your page:
 </script>
 ```
 
-## Basic Usage
+### 2. Set your API key
+
+You can get the API key for a specific Honeybadger project from the Project Settings page. Then set it as a configuration option.
+
+```javascript
+Honeybadger.configure({
+  api_key: '[YOUR API KEY HERE]'
+});
+```
+
+### 3. Start reporting exceptions
 
 To catch an error and notify Honeybadger:
 
@@ -50,9 +56,71 @@ try {
 }
 ```
 
-## Catching errors in callbacks
 
-`Honeybadger.wrap` takes an anonymous function as it's argument and returns a new function which is wrapped in a try/catch which reports any errors to Honeybadger. You can use it like this:
+## Advanced Configuration
+
+You can set configuration options by using the `Honeybadger.configure` function. All of the available options are shown below:
+
+```javascript
+Honeybadger.configure({
+  // Honeybadger API key (required)
+  api_key: '',
+
+  // Collector Host
+  host: 'api.honeybadger.io',
+
+  // Use SSL?
+  ssl: true,
+
+  // Project root
+  project_root: 'http://my-app.com',
+
+  // Environment
+  environment: 'production',
+
+  // Component (optional)
+  component: '',
+
+  // Action (optional)
+  action: '',
+
+  // Should unhandled (window.onerror) notifications be sent?
+  onerror: false,
+
+  // Disable notifications?
+  disabled: false,
+
+  // Timeout (in milliseconds) when making requests.
+  timeout: false
+});
+```
+
+You can call `Honeybadger.configure` as many times as you like. The existing configuration data will be merged with any new data you provide. This is especially useful for changing the `action` and `component` values inside of single-page apps.
+
+
+
+## Public Interface 
+
+### `Honeybadger.notify()`: Send an exception to Honeybadger
+
+If you've caught an exception and want to send it to Honeybadger, this is the method for you. 
+
+#### Examples:
+
+```javascript
+try {
+  // ...error producing code...
+} catch(e) {
+  Honeybadger.notify(e, 'DescriptiveClass');
+}
+```
+---
+
+### `Honeybadger.wrap()`: Wrap the given function in try/catch and report any exceptions
+
+It can be a pain to include try/catch blocks everywhere in your app. A slighly nicer option is to use `Honeybadger.wrap`. You pass it a function. It returns a new function which wraps your existing function is a try/catch block.
+
+#### Examples:
 
 ```javascript
 Honeybadger.wrap(function(){
@@ -66,17 +134,20 @@ You can also omit the () on the end (which immediately calls the returned functi
 $(document).on("click", "#myElement", Honeybadger.wrap(function(){ throw "oops"; }));
 ```
 
-Please note that with `Honeybadger.wrap` the default class name is always reported as there is no way differentiate between different types of errors.
 
-## Sending Custom Data
 
-Honeybadger allows you to send custom data using
-`Honeybadger.setContext` And `Honeybadger.resetContext`:
+### `Honeybadger.setContext()`: Set metadata to be sent if an exception occurs
+
+Javascript exceptions are pretty bare-bones. You probably have some additonal data that could make them a lot easier to understand. Perhaps the name of the current Angular view, or the id of the current user. This function lets you set context data that will be sent if an error should occur. 
+
+You can call `setContext` as many times as you like. New context data will be merged with an existing data. 
+
+#### Examples:
 
 ```javascript
 // On load
 Honeybadger.setContext({
-  user_id: '<%= current_user.id %>'
+  user_id: 123
 });
 
 // Later
@@ -84,55 +155,49 @@ Honeybadger.setContext({
   backbone_view: 'tracks'
 });
 
-// Honeybadger.context => { user_id: 1, backbone_view: 'tracks' }
-
-Honeybadger.resetContext({
-  some_other_data: 'foo'
-});
-
-// Honeybadger.context == { some_other_data: 'foo' }
+// The context now contains { user_id: 123, backbone_view: 'tracks' }
 ```
+---
 
-You can also add context to a specific exception by passing an
-associative array to the `notify` method. Global context will be
-merged locally:
+### `Honeybadger.resetContext()`: Clear context metadata
+
+If you've used `Honeybadger.setContext` to store context data, you can clear it with `Honeybadger.resetContext`.
+
+#### Example:
 
 ```javascript
-Honeybadger.setContext({
-  user_id: '<%= current_user.id %>'
+// Set the context to {}
+Honeybadger.resetContext();
+
+// Set the context to { user_id: 123 }
+Honeybadger.resetContext({
+  user_id: 123
 });
-
-try {
-  // ...error producing code...
-} catch(e) {
-  Honeybadger.notify(e, { context: { some_other_data: 'foo' } });
-}
-
-// Honeybadger.context == { user_id: 1 }
 ```
 
-## Notification handlers
+---
+
+### `Honeybadger.beforeNotify()`: Add a callback to be run before an exception is reported
 
 Passing a function to `Honeybadger.beforeNotify` will add the function
 to a list of before notify handlers. If the function includes a
 parameter, the `Notice` object will be passed as an argument.  Multiple
 handlers may be added in this fashion:
 
+
+#### Examples
+
 ```javascript
 Honeybadger.beforeNotify(function(notice) {
   notice.message = 'My custom message';
 });
-```
 
-To halt notification, return false from any `beforeNotify` handler:
 
-```javascript
+// To halt notification, return false from any `beforeNotify` handler:
 Honeybadger.beforeNotify(function(notice) {
   if (notice.class == 'MyCustomError') return false;
 });
 ```
-
-### Notice Attributes
 
 The following notice attributes may be modified by your notification handlers:
 
@@ -146,6 +211,20 @@ The following notice attributes may be modified by your notification handlers:
 * action - Similar to a rails action name. example: "create"
 * fingerprint - A unique fingerprint, used to customize grouping of errors in Honeybadger.
 * context - The context object.
+
+
+---
+
+
+### `Honeybadger.configure()`: Set configuration values
+
+The `configure` method takes an object containing config values. Its return value is unspecified. 
+
+#### Examples:
+
+```javascript
+Honeybadger.configure({api_key: "adlkjfljk"});
+```
 
 ## Sourcemaps
 
@@ -204,47 +283,6 @@ Honeybadger.configure({
 });
 ```
 
-## Configuration
-
-`Honeybadger.configure` may be called multiple times to set/update
-configuration options. Existing configuration will be merged. In most
-cases configuration will be set once, however the `action` and
-`component` options may change semi-frequently for client-side
-frameworks like Angular or Ember.
-
-```javascript
-Honeybadger.configure({
-  // Honeybadger API key (required)
-  api_key: '',
-
-  // Collector Host
-  host: 'api.honeybadger.io',
-
-  // Use SSL?
-  ssl: true,
-
-  // Project root
-  project_root: 'http://my-app.com',
-
-  // Environment
-  environment: 'production',
-
-  // Component (optional)
-  component: '',
-
-  // Action (optional)
-  action: '',
-
-  // Should unhandled (window.onerror) notifications be sent?
-  onerror: false,
-
-  // Disable notifications?
-  disabled: false,
-
-  // Timeout (in milliseconds) when making requests.
-  timeout: false
-});
-```
 
 ## Contributing
 
