@@ -24,17 +24,7 @@ Place the following code between the `<head></head>` tags of your page:
 </script>
 ```
 
-### 2. Set your API key
-
-You can get the API key for a specific Honeybadger project from the Project Settings page. Then set it as a configuration option.
-
-```javascript
-Honeybadger.configure({
-  api_key: '[YOUR API KEY HERE]'
-});
-```
-
-### 3. Start reporting exceptions
+### 2. Start reporting exceptions
 
 To catch an error and notify Honeybadger:
 
@@ -128,17 +118,17 @@ Honeybadger.wrap(function(){
 })();
 ```
 
-You can also omit the () on the end (which immediately calls the returned function) and use it to wrap your callbacks, like so:
+Note that `wrap` returns a function. This makes it easy to use with event handlers, as in the example below:
 
 ```javascript
 $(document).on("click", "#myElement", Honeybadger.wrap(function(){ throw "oops"; }));
 ```
 
-
+---
 
 ### `Honeybadger.setContext()`: Set metadata to be sent if an exception occurs
 
-Javascript exceptions are pretty bare-bones. You probably have some additional data that could make them a lot easier to understand. Perhaps the name of the current Angular view, or the id of the current user. This function lets you set context data that will be sent if an error should occur. 
+Javascript exceptions are pretty bare-bones. You probably have some additional data that could make them a lot easier to understand - perhaps the name of the current Angular view, or the id of the current user. This function lets you set context data that will be sent if an error should occur. 
 
 You can call `setContext` as many times as you like. New context data will be merged with an existing data. 
 
@@ -169,7 +159,7 @@ If you've used `Honeybadger.setContext` to store context data, you can clear it 
 // Set the context to {}
 Honeybadger.resetContext();
 
-// Set the context to { user_id: 123 }
+// Clear the context, then set it to `{ user_id: 123 }`
 Honeybadger.resetContext({
   user_id: 123
 });
@@ -230,17 +220,27 @@ Honeybadger.configure({api_key: "adlkjfljk"});
 
 Honeybadger can automatically un-minify your code if you provide a [sourcemap](http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) along with your minified JavaScript files.
 
-In order to make this work you must include a special comment at the bottom of your minified file which points to the corresponding sourcemap file. To see what this comment should look like, [see the comment at the bottom of honeybadger.js](https://js.honeybadger.io/v0.3/honeybadger.min.js). If you upload the original source files along with the sourcemap, Honeybadger will link to those files when displaying the stack trace.
-
-All files must be publicly-accessible online so that Honeybadger's servers can download and parse them. For the full specification, see the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
-
-### Linking stack traces to source files
-
-Honeybadger supports an optional `sourceRoot` comment, which should point to the root path of the original source files online. For example:
+To do this, you'll add a special comment at the bottom of your minified JS. It tells us where to find your sourcemap. For example:
 
 ```js
 // ...minified code...
 //# sourceMappingURL=application.min.js.map
+```
+
+The sourcemap URL needs to be a valid URL accessible to the public. 
+
+For more information on sourcemaps, check out the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
+
+
+### Linking stack traces to source files
+
+If you'd like to be able to jump from the Honeybadger backtrace to your unminified source file, just tell us where to find your unminified files using the `sourceRoot` option. 
+
+`sourceRoot` is the root URL for your unminified source files. To set it, you can use another magic comment: 
+
+
+```js
+// ...minified code...
 //# sourceRoot=https://sources.my-domain.com/src
 ```
 
@@ -253,11 +253,11 @@ This option may also be specified as a top-level key in the JSON sourcemap file 
 }
 ```
 
-To customize this setting *just* for Honeybadger, use `honeybadgerSourceRoot` instead.
+If providing the `sourceRoot` option fouls up other tools in your toolchain, you can alternatively use `honeybadgerSourceRoot`.
 
-#### Linking stack traces to GitHub
+#### Using GitHub
 
-If you're using the GitHub integration, you can also link to source files on GitHub by substituting a special `[PROJECT_ROOT]` token for the root of your GitHub repository:
+If you're using Honeybadger's GitHub integration, you can link to source files on GitHub by substituting a special `[PROJECT_ROOT]` token for the root of your GitHub repository:
 
 ```js
 // ...minified code...
