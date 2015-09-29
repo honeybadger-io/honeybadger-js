@@ -118,7 +118,7 @@ try {
 
 ### `Honeybadger.wrap()`: Wrap the given function in try/catch and report any exceptions
 
-It can be a pain to include try/catch blocks everywhere in your app. A slighly nicer option is to use `Honeybadger.wrap`. You pass it a function. It returns a new function which wraps your existing function is a try/catch block.
+It can be a pain to include try/catch blocks everywhere in your app. A slightly nicer option is to use `Honeybadger.wrap`. You pass it a function. It returns a new function which wraps your existing function is a try/catch block.
 
 #### Examples:
 
@@ -138,7 +138,7 @@ $(document).on("click", "#myElement", Honeybadger.wrap(function(){ throw "oops";
 
 ### `Honeybadger.setContext()`: Set metadata to be sent if an exception occurs
 
-Javascript exceptions are pretty bare-bones. You probably have some additonal data that could make them a lot easier to understand. Perhaps the name of the current Angular view, or the id of the current user. This function lets you set context data that will be sent if an error should occur. 
+Javascript exceptions are pretty bare-bones. You probably have some additional data that could make them a lot easier to understand. Perhaps the name of the current Angular view, or the id of the current user. This function lets you set context data that will be sent if an error should occur. 
 
 You can call `setContext` as many times as you like. New context data will be merged with an existing data. 
 
@@ -232,7 +232,7 @@ Honeybadger can automatically un-minify your code if you provide a [sourcemap](h
 
 In order to make this work you must include a special comment at the bottom of your minified file which points to the corresponding sourcemap file. To see what this comment should look like, [see the comment at the bottom of honeybadger.js](https://js.honeybadger.io/v0.3/honeybadger.min.js). If you upload the original source files along with the sourcemap, Honeybadger will link to those files when displaying the stack trace.
 
-All files must be publically accessible online so that Honeybadger's servers can download and parse them. For the full specification, see the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
+All files must be publicly-accessible online so that Honeybadger's servers can download and parse them. For the full specification, see the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
 
 ### Linking stack traces to source files
 
@@ -267,7 +267,7 @@ If you're using the GitHub integration, you can also link to source files on Git
 
 This is the only situation in which the source root is not required to be a valid URL.
 
-## Unhandled errors via (window.onerror)
+## window.onerror
 
 By default, honeybadger.js does not track unhandled errors. This is
 because `window.onerror` is a very limited method of error handling, and
