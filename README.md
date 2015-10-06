@@ -89,11 +89,11 @@ You can call `Honeybadger.configure` as many times as you like. The existing con
 
 
 
-## Public Interface 
+## Public Interface
 
 ### `Honeybadger.notify()`: Send an exception to Honeybadger
 
-If you've caught an exception and want to send it to Honeybadger, this is the method for you. 
+If you've caught an exception and want to send it to Honeybadger, this is the method for you.
 
 #### Examples:
 
@@ -128,9 +128,9 @@ $(document).on("click", "#myElement", Honeybadger.wrap(function(){ throw "oops";
 
 ### `Honeybadger.setContext()`: Set metadata to be sent if an exception occurs
 
-Javascript exceptions are pretty bare-bones. You probably have some additional data that could make them a lot easier to understand - perhaps the name of the current Angular view, or the id of the current user. This function lets you set context data that will be sent if an error should occur. 
+Javascript exceptions are pretty bare-bones. You probably have some additional data that could make them a lot easier to understand - perhaps the name of the current Angular view, or the id of the current user. This function lets you set context data that will be sent if an error should occur.
 
-You can call `setContext` as many times as you like. New context data will be merged with the existing data. 
+You can call `setContext` as many times as you like. New context data will be merged with the existing data.
 
 #### Examples:
 
@@ -208,7 +208,7 @@ The following notice attributes may be modified by your notification handlers:
 
 ### `Honeybadger.configure()`: Set configuration values
 
-The `configure` method takes an object containing config values. Its return value is unspecified. 
+The `configure` method takes an object containing config values. Its return value is unspecified.
 
 #### Examples:
 
@@ -227,16 +227,16 @@ To do this, you'll add a special comment at the bottom of your minified JS. It t
 //# sourceMappingURL=application.min.js.map
 ```
 
-The sourcemap URL needs to be a valid URL accessible to the public. 
+The sourcemap URL needs to be a valid URL accessible to the public.
 
 For more information on sourcemaps, check out the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
 
 
 ### Linking stack traces to source files
 
-If you'd like to be able to jump from the Honeybadger backtrace to your unminified source file, just tell us where to find your unminified files using the `sourceRoot` option. 
+If you'd like to be able to jump from the Honeybadger backtrace to your unminified source file, just tell us where to find your unminified files using the `sourceRoot` option.
 
-`sourceRoot` is the root URL for your unminified source files. To set it, you can use another magic comment: 
+`sourceRoot` is the root URL for your unminified source files. To set it, you can use another magic comment:
 
 
 ```js
@@ -294,9 +294,9 @@ Honeybadger.configure({
 
 ### Running the tests
 
-To run the test suite, enter `make test` into the console. 
+To run the test suite, enter `make test` into the console.
 
 ### License
 
-The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details. 
+The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
 
