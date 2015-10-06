@@ -108,7 +108,7 @@ try {
 
 ### `Honeybadger.wrap()`: Wrap the given function in try/catch and report any exceptions
 
-It can be a pain to include try/catch blocks everywhere in your app. A slightly nicer option is to use `Honeybadger.wrap`. You pass it a function. It returns a new function which wraps your existing function is a try/catch block.
+It can be a pain to include try/catch blocks everywhere in your app. A slightly nicer option is to use `Honeybadger.wrap`. You pass it a function. It returns a new function which wraps your existing function in a try/catch block.
 
 #### Examples:
 
@@ -130,7 +130,7 @@ $(document).on("click", "#myElement", Honeybadger.wrap(function(){ throw "oops";
 
 Javascript exceptions are pretty bare-bones. You probably have some additional data that could make them a lot easier to understand - perhaps the name of the current Angular view, or the id of the current user. This function lets you set context data that will be sent if an error should occur. 
 
-You can call `setContext` as many times as you like. New context data will be merged with an existing data. 
+You can call `setContext` as many times as you like. New context data will be merged with the existing data. 
 
 #### Examples:
 
