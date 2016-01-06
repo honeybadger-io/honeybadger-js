@@ -13,6 +13,7 @@ BUILD_FILES = src/header.txt \
 							build/src/configuration.js \
 							build/src/notice.js \
               build/src/honeybadger.js \
+              src/instrumentation.js \
 							src/footer.txt
 
 all: compile concat minify

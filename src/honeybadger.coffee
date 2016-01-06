@@ -154,10 +154,6 @@ class Client
 
   install: () ->
     return if @installed == true
-    unless window.onerror == @_windowOnErrorHandler
-      @log('Installing window.onerror handler')
-      @_oldOnErrorHandler = window.onerror
-      window.onerror = @_windowOnErrorHandler
     if @_loaded
       @log('honeybadger.js ' + @version + ' ready')
     else
@@ -306,31 +302,7 @@ class Client
         ret.push(if typeof v is 'object' then @_serialize(v, pk) else encodeURIComponent(pk) + '=' + encodeURIComponent(v))
     ret.join '&'
 
-  _windowOnErrorHandler: (msg, url, line, col, error) =>
-    if !currentNotice && @configuration.onerror
-      @log('Error caught by window.onerror', msg, url, line, col, error)
-      unless error
-        error = new UncaughtError(msg, url, line, col)
-      @notify(error)
-    if @_oldOnErrorHandler
-      return @_oldOnErrorHandler.apply(this, arguments)
-    false
-
-# Invoked from window.onerror handler, and uses v8 stack format.
-class UncaughtError extends Error
-  constructor: (message, url, line, column) ->
-    @name = 'window.onerror'
-    @message = message || 'An unknown error was caught by window.onerror.'
-    @stack = [
-      @message
-      '\n    at ? ('
-      (url || 'unknown')
-      ':'
-      (line || 0)
-      ':'
-      (column || 0)
-      ')'
-    ].join('')
-
 Honeybadger = new Client
 Honeybadger.Client = Client
+
+window.Honeybadger = Honeybadger

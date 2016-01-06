@@ -281,4 +281,4 @@ describe 'Honeybadger', ->
         stackInfo = 'foo'
         window.onerror 'testing', 'http://foo.bar', '123'
 
-        expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(UncaughtError))
+        expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(Error))
