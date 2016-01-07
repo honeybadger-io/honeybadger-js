@@ -24,7 +24,7 @@ describe 'Honeybadger', ->
     it 'logs once', ->
       Honeybadger._domReady()
       Honeybadger._domReady()
-      expect(Honeybadger.log.calls.length).toEqual(1)
+      expect(Honeybadger.log.calls.count()).toEqual(1)
 
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()

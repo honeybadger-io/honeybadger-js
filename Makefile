@@ -34,14 +34,5 @@ minify:
 	mv $(MINIFIED) $(BUILD_DIR)
 	mv $(SOURCE_MAP) $(BUILD_DIR)
 
-server:
-	node spec/server.js &
-
-kill:
-	kill -9 `cat spec/pid.txt`
-	rm spec/pid.txt
-
-test: compile server
-	sleep 1
-	$(PHANTOM) ./spec/runner.js http://localhost:8000/spec/runner.html
-	make kill
+test: compile
+	grunt jasmine
