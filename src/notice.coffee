@@ -68,7 +68,8 @@ class Notice
 
       seen.push(obj)
       if obj instanceof Array
-        return obj.map (v) => @_sanitize(v, seen)
+        new_obj = []
+        return (@_sanitize(v, seen) for v in obj)
       else
         new_obj = {}
         try

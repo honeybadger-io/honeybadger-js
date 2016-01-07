@@ -13,6 +13,10 @@ module.exports = function(grunt) {
     browserName: 'internet explorer',
     platform: 'WIN8',
     version: '10'
+  }, {
+    browserName: 'internet explorer',
+    platform: 'XP',
+    version: '8'
   }];
 
   grunt.initConfig({

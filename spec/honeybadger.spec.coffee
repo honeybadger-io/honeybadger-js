@@ -143,6 +143,15 @@ describe 'Honeybadger', ->
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
     it 'generates a stack trace without an error', ->
+      supportsGenerate = false
+      try
+        throw new Error('')
+      catch e
+        supportsGenerate = e.stack?
+      # pending('not supported in current browser') unless supportsGenerate
+      # The pending function ^ does not work in IE8 apparently, so do this for now:
+      return unless supportsGenerate
+
       Honeybadger.configure
         api_key: 'asdf'
 

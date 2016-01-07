@@ -28,7 +28,7 @@
     // Thanks @gordonwoodhull https://github.com/axemclion/grunt-saucelabs/issues/109#issuecomment-166767282
     (function () {
       var oldJSReport = window.jasmine.getJSReport;
-      window.jasmine.getJSReport = function () {
+      window.jasmine.getJSReport = function() {
         var results = oldJSReport();
         if (results) {
           return {
@@ -41,22 +41,36 @@
         }
       };
 
-      function removePassingTests (suites) {
-        return suites.filter(specFailed)
-          .map(mapSuite);
+      function removePassingTests(suites) {
+        var result = [];
+        suites = takeItems(suites, specFailed);
+        for (i = 0; i < suites.length; ++i) {
+          result[i] = mapSuite(suites[i]);
+        }
+        return result;
       }
 
-      function mapSuite (suite) {
+      function mapSuite(suite) {
         var result = {};
         for (var s in suite) {
           result[s] = suite[s];
         }
-        result.specs = suite.specs.filter(specFailed);
+        result.specs = takeItems(suite.specs, specFailed);
         result.suites = removePassingTests(suite.suites);
         return result;
       }
 
-      function specFailed (item) {
+      function takeItems(items, func) {
+        var result = [];
+        for (i = 0; i < items.length; ++i) {
+          if (!!func(items[i])) {
+            result[i] = items[i];
+          }
+        }
+        return result;
+      }
+
+      function specFailed(item) {
         return !item.passed;
       }
     })();
