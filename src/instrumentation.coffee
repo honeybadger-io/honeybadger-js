@@ -3,8 +3,8 @@
   # removeEventListener.
   wrap = (fn) ->
     try
-      return fn unless hb.configuration.onerror
       return fn if typeof fn isnt 'function'
+      return fn unless hb.configuration.onerror
       fn.___hb = hb.wrap(fn) unless fn.___hb
       return fn.___hb
     catch _e
@@ -36,6 +36,8 @@
       instrument prototype, 'addEventListener', (original) ->
         # See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
         (type, listener, useCapture, wantsUntrusted) ->
+          if listener.handleEvent?
+            listener.handleEvent = wrap(listener.handleEvent)
           original.call(this, type, wrap(listener), useCapture, wantsUntrusted)
 
       instrument prototype, 'removeEventListener', (original) ->

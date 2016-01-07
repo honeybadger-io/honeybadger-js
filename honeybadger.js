@@ -173,11 +173,16 @@ Notice = (function() {
       }
       seen.push(obj);
       if (obj instanceof Array) {
-        return obj.map((function(_this) {
-          return function(v) {
-            return _this._sanitize(v, seen);
-          };
-        })(this));
+        new_obj = [];
+        return (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = obj.length; i < len; i++) {
+            v = obj[i];
+            results.push(this._sanitize(v, seen));
+          }
+          return results;
+        }).call(this);
       } else {
         new_obj = {};
         try {
@@ -598,10 +603,10 @@ window.Honeybadger = Honeybadger;
   wrap = function(fn) {
     var _e;
     try {
-      if (!hb.configuration.onerror) {
+      if (typeof fn !== 'function') {
         return fn;
       }
-      if (typeof fn !== 'function') {
+      if (!hb.configuration.onerror) {
         return fn;
       }
       if (!fn.___hb) {
@@ -646,6 +651,9 @@ window.Honeybadger = Honeybadger;
     if (prototype = window[prop] && window[prop].prototype) {
       instrument(prototype, 'addEventListener', function(original) {
         return function(type, listener, useCapture, wantsUntrusted) {
+          if (listener.handleEvent != null) {
+            listener.handleEvent = wrap(listener.handleEvent);
+          }
           return original.call(this, type, wrap(listener), useCapture, wantsUntrusted);
         };
       });
@@ -659,9 +667,9 @@ window.Honeybadger = Honeybadger;
   }
   instrument(window, 'onerror', function(original) {
     return function(msg, url, line, col, error) {
-      if (!currentNotice && hb.configuration.onerror) {
+      if (hb.configuration.onerror && !currentNotice) {
         hb.log('Error caught by window.onerror', msg, url, line, col, error);
-        if (!error && msg) {
+        if (msg && !error) {
           error = new Error(msg);
           error.name = 'window.onerror';
           error.stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
