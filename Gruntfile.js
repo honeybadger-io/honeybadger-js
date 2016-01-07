@@ -50,7 +50,7 @@ module.exports = function(grunt) {
     },
     watch: {
       compile: {
-        files: ['Makefile', 'src/**/*.*', 'spec/runner.html'],
+        files: ['Makefile', 'spec/**/*.*', 'src/**/*.*', 'spec/runner.html'],
         tasks: 'shell:compile'
       },
       specs: {
