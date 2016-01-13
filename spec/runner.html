@@ -4,11 +4,11 @@
 <head>
   <title>Jasmine Spec Runner</title>
 
-  <link rel="shortcut icon" type="image/png" href="../vendor/jasmine-2.4.1/jasmine_favicon.png">
-  <link rel="stylesheet" type="text/css" href="../vendor/jasmine-2.4.1/jasmine.css">
-  <script type="text/javascript" src="../vendor/jasmine-2.4.1/jasmine.js"></script>
-  <script type="text/javascript" src="../vendor/jasmine-2.4.1/jasmine-html.js"></script>
-  <script type="text/javascript" src="../vendor/jasmine-2.4.1/boot.js"></script>
+  <link rel="shortcut icon" type="image/png" href="../vendor/jasmine-1.3.1/jasmine_favicon.png">
+  <link rel="stylesheet" type="text/css" href="../vendor/jasmine-1.3.1/jasmine.css">
+  <script type="text/javascript" src="../vendor/jasmine-1.3.1/jasmine.js"></script>
+  <script type="text/javascript" src="../vendor/jasmine-1.3.1/jasmine-html.js"></script>
+
   <script type="text/javascript" src="../vendor/jasmine-jsreporter-1.0.0/jasmine-jsreporter.js"></script>
 
   <!-- include source files here... -->
@@ -22,24 +22,24 @@
   <script type="text/javascript" src="../build/spec/notice.spec.js"></script>
   <script type="text/javascript" src="../build/spec/configuration.spec.js"></script>
   <script type="text/javascript" src="../build/spec/honeybadger.spec.js"></script>
-  <script>
-    jasmine.getEnv().addReporter(new jasmine.JSReporter2());
 
+  <script>
     // Thanks @gordonwoodhull https://github.com/axemclion/grunt-saucelabs/issues/109#issuecomment-166767282
     (function () {
-      var oldJSReport = window.jasmine.getJSReport;
-      window.jasmine.getJSReport = function() {
-        var results = oldJSReport();
+      var reporter = new jasmine.JSReporter();
+      var oldReportRunnerResults = reporter.reportRunnerResults;
+      reporter.reportRunnerResults = function(runner) {
+        oldReportRunnerResults(runner);
+        var results = jasmine.runnerResults;
         if (results) {
-          return {
+          jasmine.runnerResults = {
             durationSec: results.durationSec,
             suites: removePassingTests(results.suites),
             passed: results.passed
           };
-        } else {
-          return null;
         }
       };
+      jasmine.getEnv().addReporter(reporter);
 
       function removePassingTests(suites) {
         var result = [];
@@ -73,6 +73,35 @@
       function specFailed(item) {
         return !item.passed;
       }
+    })();
+  </script>
+
+  <script type="text/javascript">
+    (function() {
+      var jasmineEnv = jasmine.getEnv();
+      jasmineEnv.updateInterval = 1000;
+
+      var htmlReporter = new jasmine.HtmlReporter();
+
+      jasmineEnv.addReporter(htmlReporter);
+
+      jasmineEnv.specFilter = function(spec) {
+        return htmlReporter.specFilter(spec);
+      };
+
+      var currentWindowOnload = window.onload;
+
+      window.onload = function() {
+        if (currentWindowOnload) {
+          currentWindowOnload();
+        }
+        execJasmine();
+      };
+
+      function execJasmine() {
+        jasmineEnv.execute();
+      }
+
     })();
   </script>
 </head>

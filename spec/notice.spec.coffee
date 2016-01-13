@@ -70,6 +70,9 @@ describe 'Notice', ->
       expect(output.error.message).toEqual("[object Object]")
 
   describe "cyclic structures in payload", ->
+    # Local `it` marks scenarios as pending in browsers which don't support JSON.
+    it = if typeof(JSON) is 'undefined' then window.xit else window.it
+
     it "converts cyclic structures", ->
       e = mockError()
       c = { "foo": "bar" }

@@ -24,7 +24,7 @@ describe 'Honeybadger', ->
     it 'logs once', ->
       Honeybadger._domReady()
       Honeybadger._domReady()
-      expect(Honeybadger.log.calls.count()).toEqual(1)
+      expect(Honeybadger.log.calls.length).toEqual(1)
 
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
@@ -104,7 +104,7 @@ describe 'Honeybadger', ->
         api_key: 'asdf'
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
         notice = new Notice({ stack: e.stack, message: e.message, name: e.name })
@@ -113,7 +113,7 @@ describe 'Honeybadger', ->
 
     it 'does not deliver notice when not configured', ->
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
 
@@ -125,7 +125,7 @@ describe 'Honeybadger', ->
         disabled: true
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
 
@@ -206,7 +206,7 @@ describe 'Honeybadger', ->
 
     it 'notifies Honeybadger of errors and re-throws', ->
       func = () ->
-        'foo'.bar()
+        throw new Error("Testing")
       error = null
 
       try
@@ -229,7 +229,7 @@ describe 'Honeybadger', ->
       Honeybadger.beforeNotify () -> false
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
         notice = new Notice({ error: e })
@@ -240,7 +240,7 @@ describe 'Honeybadger', ->
       Honeybadger.beforeNotify () -> true
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
         notice = new Notice({ error: e })
@@ -251,7 +251,7 @@ describe 'Honeybadger', ->
       Honeybadger.beforeNotify () ->
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
         notice = new Notice({ error: e })
