@@ -1,4 +1,8 @@
 ((window, hb) ->
+  unless hb
+    console.log('Skipping JavaScript instrumentation: please load honeybadger.js first.') if window.console
+    return
+
   # wrap always returns the same function so that callbacks can be removed via
   # removeEventListener.
   wrap = (fn) ->
@@ -9,12 +13,10 @@
       return fn.___hb
     catch _e
       return fn
+
   instrument = (object, name, replacement) ->
     original = object[name]
     object[name] = replacement(original)
-  unless hb
-    console.log('Skipping JavaScript instrumentation: please load honeybadger.js first.') if window.console
-    return
 
   instrumentTimer = (original) ->
     # See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
