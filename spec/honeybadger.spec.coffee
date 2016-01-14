@@ -14,14 +14,15 @@ describe 'Honeybadger', ->
   it 'is not configured by default', ->
     expect(Honeybadger._configured).toEqual(false)
 
-  it 'is not loaded by default', ->
-    expect(Honeybadger._loaded).toEqual(false)
+  it 'is loaded by default', ->
+    expect(Honeybadger._loaded).toEqual(true)
 
   describe '._domReady', ->
     beforeEach () ->
       spyOn(Honeybadger, 'log')
 
     it 'logs once', ->
+      Honeybadger._loaded = false
       Honeybadger._domReady()
       Honeybadger._domReady()
       expect(Honeybadger.log.calls.length).toEqual(1)
@@ -272,7 +273,6 @@ describe 'Honeybadger', ->
 
   describe '._windowOnErrorHandler', ->
     beforeEach () ->
-      Honeybadger.install()
       spyOn Honeybadger, 'notify'
 
     describe 'default behavior', ->

@@ -222,6 +222,18 @@ Client = (function() {
     if (options) {
       this.configure(options);
     }
+    if (document.readyState === 'complete') {
+      this._loaded = true;
+      this.log('honeybadger.js ' + this.version + ' ready');
+    } else {
+      this.log('Installing ready handler');
+      if (document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', this._domReady, true);
+        window.addEventListener('load', this._domReady, true);
+      } else {
+        window.attachEvent('onload', this._domReady);
+      }
+    }
   }
 
   Client.prototype.log = function() {
@@ -379,28 +391,9 @@ Client = (function() {
     return this;
   };
 
-  Client.prototype.install = function() {
-    if (this.installed === true) {
-      return;
-    }
-    if (this._loaded) {
-      this.log('honeybadger.js ' + this.version + ' ready');
-    } else {
-      this.log('Installing ready handler');
-      if (document.addEventListener) {
-        document.addEventListener('DOMContentLoaded', this._domReady, true);
-        window.addEventListener('load', this._domReady, true);
-      } else {
-        window.attachEvent('onload', this._domReady);
-      }
-    }
-    this._installed = true;
-    return this;
-  };
-
   Client.prototype._queue = [];
 
-  Client.prototype._loaded = document.readyState === 'complete';
+  Client.prototype._loaded = false;
 
   Client.prototype._configured = false;
 
@@ -677,6 +670,5 @@ Honeybadger.Client = Client;
     };
   });
 })(window, Honeybadger);
-  Honeybadger.install();
   window.Honeybadger = Honeybadger;
 })(window);

@@ -6,6 +6,16 @@ class Client
   constructor: (options) ->
     @log('Initializing honeybadger.js ' + @version)
     @configure(options) if options
+    if document.readyState == 'complete'
+      @_loaded = true
+      @log('honeybadger.js ' + @version + ' ready')
+    else
+      @log('Installing ready handler')
+      if document.addEventListener
+        document.addEventListener('DOMContentLoaded', @_domReady, true)
+        window.addEventListener('load', @_domReady, true)
+      else
+        window.attachEvent('onload', @_domReady)
 
   # Debug logging.
   #
@@ -128,7 +138,7 @@ class Client
     return false if @_checkHandlers(@beforeNotifyHandlers, notice)
 
     [currentError, currentNotice] = [error, notice]
-    if ! @_loaded
+    if not @_loaded
       @log('Queuing notice', notice)
       @_queue.push(notice)
     else
@@ -152,23 +162,9 @@ class Client
     @_configured = false
     @
 
-  install: () ->
-    return if @installed == true
-    if @_loaded
-      @log('honeybadger.js ' + @version + ' ready')
-    else
-      @log('Installing ready handler')
-      if document.addEventListener
-        document.addEventListener('DOMContentLoaded', @_domReady, true)
-        window.addEventListener('load', @_domReady, true)
-      else
-        window.attachEvent('onload', @_domReady)
-    @_installed = true
-    @
-
   _queue: []
 
-  _loaded: (document.readyState == 'complete')
+  _loaded: false
 
   _configured: false
 
