@@ -59,7 +59,7 @@ module.exports = function(grunt) {
         command: 'make compile'
       },
       build: {
-        command: 'make'
+        command: 'make compile concat'
       }
     },
     watch: {
