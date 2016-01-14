@@ -57,6 +57,9 @@ module.exports = function(grunt) {
     shell: {
       compile: {
         command: 'make compile'
+      },
+      build: {
+        command: 'make'
       }
     },
     watch: {
@@ -77,5 +80,5 @@ module.exports = function(grunt) {
   }
 
   grunt.registerTask('dev', ['connect', 'watch']);
-  grunt.registerTask('test', ['shell:compile', 'connect', 'saucelabs-jasmine']);
+  grunt.registerTask('test', ['shell:build', 'connect', 'saucelabs-jasmine']);
 };

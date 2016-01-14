@@ -1,15 +1,14 @@
 describe 'Honeybadger', ->
   beforeEach () ->
     Honeybadger.reset()
-    Honeybadger.resetContext()
 
     # Perform immediately.
     window.setTimeout = (f) ->
       f.apply(this, arguments)
 
-  it 'exposes it\' prototype', ->
-    new_honeybadger = new Honeybadger.Client
-    expect(new_honeybadger).toEqual(jasmine.any(Client))
+  it 'exposes it\'s prototype', ->
+    expect(Honeybadger.Client.prototype).toEqual(Honeybadger.__proto__)
+    expect((new Honeybadger.Client).__proto__).toEqual(Honeybadger.__proto__)
 
   it 'is not configured by default', ->
     expect(Honeybadger._configured).toEqual(false)
@@ -29,7 +28,6 @@ describe 'Honeybadger', ->
 
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
-    expect(Honeybadger.configuration).toEqual(jasmine.any(Configuration))
 
   describe '.configure', ->
     it 'configures Honeybadger', ->
@@ -96,9 +94,12 @@ describe 'Honeybadger', ->
     expect(Honeybadger.notify).toBeDefined()
 
   describe '.notify', ->
+    notice = null
     beforeEach () ->
-      spyOn(Honeybadger, '_sendRequest')
       notice = null
+      spyOn(Honeybadger, '_sendRequest').andCallFake (data) ->
+        notice = data
+        true
 
     it 'delivers the notice when enabled', ->
       Honeybadger.configure
@@ -108,9 +109,8 @@ describe 'Honeybadger', ->
         throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ stack: e.stack, message: e.message, name: e.name })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
     it 'does not deliver notice when not configured', ->
       try
@@ -171,9 +171,8 @@ describe 'Honeybadger', ->
         throw new Error("Honeybadger don't care, but you might.")
       catch e
         Honeybadger.notify(error: e)
-        notice = new Notice({ stack: e.stack, message: e.message, name: e.name })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
     it 'accepts name as second argument', ->
       Honeybadger.configure
@@ -183,9 +182,8 @@ describe 'Honeybadger', ->
         throw new Error("Honeybadger don't care, but you might.")
       catch e
         Honeybadger.notify(e, 'CustomError')
-        notice = new Notice({ stack: e.stack, message: e.message, name: 'CustomError' })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
     it 'accepts options as third argument', ->
       Honeybadger.configure
@@ -194,10 +192,9 @@ describe 'Honeybadger', ->
       try
         throw new Error("Honeybadger don't care, but you might.")
       catch e
-        notice = new Notice({ stack: e.stack, name: 'CustomError', message: 'Custom message' })
         Honeybadger.notify(e, 'CustomError', { message: 'Custom message' })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
   describe '.wrap', ->
     beforeEach () ->
@@ -233,7 +230,6 @@ describe 'Honeybadger', ->
         throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
@@ -244,7 +240,6 @@ describe 'Honeybadger', ->
         throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
@@ -255,7 +250,6 @@ describe 'Honeybadger', ->
         throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
