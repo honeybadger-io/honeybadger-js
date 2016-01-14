@@ -7,8 +7,9 @@ describe 'Honeybadger', ->
       f.apply(this, arguments)
 
   it 'exposes it\'s prototype', ->
-    expect(Honeybadger.Client.prototype).toEqual(Honeybadger.__proto__)
-    expect((new Honeybadger.Client).__proto__).toEqual(Honeybadger.__proto__)
+    proto = (obj) -> obj.constructor.prototype
+    expect(Honeybadger.Client.prototype).toEqual(proto(Honeybadger))
+    expect(proto(new Honeybadger.Client)).toEqual(proto(Honeybadger))
 
   it 'is not configured by default', ->
     expect(Honeybadger._configured).toEqual(false)
