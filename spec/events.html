@@ -52,17 +52,21 @@
       }
     };
 
+    var timeout;
     function testSetTimeout() {
+      testClearTimeout();
       log("Failing in 3 seconds...");
-      return setTimeout(function(){
+      return timeout = setTimeout(function(){
         log(arguments);
         throw new Error("This is a test error raised from setTimeout callback.");
       }, 3000, 'foo', 'bar');
     }
     function testClearTimeout() {
-      var timeout = testSetTimeout();
-      log("just kidding...");
-      clearTimeout(timeout);
+      if (timeout) {
+        log("just kidding...");
+        clearTimeout(timeout);
+        timeout = null;
+      }
     }
 
     var interval;
