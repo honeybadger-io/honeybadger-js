@@ -11,11 +11,19 @@
 
   <script type="text/javascript" src="../vendor/jasmine-jsreporter-1.0.0/jasmine-jsreporter.js"></script>
 
-  <!-- include source files here... -->
+  <!-- Note: this is the full build of honeybadger.js, including dependencies. -->
   <script type="text/javascript" src="../honeybadger.js"></script>
+  <script type="text/javascript" src="../build/spec/honeybadger.spec.js"></script>
+
+  <!-- include source files here... -->
+  <script type="text/javascript" src="../build/src/helpers.js"></script>
+  <script type="text/javascript" src="../build/src/notice.js"></script>
+  <script type="text/javascript" src="../build/src/configuration.js"></script>
 
   <!-- include spec files here... -->
-  <script type="text/javascript" src="../build/spec/honeybadger.spec.js"></script>
+  <script type="text/javascript" src="../build/spec/helpers.spec.js"></script>
+  <script type="text/javascript" src="../build/spec/notice.spec.js"></script>
+  <script type="text/javascript" src="../build/spec/configuration.spec.js"></script>
 
   <script>
     // Thanks @gordonwoodhull https://github.com/axemclion/grunt-saucelabs/issues/109#issuecomment-166767282
