@@ -213,15 +213,21 @@ var Client, Honeybadger, currentError, currentNotice, ref,
 ref = [null, null], currentError = ref[0], currentNotice = ref[1];
 
 Client = (function() {
+  var logFactory;
+
   Client.prototype.version = '0.3.1';
 
   function Client(options) {
     this._domReady = bind(this._domReady, this);
-    this.log = bind(this.log, this);
-    this.log('Initializing honeybadger.js ' + this.version);
+    this._queue = [];
+    this.context = {};
+    this.beforeNotifyHandlers = [];
+    this.configuration = new Configuration;
+    this.log = logFactory(this.configuration);
     if (options) {
       this.configure(options);
     }
+    this.log('Initializing honeybadger.js ' + this.version);
     if (document.readyState === 'complete') {
       this._loaded = true;
       this.log('honeybadger.js ' + this.version + ' ready');
@@ -236,12 +242,20 @@ Client = (function() {
     }
   }
 
-  Client.prototype.log = function() {
-    this.log.history = this.log.history || [];
-    this.log.history.push(arguments);
-    if (this.configuration.debug && window.console) {
+  logFactory = function(config) {
+    var log;
+    log = function() {
+      log.history.push(arguments);
+      if (config && !config.debug) {
+        return;
+      }
+      if (!window.console) {
+        return;
+      }
       return console.log(Array.prototype.slice.call(arguments));
-    }
+    };
+    log.history = [];
+    return log;
   };
 
   Client.prototype.configure = function(options) {
@@ -264,10 +278,6 @@ Client = (function() {
     return this;
   };
 
-  Client.prototype.configuration = new Configuration();
-
-  Client.prototype.context = {};
-
   Client.prototype.resetContext = function(options) {
     if (options == null) {
       options = {};
@@ -289,8 +299,6 @@ Client = (function() {
     }
     return this;
   };
-
-  Client.prototype.beforeNotifyHandlers = [];
 
   Client.prototype.beforeNotify = function(handler) {
     return this.beforeNotifyHandlers.push(handler);
@@ -390,8 +398,6 @@ Client = (function() {
     this._configured = false;
     return this;
   };
-
-  Client.prototype._queue = [];
 
   Client.prototype._loaded = false;
 

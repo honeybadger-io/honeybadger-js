@@ -4,8 +4,15 @@ class Client
   version: '0.3.1'
 
   constructor: (options) ->
-    @log('Initializing honeybadger.js ' + @version)
+    @_queue = []
+
+    @context = {}
+    @beforeNotifyHandlers = []
+    @configuration = new Configuration
+    @log = logFactory(@configuration)
     @configure(options) if options
+
+    @log('Initializing honeybadger.js ' + @version)
     if document.readyState == 'complete'
       @_loaded = true
       @log('honeybadger.js ' + @version + ' ready')
@@ -23,14 +30,18 @@ class Client
   #
   # Example
   #
-  #   log('inside coolFunc',this,arguments);
+  #   log = logFactory()
+  #   log('inside coolFunc', this, arguments)
   #
   # Returns nothing.
-  log: () =>
-    @log.history = @log.history || [] # store logs to an array for reference
-    @log.history.push(arguments)
-    if @configuration.debug && window.console
+  logFactory = (config) ->
+    log = () ->
+      log.history.push(arguments)
+      return if config and not config.debug
+      return if not window.console
       console.log(Array.prototype.slice.call(arguments))
+    log.history = [] # store logs to an array for reference
+    log
 
   configure: (options = {}) ->
     for k,v of options
@@ -39,10 +50,6 @@ class Client
       console.log(Array.prototype.slice.call(args)) for args in @log.history
     @_configured = true
     @
-
-  configuration: new Configuration()
-
-  context: {}
 
   resetContext: (options = {}) ->
     @context = if options instanceof Object then options else {}
@@ -54,7 +61,6 @@ class Client
         @context[k] = v
     @
 
-  beforeNotifyHandlers: []
   beforeNotify: (handler) ->
     @beforeNotifyHandlers.push handler
 
@@ -162,10 +168,7 @@ class Client
     @_configured = false
     @
 
-  _queue: []
-
   _loaded: false
-
   _configured: false
 
   _domReady: () =>
