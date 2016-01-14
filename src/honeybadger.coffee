@@ -41,6 +41,10 @@ class Client
       return if not window.console
       console.log(Array.prototype.slice.call(arguments))
     log.history = [] # store logs to an array for reference
+    log.error = () ->
+      log.history.push(arguments)
+      return if not window.console
+      console.log(Array.prototype.slice.call(arguments))
     log
 
   configure: (options = {}) ->
@@ -98,7 +102,10 @@ class Client
   #
   # Returns false if halted (see below), otherwise sent Notice.
   notify: (error, name, opts = {}) ->
-    return false if !@_validConfig() || @configuration.disabled == true
+    return false if @configuration.disabled
+    if not @_validConfig()
+      @log.error("Could not send error report: invalid API key.", arguments)
+      return false
 
     [stack, generator] = [undefined, undefined]
 

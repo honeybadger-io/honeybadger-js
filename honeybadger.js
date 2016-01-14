@@ -255,6 +255,13 @@ Client = (function() {
       return console.log(Array.prototype.slice.call(arguments));
     };
     log.history = [];
+    log.error = function() {
+      log.history.push(arguments);
+      if (!window.console) {
+        return;
+      }
+      return console.log(Array.prototype.slice.call(arguments));
+    };
     return log;
   };
 
@@ -309,7 +316,11 @@ Client = (function() {
     if (opts == null) {
       opts = {};
     }
-    if (!this._validConfig() || this.configuration.disabled === true) {
+    if (this.configuration.disabled) {
+      return false;
+    }
+    if (!this._validConfig()) {
+      this.log.error("Could not send error report: invalid API key.", arguments);
       return false;
     }
     ref1 = [void 0, void 0], stack = ref1[0], generator = ref1[1];
