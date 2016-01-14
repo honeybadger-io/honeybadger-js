@@ -304,5 +304,3 @@ class Client
 
 Honeybadger = new Client
 Honeybadger.Client = Client
-
-window.Honeybadger = Honeybadger

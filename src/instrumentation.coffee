@@ -1,8 +1,4 @@
 ((window, hb) ->
-  unless hb
-    console.log('Skipping JavaScript instrumentation: please load honeybadger.js first.') if window.console
-    return
-
   # wrap always returns the same function so that callbacks can be removed via
   # removeEventListener.
   wrap = (fn) ->
@@ -62,4 +58,4 @@
       false
 
   return
-)(window, window.Honeybadger)
+)(window, Honeybadger)

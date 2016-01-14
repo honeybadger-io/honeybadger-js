@@ -1,2 +1,3 @@
   Honeybadger.install();
+  window.Honeybadger = Honeybadger;
 })(window);
