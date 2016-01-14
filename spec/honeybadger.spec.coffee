@@ -265,7 +265,7 @@ describe 'Honeybadger', ->
     it 'drops undefined values', ->
       expect(Honeybadger._serialize({foo: undefined, bar: 'baz'})).toEqual('bar=baz')
 
-  describe '._windowOnErrorHandler', ->
+  describe 'window.onerror callback', ->
     beforeEach () ->
       spyOn Honeybadger, 'notify'
 
