@@ -1,7 +1,7 @@
 [currentError, currentNotice] = [null, null]
 
 class Client
-  version: '0.3.1'
+  version: '0.4.0'
 
   constructor: (options) ->
     @_queue = []

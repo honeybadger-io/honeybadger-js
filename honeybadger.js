@@ -1,5 +1,5 @@
 /*
-  honeybadger.js v0.3.1
+  honeybadger.js v0.4.0
   A JavaScript Notifier for Honeybadger
   https://github.com/honeybadger-io/honeybadger-js
   https://www.honeybadger.io/
@@ -227,7 +227,7 @@ ref = [null, null], currentError = ref[0], currentNotice = ref[1];
 Client = (function() {
   var logFactory;
 
-  Client.prototype.version = '0.3.1';
+  Client.prototype.version = '0.4.0';
 
   function Client(options) {
     this._domReady = bind(this._domReady, this);
