@@ -12,6 +12,8 @@ new errors may be grouped differently than old.*
 
 ### 1. Include the JS library
 
+#### Globally
+
 Place the following code between the `<head></head>` tags of your page:
 
 ```html
@@ -22,6 +24,39 @@ Place the following code between the `<head></head>` tags of your page:
     environment: 'production'
   });
 </script>
+```
+
+#### Installing via Node.js
+
+```
+npm install honeybadger-js --save-dev
+```
+
+#### Installing via Bower
+
+```sh
+bower install honeybadger-js
+```
+
+#### Browserify
+
+```sh
+var Honeybadger = require("honeybadger");
+Honeybadger.configure({
+  api_key: 'project api key',
+  environment: 'production'
+});
+```
+
+#### RequireJS
+
+```sh
+requirejs(["honeybadger"], function(Honeybadger) {
+  Honeybadger.configure({
+    api_key: 'project api key',
+    environment: 'production'
+  });
+});
 ```
 
 ### 2. Start reporting exceptions
