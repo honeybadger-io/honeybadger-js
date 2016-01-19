@@ -103,9 +103,6 @@ class Client
   # Returns false if halted (see below), otherwise sent Notice.
   notify: (error, name, opts = {}) ->
     return false if @configuration.disabled
-    if not @_validConfig()
-      @log.error("Could not send error report: invalid API key.", arguments)
-      return false
 
     [stack, generator] = [undefined, undefined]
 
@@ -229,6 +226,9 @@ class Client
   _send: (notice) ->
     @log('Sending notice', notice)
     [currentError, currentNotice] = [null, null]
+    if not @_validConfig()
+      @log.error("Could not send error report: invalid API key.", arguments)
+      return false
     @_sendRequest(notice.payload())
 
   _validConfig: () ->

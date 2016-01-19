@@ -10,9 +10,9 @@
     // AMD. Register as an anonymous module.
     define([], factory);
   } else if (typeof module === 'object' && module.exports) {
-    // Node. Does not work with strict CommonJS, but
+    // Browserfy. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
-    // like Node.
+    // like Browserfy/Node.
     module.exports = factory();
   } else {
     // Browser globals (root is window)
@@ -331,10 +331,6 @@ Client = (function() {
     if (this.configuration.disabled) {
       return false;
     }
-    if (!this._validConfig()) {
-      this.log.error("Could not send error report: invalid API key.", arguments);
-      return false;
-    }
     ref1 = [void 0, void 0], stack = ref1[0], generator = ref1[1];
     if (name instanceof Object) {
       opts = name;
@@ -486,6 +482,10 @@ Client = (function() {
     var ref1;
     this.log('Sending notice', notice);
     ref1 = [null, null], currentError = ref1[0], currentNotice = ref1[1];
+    if (!this._validConfig()) {
+      this.log.error("Could not send error report: invalid API key.", arguments);
+      return false;
+    }
     return this._sendRequest(notice.payload());
   };
 
