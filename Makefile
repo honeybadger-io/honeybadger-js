@@ -8,13 +8,13 @@ CDN=//js.honeybadger.io/$(VERSION)
 MINIFIED=honeybadger.min.js
 SOURCE_MAP=honeybadger.min.js.map
 
-BUILD_FILES = src/header.txt \
+BUILD_FILES = src/header.js \
 							build/src/helpers.js \
 							build/src/configuration.js \
 							build/src/notice.js \
               build/src/honeybadger.js \
               build/src/instrumentation.js \
-							src/footer.txt
+							src/footer.js
 
 all: compile concat minify
 
