@@ -7,6 +7,7 @@
 
 	<title>Honeybadger-js Instrumentation</title>
 
+  <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script type="text/javascript" src="../honeybadger.js" ></script>
 
 	<script>
@@ -84,6 +85,15 @@
         interval = null;
       }
     }
+
+    function attachjQueryEvent() {
+      log("Attaching jQuery event");
+      handler = function(){
+        log("Failing in jQuery event handler...");
+        throw new Error("This is a test error raised from a jQuery event handler.");
+      }
+      $("#btnjQuery").on("click", handler);
+    };
   </script>
 </head>
 
@@ -101,5 +111,8 @@
   <button id="clearInterval" onclick="testClearInterval();">clearInterval()</button>
   <h2>Unhandled error</h2>
   <button id="throw" onclick="throw new Error('This is a test error thrown outside of a callback.');">throw</button>
+  <h2>jQuery event</h2>
+  <button id="attchjQuery" onclick="attachjQueryEvent();">Attach</button>
+  <button id="btnjQuery">Click</button>
 </body>
 </html>
