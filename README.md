@@ -17,7 +17,7 @@ new errors may be grouped differently than old.*
 Place the following code between the `<head></head>` tags of your page:
 
 ```html
-<script src="//js.honeybadger.io/v0.3/honeybadger.min.js" type="text/javascript"></script>
+<script src="//js.honeybadger.io/v0.4/honeybadger.min.js" type="text/javascript"></script>
 <script type="text/javascript">
   Honeybadger.configure({
     api_key: 'project api key',
