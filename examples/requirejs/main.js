@@ -7,8 +7,7 @@
   requirejs(["../../honeybadger"], function(Honeybadger) {
     Honeybadger.configure({
       api_key: prompt("Enter the API key for your Honeybadger project:"),
-      debug: true,
-      onerror: true
+      debug: true
     });
     log("Attaching event");
     document.getElementById('btn').addEventListener("click", function(){

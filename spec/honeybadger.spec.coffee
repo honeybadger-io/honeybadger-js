@@ -271,18 +271,18 @@ describe 'Honeybadger', ->
       spyOn Honeybadger, 'notify'
 
     describe 'default behavior', ->
-      it 'ignores unhandled errors', ->
-        window.onerror 'testing', 'http://foo.bar', '123'
-        expect(Honeybadger.notify).not.toHaveBeenCalled()
-
-    describe 'when onerror is enabled', ->
-      beforeEach () ->
-        Honeybadger.configure
-          api_key: 'asdf',
-          onerror: true
-
       it 'notifies Honeybadger of unhandled exceptions', ->
         stackInfo = 'foo'
         window.onerror 'testing', 'http://foo.bar', '123'
 
         expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(Error))
+
+    describe 'when onerror is disabled', ->
+      beforeEach () ->
+        Honeybadger.configure
+          api_key: 'asdf',
+          onerror: false
+
+      it 'ignores unhandled errors', ->
+        window.onerror 'testing', 'http://foo.bar', '123'
+        expect(Honeybadger.notify).not.toHaveBeenCalled()

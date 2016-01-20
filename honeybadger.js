@@ -91,7 +91,7 @@ Configuration = (function() {
     component: null,
     action: null,
     disabled: false,
-    onerror: false,
+    onerror: true,
     debug: false,
     timeout: false
   };

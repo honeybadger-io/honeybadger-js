@@ -110,7 +110,7 @@ Honeybadger.configure({
   action: '',
 
   // Should unhandled (window.onerror) notifications be sent?
-  onerror: false,
+  onerror: true,
 
   // Disable notifications?
   disabled: false,
@@ -304,17 +304,14 @@ This is the only situation in which the source root is not required to be a vali
 
 ## window.onerror
 
-By default, honeybadger.js does not track unhandled errors. This is
-because `window.onerror` is a very limited method of error handling, and
-does not usually yield useful information. It is our official
-recommendation to always use try/catch explicitly to notify Honeybadger.
-If you still want to automatically catch errors via `window.onerror`,
-you can set the `onerror` configuration option to true:
+Honeybadger.js automatically reports uncaught exceptions from window.onerror. To
+disable notifications for uncaught exceptions, set the `onerror` option to
+`false`.
 
 ```javascript
 Honeybadger.configure({
   api_key: 'project api key',
-  onerror: true
+  onerror: false
 });
 ```
 
