@@ -28,7 +28,7 @@ concat: $(BUILD_FILES)
 	cat $^ >$(FINAL)
 
 minify:
-	uglifyjs --source-map $(SOURCE_MAP) --source-map-url $(CDN)/$(SOURCE_MAP) -o $(MINIFIED) $(FINAL)
+	uglifyjs --compress --mangle --source-map $(SOURCE_MAP) --source-map-url $(CDN)/$(SOURCE_MAP) -o $(MINIFIED) $(FINAL)
 	mkdir -p $(BUILD_DIR)
 	cp $(FINAL) $(BUILD_DIR)
 	mv $(MINIFIED) $(BUILD_DIR)
