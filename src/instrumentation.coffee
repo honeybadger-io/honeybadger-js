@@ -47,13 +47,16 @@
     # See https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
     (msg, url, line, col, error) ->
       if hb.configuration.onerror and not currentNotice
-        hb.log 'Error caught by window.onerror', msg, url, line, col, error
-        if msg and not error
-          error = new Error(msg)
-          error.name = 'window.onerror'
-          # v8 stack format.
-          error.stack = [ msg, '\n    at ? (', url or 'unknown', ':', line or 0, ':', col or 0, ')' ].join('')
-        hb.notify error if error
+        if line == 0 && msg =~ /Script error\.?/
+          hb.log('Ignoring cross-domain script error. Use CORS to enable tracking of these types of errors.', msg, url, line, col, error)
+        else
+          hb.log('Error caught by window.onerror', msg, url, line, col, error)
+          if msg and not error
+            error = new Error(msg)
+            error.name = 'window.onerror'
+            # v8 stack format.
+            error.stack = [ msg, '\n    at ? (', url or 'unknown', ':', line or 0, ':', col or 0, ')' ].join('')
+          hb.notify(error) if error
       return original.apply(this, arguments) if original instanceof Function
       false
 

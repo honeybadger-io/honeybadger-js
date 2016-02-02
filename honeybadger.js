@@ -354,6 +354,7 @@ Client = (function() {
         opts[k] = v;
       }
     }
+    stack || (stack = opts.stack);
     if (currentNotice) {
       if (error === currentError) {
         return;
@@ -682,14 +683,18 @@ Honeybadger.Client = Client;
   instrument(window, 'onerror', function(original) {
     return function(msg, url, line, col, error) {
       if (hb.configuration.onerror && !currentNotice) {
-        hb.log('Error caught by window.onerror', msg, url, line, col, error);
-        if (msg && !error) {
-          error = new Error(msg);
-          error.name = 'window.onerror';
-          error.stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
-        }
-        if (error) {
-          hb.notify(error);
+        if (line === 0 && (msg = ~/Script error\.?/)) {
+          hb.log('Ignoring cross-domain script error. Use CORS to enable tracking of these types of errors.', msg, url, line, col, error);
+        } else {
+          hb.log('Error caught by window.onerror', msg, url, line, col, error);
+          if (msg && !error) {
+            error = new Error(msg);
+            error.name = 'window.onerror';
+            error.stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
+          }
+          if (error) {
+            hb.notify(error);
+          }
         }
       }
       if (original instanceof Function) {

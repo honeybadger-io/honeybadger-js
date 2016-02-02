@@ -128,6 +128,8 @@ class Client
       for k,v of error
         opts[k] = v
 
+    stack ||= opts.stack
+
     # Check if a notice is already being processed, or is waiting to be deferred.
     if currentNotice
       if error == currentError

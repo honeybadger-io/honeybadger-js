@@ -272,10 +272,14 @@ describe 'Honeybadger', ->
 
     describe 'default behavior', ->
       it 'notifies Honeybadger of unhandled exceptions', ->
-        stackInfo = 'foo'
         window.onerror 'testing', 'http://foo.bar', '123'
 
         expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(Error))
+
+      it 'skips cross-domain script errors', ->
+        window.onerror 'Script error', 'http://foo.bar', 0
+
+        expect(Honeybadger.notify).not.toHaveBeenCalledWith(jasmine.any(Error))
 
     describe 'when onerror is disabled', ->
       beforeEach () ->
@@ -284,5 +288,5 @@ describe 'Honeybadger', ->
           onerror: false
 
       it 'ignores unhandled errors', ->
-        window.onerror 'testing', 'http://foo.bar', '123'
+        window.onerror 'testing', 'http://foo.bar', 0
         expect(Honeybadger.notify).not.toHaveBeenCalled()
