@@ -22,7 +22,7 @@ class Notice
         @context[k] = v
 
   payload: ->
-    @_sanitize
+    helpers.sanitize
       notifier:
         name: 'honeybadger.js'
         url: 'https://github.com/honeybadger-io/honeybadger-js'
@@ -55,27 +55,3 @@ class Notice
       delete data['USER_AGENT']
     data['HTTP_REFERER'] = document.referrer if document.referrer.match /\S/
     data
-
-  _sanitize: (obj, seen = []) =>
-    if obj instanceof Function
-      return "[FUNC]"
-    else if obj instanceof Object
-      # Object equality is determined by reference which means this should pass
-      # on unique objects with the same (or empty) values. {} != {}.
-      if obj in seen
-        @log("Dropping circular data structure.", k, v, obj)
-        return "[CIRCULAR DATA STRUCTURE]"
-
-      seen.push(obj)
-      if obj instanceof Array
-        return obj.map (v) => @_sanitize(v, seen)
-      else
-        new_obj = {}
-        try
-          for k,v of obj
-            new_obj[k] = @_sanitize(v, seen)
-        catch e
-          return { error: "Honeybadger was unable to read this object: " + String(e) }
-        return new_obj
-
-    obj

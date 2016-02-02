@@ -8,12 +8,13 @@ CDN=//js.honeybadger.io/$(VERSION)
 MINIFIED=honeybadger.min.js
 SOURCE_MAP=honeybadger.min.js.map
 
-BUILD_FILES = src/header.txt \
+BUILD_FILES = src/header.js \
 							build/src/helpers.js \
 							build/src/configuration.js \
 							build/src/notice.js \
               build/src/honeybadger.js \
-							src/footer.txt
+              build/src/instrumentation.js \
+							src/footer.js
 
 all: compile concat minify
 
@@ -33,14 +34,5 @@ minify:
 	mv $(MINIFIED) $(BUILD_DIR)
 	mv $(SOURCE_MAP) $(BUILD_DIR)
 
-server:
-	node spec/server.js &
-
-kill:
-	kill -9 `cat spec/pid.txt`
-	rm spec/pid.txt
-
-test: compile server
-	sleep 1
-	$(PHANTOM) ./spec/runner.js http://localhost:8000/spec/runner.html
-	make kill
+test: compile
+	grunt jasmine

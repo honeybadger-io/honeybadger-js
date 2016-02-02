@@ -1,34 +1,34 @@
 describe 'Honeybadger', ->
   beforeEach () ->
     Honeybadger.reset()
-    Honeybadger.resetContext()
 
     # Perform immediately.
     window.setTimeout = (f) ->
       f.apply(this, arguments)
 
-  it 'exposes it\' prototype', ->
-    new_honeybadger = new Honeybadger.Client
-    expect(new_honeybadger).toEqual(jasmine.any(Client))
+  it 'exposes it\'s prototype', ->
+    proto = (obj) -> obj.constructor.prototype
+    expect(Honeybadger.Client.prototype).toEqual(proto(Honeybadger))
+    expect(proto(new Honeybadger.Client)).toEqual(proto(Honeybadger))
 
   it 'is not configured by default', ->
     expect(Honeybadger._configured).toEqual(false)
 
-  it 'is not loaded by default', ->
-    expect(Honeybadger._loaded).toEqual(false)
+  it 'is loaded by default', ->
+    expect(Honeybadger._loaded).toEqual(true)
 
   describe '._domReady', ->
     beforeEach () ->
       spyOn(Honeybadger, 'log')
 
     it 'logs once', ->
+      Honeybadger._loaded = false
       Honeybadger._domReady()
       Honeybadger._domReady()
       expect(Honeybadger.log.calls.length).toEqual(1)
 
   it 'has a configuration object', ->
     expect(Honeybadger.configuration).toBeDefined()
-    expect(Honeybadger.configuration).toEqual(jasmine.any(Configuration))
 
   describe '.configure', ->
     it 'configures Honeybadger', ->
@@ -95,25 +95,27 @@ describe 'Honeybadger', ->
     expect(Honeybadger.notify).toBeDefined()
 
   describe '.notify', ->
+    notice = null
     beforeEach () ->
-      spyOn(Honeybadger, '_sendRequest')
       notice = null
+      spyOn(Honeybadger, '_sendRequest').andCallFake (data) ->
+        notice = data
+        true
 
     it 'delivers the notice when enabled', ->
       Honeybadger.configure
         api_key: 'asdf'
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ stack: e.stack, message: e.message, name: e.name })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
     it 'does not deliver notice when not configured', ->
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
 
@@ -125,7 +127,7 @@ describe 'Honeybadger', ->
         disabled: true
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
 
@@ -143,6 +145,15 @@ describe 'Honeybadger', ->
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
     it 'generates a stack trace without an error', ->
+      supportsGenerate = false
+      try
+        throw new Error('')
+      catch e
+        supportsGenerate = e.stack?
+      # pending('not supported in current browser') unless supportsGenerate
+      # The pending function ^ does not work in IE8 apparently, so do this for now:
+      return unless supportsGenerate
+
       Honeybadger.configure
         api_key: 'asdf'
 
@@ -161,9 +172,8 @@ describe 'Honeybadger', ->
         throw new Error("Honeybadger don't care, but you might.")
       catch e
         Honeybadger.notify(error: e)
-        notice = new Notice({ stack: e.stack, message: e.message, name: e.name })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
     it 'accepts name as second argument', ->
       Honeybadger.configure
@@ -173,9 +183,8 @@ describe 'Honeybadger', ->
         throw new Error("Honeybadger don't care, but you might.")
       catch e
         Honeybadger.notify(e, 'CustomError')
-        notice = new Notice({ stack: e.stack, message: e.message, name: 'CustomError' })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
     it 'accepts options as third argument', ->
       Honeybadger.configure
@@ -184,10 +193,9 @@ describe 'Honeybadger', ->
       try
         throw new Error("Honeybadger don't care, but you might.")
       catch e
-        notice = new Notice({ stack: e.stack, name: 'CustomError', message: 'Custom message' })
         Honeybadger.notify(e, 'CustomError', { message: 'Custom message' })
 
-      expect(Honeybadger._sendRequest).toHaveBeenCalledWith(notice.payload())
+      expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
   describe '.wrap', ->
     beforeEach () ->
@@ -197,7 +205,7 @@ describe 'Honeybadger', ->
 
     it 'notifies Honeybadger of errors and re-throws', ->
       func = () ->
-        'foo'.bar()
+        throw new Error("Testing")
       error = null
 
       try
@@ -220,10 +228,9 @@ describe 'Honeybadger', ->
       Honeybadger.beforeNotify () -> false
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).not.toHaveBeenCalled()
 
@@ -231,10 +238,9 @@ describe 'Honeybadger', ->
       Honeybadger.beforeNotify () -> true
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
@@ -242,10 +248,9 @@ describe 'Honeybadger', ->
       Honeybadger.beforeNotify () ->
 
       try
-        'foo'.bar()
+        throw new Error("Testing")
       catch e
         Honeybadger.notify(e)
-        notice = new Notice({ error: e })
 
       expect(Honeybadger._sendRequest).toHaveBeenCalled()
 
@@ -261,24 +266,23 @@ describe 'Honeybadger', ->
     it 'drops undefined values', ->
       expect(Honeybadger._serialize({foo: undefined, bar: 'baz'})).toEqual('bar=baz')
 
-  describe '._windowOnErrorHandler', ->
+  describe 'window.onerror callback', ->
     beforeEach () ->
-      Honeybadger.install()
       spyOn Honeybadger, 'notify'
 
     describe 'default behavior', ->
-      it 'ignores unhandled errors', ->
-        window.onerror 'testing', 'http://foo.bar', '123'
-        expect(Honeybadger.notify).not.toHaveBeenCalled()
-
-    describe 'when onerror is enabled', ->
-      beforeEach () ->
-        Honeybadger.configure
-          api_key: 'asdf',
-          onerror: true
-
       it 'notifies Honeybadger of unhandled exceptions', ->
         stackInfo = 'foo'
         window.onerror 'testing', 'http://foo.bar', '123'
 
-        expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(UncaughtError))
+        expect(Honeybadger.notify).toHaveBeenCalledWith(jasmine.any(Error))
+
+    describe 'when onerror is disabled', ->
+      beforeEach () ->
+        Honeybadger.configure
+          api_key: 'asdf',
+          onerror: false
+
+      it 'ignores unhandled errors', ->
+        window.onerror 'testing', 'http://foo.bar', '123'
+        expect(Honeybadger.notify).not.toHaveBeenCalled()

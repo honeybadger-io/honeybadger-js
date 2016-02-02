@@ -1,11 +1,28 @@
 [currentError, currentNotice] = [null, null]
 
 class Client
-  version: '0.3.1'
+  version: '0.4.0'
 
   constructor: (options) ->
-    @log('Initializing honeybadger.js ' + @version)
+    @_queue = []
+
+    @context = {}
+    @beforeNotifyHandlers = []
+    @configuration = new Configuration
+    @log = logFactory(@configuration)
     @configure(options) if options
+
+    @log('Initializing honeybadger.js ' + @version)
+    if document.readyState == 'complete'
+      @_loaded = true
+      @log('honeybadger.js ' + @version + ' ready')
+    else
+      @log('Installing ready handler')
+      if document.addEventListener
+        document.addEventListener('DOMContentLoaded', @_domReady, true)
+        window.addEventListener('load', @_domReady, true)
+      else
+        window.attachEvent('onload', @_domReady)
 
   # Debug logging.
   #
@@ -13,14 +30,22 @@ class Client
   #
   # Example
   #
-  #   log('inside coolFunc',this,arguments);
+  #   log = logFactory()
+  #   log('inside coolFunc', this, arguments)
   #
   # Returns nothing.
-  log: () =>
-    @log.history = @log.history || [] # store logs to an array for reference
-    @log.history.push(arguments)
-    if @configuration.debug && window.console
+  logFactory = (config) ->
+    log = () ->
+      log.history.push(arguments)
+      return if config and not config.debug
+      return if not window.console
       console.log(Array.prototype.slice.call(arguments))
+    log.history = [] # store logs to an array for reference
+    log.error = () ->
+      log.history.push(arguments)
+      return if not window.console
+      console.log(Array.prototype.slice.call(arguments))
+    log
 
   configure: (options = {}) ->
     for k,v of options
@@ -29,10 +54,6 @@ class Client
       console.log(Array.prototype.slice.call(args)) for args in @log.history
     @_configured = true
     @
-
-  configuration: new Configuration()
-
-  context: {}
 
   resetContext: (options = {}) ->
     @context = if options instanceof Object then options else {}
@@ -44,7 +65,6 @@ class Client
         @context[k] = v
     @
 
-  beforeNotifyHandlers: []
   beforeNotify: (handler) ->
     @beforeNotifyHandlers.push handler
 
@@ -82,7 +102,7 @@ class Client
   #
   # Returns false if halted (see below), otherwise sent Notice.
   notify: (error, name, opts = {}) ->
-    return false if !@_validConfig() || @configuration.disabled == true
+    return false if @configuration.disabled
 
     [stack, generator] = [undefined, undefined]
 
@@ -128,7 +148,7 @@ class Client
     return false if @_checkHandlers(@beforeNotifyHandlers, notice)
 
     [currentError, currentNotice] = [error, notice]
-    if ! @_loaded
+    if not @_loaded
       @log('Queuing notice', notice)
       @_queue.push(notice)
     else
@@ -152,28 +172,7 @@ class Client
     @_configured = false
     @
 
-  install: () ->
-    return if @installed == true
-    unless window.onerror == @_windowOnErrorHandler
-      @log('Installing window.onerror handler')
-      @_oldOnErrorHandler = window.onerror
-      window.onerror = @_windowOnErrorHandler
-    if @_loaded
-      @log('honeybadger.js ' + @version + ' ready')
-    else
-      @log('Installing ready handler')
-      if document.addEventListener
-        document.addEventListener('DOMContentLoaded', @_domReady, true)
-        window.addEventListener('load', @_domReady, true)
-      else
-        window.attachEvent('onload', @_domReady)
-    @_installed = true
-    @
-
-  _queue: []
-
-  _loaded: (document.readyState == 'complete')
-
+  _loaded: false
   _configured: false
 
   _domReady: () =>
@@ -227,6 +226,9 @@ class Client
   _send: (notice) ->
     @log('Sending notice', notice)
     [currentError, currentNotice] = [null, null]
+    if not @_validConfig()
+      @log.error("Could not send error report: invalid API key.", arguments)
+      return false
     @_sendRequest(notice.payload())
 
   _validConfig: () ->
@@ -305,32 +307,6 @@ class Client
         pk = (if prefix then prefix + '[' + k + ']' else k)
         ret.push(if typeof v is 'object' then @_serialize(v, pk) else encodeURIComponent(pk) + '=' + encodeURIComponent(v))
     ret.join '&'
-
-  _windowOnErrorHandler: (msg, url, line, col, error) =>
-    if !currentNotice && @configuration.onerror
-      @log('Error caught by window.onerror', msg, url, line, col, error)
-      unless error
-        error = new UncaughtError(msg, url, line, col)
-      @notify(error)
-    if @_oldOnErrorHandler
-      return @_oldOnErrorHandler.apply(this, arguments)
-    false
-
-# Invoked from window.onerror handler, and uses v8 stack format.
-class UncaughtError extends Error
-  constructor: (message, url, line, column) ->
-    @name = 'window.onerror'
-    @message = message || 'An unknown error was caught by window.onerror.'
-    @stack = [
-      @message
-      '\n    at ? ('
-      (url || 'unknown')
-      ':'
-      (line || 0)
-      ':'
-      (column || 0)
-      ')'
-    ].join('')
 
 Honeybadger = new Client
 Honeybadger.Client = Client
