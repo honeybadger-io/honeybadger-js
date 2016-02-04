@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>Honeybadger.js global example</title>
+
+	<script type="text/javascript" src="../../honeybadger.js" data-debug="true"></script>
+
+  <script>
+    Honeybadger.configure({
+      api_key: prompt("Enter the API key for your Honeybadger project:")
+    });
+
+    (function(){
+      function bar(callback) {
+        callback();
+      }
+
+      function foo(callback) {
+        bar(callback);
+      }
+
+      function log() {
+        if (window.console) {
+          console.log(arguments);
+        }
+      }
+
+      window.onload = function(){
+        log("Attaching event");
+        die = Honeybadger.wrap(function(){
+          throw new Error("This is a test error raised from an addEventListener callback.");
+        });
+        var btn = document.getElementById("btn");
+        var listener = function() {
+          log("Failing in event listener...");
+          foo(die);
+        }
+        if (btn.addEventListener) {
+          btn.addEventListener("click", listener);
+        } else {
+          btn.attachEvent("onclick", listener);
+        }
+      };
+    })();
+  </script>
+</head>
+
+<body>
+  <button id="btn">Throw an error.</button>
+</body>
+</html>

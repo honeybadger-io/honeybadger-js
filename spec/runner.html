@@ -4,25 +4,19 @@
 <head>
   <title>Jasmine Spec Runner</title>
 
+  <script type="text/javascript" src="../vendor/sinon-1.17.3.js"></script>
+
   <link rel="stylesheet" type="text/css" href="../vendor/jasmine-1.3.1/jasmine.css">
   <script type="text/javascript" src="../vendor/jasmine-1.3.1/jasmine.js"></script>
   <script type="text/javascript" src="../vendor/jasmine-1.3.1/jasmine-html.js"></script>
 
   <script type="text/javascript" src="../vendor/jasmine-jsreporter-1.0.0/jasmine-jsreporter.js"></script>
 
-  <!-- Note: this is the full build of honeybadger.js, including dependencies. -->
-  <script type="text/javascript" src="../honeybadger.js"></script>
-  <script type="text/javascript" src="../build/spec/honeybadger.spec.js"></script>
-
   <!-- include source files here... -->
-  <script type="text/javascript" src="../build/src/helpers.js"></script>
-  <script type="text/javascript" src="../build/src/notice.js"></script>
-  <script type="text/javascript" src="../build/src/configuration.js"></script>
+  <script type="text/javascript" src="../honeybadger.js"></script>
 
   <!-- include spec files here... -->
-  <script type="text/javascript" src="../build/spec/helpers.spec.js"></script>
-  <script type="text/javascript" src="../build/spec/notice.spec.js"></script>
-  <script type="text/javascript" src="../build/spec/configuration.spec.js"></script>
+  <script type="text/javascript" src="../spec/honeybadger.spec.js"></script>
 
   <script>
     // Thanks @gordonwoodhull https://github.com/axemclion/grunt-saucelabs/issues/109#issuecomment-166767282
@@ -46,7 +40,7 @@
         var result = [];
         suites = takeItems(suites, specFailed);
         for (i = 0; i < suites.length; ++i) {
-          result[i] = mapSuite(suites[i]);
+          result.push(mapSuite(suites[i]));
         }
         return result;
       }
@@ -65,7 +59,7 @@
         var result = [];
         for (i = 0; i < items.length; ++i) {
           if (!!func(items[i])) {
-            result[i] = items[i];
+            result.push(items[i]);
           }
         }
         return result;

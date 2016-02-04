@@ -35,10 +35,11 @@ module.exports = function(grunt) {
         }
       }
     },
-    jasmine : {
-      src : ['build/src/**/*.js', 'src/**/*.js'],
-      options : {
-        specs : 'build/spec/**/*.js'
+    jasmine: {
+      src: ['honeybadger.js'],
+      options: {
+        specs: ['spec/honeybadger.spec.js'],
+        vendor: ['vendor/sinon-1.17.3.js']
       }
     },
     'saucelabs-jasmine': {
@@ -54,21 +55,9 @@ module.exports = function(grunt) {
         }
       }
     },
-    shell: {
-      compile: {
-        command: 'make compile'
-      },
-      build: {
-        command: 'make compile concat'
-      }
-    },
     watch: {
-      compile: {
-        files: ['Makefile', 'spec/**/*.*', 'src/**/*.*', 'spec/runner.html'],
-        tasks: 'shell:compile'
-      },
       specs: {
-        files: ['build/spec/**/*.js'],
+        files: ['spec/**/*.js', 'honeybadger.js'],
         tasks: 'jasmine'
       }
     }
@@ -80,5 +69,5 @@ module.exports = function(grunt) {
   }
 
   grunt.registerTask('dev', ['connect', 'watch']);
-  grunt.registerTask('test', ['shell:build', 'connect', 'saucelabs-jasmine']);
+  grunt.registerTask('test', ['connect', 'saucelabs-jasmine']);
 };
