@@ -5,12 +5,11 @@ Status](https://travis-ci.org/honeybadger-io/honeybadger-js.png?branch=master&1)
 
 A client-side JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io). For server-side javascript, check out our [NodeJS library](https://github.com/honeybadger-io/honeybadger-node).
 
-*Note: 0.1 and 0.2 make significant improvements to error grouping. As a result,
-new errors may be grouped differently than old.*
-
 ## Getting Started
 
 ### 1. Include the JS library
+
+> **Note**: honeybadger.js v0.4 is currently alpha; it is recommended that you [use v0.3](https://github.com/honeybadger-io/honeybadger-js/tree/b7cde0e7f8ab3dd27090d184517fd8b5958b362b) until the v0.4 release is finalized.
 
 #### Globally
 
