@@ -425,6 +425,10 @@
       return self;
     };
 
+    self.getVersion = function() {
+      return VERSION;
+    }
+
     // Install instrumentation.
     // This should happen once for the first factory call.
     function instrument(object, name, replacement) {

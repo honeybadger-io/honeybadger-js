@@ -407,4 +407,10 @@ describe('Honeybadger', function() {
       });
     });
   });
+
+  describe('getVersion', function() {
+    it('returns the current version', function() {
+      expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
+    });
+  });
 });
