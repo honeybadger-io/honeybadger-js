@@ -538,7 +538,6 @@
       };
       if (document.addEventListener) {
         document.addEventListener('DOMContentLoaded', domReady, true);
-        window.addEventListener('load', domReady, true);
       } else {
         window.attachEvent('onload', domReady);
       }
