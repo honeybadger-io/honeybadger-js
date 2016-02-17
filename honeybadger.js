@@ -98,6 +98,23 @@
     return data;
   }
 
+  function cookies() {
+    var cookies = {},
+        pairs,
+        pair,
+        i;
+
+    pairs = document.cookie.split(/;\s*/);
+    for (i = 0; i < pairs.length; i++) {
+      pair = pairs[i].split('=', 2);
+      if (pair[0] && pair[1]) {
+        cookies[pair[0]] = pair[1];
+      }
+    }
+
+    return cookies;
+  }
+
   function stackTrace(err) {
     // From TraceKit: Opera 10 *destroys* its stacktrace property if you try to
     // access the stack property first.
@@ -284,7 +301,8 @@
           component: err.component || config('component'),
           action: err.action || config('action'),
           context: merge(self.context, err.context),
-          cgi_data: cgiData()
+          cgi_data: cgiData(),
+          cookies: cookies()
         },
         server: {
           project_root: config('project_root') || (window.location.protocol + '//' + window.location.host),
