@@ -112,10 +112,7 @@ Honeybadger.configure({
   onerror: true,
 
   // Disable notifications?
-  disabled: false,
-
-  // Timeout (in milliseconds) when making requests.
-  timeout: false
+  disabled: false
 });
 ```
 
