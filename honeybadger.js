@@ -80,18 +80,8 @@
   }
 
   function cgiData() {
-    var data, k, v;
-    data = {};
-    if (typeof navigator !== "undefined" && navigator !== null) {
-      for (k in navigator) {
-        v = navigator[k];
-        if ((k != null) && (v != null) && !(typeof v === 'object')) {
-          data[k.replace(/(?=[A-Z][a-z]*)/g, '_').toUpperCase()] = v;
-        }
-      }
-      data['HTTP_USER_AGENT'] = data['USER_AGENT'];
-      delete data['USER_AGENT'];
-    }
+    var data = {};
+    data['HTTP_USER_AGENT'] = navigator.userAgent;
     if (document.referrer.match(/\S/)) {
       data['HTTP_REFERER'] = document.referrer;
     }
