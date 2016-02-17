@@ -247,6 +247,21 @@ The `configure` method takes an object containing config values. Its return valu
 Honeybadger.configure({api_key: "adlkjfljk"});
 ```
 
+
+---
+
+
+### `Honeybadger.factory()`: create a new client instance.
+
+The `factory` method returns a new instance of Honeybadger which can be configured differently than the global/singleton instance.
+
+#### Examples:
+
+```javascript
+var other_hb = Honeybadger.factory({api_key: "zxcvbnm"});
+other_hb.notify("This will go to an alternate project.");
+```
+
 ## Sourcemaps
 
 Honeybadger can automatically un-minify your code if you provide a [sourcemap](http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) along with your minified JavaScript files.
