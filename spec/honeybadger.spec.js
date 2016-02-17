@@ -314,26 +314,6 @@ describe('Honeybadger', function() {
     });
   });
 
-  describe('payload', function() {
-    beforeEach(function() {
-      Honeybadger.configure({
-        api_key: 'asdf'
-      });
-    });
-
-    it('includes cookies', function() {
-      document.cookie = 'foo=bar'
-      document.cookie = 'bar=baz'
-      Honeybadger.notify('testing');
-      afterNotify(function() {
-        expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcookies%5D%5Bfoo%5D=bar&notice%5Brequest%5D%5Bcookies%5D%5Bbar%5D=baz');
-        document.cookie = 'foo=bar;max-age=0'
-        document.cookie = 'bar=baz;max-age=0'
-      });
-    });
-  });
-
   describe('payload query string', function() {
     beforeEach(function() {
       Honeybadger.configure({
@@ -342,7 +322,7 @@ describe('Honeybadger', function() {
     });
 
     it('serializes an object to a query string', function() {
-      Honeybadger.notify('testing', {
+      Honeybadger.notify("testing", {
         context: {
           foo: 'foo',
           bar: {
