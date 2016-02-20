@@ -9,8 +9,6 @@ A client-side JavaScript library for integrating apps with the :zap: [Honeybadge
 
 ### 1. Include the JS library
 
-> **Note**: honeybadger.js v0.4 is currently alpha; it is recommended that you [use v0.3](https://github.com/honeybadger-io/honeybadger-js/tree/b7cde0e7f8ab3dd27090d184517fd8b5958b362b) until the v0.4 release is finalized.
-
 #### Globally
 
 Place the following code between the `<head></head>` tags of your page:
