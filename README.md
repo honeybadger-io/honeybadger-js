@@ -256,7 +256,7 @@ Honeybadger.beforeNotify(function(notice) {
 The following notice attributes may be modified by your notification handlers:
 
 * stack - The stack trace
-* class - The exception class name
+* name - The exception class name
 * message - The error message
 * url - The current url
 * project_root - The root url
