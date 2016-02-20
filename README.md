@@ -14,7 +14,12 @@ A client-side JavaScript library for integrating apps with the :zap: [Honeybadge
 Place the following code between the `<head></head>` tags of your page:
 
 ```html
-<script src="//js.honeybadger.io/v0.4/honeybadger.min.js" type="text/javascript"></script>
+<script src="//js.honeybadger.io/v0.4/honeybadger.min.js" type="text/javascript" data-api_key="project api key" data-environment="production"></script>
+```
+
+Honeybadger may also be configured via JavaScript:
+
+```javascript
 <script type="text/javascript">
   Honeybadger.configure({
     api_key: 'project api key',
@@ -63,21 +68,45 @@ To catch an error and notify Honeybadger:
 ```javascript
 try {
   // ...error producing code...
-} catch(e) {
-  Honeybadger.notify(e);
+} catch(error) {
+  Honeybadger.notify(error);
 }
 ```
 
 JavaScript often uses generic class names -- such as `Error` -- which are uninformative and also cause unrelated errors to be grouped together. To get around this issue it's a good practice to send a custom error class when notifying Honeybadger:
 
 ```javascript
-try {
-  // ...error producing code...
-} catch(e) {
-  Honeybadger.notify(e, 'DescriptiveClass');
-}
+Honeybadger.notify(error, 'DescriptiveClass');
 ```
 
+You can also set or override other optional data which is reported with the error:
+
+```javascript
+Honeybadger.notify(error, {
+  message: 'My custom message',
+  name: 'DescriptiveClass',
+  component: 'badgers',
+  action: 'show',
+  context: { badgerId: 1 },
+  fingerprint: 'This unique string will group similar errors together'
+});
+```
+
+Finally, you can notify Honeybadger of anything, even if you don't have an error object:
+
+```javascript
+Honeybadger.notify('Badgers!');
+Honeybadger.notify('Badgers!', { ... });
+Honeybadger.notify('Badgers!', 'CustomClass');
+Honeybadger.notify('Badgers!', 'CustomClass', { ... });
+Honeybadger.notify({
+  message: 'Badgers!',
+  name: 'CustomClass',
+  ...
+});
+```
+
+A stacktrace will be generated for you (when possible) if you do not provide an error object.
 
 ## Advanced Configuration
 
@@ -116,7 +145,13 @@ Honeybadger.configure({
 
 You can call `Honeybadger.configure` as many times as you like. The existing configuration data will be merged with any new data you provide. This is especially useful for changing the `action` and `component` values inside of single-page apps.
 
+### Configuring via data attributes
 
+The global Honeybadger instance may also be configured via data attributes on the script tag which loads honeybadger.js:
+
+```html
+<script src="honeybadger.js" type="text/javascript" data-component="pages" data-action="index" ...></script>
+```
 
 ## Public Interface
 
