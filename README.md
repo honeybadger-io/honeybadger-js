@@ -63,7 +63,9 @@ requirejs(["honeybadger"], function(Honeybadger) {
 
 ### 2. Start reporting exceptions
 
-To catch an error and notify Honeybadger:
+By default Honeybadger will report all uncaught exceptions automatically using our `window.onerror` handler.
+
+You can also manually notify Honeybadger of errors and other events in your application code:
 
 ```javascript
 try {
@@ -73,42 +75,7 @@ try {
 }
 ```
 
-JavaScript often uses generic class names -- such as `Error` -- which are uninformative and also cause unrelated errors to be grouped together. To get around this issue it's a good practice to send a custom error class when notifying Honeybadger:
-
-```javascript
-Honeybadger.notify(error, 'DescriptiveClass');
-```
-
-You can also set or override other optional data which is reported with the error:
-
-```javascript
-Honeybadger.notify(error, {
-  message: 'My custom message',
-  name: 'DescriptiveClass',
-  component: 'badgers',
-  action: 'show',
-  context: { badgerId: 1 },
-  fingerprint: 'This unique string will group similar errors together',
-  environment: 'production',
-  project_root: 'https://www.example.com/'
-});
-```
-
-Finally, you can notify Honeybadger of anything, even if you don't have an error object:
-
-```javascript
-Honeybadger.notify('Badgers!');
-Honeybadger.notify('Badgers!', { ... });
-Honeybadger.notify('Badgers!', 'CustomClass');
-Honeybadger.notify('Badgers!', 'CustomClass', { ... });
-Honeybadger.notify({
-  message: 'Badgers!',
-  name: 'CustomClass',
-  ...
-});
-```
-
-A stacktrace will be generated for you (when possible) if you do not provide an error object.
+See the [full documentation](#honeybadgernotify-send-an-exception-to-honeybadger) for the `notify` method for more examples.
 
 ## Advanced Configuration
 
@@ -166,10 +133,48 @@ If you've caught an exception and want to send it to Honeybadger, this is the me
 ```javascript
 try {
   // ...error producing code...
-} catch(e) {
-  Honeybadger.notify(e, 'DescriptiveClass');
+} catch(error) {
+  Honeybadger.notify(error);
 }
 ```
+
+JavaScript often uses generic class names -- such as `Error` -- which are uninformative and also cause unrelated errors to be grouped together. To get around this issue it's a good practice to send a custom error class when notifying Honeybadger:
+
+```javascript
+Honeybadger.notify(error, 'DescriptiveClass');
+```
+
+You can also set or override other optional data which is reported with the error:
+
+```javascript
+Honeybadger.notify(error, {
+  message: 'My custom message',
+  name: 'DescriptiveClass',
+  component: 'badgers',
+  action: 'show',
+  context: { badgerId: 1 },
+  fingerprint: 'This unique string will group similar errors together',
+  environment: 'production',
+  project_root: 'https://www.example.com/'
+});
+```
+
+Finally, you can notify Honeybadger of anything, even if you don't have an error object:
+
+```javascript
+Honeybadger.notify('Badgers!');
+Honeybadger.notify('Badgers!', { ... });
+Honeybadger.notify('Badgers!', 'CustomClass');
+Honeybadger.notify('Badgers!', 'CustomClass', { ... });
+Honeybadger.notify({
+  message: 'Badgers!',
+  name: 'CustomClass',
+  ...
+});
+```
+
+A stacktrace will be generated for you (when possible) if you do not provide an error object.
+
 ---
 
 ### `Honeybadger.wrap()`: Wrap the given function in try/catch and report any exceptions
