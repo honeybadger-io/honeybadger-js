@@ -270,15 +270,15 @@
           fingerprint: err.fingerprint
         },
         request: {
-          url: document.URL,
+          url: err.url || document.URL,
           component: err.component || config('component'),
           action: err.action || config('action'),
           context: merge(self.context, err.context),
           cgi_data: cgiData()
         },
         server: {
-          project_root: config('project_root') || (window.location.protocol + '//' + window.location.host),
-          environment_name: config('environment')
+          project_root: err.project_root || config('project_root', window.location.protocol + '//' + window.location.host),
+          environment_name: err.environment || config('environment')
         }
       };
 
