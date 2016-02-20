@@ -88,7 +88,9 @@ Honeybadger.notify(error, {
   component: 'badgers',
   action: 'show',
   context: { badgerId: 1 },
-  fingerprint: 'This unique string will group similar errors together'
+  fingerprint: 'This unique string will group similar errors together',
+  environment: 'production',
+  project_root: 'https://www.example.com/'
 });
 ```
 
