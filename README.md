@@ -43,7 +43,7 @@ bower install honeybadger --save-dev
 #### Browserify
 
 ```sh
-var Honeybadger = require("honeybadger");
+var Honeybadger = require("path/to/honeybadger");
 Honeybadger.configure({
   api_key: 'project api key',
   environment: 'production'
@@ -53,7 +53,7 @@ Honeybadger.configure({
 #### RequireJS
 
 ```sh
-requirejs(["honeybadger"], function(Honeybadger) {
+requirejs(["path/to/honeybadger"], function(Honeybadger) {
   Honeybadger.configure({
     api_key: 'project api key',
     environment: 'production'
