@@ -103,7 +103,7 @@ try {
 }
 ```
 
-See the [full documentation](#honeybadgernotify-send-an-exception-to-honeybadger) for the `notify` method for more examples.
+See the [full documentation](https://github.com/honeybadger-io/honeybadger-js#honeybadgernotify-send-an-exception-to-honeybadger) for the `notify` method for more examples.
 
 ## Advanced Configuration
 
