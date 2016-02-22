@@ -7,6 +7,7 @@
     "name": "Joshua Wood",
     "email": "josh@honeybadger.io"
   },
+  "main": "honeybadger.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:honeybadger-io/honeybadger-js.git"
