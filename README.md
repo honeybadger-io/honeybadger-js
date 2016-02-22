@@ -40,7 +40,7 @@ npm install honeybadger-js --save-dev
 bower install honeybadger --save-dev
 ```
 
-#### Browserify
+#### Browserify/Webpack (CommonJS)
 
 ```sh
 var Honeybadger = require("path/to/honeybadger");
@@ -50,9 +50,10 @@ Honeybadger.configure({
 });
 ```
 
-See an [example browserify + honeybadger.js project](examples/browserify).
+- See an [example browserify + honeybadger.js project](examples/browserify).
+- See an [example webpack + honeybadger.js project](examples/webpack).
 
-#### RequireJS
+#### RequireJS (AMD)
 
 ```sh
 requirejs(["path/to/honeybadger"], function(Honeybadger) {
@@ -63,7 +64,7 @@ requirejs(["path/to/honeybadger"], function(Honeybadger) {
 });
 ```
 
-See an [example requirejs + honeybadger.js project](examples/requirejs).
+- See an [example requirejs + honeybadger.js project](examples/requirejs).
 
 ### 2. Start reporting exceptions
 
