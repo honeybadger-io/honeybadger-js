@@ -50,8 +50,8 @@ Honeybadger.configure({
 });
 ```
 
-- See an [example browserify + honeybadger.js project](examples/browserify).
-- See an [example webpack + honeybadger.js project](examples/webpack).
+- See an [example browserify + honeybadger.js project](https://github.com/honeybadger-io/honeybadger-js/tree/master/examples/browserify).
+- See an [example webpack + honeybadger.js project](https://github.com/honeybadger-io/honeybadger-js/tree/master/examples/webpack).
 
 #### RequireJS (AMD)
 
@@ -64,7 +64,7 @@ requirejs(["path/to/honeybadger"], function(Honeybadger) {
 });
 ```
 
-- See an [example requirejs + honeybadger.js project](examples/requirejs).
+- See an [example requirejs + honeybadger.js project](https://github.com/honeybadger-io/honeybadger-js/tree/master/examples/requirejs).
 
 #### Rails Assets
 
