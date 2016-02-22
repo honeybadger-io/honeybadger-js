@@ -50,6 +50,8 @@ Honeybadger.configure({
 });
 ```
 
+See an [example browserify + honeybadger.js project](examples/browserify).
+
 #### RequireJS
 
 ```sh
@@ -60,6 +62,8 @@ requirejs(["path/to/honeybadger"], function(Honeybadger) {
   });
 });
 ```
+
+See an [example requirejs + honeybadger.js project](examples/requirejs).
 
 ### 2. Start reporting exceptions
 
