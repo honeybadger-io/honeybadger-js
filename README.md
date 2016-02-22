@@ -66,6 +66,29 @@ requirejs(["path/to/honeybadger"], function(Honeybadger) {
 
 - See an [example requirejs + honeybadger.js project](examples/requirejs).
 
+#### Rails Assets
+
+*Note: First, make sure you use bundler >= 1.8.4.*
+
+Add the following to your Gemfile:
+
+```ruby
+source 'https://rails-assets.org' do
+  gem 'rails-assets-honeybadger'
+end
+```
+
+Add the following to application.js:
+
+```javascript
+//= require honeybadger
+
+Honeybadger.configure({
+  api_key: 'project api key',
+  environment: 'production'
+});
+```
+
 ### 2. Start reporting exceptions
 
 By default Honeybadger will report all uncaught exceptions automatically using our `window.onerror` handler.
