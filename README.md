@@ -37,7 +37,7 @@ npm install honeybadger-js --save-dev
 #### Installing via Bower
 
 ```sh
-bower install honeybadger-js --save-dev
+bower install honeybadger --save-dev
 ```
 
 #### Browserify
