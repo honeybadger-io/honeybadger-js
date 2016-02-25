@@ -5,6 +5,11 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
 
+## [0.4.1] - 2016-02-25
+### Fixed
+- Fix a bug where our DOMContentLoaded event listener wasn't added until after
+  the event had already fired which prevented requests from being made.
+
 ## [0.4.0] - 2016-02-22
 ### Added
 - Support reading configuration from data attributes on script tag.
