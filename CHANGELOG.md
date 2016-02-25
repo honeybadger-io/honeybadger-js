@@ -27,7 +27,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - The `timeout` configuration option has been removed (this may be reintroduced
   in the future, or we may limit the number of connections per browser session
-  instead.
+  instead).
 
 ## [0.3.1] - 2015-08-13
 ### Fixed
