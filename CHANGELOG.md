@@ -23,6 +23,10 @@ adheres to [Semantic Versioning](http://semver.org/).
 - The `onerror` configuration option is now enabled by default. All unhandled
   errors will be reported automatically.
 - `Honeybadger.Client()` has been renamed to `Honeybadger.factory()`.
+- `context` and other objects now have a maximum depth of 5 nested objects.
+  When the maximum depth is reached, recursion will be halted with the value
+  "[MAX DEPTH REACHED]". Maximum depth can be configured via the `max_depth`
+  option.
 
 ### Removed
 - The `timeout` configuration option has been removed (this may be reintroduced
