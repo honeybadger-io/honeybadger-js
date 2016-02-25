@@ -1,49 +1,20 @@
-## honeybadger-js v0.3.1 ##
+# Change Log
+All notable changes to this project will be documented in this file. See [Keep a
+CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
+adheres to [Semantic Versioning](http://semver.org/).
 
-* Sanitization bugfixes.
+## [Unreleased][unreleased]
 
-  *@joshuap*
+## [0.3.1] - 2015-08-13
+### Fixed
+- Sanitization bugfixes.
 
-## honeybadger-js v0.3.0 ##
+## [0.3.0] - 2015-07-28
+### Added
+- Sanitize circular data structures.
+- Generate source map.
 
-* Sanitize circular data structures.
-
-  *@joshuap*
-
-* Generate source map.
-
-  *@joshuap*
-
-## honeybadger-js v0.2.0 ##
-
-* Use CORS to send data via POST when available.
-
-  *@joshuap*
-
-* Improved error grouping.
-
-  *@joshuap*
-
-## honeybadger-js v0.1.0 ##
-
-* Stop parsing stack-traces client-side (removes TraceKit)
-
-  *@joshuap*
-
-* New window.onerror handler
-
-  *@joshuap*
-
-* Nested try/catch blocks and window.onerror will now report error only once.
-
-  *@joshuap*
-
-## honeybadger-js v0.0.3 ##
-
-* Add `beforeNotify` filter.
-
-  *@starrhorne*, *@joshuap*
-
-* Require an object when calling `setContext` and `resetContext`.
-
-  *@joshuap*
+## [0.2.0] - 2015-01-16
+### Added
+- Use CORS to send data via POST when available.
+- Improved error grouping.
