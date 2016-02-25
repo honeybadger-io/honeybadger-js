@@ -514,7 +514,11 @@
 
     // Initialization.
     log('Initializing honeybadger.js ' + VERSION);
-    if (document.readyState === 'complete') {
+
+    // See https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
+    // https://www.w3.org/TR/html5/dom.html#dom-document-readystate
+    // The 'loaded' state is for older versions of Safari.
+    if (/complete|interactive|loaded/.test(document.readyState)) {
       loaded = true;
       log('honeybadger.js ' + VERSION + ' ready');
     } else {
