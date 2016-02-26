@@ -47,7 +47,7 @@
     root.Honeybadger = factory();
   }
 }(this, function () {
-  var VERSION = '0.4.0',
+  var VERSION = '0.4.1',
       NOTIFIER = {
         name: 'honeybadger.js',
         url: 'https://github.com/honeybadger-io/honeybadger-js',
