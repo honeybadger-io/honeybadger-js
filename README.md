@@ -28,6 +28,10 @@ Honeybadger may also be configured via JavaScript:
 </script>
 ```
 
+Here's a video walkthrough of a basic, global installation:
+
+[![Using Honeybadger with Javascript](https://embed-ssl.wistia.com/deliveries/0881945df2b2413bf15aba6fc853a7b477218048.jpg?image_play_button=true&image_play_button_color=7b796ae0&image_crop_resized=150x84)](https://honeybadger.wistia.com/medias/8wkvbipxxj)
+
 #### Installing via Node.js
 
 ```
