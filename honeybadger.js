@@ -139,23 +139,6 @@
     return false;
   }
 
-  function request(url) {
-    // Use XHR when available.
-    try {
-      // Inspired by https://gist.github.com/Xeoncross/7663273
-      x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
-      x.open('GET', url, true);
-      x.send();
-      return;
-    } catch(e) {
-      log('Error encountered during XHR request (will retry): ' + e);
-    }
-
-    // Fall back to Image transport.
-    img = new Image();
-    img.src = url;
-  }
-
   // Client factory.
   var factory = (function(opts) {
     var defaultProps = [];
@@ -204,6 +187,23 @@
         }
       }
       return ret.join('&');
+    }
+
+    function request(url) {
+      // Use XHR when available.
+      try {
+        // Inspired by https://gist.github.com/Xeoncross/7663273
+        x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
+        x.open('GET', url, true);
+        x.send();
+        return;
+      } catch(e) {
+        log('Error encountered during XHR request (will retry): ' + e);
+      }
+
+      // Fall back to Image transport.
+      img = new Image();
+      img.src = url;
     }
 
     function send(payload) {
