@@ -4,10 +4,13 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
+### Fixed
+- Fixed a bug where logging wasn't available when request setup failed due to an
+  error, which could result in an uncaught error being thrown.
 
 ## [0.4.1] - 2016-02-25
 ### Fixed
-- Fix a bug where our DOMContentLoaded event listener wasn't added until after
+- Fixed a bug where our DOMContentLoaded event listener wasn't added until after
   the event had already fired which prevented requests from being made.
 
 ## [0.4.0] - 2016-02-22
