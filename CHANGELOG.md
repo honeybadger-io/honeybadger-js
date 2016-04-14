@@ -7,6 +7,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fixed a bug where logging wasn't available when request setup failed due to an
   error, which could result in an uncaught error being thrown.
+- Check for presence of addEventListener before instrumenting it.
 
 ## [0.4.1] - 2016-02-25
 ### Fixed
