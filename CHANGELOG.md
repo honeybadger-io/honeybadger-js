@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
+
+## [0.4.2] - 2016-04-14
 ### Fixed
 - Fixed a bug where logging wasn't available when request setup failed due to an
   error, which could result in an uncaught error being thrown.
