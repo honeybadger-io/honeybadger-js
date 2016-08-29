@@ -35,13 +35,13 @@ Here's a video walkthrough of a basic, global installation:
 #### Installing via Node.js
 
 ```
-npm install honeybadger-js --save-dev
+npm install honeybadger-js --save
 ```
 
 #### Installing via Bower
 
 ```sh
-bower install honeybadger --save-dev
+bower install honeybadger --save
 ```
 
 #### Browserify/Webpack (CommonJS)
