@@ -385,6 +385,14 @@ If you're using Honeybadger's GitHub integration, you can link to source files o
 
 This is the only situation in which the source root is not required to be a valid URL.
 
+#### Authentication
+
+Requests sent from Honeybadger servers to download sourcemaps and related-files include a secret token in the `Honeybadger-Token` header, which may be used to authenticate requests from Honeybadger.
+
+To find your `Honeybadger-Token` token, visit your project settings page in Honeybadger and click on the "Sourcemaps" tab.
+
+One exception is direct links from the Honeybadger UI (such as when displaying links in backtraces); these cannot be authenticated.
+
 ## window.onerror
 
 Honeybadger.js automatically reports uncaught exceptions from window.onerror. To
