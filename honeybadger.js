@@ -88,6 +88,19 @@
     return data;
   }
 
+  function encodeCookie(object) {
+    if (typeof object !== 'object') {
+      return undefined;
+    }
+
+    var cookies = [];
+    for (k in object) {
+      cookies.push(k + '=' + object[k]);
+    }
+
+    return cookies.join(';');
+  }
+
   function stackTrace(err) {
     // From TraceKit: Opera 10 *destroys* its stacktrace property if you try to
     // access the stack property first.
@@ -260,6 +273,13 @@
         return false;
       }
 
+      var data = cgiData();
+      if (typeof err.cookies === 'string') {
+        data['HTTP_COOKIE'] = err.cookies;
+      } else if (typeof err.cookies === 'object') {
+        data['HTTP_COOKIE'] = encodeCookie(err.cookies);
+      }
+
       var payload = {
         notifier: NOTIFIER,
         error: {
@@ -274,7 +294,8 @@
           component: err.component || config('component'),
           action: err.action || config('action'),
           context: merge(self.context, err.context),
-          cgi_data: cgiData()
+          cgi_data: data,
+          params: err.params
         },
         server: {
           project_root: err.project_root || config('project_root', window.location.protocol + '//' + window.location.host),
