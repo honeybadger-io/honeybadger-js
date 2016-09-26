@@ -243,6 +243,55 @@ describe('Honeybadger', function() {
         expect(requests.length).toEqual(1);
       });
     });
+
+    it('sends params', function() {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      Honeybadger.notify("testing", {
+        params: {
+          foo: 'bar'
+        }
+      });
+
+      afterNotify(function() {
+        expect(requests.length).toEqual(1);
+        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bparams%5D%5Bfoo%5D=bar');
+      });
+    });
+
+    it('sends cookies as string', function() {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      Honeybadger.notify("testing", {
+        cookies: 'foo=bar'
+      });
+
+      afterNotify(function() {
+        expect(requests.length).toEqual(1);
+        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
+      });
+    });
+
+    it('sends cookies as object', function() {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      Honeybadger.notify("testing", {
+        cookies: {
+          foo: 'bar'
+        }
+      });
+
+      afterNotify(function() {
+        expect(requests.length).toEqual(1);
+        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
+      });
+    });
   });
 
   describe('.wrap', function() {

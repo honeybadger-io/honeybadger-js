@@ -187,7 +187,9 @@ Honeybadger.notify(error, {
   context: { badgerId: 1 },
   fingerprint: 'This unique string will group similar errors together',
   environment: 'production',
-  project_root: 'https://www.example.com/'
+  project_root: 'https://www.example.com/',
+  params: { key: 'value' },
+  cookies: { key: 'value' } // May also be sent as a string in the document.cookie "foo=bar;bar=baz" format.
 });
 ```
 
@@ -304,7 +306,8 @@ The following notice attributes may be modified by your notification handlers:
 * action - Similar to a rails action name. example: "create"
 * fingerprint - A unique fingerprint, used to customize grouping of errors in Honeybadger.
 * context - The context object.
-
+* params - An object of request parameters.
+* cookies - An object of cookie key/values. May also be sent as a string in the document.cookie "foo=bar;bar=baz" format.
 
 ---
 
@@ -393,6 +396,17 @@ To find your `Honeybadger-Token` token, visit your project settings page in Hone
 
 One exception is direct links from the Honeybadger UI (such as when displaying links in backtraces); these cannot be authenticated.
 
+## Sending cookies by default
+
+To automatically send cookies with all error reports, use the following `::beforeNotify` handler:
+
+```js
+Honeybadger.beforeNotify(function(err){
+  err.cookies = document.cookie;
+  return true;
+})
+```
+
 ## window.onerror
 
 Honeybadger.js automatically reports uncaught exceptions from window.onerror. To
@@ -405,7 +419,6 @@ Honeybadger.configure({
   onerror: false
 });
 ```
-
 
 ## Contributing
 
@@ -422,4 +435,3 @@ To run the test suite, enter `make test` into the console.
 ### License
 
 The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
-
