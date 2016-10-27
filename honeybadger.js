@@ -207,7 +207,7 @@
       try {
         // Inspired by https://gist.github.com/Xeoncross/7663273
         x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
-        x.open('GET', url, true);
+        x.open('GET', url, config('async', true));
         x.send();
         return;
       } catch(e) {
