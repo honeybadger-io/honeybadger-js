@@ -307,7 +307,7 @@
       currentErr = err;
 
       if (loaded) {
-        log('Defering notice.', err, payload);
+        log('Deferring notice.', err, payload);
         window.setTimeout(function(){
           if (currentErrIs(err)) {
             send(payload);
