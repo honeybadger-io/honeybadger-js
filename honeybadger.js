@@ -5,7 +5,9 @@
   https://www.honeybadger.io/
   MIT license
 */
+
 (function (root, builder) {
+  'use strict';
   // Read default configuration from script tag if available.
   var scriptConfig = {};
   (function() {
@@ -14,7 +16,7 @@
     if (!tag) { return; }
     var attrs = tag.attributes;
     var value;
-    for (i = 0, len = attrs.length; i < len; i++) {
+    for (var i = 0, len = attrs.length; i < len; i++) {
       if (/data-(\w+)$/.test(attrs[i].nodeName)) {
         value = attrs[i].nodeValue;
         if (value === 'false') { value = false; }
