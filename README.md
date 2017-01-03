@@ -140,7 +140,10 @@ Honeybadger.configure({
   onerror: true,
 
   // Disable notifications?
-  disabled: false
+  disabled: false,
+
+  // Send notifications asynchronously
+  async: true
 });
 ```
 
