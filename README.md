@@ -115,6 +115,9 @@ You can set configuration options by using the `Honeybadger.configure` function.
 
 ```javascript
 Honeybadger.configure({
+  // Output Honeybadger debug messages to the console
+  debug: false,
+  
   // Honeybadger API key (required)
   api_key: '',
 
