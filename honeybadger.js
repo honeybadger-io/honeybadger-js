@@ -162,7 +162,7 @@
       context: {},
       beforeNotifyHandlers: []
     }
-    if (opts instanceof Object) {
+    if (typeof opts === 'object') {
       for (k in opts) { self[k] = opts[k]; }
     }
 
@@ -249,9 +249,9 @@
 
     function notify(err, generated) {
       if (config('disabled', false)) { return false; }
-      if (!(err instanceof Object)) { return false; }
+      if (!(typeof err === 'object')) { return false; }
 
-      if (err instanceof Error) {
+      if (Object.prototype.toString.call(err) === '[object Error]') {
         var e = err;
         err = {name: e.name, message: e.message, stack: stackTrace(e)};
       }
@@ -379,17 +379,17 @@
     self.notify = function(err, name, extra) {
       if (!err) { err = {}; }
 
-      if (err instanceof Error) {
+      if (Object.prototype.toString.call(err) === '[object Error]') {
         var e = err;
         err = {name: e.name, message: e.message, stack: stackTrace(e)};
       }
 
-      if (!(err instanceof Object)) {
+      if (!(typeof err === 'object')) {
         var m = String(err);
         err = {message: m};
       }
 
-      if (name && !(name instanceof Object)) {
+      if (name && !(typeof name === 'object')) {
         var n = String(name);
         name = {name: n};
       }
@@ -397,7 +397,7 @@
       if (name) {
         err = merge(err, name);
       }
-      if (extra instanceof Object) {
+      if (typeof extra === 'object') {
         err = merge(err, extra);
       }
 
@@ -409,14 +409,14 @@
     };
 
     self.setContext = function(context) {
-      if (context instanceof Object) {
+      if (typeof context === 'object') {
         self.context = merge(self.context, context);
       }
       return self;
     };
 
     self.resetContext = function(context) {
-      if (context instanceof Object) {
+      if (typeof context === 'object') {
         self.context = merge({}, context);
       } else {
         self.context = {};
@@ -464,7 +464,7 @@
     var instrumentTimer = function(original) {
       // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
       return function(func, delay) {
-        if (func instanceof Function) {
+        if (typeof func === 'function') {
           var args = Array.prototype.slice.call(arguments, 2);
           func = wrap(func);
           return original(function() {
@@ -531,7 +531,7 @@
       // See https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
       return function(msg, url, line, col, err) {
         onerror(msg, url, line, col, err);
-        if (original instanceof Function) {
+        if (typeof original === 'function') {
           return original.apply(this, arguments);
         }
         return false;
