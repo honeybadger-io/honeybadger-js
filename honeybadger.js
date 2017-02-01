@@ -186,6 +186,16 @@
       return 'http' + ((config('ssl', true) && 's') || '') + '://' + config('host', 'api.honeybadger.io');
     }
 
+    function canSerialize(obj) {
+      // Functions are TMI and Symbols can't convert to strings.
+      if (/function|symbol/.test(typeof(obj))) { return false; }
+
+      // No prototype, likely created with `Object.create(null)`.
+      if (typeof obj === 'object' && typeof obj.hasOwnProperty === 'undefined') { return false; }
+
+      return true;
+    }
+
     function serialize(obj, prefix, depth) {
       var k, pk, ret, v;
       ret = [];
@@ -196,7 +206,7 @@
       for (k in obj) {
         v = obj[k];
         if (obj.hasOwnProperty(k) && (k != null) && (v != null)) {
-          if (/function|symbol/.test(typeof(v))) { v = Object.prototype.toString.call(v); }
+          if (!canSerialize(v)) { v = Object.prototype.toString.call(v); }
           pk = (prefix ? prefix + '[' + k + ']' : k);
           ret.push(typeof v === 'object' ? serialize(v, pk, depth+1) : encodeURIComponent(pk) + '=' + encodeURIComponent(v));
         }
