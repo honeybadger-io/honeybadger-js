@@ -292,6 +292,28 @@ describe('Honeybadger', function() {
         expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
       });
     });
+
+    it('reads metadata from error objects', function() {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      var err = new Error("Testing");
+      err.context = {
+        key: 'unique context'
+      }
+
+      try {
+        throw err;
+      } catch (e) {
+        Honeybadger.notify(e);
+      }
+
+      afterNotify(function() {
+        expect(requests.length).toEqual(1);
+        expect(requests[0].url).toMatch('unique%20context');
+      });
+    });
   });
 
   describe('.wrap', function() {
