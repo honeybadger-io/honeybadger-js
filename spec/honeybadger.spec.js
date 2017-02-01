@@ -415,6 +415,37 @@ describe('Honeybadger', function() {
         expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcontext%5D%5Bbar%5D=baz');
       });
     });
+
+    if (typeof Symbol === 'function') {
+      it('handles symbols as values', function() {
+        var sym = Symbol();
+
+        Honeybadger.notify("testing", {
+          context: {
+            key: sym,
+          }
+        });
+
+        afterNotify(function() {
+          expect(requests.length).toEqual(1);
+          expect(requests[0].url).toMatch('js.gif?');
+        });
+      });
+
+      it('handles symbol as a key', function() {
+        var sym = Symbol();
+        var context = {};
+
+        context[sym] = 'value';
+
+        Honeybadger.notify("testing", { context: context });
+
+        afterNotify(function() {
+          expect(requests.length).toEqual(1);
+          expect(requests[0].url).toMatch('js.gif?');
+        });
+      });
+    }
   });
 
   describe('window.onerror callback', function() {

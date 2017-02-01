@@ -195,8 +195,8 @@
       }
       for (k in obj) {
         v = obj[k];
-        if (v instanceof Function) { v = '[FUNC]' }
         if (obj.hasOwnProperty(k) && (k != null) && (v != null)) {
+          if (/function|symbol/.test(typeof(v))) { v = Object.prototype.toString.call(v); }
           pk = (prefix ? prefix + '[' + k + ']' : k);
           ret.push(typeof v === 'object' ? serialize(v, pk, depth+1) : encodeURIComponent(pk) + '=' + encodeURIComponent(v));
         }
