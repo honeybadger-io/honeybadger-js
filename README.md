@@ -14,7 +14,7 @@ A client-side JavaScript library for integrating apps with the :zap: [Honeybadge
 Place the following code between the `<head></head>` tags of your page:
 
 ```html
-<script src="//js.honeybadger.io/v0.4/honeybadger.min.js" type="text/javascript" data-api_key="project api key" data-environment="production"></script>
+<script src="//js.honeybadger.io/v0.4/honeybadger.min.js" type="text/javascript" data-apiKey="project api key" data-environment="production"></script>
 ```
 
 Honeybadger may also be configured via JavaScript:
@@ -22,7 +22,7 @@ Honeybadger may also be configured via JavaScript:
 ```javascript
 <script type="text/javascript">
   Honeybadger.configure({
-    api_key: 'project api key',
+    apiKey: 'project api key',
     environment: 'production'
   });
 </script>
@@ -49,7 +49,7 @@ bower install honeybadger --save
 ```sh
 var Honeybadger = require("path/to/honeybadger");
 Honeybadger.configure({
-  api_key: 'project api key',
+  apiKey: 'project api key',
   environment: 'production'
 });
 ```
@@ -62,7 +62,7 @@ Honeybadger.configure({
 ```sh
 requirejs(["path/to/honeybadger"], function(Honeybadger) {
   Honeybadger.configure({
-    api_key: 'project api key',
+    apiKey: 'project api key',
     environment: 'production'
   });
 });
@@ -88,7 +88,7 @@ Add the following to application.js:
 //= require honeybadger
 
 Honeybadger.configure({
-  api_key: 'project api key',
+  apiKey: 'project api key',
   environment: 'production'
 });
 ```
@@ -119,7 +119,7 @@ Honeybadger.configure({
   debug: false,
   
   // Honeybadger API key (required)
-  api_key: '',
+  apiKey: '',
 
   // Collector Host
   host: 'api.honeybadger.io',
@@ -128,7 +128,7 @@ Honeybadger.configure({
   ssl: true,
 
   // Project root
-  project_root: 'http://my-app.com',
+  projectRoot: 'http://my-app.com',
 
   // Environment
   environment: 'production',
@@ -193,7 +193,7 @@ Honeybadger.notify(error, {
   context: { badgerId: 1 },
   fingerprint: 'This unique string will group similar errors together',
   environment: 'production',
-  project_root: 'https://www.example.com/',
+  projectRoot: 'https://www.example.com/',
   params: { key: 'value' },
   cookies: { key: 'value' } // May also be sent as a string in the document.cookie "foo=bar;bar=baz" format.
 });
@@ -306,7 +306,7 @@ The following notice attributes may be modified by your notification handlers:
 * name - The exception class name
 * message - The error message
 * url - The current url
-* project_root - The root url
+* projectRoot - The root url
 * environment - Name of the environment. example: "production"
 * component - Similar to a rails controller name. example: "users"
 * action - Similar to a rails action name. example: "create"
@@ -325,7 +325,7 @@ The `configure` method takes an object containing config values. Its return valu
 #### Examples:
 
 ```javascript
-Honeybadger.configure({api_key: "adlkjfljk"});
+Honeybadger.configure({apiKey: "adlkjfljk"});
 ```
 
 
@@ -339,7 +339,7 @@ The `factory` method returns a new instance of Honeybadger which can be configur
 #### Examples:
 
 ```javascript
-var other_hb = Honeybadger.factory({api_key: "zxcvbnm"});
+var other_hb = Honeybadger.factory({apiKey: "zxcvbnm"});
 other_hb.notify("This will go to an alternate project.");
 ```
 
@@ -421,7 +421,7 @@ disable notifications for uncaught exceptions, set the `onerror` option to
 
 ```javascript
 Honeybadger.configure({
-  api_key: 'project api key',
+  apiKey: 'project api key',
   onerror: false
 });
 ```

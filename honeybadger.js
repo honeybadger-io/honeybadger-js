@@ -234,7 +234,7 @@
     function send(payload) {
       currentErr = currentPayload = null;
 
-      if (!config('api_key')) {
+      if (!config('apiKey', config('api_key'))) {
         log('Unable to send error report: no API key has been configured.');
         return false;
       }
@@ -310,7 +310,7 @@
           params: err.params
         },
         server: {
-          project_root: err.project_root || config('project_root', window.location.protocol + '//' + window.location.host),
+          project_root: err.projectRoot || err.project_root || config('projectRoot', config('project_root', window.location.protocol + '//' + window.location.host)),
           environment_name: err.environment || config('environment')
         }
       };
