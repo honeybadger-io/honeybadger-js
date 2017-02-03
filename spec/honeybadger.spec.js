@@ -438,21 +438,23 @@ describe('Honeybadger', function() {
       });
     });
 
-    it('handles objects without prototypes as values', function() {
-      var obj = Object.create(null);
-      obj.foo = 'bar';
+    if (typeof Object.create === 'function') {
+      it('handles objects without prototypes as values', function() {
+        var obj = Object.create(null);
+        obj.foo = 'bar';
 
-      Honeybadger.notify("Test error message", {
-        context: {
-          key: obj,
-        }
-      });
+        Honeybadger.notify("Test error message", {
+          context: {
+            key: obj,
+          }
+        });
 
-      afterNotify(function() {
-        expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('Test%20error%20message');
+        afterNotify(function() {
+          expect(requests.length).toEqual(1);
+          expect(requests[0].url).toMatch('Test%20error%20message');
+        });
       });
-    });
+    }
 
     if (typeof Symbol === 'function') {
       it('handles symbols as values', function() {
