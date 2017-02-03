@@ -234,13 +234,14 @@
     function send(payload) {
       currentErr = currentPayload = null;
 
-      if (!config('apiKey', config('api_key'))) {
+      var apiKey = config('apiKey', config('api_key'));
+      if (!apiKey) {
         log('Unable to send error report: no API key has been configured.');
         return false;
       }
 
       url = baseURL() + '/v1/notices/js.gif?' + serialize({notice: payload}) +
-        '&api_key=' + config('api_key') + '&t=' + new Date().getTime();
+        '&api_key=' + config('apiKey') + '&t=' + new Date().getTime();
 
       request(url);
 
