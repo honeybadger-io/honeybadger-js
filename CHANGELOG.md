@@ -4,6 +4,20 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
+### Added
+- Metadata such as context can now be added to thrown errors via properties.
+- The `async` config option can be enabled to make requests asynchronously when
+  using XHR.
+- Type declarations for TypeScript. See
+  [honeybadger-js.d.ts](./honeybadger-js.d.ts)
+- Camel case is now preferred for config options -- use `apiKey` instead of
+  `api_key` and `projectRoot` instead of `project_root`. The old options are
+  deprecated but will continue to be supported for the foreseeable future.
+
+### Fixed
+- Fixed a bug when including objects created without a prototype (i.e. with
+  `Object.create(null)` in context data.
+- Enforce strict mode.
 
 ## [0.4.3] - 2016-09-26
 ### Added
