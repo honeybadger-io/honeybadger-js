@@ -214,20 +214,38 @@
       return ret.join('&');
     }
 
-    function request(url) {
-      // Use XHR when available.
+    function request(apiKey, payload) {
+      // Use XHR/POST when enabled.
       try {
-        // Inspired by https://gist.github.com/Xeoncross/7663273
-        x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
+        if (typeof(JSON) === 'object' && typeof(JSON.stringify) === 'function' && config('post', false)) {
+          // Inspired by https://gist.github.com/Xeoncross/7663273
+          var x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
+          x.open('POST', baseURL() + '/v1/notices/js', config('async', true));
+          x.setRequestHeader('X-API-Key', apiKey);
+          x.setRequestHeader('Content-Type', 'application/json');
+          x.setRequestHeader('Accept', 'text/json, application/json');
+          x.send(JSON.stringify(payload));
+          return;
+        }
+      } catch(e) {
+        log('Error encountered during XHR/POST request (will retry): ' + e);
+      }
+
+      // Fall back to XHR/GET
+      var url = baseURL() + '/v1/notices/js.gif?' + serialize({notice: payload}) +
+        '&api_key=' + apiKey + '&t=' + new Date().getTime();
+
+      try {
+        var x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
         x.open('GET', url, config('async', true));
         x.send();
         return;
       } catch(e) {
-        log('Error encountered during XHR request (will retry): ' + e);
+        log('Error encountered during XHR/GET request (will retry): ' + e);
       }
 
       // Fall back to Image transport.
-      img = new Image();
+      var img = new Image();
       img.src = url;
     }
 
@@ -240,10 +258,7 @@
         return false;
       }
 
-      url = baseURL() + '/v1/notices/js.gif?' + serialize({notice: payload}) +
-        '&api_key=' + config('apiKey') + '&t=' + new Date().getTime();
-
-      request(url);
+      request(apiKey, payload);
 
       return true;
     }

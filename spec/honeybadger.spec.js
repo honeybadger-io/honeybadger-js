@@ -385,6 +385,41 @@ describe('Honeybadger', function() {
     });
   });
 
+  if (typeof(JSON) === 'object' && typeof(JSON.stringify) === 'function') {
+    describe('POST payload', function() {
+      beforeEach(function() {
+        Honeybadger.configure({
+          api_key: 'asdf',
+          post: true
+        });
+      });
+
+      it ('serializes object as JSON', function() {
+        Honeybadger.notify("test error message");
+
+        afterNotify(function() {
+          expect(requests.length).toEqual(1);
+
+          var headers = requests[0].requestHeaders,
+              payload = JSON.parse(requests[0].requestBody);
+
+          expect(headers['X-API-Key']).toEqual('asdf');
+          expect(headers['Content-Type']).toEqual('application/json;charset=utf-8');
+
+
+          expect(typeof(payload.notifier)).toEqual('object');
+          expect(typeof(payload.error)).toEqual('object');
+          expect(typeof(payload.request)).toEqual('object');
+          expect(typeof(payload.server)).toEqual('object');
+
+          expect(payload.error.class).toEqual('Error');
+          expect(payload.error.message).toEqual('test error message');
+          expect(typeof(payload.error.backtrace)).toEqual('string');
+        });
+      });
+    });
+  }
+
   describe('payload query string', function() {
     beforeEach(function() {
       Honeybadger.configure({
