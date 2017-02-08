@@ -117,7 +117,7 @@ You can set configuration options by using the `Honeybadger.configure` function.
 Honeybadger.configure({
   // Output Honeybadger debug messages to the console
   debug: false,
-
+  
   // Honeybadger API key (required)
   apiKey: '',
 
@@ -146,10 +146,7 @@ Honeybadger.configure({
   disabled: false,
 
   // Send notifications asynchronously
-  async: true,
-
-  // Makes requests using POST method when available.
-  post: false
+  async: true
 });
 ```
 
