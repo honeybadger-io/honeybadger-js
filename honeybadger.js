@@ -254,7 +254,7 @@
 
       if (Object.prototype.toString.call(err) === '[object Error]') {
         var e = err;
-        err = merge(err, {stack: stackTrace(e)})
+        err = merge(err, {name: e.name, message: e.message, stack: stackTrace(e)})
       }
 
       if (currentErrIs(err)) {
@@ -382,7 +382,7 @@
 
       if (Object.prototype.toString.call(err) === '[object Error]') {
         var e = err;
-        err = merge(err, {stack: stackTrace(e)})
+        err = merge(err, {name: e.name, message: e.message, stack: stackTrace(e)})
       }
 
       if (!(typeof err === 'object')) {

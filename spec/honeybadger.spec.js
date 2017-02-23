@@ -293,6 +293,25 @@ describe('Honeybadger', function() {
       });
     });
 
+    it('reads default properties from error objects', function() {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      var err = new Error("Test message");
+      try {
+        throw err;
+      } catch (e) {
+        Honeybadger.notify(e);
+      }
+
+      afterNotify(function() {
+        expect(requests.length).toEqual(1);
+        expect(requests[0].url).toMatch('%5Bclass%5D=Error');
+        expect(requests[0].url).toMatch('%5Bmessage%5D=Test%20message');
+      });
+    });
+
     it('reads metadata from error objects', function() {
       Honeybadger.configure({
         api_key: 'asdf'
