@@ -241,7 +241,7 @@
       }
 
       url = baseURL() + '/v1/notices/js.gif?' + serialize({notice: payload}) +
-        '&api_key=' + config('apiKey') + '&t=' + new Date().getTime();
+        '&api_key=' + apiKey + '&t=' + new Date().getTime();
 
       request(url);
 
