@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
+
+## [0.4.5] - 2017-02-23
 ### Fixed
 - Fix bug where default properties "name" and "message" on error objects were
   not reported by `Honeybadger.notify`.
