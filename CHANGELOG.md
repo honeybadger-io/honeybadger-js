@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
+
+## [0.4.4] - 2017-02-23
 ### Added
 - Metadata such as context can now be added to thrown errors via properties.
 - The `async` config option can be enabled to make requests asynchronously when
