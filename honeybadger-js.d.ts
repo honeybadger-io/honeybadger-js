@@ -1,9 +1,9 @@
 declare module "honeybadger-js" {
     interface Config {
-        api_key: string;
+        apiKey: string;
         host?: string;
         ssl?: boolean;
-        project_root?: string;
+        projectRoot?: string;
         environment?: string;
         component?: string;
         action?: string;
