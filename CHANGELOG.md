@@ -6,6 +6,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased][unreleased]
 ### Fixed
 - Fixed a bug which caused `window.url` to be overridden.
+- Updated typescript definitions.
 
 ## [0.4.5] - 2017-02-23
 ### Fixed
