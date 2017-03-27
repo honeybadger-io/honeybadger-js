@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
+
+## [0.4.6] - 2017-03-27
 ### Fixed
 - Fixed a bug which caused `window.url` to be overridden.
 - Updated typescript definitions.
