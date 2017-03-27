@@ -240,7 +240,7 @@
         return false;
       }
 
-      url = baseURL() + '/v1/notices/js.gif?' + serialize({notice: payload}) +
+      var url = baseURL() + '/v1/notices/js.gif?' + serialize({notice: payload}) +
         '&api_key=' + apiKey + '&t=' + new Date().getTime();
 
       request(url);

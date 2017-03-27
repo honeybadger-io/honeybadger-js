@@ -1,3 +1,5 @@
+var url = 'global';
+
 describe('Honeybadger', function() {
   var requests, xhr;
 
@@ -331,6 +333,22 @@ describe('Honeybadger', function() {
       afterNotify(function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).toMatch('unique%20context');
+      });
+    });
+
+    it('does not clobber global url', function() {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      try {
+        throw new Error("Testing");
+      } catch (e) {
+        Honeybadger.notify(e);
+      }
+
+      afterNotify(function() {
+        expect(url).toEqual('global');
       });
     });
   });
