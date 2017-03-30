@@ -426,6 +426,8 @@ Honeybadger.configure({
 });
 ```
 
+If you host your assets on a CDN (or if the domain is different from where your HTML is served) you may need to enable CORS on your asset domain for the `window.onerror` errors to be reported. See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes for more info.
+
 ## Contributing
 
 1. Fork it.
