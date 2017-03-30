@@ -434,9 +434,11 @@ Honeybadger.configure({
 3. Push to your branch `git push origin my_branch`
 4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)
 
-### Running the tests
+### Development
 
-To run the test suite, enter `make test` into the console.
+First, install the required npm packages with `npm install`. After that you can run the dev server with `grunt dev`; this will launch a development server at *http://127.0.0.1:9999*. It will also run the test suite automatically when files change.
+
+To run the test suite by itself, use `grunt jasmine`.
 
 ### License
 
