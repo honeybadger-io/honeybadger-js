@@ -350,7 +350,7 @@
     // removeEventListener.
     function wrap(fn, force) {
       try {
-        if (typeof fn !== 'function') {
+        if (typeof fn !== 'function' || !Object.isExtensible(fn)) {
           return fn;
         }
         if (!fn.___hb) {
