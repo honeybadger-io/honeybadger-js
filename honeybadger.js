@@ -173,10 +173,8 @@
     }
 
     function config(key, fallback) {
-      var value;
-      if (self[key] !== undefined) {
-        value = self[key];
-      }
+      var value = self[key];
+      if (value === undefined) { value = self[key.toLowerCase()] }
       if (value === 'false') { value = false; }
       if (value !== undefined) { return value; }
       return fallback;

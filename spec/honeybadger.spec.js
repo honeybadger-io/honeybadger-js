@@ -119,7 +119,39 @@ describe('Honeybadger', function() {
   });
 
   describe('.notify', function() {
-    it('delivers the notice when enabled', function() {
+    it('delivers the notice when configured', function() {
+      Honeybadger.configure({
+        apiKey: 'asdf'
+      });
+
+      try {
+        throw new Error("Testing");
+      } catch (e) {
+        Honeybadger.notify(e);
+      }
+
+      afterNotify(function() {
+        expect(requests.length).toEqual(1);
+      });
+    });
+
+    it('delivers the notice when configured with lower case api key', function() {
+      Honeybadger.configure({
+        apikey: 'asdf'
+      });
+
+      try {
+        throw new Error("Testing");
+      } catch (e) {
+        Honeybadger.notify(e);
+      }
+
+      afterNotify(function() {
+        expect(requests.length).toEqual(1);
+      });
+    });
+
+    it('delivers the notice when configured with snake case api key', function() {
       Honeybadger.configure({
         api_key: 'asdf'
       });

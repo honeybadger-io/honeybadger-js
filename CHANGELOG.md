@@ -5,6 +5,10 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
 
+### Fixed
+- Fixed a bug which caused config values read from the "data-apiKey" and
+  "data-projectRoot" attributes on script tag to be missing.
+
 ## [0.4.6] - 2017-03-27
 ### Fixed
 - Fixed a bug which caused `window.url` to be overridden.
