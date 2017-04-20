@@ -413,6 +413,11 @@ describe('Honeybadger', function() {
         expect(requests.length).toEqual(1);
       });
     });
+
+    it('returns original function if fn is not extensible', function() {
+      var func = Object.freeze(function() {});
+      expect(Honeybadger.wrap(func)).toEqual(func);
+    });
   });
 
   describe('beforeNotify', function() {
