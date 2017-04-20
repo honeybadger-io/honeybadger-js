@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.4.7] - 2017-04-20
 ### Fixed
 - Fixed a bug which caused config values read from the "data-apiKey" and
   "data-projectRoot" attributes on script tag to be missing.
