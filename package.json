@@ -16,7 +16,8 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "scripts": {
-    "test": "make test"
+    "test": "make test",
+    "bump": "bin/bump"
   },
   "devDependencies": {
     "connect": "~2.7.11",
