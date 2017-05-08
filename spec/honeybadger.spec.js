@@ -211,6 +211,19 @@ describe('Honeybadger', function() {
       });
     });
 
+    it('does not deliver notice for ignored message', function() {
+      Honeybadger.configure({
+        api_key: 'asdf',
+        ignorePatterns: [/care/i]
+      });
+
+      var notice = Honeybadger.notify("Honeybadger don't care, but you might.");
+
+      afterNotify(function() {
+        expect(requests.length).toEqual(0);
+      });
+    });
+
     it('generates a stack trace without an error', function() {
       Honeybadger.configure({
         api_key: 'asdf'

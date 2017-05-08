@@ -81,6 +81,16 @@
     return true;
   }
 
+  function isIgnored(err, patterns) {
+    var msg = err.message;
+    var ignored = false;
+
+    for (p in patterns) {
+      if (msg.match(patterns[p])) { ignored = true; }
+    }
+    return ignored;
+  }
+
   function cgiData() {
     var data = {};
     data['HTTP_USER_AGENT'] = navigator.userAgent;
@@ -257,6 +267,8 @@
 
       if (currentErrIs(err)) {
         // Skip the duplicate error.
+        return false;
+      } else if (isIgnored(err, config('ignorePatterns'))) {
         return false;
       } else if (currentPayload && loaded) {
         // This is a different error, send the old one now.
