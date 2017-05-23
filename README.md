@@ -139,6 +139,10 @@ Honeybadger.configure({
   // Action (optional)
   action: '',
 
+  // Ignore Patterns (optional)
+  // Array of error messages as regexes that should be ignored
+  ignorePatterns: [/known\ error/i],
+
   // Should unhandled (window.onerror) notifications be sent?
   onerror: true,
 
