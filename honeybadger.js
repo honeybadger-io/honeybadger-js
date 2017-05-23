@@ -268,8 +268,6 @@
       if (currentErrIs(err)) {
         // Skip the duplicate error.
         return false;
-      } else if (isIgnored(err, config('ignorePatterns'))) {
-        return false;
       } else if (currentPayload && loaded) {
         // This is a different error, send the old one now.
         send(currentPayload);
@@ -292,9 +290,9 @@
         err = merge(err, generated);
       }
 
-      if (checkHandlers(self.beforeNotifyHandlers, err)) {
-        return false;
-      }
+      if (isIgnored(err, config('ignorePatterns'))) { return false; }
+
+      if (checkHandlers(self.beforeNotifyHandlers, err)) { return false; }
 
       var data = cgiData();
       if (typeof err.cookies === 'string') {
