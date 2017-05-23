@@ -83,12 +83,12 @@
 
   function isIgnored(err, patterns) {
     var msg = err.message;
-    var ignored = false;
 
     for (p in patterns) {
-      if (msg.match(patterns[p])) { ignored = true; }
+      if (msg.match(patterns[p])) { return true; }
     }
-    return ignored;
+
+    return false;
   }
 
   function cgiData() {
