@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Fixed "'prototype' is undefined" bug.
 
 ## [0.4.7] - 2017-04-20
 ### Fixed

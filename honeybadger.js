@@ -480,7 +480,7 @@
     // Event targets borrowed from bugsnag-js:
     // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
     'EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload'.replace(/\w+/g, function (prop) {
-      prototype = window[prop] && window[prop].prototype;
+      var prototype = window[prop] && window[prop].prototype;
       if (prototype && prototype.hasOwnProperty && prototype.hasOwnProperty('addEventListener')) {
         instrument(prototype, 'addEventListener', function(original) {
           // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
