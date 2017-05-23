@@ -4,6 +4,9 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Allow error messages to be ignored. - @mhuerster
+
 ### Fixed
 - Fixed "'prototype' is undefined" bug.
 
