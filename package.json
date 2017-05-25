@@ -1,7 +1,7 @@
 {
   "name": "honeybadger-js",
   "description": "A JavaScript library for integrating apps with the Honeybadger Rails Error Notifier.",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "homepage": "https://github.com/honeybadger-io/honeybadger-js",
   "author": {
     "name": "Joshua Wood",
