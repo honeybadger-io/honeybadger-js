@@ -342,6 +342,11 @@
       return err;
     }
 
+    function objectIsExtensible(obj) {
+      if (typeof Object.isExtensible !== 'function') { return true; }
+      return Object.isExtensible(obj);
+    }
+
     var preferCatch = true;
     // IE < 10
     if (!window.atob) { preferCatch = false; }
@@ -358,9 +363,8 @@
     // removeEventListener.
     function wrap(fn, force) {
       try {
-        if (typeof fn !== 'function' || !Object.isExtensible(fn)) {
-          return fn;
-        }
+        if (typeof fn !== 'function') { return fn; }
+        if (!objectIsExtensible(fn))  { return fn; }
         if (!fn.___hb) {
           fn.___hb = function() {
             var onerror = config('onerror', true);
