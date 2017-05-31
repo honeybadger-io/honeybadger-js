@@ -14,7 +14,7 @@ A client-side JavaScript library for integrating apps with the :zap: [Honeybadge
 Place the following code between the `<head></head>` tags of your page:
 
 ```html
-<script src="//js.honeybadger.io/v0.4/honeybadger.min.js" type="text/javascript" data-apiKey="project api key" data-environment="production"></script>
+<script src="//js.honeybadger.io/v0.4/honeybadger.min.js" type="text/javascript" data-api_key="project api key" data-environment="production"></script>
 ```
 
 Honeybadger may also be configured via JavaScript:
@@ -117,7 +117,7 @@ You can set configuration options by using the `Honeybadger.configure` function.
 Honeybadger.configure({
   // Output Honeybadger debug messages to the console
   debug: false,
-  
+
   // Honeybadger API key (required)
   apiKey: '',
 
