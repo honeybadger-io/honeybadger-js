@@ -68,8 +68,8 @@
   // Utilities.
   function merge(obj1, obj2) {
     var obj3 = {};
-    for (k in obj1) { obj3[k] = obj1[k]; }
-    for (k in obj2) { obj3[k] = obj2[k]; }
+    for (var k in obj1) { obj3[k] = obj1[k]; }
+    for (var k in obj2) { obj3[k] = obj2[k]; }
     return obj3;
   }
 
@@ -84,7 +84,7 @@
   function isIgnored(err, patterns) {
     var msg = err.message;
 
-    for (p in patterns) {
+    for (var p in patterns) {
       if (msg.match(patterns[p])) { return true; }
     }
 
@@ -106,7 +106,7 @@
     }
 
     var cookies = [];
-    for (k in object) {
+    for (var k in object) {
       cookies.push(k + '=' + object[k]);
     }
 
@@ -173,7 +173,7 @@
       beforeNotifyHandlers: []
     }
     if (typeof opts === 'object') {
-      for (k in opts) { self[k] = opts[k]; }
+      for (var k in opts) { self[k] = opts[k]; }
     }
 
     function log(msg){
@@ -226,7 +226,7 @@
       // Use XHR when available.
       try {
         // Inspired by https://gist.github.com/Xeoncross/7663273
-        x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
+        var x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
         x.open('GET', url, config('async', true));
         x.send();
         return;
@@ -235,7 +235,7 @@
       }
 
       // Fall back to Image transport.
-      img = new Image();
+      var img = new Image();
       img.src = url;
     }
 
@@ -438,7 +438,7 @@
     };
 
     self.configure = function(opts) {
-      for (k in opts) {
+      for (var k in opts) {
         self[k] = opts[k];
       }
       return self;
@@ -453,7 +453,7 @@
     self.reset = function() {
       self.context = {};
       self.beforeNotifyHandlers = [];
-      for (k in self) {
+      for (var k in self) {
         if (indexOf.call(defaultProps, k) == -1) {
           self[k] = undefined;
         }
@@ -534,7 +534,7 @@
           return;
         }
         // simulate v8 stack
-        stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
+        var stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
         notify({
           name: 'window.onerror',
           message: msg,
@@ -555,7 +555,7 @@
     installed = true;
 
     // Save original state for reset()
-    for (k in self) {
+    for (var k in self) {
       defaultProps.push(k);
     }
 
@@ -573,6 +573,7 @@
       var domReady = function() {
         loaded = true;
         log('honeybadger.js ' + VERSION + ' ready');
+        var notice;
         while (notice = queue.pop()) {
           send(notice);
         }
