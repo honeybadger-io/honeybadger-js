@@ -117,9 +117,12 @@ You can set configuration options by using the `Honeybadger.configure` function.
 Honeybadger.configure({
   // Output Honeybadger debug messages to the console
   debug: false,
-  
+
   // Honeybadger API key (required)
   apiKey: '',
+
+  // The revision of the current deploy
+  revision: '',
 
   // Collector Host
   host: 'api.honeybadger.io',

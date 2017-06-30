@@ -320,7 +320,8 @@
         },
         server: {
           project_root: err.projectRoot || err.project_root || config('projectRoot', config('project_root', window.location.protocol + '//' + window.location.host)),
-          environment_name: err.environment || config('environment')
+          environment_name: err.environment || config('environment'),
+          revision: err.revision || config('revision')
         }
       };
 
