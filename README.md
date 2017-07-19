@@ -358,7 +358,7 @@ other_hb.notify("This will go to an alternate project.");
 
 Honeybadger can automatically un-minify your code if you provide a [sourcemap](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) along with your minified JavaScript files.
 
-For source maps to work properly, first make sure you're configuring the revision option in *honeybadger.js*. The value should be a unique version number for your current code deployment (a git SHA  works well for this):
+For source maps to work properly, first make sure you're configuring the revision option in *honeybadger.js*. The value should be a unique version number for your current code deployment (a git SHA  works well for this). The revision is used to tell Honeybadger that your code has changed and that it should update your source translations for future errors:
 
 ```js
 Honeybadger.configure({
