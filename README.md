@@ -14,7 +14,7 @@ A client-side JavaScript library for integrating apps with the :zap: [Honeybadge
 Place the following code between the `<head></head>` tags of your page:
 
 ```html
-<script src="//js.honeybadger.io/v0.4/honeybadger.min.js" type="text/javascript" data-apiKey="project api key" data-environment="production"></script>
+<script src="//js.honeybadger.io/v0.5/honeybadger.min.js" type="text/javascript" data-apiKey="project api key" data-environment="production" data-revision="git SHA/project version"></script>
 ```
 
 Honeybadger may also be configured via JavaScript:
@@ -23,7 +23,8 @@ Honeybadger may also be configured via JavaScript:
 <script type="text/javascript">
   Honeybadger.configure({
     apiKey: 'project api key',
-    environment: 'production'
+    environment: 'production',
+    revision: 'git SHA/project version'
   });
 </script>
 ```
@@ -50,7 +51,8 @@ bower install honeybadger --save
 var Honeybadger = require("path/to/honeybadger");
 Honeybadger.configure({
   apiKey: 'project api key',
-  environment: 'production'
+  environment: 'production',
+  revision: 'git SHA/project version'
 });
 ```
 
@@ -63,7 +65,8 @@ Honeybadger.configure({
 requirejs(["path/to/honeybadger"], function(Honeybadger) {
   Honeybadger.configure({
     apiKey: 'project api key',
-    environment: 'production'
+    environment: 'production',
+    revision: 'git SHA/project version'
   });
 });
 ```
@@ -89,7 +92,8 @@ Add the following to application.js:
 
 Honeybadger.configure({
   apiKey: 'project api key',
-  environment: 'production'
+  environment: 'production',
+  revision: 'git SHA/project version'
 });
 ```
 
@@ -352,62 +356,21 @@ other_hb.notify("This will go to an alternate project.");
 
 ## Sourcemaps
 
-Honeybadger can automatically un-minify your code if you provide a [sourcemap](http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) along with your minified JavaScript files.
+Honeybadger can automatically un-minify your code if you provide a [sourcemap](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) along with your minified JavaScript files.
 
-To do this, you'll add a special comment at the bottom of your minified JS. It tells us where to find your sourcemap. For example:
-
-```js
-// ...minified code...
-//# sourceMappingURL=application.min.js.map
-```
-
-The sourcemap URL needs to be a valid URL accessible to the public.
-
-For more information on sourcemaps, check out the [Source Map Revision 3 Proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
-
-
-### Linking stack traces to source files
-
-If you'd like to be able to jump from the Honeybadger backtrace to your unminified source file, just tell us where to find your unminified files using the `sourceRoot` option.
-
-`sourceRoot` is the root URL for your unminified source files. To set it, you can use another magic comment:
-
+For source maps to work properly, first make sure you're configuring the revision option in *honeybadger.js*. The value should be a unique version number for your current code deployment (a git SHA  works well for this):
 
 ```js
-// ...minified code...
-//# sourceRoot=https://sources.my-domain.com/src
+Honeybadger.configure({
+  apiKey: 'project api key',
+  environment: 'production',
+  revision: 'dcc69529edf375c72df39b0e9195d60d59db18ff'
+});
 ```
 
-This option may also be specified as a top-level key in the JSON sourcemap file itself:
+We recommend [uploading your source map files to our servers](https://docs.honeybadger.io/guides/source-maps.html#uploading-your-files-to-honeybadger) every time you deploy your code. It's also possible for you to [host your source map files yourself](https://docs.honeybadger.io/guides/source-maps.html#hosting-your-own-files) along with your production assets, in which case we'll try to download your source maps when an error is reported to us.
 
-```js
-{
-  "sourceRoot" : "https://sources.my-domain.com/src",
-  // ...sourcemap...
-}
-```
-
-If providing the `sourceRoot` option fouls up other tools in your toolchain, you can alternatively use `honeybadgerSourceRoot`.
-
-#### Using GitHub
-
-If you're using Honeybadger's GitHub integration, you can link to source files on GitHub by substituting a special `[PROJECT_ROOT]` token for the root of your GitHub repository:
-
-```js
-// ...minified code...
-//# sourceMappingURL=honeybadger.min.js.map
-//# honeybadgerSourceRoot=[PROJECT_ROOT]/src
-```
-
-This is the only situation in which the source root is not required to be a valid URL.
-
-#### Authentication
-
-Requests sent from Honeybadger servers to download sourcemaps and related-files include a secret token in the `Honeybadger-Token` header, which may be used to authenticate requests from Honeybadger.
-
-To find your `Honeybadger-Token` token, visit your project settings page in Honeybadger and click on the "Sourcemaps" tab.
-
-One exception is direct links from the Honeybadger UI (such as when displaying links in backtraces); these cannot be authenticated.
+[See our guide to learn how to generate source maps and providing them to Honeybadger.](https://docs.honeybadger.io/guides/source-maps.html)
 
 ## Sending cookies by default
 
