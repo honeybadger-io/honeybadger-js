@@ -5,6 +5,12 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2017-07-19
+### Changed
+- Honeybadger now uses source maps when available to group errors. If upgrading,
+  some errors may be grouped differently (causing new errors to be created), but
+  the new grouping will be more accurate.
+
 ## [0.4.9] - 2017-07-19
 ### Fixed
 - Added missing declarations for variables. - @HolixSF
