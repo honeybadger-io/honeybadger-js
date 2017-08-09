@@ -4,6 +4,9 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Notification is now halted later in the process when `disabled` is `true` so
+  that errors are still logged when disabled. -@novito
 
 ## [0.5.0] - 2017-07-19
 ### Changed
