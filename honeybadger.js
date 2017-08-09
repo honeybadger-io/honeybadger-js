@@ -223,6 +223,8 @@
     }
 
     function request(url) {
+      if (config('disabled', false)) { return false; }
+
       // Use XHR when available.
       try {
         // Inspired by https://gist.github.com/Xeoncross/7663273
@@ -257,7 +259,6 @@
     }
 
     function notify(err, generated) {
-      if (config('disabled', false)) { return false; }
       if (!(typeof err === 'object')) { return false; }
 
       if (Object.prototype.toString.call(err) === '[object Error]') {
