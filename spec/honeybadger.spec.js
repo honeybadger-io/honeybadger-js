@@ -433,6 +433,14 @@ describe('Honeybadger', function() {
         expect(Honeybadger.wrap(func)).toEqual(func);
       });
     }
+
+    it('returns the same function when wrapping itself', function() {
+      var f = function() {}
+      var w = Honeybadger.wrap;
+
+      expect(w(w(f))).toEqual(w(f));
+      expect(w(w(w(f)))).toEqual(w(w(f)));
+    });
   });
 
   describe('beforeNotify', function() {

@@ -384,6 +384,7 @@
             }
           };
         }
+        fn.___hb.___hb = fn.___hb;
         return fn.___hb;
       } catch(_e) {
         return fn;
