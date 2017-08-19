@@ -1,6 +1,8 @@
 declare module "honeybadger-js" {
     interface Config {
+        debug?: boolean;
         apiKey: string;
+        revision?: string;
         host?: string;
         ssl?: boolean;
         projectRoot?: string;
@@ -9,6 +11,8 @@ declare module "honeybadger-js" {
         action?: string;
         onerror?: boolean;
         disabled?: boolean;
+        ignorePatterns?: RegExp[];
+        async?: boolean;
     }
 
     interface Notice {
