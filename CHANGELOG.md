@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Notification is now halted later in the process when `disabled` is `true` so
   that errors are still logged when disabled. -@novito
+- Make calls to `Honeybadger.wrap` idempotent. Previously calling
+  `Honeybadger.wrap(Honeybadger.wrap(func))` would wrap the function twice. Some
+  events can be wrapped numerous times, causing a stack recursion error in
+  certain environments (specifically IE 11).
 
 ## [0.5.0] - 2017-07-19
 ### Changed
