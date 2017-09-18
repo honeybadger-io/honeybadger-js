@@ -178,7 +178,7 @@
 
     function log() {
       if (this.console) {
-        args = Array.prototype.slice.call(arguments);
+        var args = Array.prototype.slice.call(arguments);
         args.unshift('[Honeybadger]');
         console.log.apply(console, args);
       }
