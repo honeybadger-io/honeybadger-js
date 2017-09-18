@@ -176,9 +176,15 @@
       for (var k in opts) { self[k] = opts[k]; }
     }
 
-    function log(msg){
+    function log(msg) {
       if (config('debug') && this.console) {
-        console.log( msg );
+        return console.log(msg);
+      }
+    }
+
+    function warn(msg) {
+      if (this.console) {
+        return console.log(msg);
       }
     }
 
@@ -233,7 +239,7 @@
         x.send();
         return;
       } catch(e) {
-        log('Error encountered during XHR request (will retry): ' + e);
+        warn('Error encountered during XHR request (will retry): ' + e);
       }
 
       // Fall back to Image transport.
@@ -246,7 +252,7 @@
 
       var apiKey = config('apiKey', config('api_key'));
       if (!apiKey) {
-        log('Unable to send error report: no API key has been configured.');
+        warn('Unable to send error report: no API key has been configured.');
         return false;
       }
 
@@ -508,7 +514,7 @@
               }
             } catch(e) {
               // Ignore 'Permission denied to access property "handleEvent"' errors.
-              log(e);
+              warn(e);
             }
             return original.call(this, type, wrap(listener), useCapture, wantsUntrusted);
           };
@@ -528,7 +534,7 @@
         if (!config('onerror', true)) { return; }
         if (line === 0 && /Script error\.?/.test(msg)) {
           // See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes
-          log('Ignoring cross-domain script error. Use CORS to enable tracking of these types of errors.');
+          warn('Ignoring cross-domain script error. Use CORS to enable tracking of these types of errors.');
           return;
         }
         log('Error caught by window.onerror');
