@@ -178,13 +178,13 @@
 
     function log(msg) {
       if (config('debug') && this.console) {
-        return console.log(msg);
+        return console.log('[Honeybadger]', msg);
       }
     }
 
     function warn(msg) {
       if (this.console) {
-        return console.log(msg);
+        return console.log('[Honeybadger]', msg);
       }
     }
 
