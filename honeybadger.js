@@ -176,15 +176,17 @@
       for (var k in opts) { self[k] = opts[k]; }
     }
 
-    function log(msg) {
-      if (config('debug') && this.console) {
-        return console.log('[Honeybadger]', msg);
+    function log() {
+      if (this.console) {
+        args = Array.prototype.slice.call(arguments);
+        args.unshift('[Honeybadger]');
+        console.log.apply(console, args);
       }
     }
 
-    function warn(msg) {
-      if (this.console) {
-        return console.log('[Honeybadger]', msg);
+    function debug() {
+      if (config('debug')) {
+        return log.apply(this, arguments);
       }
     }
 
@@ -239,7 +241,7 @@
         x.send();
         return;
       } catch(e) {
-        warn('Error encountered during XHR request (will retry): ' + e);
+        log('Error encountered during XHR request (will retry): ' + e);
       }
 
       // Fall back to Image transport.
@@ -252,7 +254,7 @@
 
       var apiKey = config('apiKey', config('api_key'));
       if (!apiKey) {
-        warn('Unable to send error report: no API key has been configured.');
+        log('Unable to send error report: no API key has been configured.');
         return false;
       }
 
@@ -336,14 +338,14 @@
       currentErr = err;
 
       if (loaded) {
-        log('Deferring notice.', err, payload);
+        debug('Deferring notice.', err, payload);
         window.setTimeout(function(){
           if (currentErrIs(err)) {
             send(payload);
           }
         });
       } else {
-        log('Queuing notice.', err, payload);
+        debug('Queuing notice.', err, payload);
         queue.push(payload);
       }
 
@@ -514,7 +516,7 @@
               }
             } catch(e) {
               // Ignore 'Permission denied to access property "handleEvent"' errors.
-              warn(e);
+              log(e);
             }
             return original.call(this, type, wrap(listener), useCapture, wantsUntrusted);
           };
@@ -530,20 +532,27 @@
 
     instrument(window, 'onerror', function(original) {
       function onerror(msg, url, line, col, err) {
+        debug('window.onerror callback invoked.', arguments);
+
+        // Skip if the error is already being sent.
         if (currentErr) { return; }
+
         if (!config('onerror', true)) { return; }
+
         if (line === 0 && /Script error\.?/.test(msg)) {
           // See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes
-          warn('Ignoring cross-domain script error. Use CORS to enable tracking of these types of errors.');
+          log('Ignoring cross-domain script error. Use CORS to enable tracking of these types of errors.', arguments);
           return;
         }
-        log('Error caught by window.onerror');
+
         if (err) {
           notify(err);
           return;
         }
+
         // simulate v8 stack
         var stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
+
         notify({
           name: 'window.onerror',
           message: msg,
@@ -569,19 +578,19 @@
     }
 
     // Initialization.
-    log('Initializing honeybadger.js ' + VERSION);
+    debug('Initializing honeybadger.js ' + VERSION);
 
     // See https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
     // https://www.w3.org/TR/html5/dom.html#dom-document-readystate
     // The 'loaded' state is for older versions of Safari.
     if (/complete|interactive|loaded/.test(document.readyState)) {
       loaded = true;
-      log('honeybadger.js ' + VERSION + ' ready');
+      debug('honeybadger.js ' + VERSION + ' ready');
     } else {
-      log('Installing ready handler');
+      debug('Installing ready handler');
       var domReady = function() {
         loaded = true;
-        log('honeybadger.js ' + VERSION + ' ready');
+        debug('honeybadger.js ' + VERSION + ' ready');
         var notice;
         while (notice = queue.pop()) {
           send(notice);
