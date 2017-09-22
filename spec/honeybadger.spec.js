@@ -637,11 +637,27 @@ describe('Honeybadger', function() {
         });
       });
 
+      it('reports stack from error object when available', function() {
+        window.onerror('testing', 'http://foo.bar', '123', '345', new Error());
+        afterNotify(function() {
+          expect(requests.length).toEqual(1);
+          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bbacktrace%5D=Error');
+        });
+      });
+
       it('coerces unknown objects into string error message ', function() {
         window.onerror(null, null, null, null, 'testing');
         afterNotify(function() {
           expect(requests.length).toEqual(1);
           expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
+        });
+      });
+
+      it('supplements stack property when the error object does not have one', function() {
+        window.onerror('testing', 'http://foo.bar', '123', '345', 'testing');
+        afterNotify(function() {
+          expect(requests.length).toEqual(1);
+          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bbacktrace%5D=testing');
         });
       });
     });

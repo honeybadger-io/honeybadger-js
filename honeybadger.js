@@ -550,13 +550,15 @@
           return;
         }
 
-        if (err) {
-          notify(err);
-          return;
-        }
-
         // simulate v8 stack
         var stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
+
+        if (err) {
+          var generated = { stack: stackTrace(err) };
+          if (!generated.stack) { generated = {stack: stack}; }
+          notify(err, generated);
+          return;
+        }
 
         notify({
           name: 'window.onerror',

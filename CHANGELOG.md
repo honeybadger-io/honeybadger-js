@@ -10,6 +10,9 @@ adheres to [Semantic Versioning](http://semver.org/).
 - Non-error objects are now reported correctly from `window.onerror` and
   `Honeybadger.wrap`. For instance, `throw('string');` will result in the
   uncaught error being reported with the message "string".
+- The limited stack info in `window.onerror` is now supplemented if the error
+  object (in browsers which support it) does not have a stack property, such as
+  when `String` is thrown.
 
 ## [0.5.1] - 2017-08-22
 ### Fixed
