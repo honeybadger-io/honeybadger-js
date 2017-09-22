@@ -267,11 +267,16 @@
     }
 
     function notify(err, generated) {
-      if (!(typeof err === 'object')) { return false; }
+      if (!err) { err = {}; }
 
       if (Object.prototype.toString.call(err) === '[object Error]') {
         var e = err;
         err = merge(err, {name: e.name, message: e.message, stack: stackTrace(e)})
+      }
+
+      if (!(typeof err === 'object')) {
+        var m = String(err);
+        err = {message: m};
       }
 
       if (currentErrIs(err)) {

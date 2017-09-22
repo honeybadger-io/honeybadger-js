@@ -7,6 +7,9 @@ adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Warnings are now logged all the time. Previously they required the `debug`
   config option to be enabled.
+- Non-error objects are now reported correctly from `window.onerror` and
+  `Honeybadger.wrap`. For instance, `throw('string');` will result in the
+  uncaught error being reported with the message "string".
 
 ## [0.5.1] - 2017-08-22
 ### Fixed

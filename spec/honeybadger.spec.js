@@ -409,7 +409,7 @@ describe('Honeybadger', function() {
     it('notifies Honeybadger of errors and re-throws', function() {
       var error, func, caughtError;
 
-      error = new Error("Testing")
+      error = new Error("Testing");
       func = function() {
         throw(error);
       };
@@ -440,6 +440,27 @@ describe('Honeybadger', function() {
 
       expect(w(w(f))).toEqual(w(f));
       expect(w(w(w(f)))).toEqual(w(w(f)));
+    });
+
+    it('coerces unknown objects into string error message', function() {
+      var error, func, caughtError;
+
+      error = 'testing';
+      func = function() {
+        throw(error);
+      };
+
+      try {
+        Honeybadger.wrap(func)();
+      } catch (e) {
+        caughtError = e;
+      }
+
+      expect(caughtError).toEqual(error);
+      afterNotify(function() {
+        expect(requests.length).toEqual(1);
+        expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
+      });
     });
   });
 
@@ -604,6 +625,23 @@ describe('Honeybadger', function() {
         window.onerror('Script error', 'http://foo.bar', 0);
         afterNotify(function() {
           expect(requests.length).toEqual(0);
+        });
+      });
+
+      it('reports error object when it is available', function() {
+        var err = new Error('expected-message');
+        window.onerror('foo', 'http://foo.bar', '123', '456', err);
+        afterNotify(function() {
+          expect(requests.length).toEqual(1);
+          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=expected-message');
+        });
+      });
+
+      it('coerces unknown objects into string error message ', function() {
+        window.onerror(null, null, null, null, 'testing');
+        afterNotify(function() {
+          expect(requests.length).toEqual(1);
+          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
         });
       });
     });
