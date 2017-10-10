@@ -19,9 +19,11 @@ describe('Honeybadger', function() {
     xhr.restore();
   });
 
-  function afterNotify(callback) {
-    waits(1);
-    runs(callback);
+  function afterNotify(done, run) {
+    setTimeout(function() {
+      run();
+      done();
+    }, 50);
   }
 
   describe('.configure', function() {
@@ -119,7 +121,7 @@ describe('Honeybadger', function() {
   });
 
   describe('.notify', function() {
-    it('delivers the notice when configured', function() {
+    it('delivers the notice when configured', function(done) {
       Honeybadger.configure({
         apiKey: 'asdf'
       });
@@ -130,12 +132,12 @@ describe('Honeybadger', function() {
         Honeybadger.notify(e);
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
 
-    it('delivers the notice when configured with lower case api key', function() {
+    it('delivers the notice when configured with lower case api key', function(done) {
       Honeybadger.configure({
         apikey: 'asdf'
       });
@@ -146,12 +148,12 @@ describe('Honeybadger', function() {
         Honeybadger.notify(e);
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
 
-    it('delivers the notice when configured with snake case api key', function() {
+    it('delivers the notice when configured with snake case api key', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -162,24 +164,24 @@ describe('Honeybadger', function() {
         Honeybadger.notify(e);
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
 
-    it('does not deliver notice when not configured', function() {
+    it('does not deliver notice when not configured', function(done) {
       try {
         throw new Error("Testing");
       } catch (e) {
         Honeybadger.notify(e);
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(0);
       });
     });
 
-    it('does not deliver notice when disabled', function() {
+    it('does not deliver notice when disabled', function(done) {
       Honeybadger.configure({
         api_key: 'asdf',
         disabled: true
@@ -191,12 +193,12 @@ describe('Honeybadger', function() {
         Honeybadger.notify(e);
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(0);
       });
     });
 
-    it('does not deliver notice without arguments', function() {
+    it('does not deliver notice without arguments', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -206,12 +208,12 @@ describe('Honeybadger', function() {
       Honeybadger.notify(null, {});
       Honeybadger.notify({});
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(0);
       });
     });
 
-    it('does not deliver notice for ignored message', function() {
+    it('does not deliver notice for ignored message', function(done) {
       Honeybadger.configure({
         api_key: 'asdf',
         ignorePatterns: [/care/i]
@@ -219,12 +221,12 @@ describe('Honeybadger', function() {
 
       var notice = Honeybadger.notify("Honeybadger don't care, but you might.");
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(0);
       });
     });
 
-    it('generates a stack trace without an error', function() {
+    it('generates a stack trace without an error', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -234,12 +236,12 @@ describe('Honeybadger', function() {
       expect(notice.stack).toEqual(jasmine.any(String));
       expect(notice.generator).toEqual(jasmine.any(String));
       expect(notice.message).toEqual("Honeybadger don't care, but you might.");
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
 
-    it('accepts options as first argument', function() {
+    it('accepts options as first argument', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -252,12 +254,12 @@ describe('Honeybadger', function() {
         });
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
 
-    it('accepts name as second argument', function() {
+    it('accepts name as second argument', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -268,12 +270,12 @@ describe('Honeybadger', function() {
         Honeybadger.notify(e, 'CustomError');
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
 
-    it('accepts options as third argument', function() {
+    it('accepts options as third argument', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -286,12 +288,12 @@ describe('Honeybadger', function() {
         });
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
 
-    it('sends params', function() {
+    it('sends params', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -302,13 +304,13 @@ describe('Honeybadger', function() {
         }
       });
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bparams%5D%5Bfoo%5D=bar');
       });
     });
 
-    it('sends cookies as string', function() {
+    it('sends cookies as string', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -317,13 +319,13 @@ describe('Honeybadger', function() {
         cookies: 'foo=bar'
       });
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
       });
     });
 
-    it('sends cookies as object', function() {
+    it('sends cookies as object', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -334,13 +336,13 @@ describe('Honeybadger', function() {
         }
       });
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
       });
     });
 
-    it('reads default properties from error objects', function() {
+    it('reads default properties from error objects', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -352,14 +354,14 @@ describe('Honeybadger', function() {
         Honeybadger.notify(e);
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).toMatch('%5Bclass%5D=Error');
         expect(requests[0].url).toMatch('%5Bmessage%5D=Test%20message');
       });
     });
 
-    it('reads metadata from error objects', function() {
+    it('reads metadata from error objects', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -375,13 +377,13 @@ describe('Honeybadger', function() {
         Honeybadger.notify(e);
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).toMatch('unique%20context');
       });
     });
 
-    it('does not clobber global url', function() {
+    it('does not clobber global url', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
       });
@@ -392,7 +394,7 @@ describe('Honeybadger', function() {
         Honeybadger.notify(e);
       }
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(url).toEqual('global');
       });
     });
@@ -406,7 +408,7 @@ describe('Honeybadger', function() {
       });
     });
 
-    it('notifies Honeybadger of errors and re-throws', function() {
+    it('notifies Honeybadger of errors and re-throws', function(done) {
       var error, func, caughtError;
 
       error = new Error("Testing");
@@ -422,7 +424,7 @@ describe('Honeybadger', function() {
       }
 
       expect(caughtError).toEqual(error);
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
@@ -442,7 +444,7 @@ describe('Honeybadger', function() {
       expect(w(w(w(f)))).toEqual(w(w(f)));
     });
 
-    it('coerces unknown objects into string error message', function() {
+    it('coerces unknown objects into string error message', function(done) {
       var error, func, caughtError;
 
       error = 'testing';
@@ -457,7 +459,7 @@ describe('Honeybadger', function() {
       }
 
       expect(caughtError).toEqual(error);
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
       });
@@ -471,33 +473,33 @@ describe('Honeybadger', function() {
       });
     });
 
-    it('does not deliver notice when  beforeNotify callback returns false', function() {
+    it('does not deliver notice when  beforeNotify callback returns false', function(done) {
       Honeybadger.beforeNotify(function() {
         return false;
       });
       Honeybadger.notify("testing");
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(0);
       });
     });
 
-    it('delivers notice when beforeNotify returns true', function() {
+    it('delivers notice when beforeNotify returns true', function(done) {
       Honeybadger.beforeNotify(function() {
         return true;
       });
       Honeybadger.notify("testing");
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
 
-    it('delivers notice when beforeNotify has no return', function() {
+    it('delivers notice when beforeNotify has no return', function(done) {
       Honeybadger.beforeNotify(function() {});
       Honeybadger.notify("testing");
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
       });
     });
@@ -510,7 +512,7 @@ describe('Honeybadger', function() {
       });
     });
 
-    it('serializes an object to a query string', function() {
+    it('serializes an object to a query string', function(done) {
       Honeybadger.notify("testing", {
         context: {
           foo: 'foo',
@@ -520,13 +522,13 @@ describe('Honeybadger', function() {
         }
       });
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcontext%5D%5Bfoo%5D=foo&notice%5Brequest%5D%5Bcontext%5D%5Bbar%5D%5Bbaz%5D=baz');
       });
     });
 
-    it('drops null values', function() {
+    it('drops null values', function(done) {
       Honeybadger.notify("testing", {
         context: {
           foo: null,
@@ -534,14 +536,14 @@ describe('Honeybadger', function() {
         }
       });
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).not.toMatch('foo');
         expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcontext%5D%5Bbar%5D=baz');
       });
     });
 
-    it('drops undefined values', function() {
+    it('drops undefined values', function(done) {
       Honeybadger.notify("testing", {
         context: {
           foo: void 0,
@@ -549,7 +551,7 @@ describe('Honeybadger', function() {
         }
       });
 
-      afterNotify(function() {
+      afterNotify(done, function() {
         expect(requests.length).toEqual(1);
         expect(requests[0].url).not.toMatch('foo');
         expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcontext%5D%5Bbar%5D=baz');
@@ -557,7 +559,7 @@ describe('Honeybadger', function() {
     });
 
     if (typeof Object.create === 'function') {
-      it('handles objects without prototypes as values', function() {
+      it('handles objects without prototypes as values', function(done) {
         var obj = Object.create(null);
         obj.foo = 'bar';
 
@@ -567,7 +569,7 @@ describe('Honeybadger', function() {
           }
         });
 
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(1);
           expect(requests[0].url).toMatch('Test%20error%20message');
         });
@@ -575,7 +577,7 @@ describe('Honeybadger', function() {
     }
 
     if (typeof Symbol === 'function') {
-      it('handles symbols as values', function() {
+      it('handles symbols as values', function(done) {
         var sym = Symbol();
 
         Honeybadger.notify("testing", {
@@ -584,13 +586,13 @@ describe('Honeybadger', function() {
           }
         });
 
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(1);
           expect(requests[0].url).toMatch('js.gif?');
         });
       });
 
-      it('handles symbol as a key', function() {
+      it('handles symbol as a key', function(done) {
         var sym = Symbol();
         var context = {};
 
@@ -598,7 +600,7 @@ describe('Honeybadger', function() {
 
         Honeybadger.notify("testing", { context: context });
 
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(1);
           expect(requests[0].url).toMatch('js.gif?');
         });
@@ -614,48 +616,48 @@ describe('Honeybadger', function() {
         });
       });
 
-      it('notifies Honeybadger of unhandled exceptions', function() {
+      it('notifies Honeybadger of unhandled exceptions', function(done) {
         window.onerror('testing', 'http://foo.bar', '123');
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(1);
         });
       });
 
-      it('skips cross-domain script errors', function() {
+      it('skips cross-domain script errors', function(done) {
         window.onerror('Script error', 'http://foo.bar', 0);
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(0);
         });
       });
 
-      it('reports error object when it is available', function() {
+      it('reports error object when it is available', function(done) {
         var err = new Error('expected-message');
         window.onerror('foo', 'http://foo.bar', '123', '456', err);
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(1);
           expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=expected-message');
         });
       });
 
-      it('reports stack from error object when available', function() {
+      it('reports stack from error object when available', function(done) {
         window.onerror('testing', 'http://foo.bar', '123', '345', {stack: 'expected'});
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(1);
           expect(requests[0].url).toMatch(/notice%5Berror%5D%5Bbacktrace%5D=expected/);
         });
       });
 
-      it('coerces unknown objects into string error message ', function() {
+      it('coerces unknown objects into string error message ', function(done) {
         window.onerror(null, null, null, null, 'testing');
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(1);
           expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
         });
       });
 
-      it('supplements stack property when the error object does not have one', function() {
+      it('supplements stack property when the error object does not have one', function(done) {
         window.onerror('testing', 'http://foo.bar', '123', '345', 'testing');
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(1);
           expect(requests[0].url).toMatch('notice%5Berror%5D%5Bbacktrace%5D=testing');
         });
@@ -670,9 +672,9 @@ describe('Honeybadger', function() {
         });
       });
 
-      it('ignores unhandled errors', function() {
+      it('ignores unhandled errors', function(done) {
         window.onerror('testing', 'http://foo.bar', 0);
-        afterNotify(function() {
+        afterNotify(done, function() {
           expect(requests.length).toEqual(0);
         });
       });
@@ -684,4 +686,5 @@ describe('Honeybadger', function() {
       expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
     });
   });
+
 });
