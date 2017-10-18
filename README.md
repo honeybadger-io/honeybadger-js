@@ -157,11 +157,19 @@ Honeybadger.configure({
   disabled: false,
 
   // Send notifications asynchronously
-  async: true
+  async: true,
+
+  // Limit the maximum number of errors the client will send to Honeybadger
+  // after page load. Default is unlimited (undefined)
+  maxErrors: 20
 });
 ```
 
 You can call `Honeybadger.configure` as many times as you like. The existing configuration data will be merged with any new data you provide. This is especially useful for changing the `action` and `component` values inside of single-page apps.
+
+If the number of errors sent exceeds a configured `maxErrors` the count can
+be zeroed out with a call to `Honeybadger.resetMaxErrors();`. Errors will be
+sent to Honeybadger until the `maxErrors` threshold has been reached again.
 
 ### Configuring via data attributes
 

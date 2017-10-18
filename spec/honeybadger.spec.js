@@ -226,6 +226,72 @@ describe('Honeybadger', function() {
       });
     });
 
+    it('has unlimited errors as its default', function(done) {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      for(var i=0; i<3; i++) {
+        try {
+          throw new Error("Testing " + (i+1));
+        } catch (e) {
+          Honeybadger.notify(e);
+        }
+      }
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(3);
+      });
+    });
+
+    it('resets count for error limit', function(done) {
+      Honeybadger.configure({
+        api_key: 'asdf',
+        maxErrors: 2
+      });
+
+      for(var i=0; i<3; i++) {
+        try {
+          throw new Error("Testing " + (i+1));
+        } catch (e) {
+          Honeybadger.notify(e);
+        }
+      }
+
+      Honeybadger.resetMaxErrors();
+
+      for(var i=0; i<3; i++) {
+        try {
+          throw new Error("Testing " + (i+1));
+        } catch (e) {
+          Honeybadger.notify(e);
+        }
+      }
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(4);
+      });
+    });
+
+    it('does not exceed sending more than the established errors limit', function(done) {
+      Honeybadger.configure({
+        api_key: 'asdf',
+        maxErrors: 2
+      });
+
+      for(var i=0; i<3; i++) {
+        try {
+          throw new Error("Testing " + (i+1));
+        } catch (e) {
+          Honeybadger.notify(e);
+        }
+      }
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(2);
+      });
+    });
+
     it('generates a stack trace without an error', function(done) {
       Honeybadger.configure({
         api_key: 'asdf'
