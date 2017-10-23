@@ -15,6 +15,10 @@ adheres to [Semantic Versioning](http://semver.org/).
 - The limited stack info in `window.onerror` is now supplemented if the error
   object (in browsers which support it) does not have a stack property, such as
   when `String` is thrown.
+- `maxErrors` configuration parameter setting a maximum number of errors
+  that can be sent to Honeybadger.
+- reset the current errors count `Honeybadger.resetMaxErrors();` utilized by
+  the `maxErrors ` parameter.
 
 ## [0.5.1] - 2017-08-22
 ### Fixed

@@ -170,7 +170,8 @@
     var queue = [];
     var self = {
       context: {},
-      beforeNotifyHandlers: []
+      beforeNotifyHandlers: [],
+      errorsSent: 0
     }
     if (typeof opts === 'object') {
       for (var k in opts) { self[k] = opts[k]; }
@@ -232,6 +233,7 @@
 
     function request(url) {
       if (config('disabled', false)) { return false; }
+      if (exceedsMaxErrors()) { return false; }
 
       // Use XHR when available.
       try {
@@ -239,6 +241,7 @@
         var x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
         x.open('GET', url, config('async', true));
         x.send();
+        incrementErrorsCount();
         return;
       } catch(e) {
         log('Error encountered during XHR request (will retry): ' + e);
@@ -474,7 +477,12 @@
           self[k] = undefined;
         }
       }
+      self.resetMaxErrors();
       return self;
+    };
+
+    self.resetMaxErrors = function() {
+      return (self.errorsSent=0);
     };
 
     self.getVersion = function() {
@@ -575,6 +583,15 @@
         return false;
       };
     });
+
+    function incrementErrorsCount() {
+      return self.errorsSent++;
+    }
+
+    function exceedsMaxErrors() {
+      var maxErrors = config('maxErrors');
+      return maxErrors && self.errorsSent >= maxErrors;
+    }
 
     // End of instrumentation.
     installed = true;
