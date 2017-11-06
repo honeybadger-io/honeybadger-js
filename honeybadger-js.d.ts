@@ -38,5 +38,6 @@ declare module "honeybadger-js" {
         static factory(config: Config): Honeybadger;
     }
 
+    namespace Honeybadger {}
     export = Honeybadger;
 }
