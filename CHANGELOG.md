@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file. See [Keep a
 CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.5.2] - 2017-11-07
 ### Fixed
 - Warnings are now logged all the time. Previously they required the `debug`
   config option to be enabled.
