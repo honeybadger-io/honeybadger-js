@@ -102,10 +102,13 @@ class HoneybadgerSourceMapPlugin {
     const form = req.form();
     form.append('api_key', this.api_key);
     form.append('minified_url', `${this.assets_url}/${sourceFile}`);
-    form.append('minified_file', `${sourceFile}`);
+    form.append('minified_file', compilation.assets[sourceFile].source(), {
+      filename: sourceFile,
+      contentType: 'application/octet-stream'
+    });
     form.append('source_map', compilation.assets[sourceMap].source(), {
       filename: sourceMap,
-      contentType: 'application/json'
+      contentType: 'application/octet-stream'
     });
     form.append('revision', this.revision);
   }

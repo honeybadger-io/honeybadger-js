@@ -15,7 +15,9 @@ Installing via Node.js
 npm install @honeybadger-io/webpack --save-dev
 ```
 
-## Example webpack.config.js
+## Configuration
+
+### Vanilla webpack.config.js
 
 ```javascript
 const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
@@ -23,15 +25,35 @@ const ASSETS_URL = 'https://cdn.example.com/assets';
 const webpackConfig = {
   plugins: [new HoneybadgerSourceMapPlugin({
     api_key: 'abc123',
-    revision: 'master',
-    assets_url: ASSETS_URL
+    assets_url: ASSETS_URL,
+    revision: 'master'
   })]
 }
 ```
 
-## Configuration
+### Rails Webpacker config/webpack/environment.js
 
-words
+```javascript
+const { environment } = require('@rails/webpacker')
+const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
+
+const revision = process.env.GIT_COMMIT || 'master' // See Heroku notes in README
+
+environment.plugins.set(
+  'HoneybadgerSourceMap',
+  new HoneybadgerSourceMapPlugin({
+    api_key: process.env.HONEYBADGER_API_KEY,
+    assets_url: process.env.ASSETS_URL,
+    silent: false,
+    ignoreErrors: false,
+    revision: revision
+  }))
+
+module.exports = environment
+```
+
+See example Rails 5 application
+https://github.com/honeybadger-io/honeybadger-rails-webpacker-example
 
 ## Contributing
 

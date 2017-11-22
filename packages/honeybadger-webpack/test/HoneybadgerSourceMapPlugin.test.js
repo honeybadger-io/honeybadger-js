@@ -309,8 +309,10 @@ describe('HoneybadgerSourceMapPlugin', function() {
       this.info = spyOn(console, 'info');
       this.compilation = {
         assets: {
-          'vendor.5190.js.map': { source: () => '{"version":3,"sources":[]' },
-          'app.81c1.js.map': { source: () => '{"version":3,"sources":[]' }
+          'vendor.5190.js': { source: () => '/**/' },
+          'vendor.5190.js.map': { source: () => '{"version":3,"file":"vendor.5190.js","sources":["vendor.js"],"names":[],mappings:""}' },
+          'app.81c1.js': { source: () => '/**/' },
+          'app.81c1.js.map': { source: () => '{"version":3,"file":"app.81c1.js","sources":["app.js"],"names":[],mappings:""}' }
         },
         errors: []
       };
