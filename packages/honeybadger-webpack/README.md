@@ -17,6 +17,27 @@ npm install @honeybadger-io/webpack --save-dev
 
 ## Configuration
 
+### Plugin parameters
+
+These plugin parameters correspond to the [Honeybadger Sourcemap API](https://docs.honeybadger.io/guides/source-maps.html).
+
+<dl>
+  <dt><code>api_key</code> (required)</dt>
+  <dd>The API key of your Honeybadger project</dd>
+
+  <dt><code>assets_url</code> (required)</dt>
+  <dd>The base URL to production assets (scheme://host/path)<code>*</code><a href="https://docs.honeybadger.io/guides/source-maps.html#wildcards">wildcards</a> are supported. The plugin combines <code>assets_url</code> with the generated minified js file name to build the API parameter <code>minified_url</code></dd>
+
+  <dt><code>revision</code> (optional &mdash; default: "master")</dt>
+  <dd>The deploy revision (i.e. commit sha) that your source map applies to. This could also be a code version. For best results, set it to something unique every time your code changes. The <code>revision</code> option must also be configured in <a href="https://github.com/honeybadger-io/honeybadger-js#advanced-configuration">honeybadger.js</a>.</dd>
+
+  <dt><code>silent</code> (optional &mdash; default: "null/false")</dt>
+  <dd>If true, silence log information emitted by the plugin.</dd>
+
+  <dt><code>ignoreErrors</code> (optional &mdash; default: "null/false")</dt>
+  <dd>If true, webpack compilation errors are treated as warnings.</dd>
+</dl>
+
 ### Vanilla webpack.config.js
 
 ```javascript
@@ -37,7 +58,10 @@ const webpackConfig = {
 const { environment } = require('@rails/webpacker')
 const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
 
-const revision = process.env.GIT_COMMIT || 'master' // See Heroku notes in README
+// See Heroku notes in README https://github.com/honeybadger-io/honeybadger-rails-webpacker-example
+// Assumes Heroku / 12-factor application style ENV variables
+// named GIT_COMMIT, HONEYBADGER_API_KEY, ASSETS_URL
+const revision = process.env.GIT_COMMIT || 'master'
 
 environment.plugins.set(
   'HoneybadgerSourceMap',

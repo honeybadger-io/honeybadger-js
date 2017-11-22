@@ -10,23 +10,17 @@ class HoneybadgerSourceMapPlugin {
   constructor({
     api_key,
     assets_url,
-    minified_url,
-    minified_file,
-    source_map,
-    includeChunks = [],
     revision = "master",
     silent = false,
-    ignoreErrors = false
+    ignoreErrors = false,
+    source_map
   }) {
     this.api_key = api_key;
     this.assets_url = assets_url;
-    this.minified_url = minified_url;
-    this.minified_file = minified_file;
-    this.source_map = source_map;
-    this.includeChunks = includeChunks;
     this.revision = revision;
     this.silent = silent;
     this.ignoreErrors = ignoreErrors;
+    this.source_map = source_map;
   }
 
   afterEmit(compilation, done) {
@@ -54,14 +48,10 @@ class HoneybadgerSourceMapPlugin {
   }
 
   getAssets(compilation) {
-    const { includeChunks } = this;
     const { chunks } = compilation.getStats().toJson();
 
     return reduce(chunks, (result, chunk) => {
       const chunkName = chunk.names[0];
-      if (includeChunks.length && includeChunks.indexOf(chunkName) === -1) {
-        return result;
-      }
 
       const sourceFile = find(chunk.files, file => /\.js$/.test(file));
       const sourceMap = find(chunk.files, file => /\.js\.map$/.test(file));
@@ -104,7 +94,7 @@ class HoneybadgerSourceMapPlugin {
     form.append('minified_url', `${this.assets_url}/${sourceFile}`);
     form.append('minified_file', compilation.assets[sourceFile].source(), {
       filename: sourceFile,
-      contentType: 'application/octet-stream'
+      contentType: 'application/javascript'
     });
     form.append('source_map', compilation.assets[sourceMap].source(), {
       filename: sourceMap,

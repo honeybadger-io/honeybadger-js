@@ -11,8 +11,6 @@ describe('HoneybadgerSourceMapPlugin', function() {
     this.options = {
       api_key: 'abcd1234',
       assets_url: 'https://cdn.example.com/assets',
-      minified_url: 'https://cdn.example.com/assets/application.min.js',
-      minified_file: 'application.min.js',
       source_map: 'application.js.map',
     };
 
@@ -40,20 +38,6 @@ describe('HoneybadgerSourceMapPlugin', function() {
 
     it('should default revision to "master"', function() {
       expect(this.plugin).toInclude({ revision: "master" });
-    });
-
-    it('should accept string value for includeChunks', function() {
-      const options = Object.assign({}, this.options, { includeChunks: 'honey' });
-      const plugin = new HoneybadgerSourceMapPlugin(options);
-      expect(plugin).toInclude({ includeChunks: ['honey'] });
-    });
-
-    it('should accept array value for includeChunks', function() {
-      const options = Object.assign({}, this.options, {
-        includeChunks: ['honey', 'badger']
-      });
-      const plugin = new HoneybadgerSourceMapPlugin(options);
-      expect(plugin).toInclude({ includeChunks: ['honey', 'badger'] });
     });
   });
 
@@ -171,10 +155,6 @@ describe('HoneybadgerSourceMapPlugin', function() {
       this.chunks = [
         {
           id: 0,
-          names: ['vendor'],
-          files: ['vendor.5190.js', 'vendor.5190.js.map']
-        }, {
-          id: 1,
           names: ['app'],
           files: ['app.81c1.js', 'app.81c1.js.map']
         }
@@ -189,7 +169,6 @@ describe('HoneybadgerSourceMapPlugin', function() {
     it('should return an array of js, sourcemap tuples', function() {
       const assets = this.plugin.getAssets(this.compilation);
       expect(assets).toEqual([
-        { sourceFile: 'vendor.5190.js', sourceMap: 'vendor.5190.js.map' },
         { sourceFile: 'app.81c1.js', sourceMap: 'app.81c1.js.map' }
       ]);
     });
@@ -198,51 +177,10 @@ describe('HoneybadgerSourceMapPlugin', function() {
       this.chunks = [
         {
           id: 0,
-          names: ['vendor'],
-          files: ['vendor.5190.js']
-        }, {
-          id: 1,
           names: ['app'],
           files: ['app.81c1.js', 'app.81c1.js.map']
         }
       ];
-      const assets = this.plugin.getAssets(this.compilation);
-      expect(assets).toEqual([
-        { sourceFile: 'app.81c1.js', sourceMap: 'app.81c1.js.map' }
-      ]);
-    });
-
-    it('should include unnamed chunks when includeChunks is not specified', function() {
-      this.chunks = [
-        {
-          id: 0,
-          names: ['vendor'],
-          files: ['vendor.5190.js', 'vendor.5190.js.map']
-        }, {
-          id: 1,
-          names: [],
-          files: ['1.cfea.js', '1.cfea.js.map']
-        }, {
-          id: 2,
-          names: [],
-          files: ['2-a364.js', '2-a364.js.map']
-        }, {
-          id: 3,
-          names: ['app'],
-          files: ['app.81c1.js', 'app.81c1.js.map']
-        }
-      ];
-      const assets = this.plugin.getAssets(this.compilation);
-      expect(assets).toEqual([
-        { sourceFile: 'vendor.5190.js', sourceMap: 'vendor.5190.js.map' },
-        { sourceFile: '1.cfea.js', sourceMap: '1.cfea.js.map' },
-        { sourceFile: '2-a364.js', sourceMap: '2-a364.js.map' },
-        { sourceFile: 'app.81c1.js', sourceMap: 'app.81c1.js.map' }
-      ]);
-    });
-
-    it('should filter out chunks that are not in includeChunks', function() {
-      this.plugin.includeChunks = ['app'];
       const assets = this.plugin.getAssets(this.compilation);
       expect(assets).toEqual([
         { sourceFile: 'app.81c1.js', sourceMap: 'app.81c1.js.map' }
