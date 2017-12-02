@@ -1,7 +1,7 @@
 {
   "name": "@honeybadger-io/webpack",
   "version": "1.0.3",
-  "description": "Webpack plugin to upload a minified js source map to Honeybadger's API - http://docs.honeybadger.io/guides/source-maps.html",
+  "description": "Webpack plugin to upload source maps to Honeybadger's API - http://docs.honeybadger.io/guides/source-maps.html",
   "main": "./dist/HoneybadgerSourceMapPlugin.js",
   "scripts": {
     "build": "babel src -d dist",
@@ -22,10 +22,12 @@
     "webpack",
     "sourcemap",
     "source map",
-    "minified js"
+    "minified js",
+    "honeybadger",
+    "honey badger"
   ],
-  "author": "Honeybadger.io",
-  "license": "ISC",
+  "author": "Honeybadger.io <support@honeybadger.io> (https://www.honeybadger.io/)",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/honeybadger-io/honeybadger-webpack/issues"
   },
