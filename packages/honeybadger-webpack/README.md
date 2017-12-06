@@ -1,5 +1,7 @@
 # Honeybadger's Webpack Source Map Plugin
 
+[![CircleCI honeybadger-io/honeybadger-webpack](https://circleci.com/gh/honeybadger-io/honeybadger-webpack.svg?style=shield&circle-token=73022b639c6abad8d31c13cb1225c14eb5e37631)](https://circleci.com/gh/honeybadger-io/honeybadger-webpack)
+
 This is a [webpack](https://webpack.js.org/) plugin to upload javascript
 sourcemaps to [Honeybadger's](https://honeybadger.io/)
 [API endpoint for source maps](https://docs.honeybadger.io/guides/source-maps.html).
@@ -22,14 +24,14 @@ npm install @honeybadger-io/webpack --save-dev
 These plugin parameters correspond to the [Honeybadger Sourcemap API](https://docs.honeybadger.io/guides/source-maps.html).
 
 <dl>
-  <dt><code>api_key</code> (required)</dt>
+  <dt><code>apiKey</code> (required)</dt>
   <dd>The API key of your Honeybadger project</dd>
 
-  <dt><code>assets_url</code> (required)</dt>
-  <dd>The base URL to production assets (scheme://host/path)<code>*</code><a href="https://docs.honeybadger.io/guides/source-maps.html#wildcards">wildcards</a> are supported. The plugin combines <code>assets_url</code> with the generated minified js file name to build the API parameter <code>minified_url</code></dd>
+  <dt><code>assetsUrl</code> (required)</dt>
+  <dd>The base URL to production assets (scheme://host/path)<code>*</code><a href="https://docs.honeybadger.io/guides/source-maps.html#wildcards">wildcards</a> are supported. The plugin combines <code>assetsUrl</code> with the generated minified js file name to build the API parameter <code>minified_url</code></dd>
 
   <dt><code>revision</code> (optional &mdash; default: "master")</dt>
-  <dd>The deploy revision (i.e. commit sha) that your source map applies to. This could also be a code version. For best results, set it to something unique every time your code changes. The <code>revision</code> option must also be configured in <a href="https://github.com/honeybadger-io/honeybadger-js#advanced-configuration">honeybadger.js</a>.</dd>
+  <dd>The deploy revision (i.e. commit sha) that your source map applies to. This could also be a code version. For best results, set it to something unique every time your code changes.</dd>
 
   <dt><code>silent</code> (optional &mdash; default: "null/false")</dt>
   <dd>If true, silence log information emitted by the plugin.</dd>
@@ -45,8 +47,8 @@ const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
 const ASSETS_URL = 'https://cdn.example.com/assets';
 const webpackConfig = {
   plugins: [new HoneybadgerSourceMapPlugin({
-    api_key: 'abc123',
-    assets_url: ASSETS_URL,
+    apiKey: 'abc123',
+    assetsUrl: ASSETS_URL,
     revision: 'master'
   })]
 }
@@ -66,8 +68,8 @@ const revision = process.env.GIT_COMMIT || 'master'
 environment.plugins.set(
   'HoneybadgerSourceMap',
   new HoneybadgerSourceMapPlugin({
-    api_key: process.env.HONEYBADGER_API_KEY,
-    assets_url: process.env.ASSETS_URL,
+    apiKey: process.env.HONEYBADGER_API_KEY,
+    assetsUrl: process.env.ASSETS_URL,
     silent: false,
     ignoreErrors: false,
     revision: revision
