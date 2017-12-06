@@ -56,36 +56,36 @@ describe('helpers', function() {
   describe('validateOptions', function() {
     it('should return null if all required options are supplied', function() {
       const options = {
-        api_key: 'abcd1234',
+        apiKey: 'abcd1234',
         revision: 'fab5a8727c70647dcc539318b5b3e9b0cb8ae17b',
-        assets_url: 'https://cdn.example.com/assets',
+        assetsUrl: 'https://cdn.example.com/assets',
       };
       const result = helpers.validateOptions(options);
       expect(result).toBe(null); // eslint-disable-line no-unused-expressions
     });
 
-    it('should return an error if api_key is not supplied', function() {
+    it('should return an error if apiKey is not supplied', function() {
       const options = {
         revision: 'fab5a8727c70647dcc539318b5b3e9b0cb8ae17b',
-        assets_url: 'https://cdn.example.com/assets',
+        assetsUrl: 'https://cdn.example.com/assets',
       };
       const result = helpers.validateOptions(options);
       expect(result).toBeA('array');
       expect(result.length).toBe(1);
       expect(result[0]).toBeA(Error)
-        .toInclude({ message: 'required field, \'api_key\', is missing.' });
+        .toInclude({ message: 'required field, \'apiKey\', is missing.' });
     });
 
-    it('should return an error if assets_url is not supplied', function() {
+    it('should return an error if assetsUrl is not supplied', function() {
       const options = {
-        api_key: 'abcd1234',
+        apiKey: 'abcd1234',
         revision: 'fab5a8727c70647dcc539318b5b3e9b0cb8ae17b',
       };
       const result = helpers.validateOptions(options);
       expect(result).toBeA('array');
       expect(result.length).toBe(1);
       expect(result[0]).toBeA(Error)
-        .toInclude({ message: 'required field, \'assets_url\', is missing.' });
+        .toInclude({ message: 'required field, \'assetsUrl\', is missing.' });
     });
 
     it('should handle multiple missing required options', function() {

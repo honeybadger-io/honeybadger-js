@@ -8,19 +8,17 @@ import { ENDPOINT } from './constants';
 
 class HoneybadgerSourceMapPlugin {
   constructor({
-    api_key,
-    assets_url,
+    apiKey,
+    assetsUrl,
     revision = "master",
     silent = false,
-    ignoreErrors = false,
-    source_map
+    ignoreErrors = false
   }) {
-    this.api_key = api_key;
-    this.assets_url = assets_url;
+    this.apiKey = apiKey;
+    this.assetsUrl = assetsUrl;
     this.revision = revision;
     this.silent = silent;
     this.ignoreErrors = ignoreErrors;
-    this.source_map = source_map;
   }
 
   afterEmit(compilation, done) {
@@ -90,8 +88,8 @@ class HoneybadgerSourceMapPlugin {
     });
 
     const form = req.form();
-    form.append('api_key', this.api_key);
-    form.append('minified_url', `${this.assets_url}/${sourceFile}`);
+    form.append('api_key', this.apiKey);
+    form.append('minified_url', `${this.assetsUrl}/${sourceFile}`);
     form.append('minified_file', compilation.assets[sourceFile].source(), {
       filename: sourceFile,
       contentType: 'application/javascript'

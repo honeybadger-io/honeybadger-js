@@ -9,9 +9,8 @@ describe('HoneybadgerSourceMapPlugin', function() {
     };
 
     this.options = {
-      api_key: 'abcd1234',
-      assets_url: 'https://cdn.example.com/assets',
-      source_map: 'application.js.map',
+      apiKey: 'abcd1234',
+      assetsUrl: 'https://cdn.example.com/assets'
     };
 
     this.plugin = new HoneybadgerSourceMapPlugin(this.options);
@@ -25,8 +24,8 @@ describe('HoneybadgerSourceMapPlugin', function() {
 
     it('should set options', function() {
       const options = Object.assign({}, this.options, {
-        api_key: "other-api-key",
-        assets_url: 'https://cdn.example.com/assets'
+        apiKey: "other-api-key",
+        assetsUrl: 'https://cdn.example.com/assets'
       });
       const plugin = new HoneybadgerSourceMapPlugin(options);
       expect(plugin).toInclude(options);
@@ -140,7 +139,7 @@ describe('HoneybadgerSourceMapPlugin', function() {
 
       this.plugin = new HoneybadgerSourceMapPlugin({
         revision: 'fab5a8727c70647dcc539318b5b3e9b0cb8ae17b',
-        assets_url: 'https://cdn.example.com/assets',
+        assetsUrl: 'https://cdn.example.com/assets',
       });
       this.plugin.afterEmit(compilation, () => {
         expect(this.uploadSourceMaps.calls.length).toBe(0);
@@ -266,7 +265,7 @@ describe('HoneybadgerSourceMapPlugin', function() {
     });
 
     it('should callback without err param if upload is success', function(done) {
-      // FIXME/TODO test multipart form body, not really supported easily by nock
+      // FIXME/TODO test multipart form body ... it isn't really supported easily by nock
       const scope = nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
         .filteringRequestBody(function(body) { return '*'; })
         .post('/v1/source_maps', '*')
