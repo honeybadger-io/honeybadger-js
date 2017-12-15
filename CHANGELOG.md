@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file. See [Keep a
 CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.3] - 2018-01-02
+### Added
+- Make use of quoted object properties to allow better ClojureScript
+  compatibility. PR #87 by @rads
+
 ## [0.5.2] - 2017-11-07
 ### Fixed
 - Warnings are now logged all the time. Previously they required the `debug`

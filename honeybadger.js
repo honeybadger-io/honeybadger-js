@@ -1,5 +1,5 @@
 /*
-  honeybadger.js v0.5.2
+  honeybadger.js v0.5.3
   A JavaScript Notifier for Honeybadger
   https://github.com/honeybadger-io/honeybadger-js
   https://www.honeybadger.io/
@@ -49,7 +49,7 @@
     root.Honeybadger = factory();
   }
 }(this, function () {
-  var VERSION = '0.5.2',
+  var VERSION = '0.5.3',
       NOTIFIER = {
         name: 'honeybadger.js',
         url: 'https://github.com/honeybadger-io/honeybadger-js',
@@ -261,7 +261,7 @@
         return false;
       }
 
-      var url = baseURL() + '/v1/notices/js.gif?' + serialize({notice: payload}) +
+      var url = baseURL() + '/v1/notices/js.gif?' + serialize({'notice': payload}) +
         '&api_key=' + apiKey + '&t=' + new Date().getTime();
 
       request(url);
@@ -319,26 +319,26 @@
       }
 
       var payload = {
-        notifier: NOTIFIER,
-        error: {
+        'notifier': NOTIFIER,
+        'error': {
           'class': err.name || 'Error',
-          message: err.message,
-          backtrace: err.stack,
-          generator: err.generator,
-          fingerprint: err.fingerprint
+          'message': err.message,
+          'backtrace': err.stack,
+          'generator': err.generator,
+          'fingerprint': err.fingerprint
         },
-        request: {
-          url: err.url || document.URL,
-          component: err.component || config('component'),
-          action: err.action || config('action'),
-          context: merge(self.context, err.context),
-          cgi_data: data,
-          params: err.params
+        'request': {
+          'url': err.url || document.URL,
+          'component': err.component || config('component'),
+          'action': err.action || config('action'),
+          'context': merge(self.context, err.context),
+          'cgi_data': data,
+          'params': err.params
         },
-        server: {
-          project_root: err.projectRoot || err.project_root || config('projectRoot', config('project_root', window.location.protocol + '//' + window.location.host)),
-          environment_name: err.environment || config('environment'),
-          revision: err.revision || config('revision')
+        'server': {
+          'project_root': err.projectRoot || err.project_root || config('projectRoot', config('project_root', window.location.protocol + '//' + window.location.host)),
+          'environment_name': err.environment || config('environment'),
+          'revision': err.revision || config('revision')
         }
       };
 
