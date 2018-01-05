@@ -631,4 +631,4 @@
   });
 
   return factory;
-}));
+}.bind(this)));
