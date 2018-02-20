@@ -27,6 +27,9 @@ First, install the required npm packages with `npm install`. After that you can 
 
 To run the test suite by itself, use `grunt jasmine`.
 
+To run the tests across all supported platforms, set up a [Sauce Labs](https://saucelabs.com/)
+account and use `SAUCE_USERNAME=your_username SAUCE_ACCESS_KEY=your-access-key grunt test`.
+
 ### License
 
 The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
