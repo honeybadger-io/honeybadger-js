@@ -48,7 +48,7 @@
     // Browser globals (root is window).
     root.Honeybadger = factory();
   }
-}(this, function (root) {
+}(this || window, function (root) {
   var VERSION = '0.5.4',
       NOTIFIER = {
         name: 'honeybadger.js',
