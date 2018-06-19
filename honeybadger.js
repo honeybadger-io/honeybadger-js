@@ -28,7 +28,7 @@
   // Build the singleton factory. The factory can be accessed through
   // singleton.factory() to instantiate a new instance.
   var factory = function(){
-    var f = builder(root);
+    var f = builder();
     var singleton = f(scriptConfig);
     singleton.factory = f;
     return singleton;
@@ -48,7 +48,7 @@
     // Browser globals (root is window).
     root.Honeybadger = factory();
   }
-}(this, function (root) {
+}(typeof self !== 'undefined' ? self : this, function () {
   var VERSION = '0.5.4',
       NOTIFIER = {
         name: 'honeybadger.js',
@@ -178,7 +178,8 @@
     }
 
     function log() {
-      if (root.console) {
+      var console = window.console;
+      if (console) {
         var args = Array.prototype.slice.call(arguments);
         args.unshift('[Honeybadger]');
         console.log.apply(console, args);
@@ -187,7 +188,7 @@
 
     function debug() {
       if (config('debug')) {
-        return log.apply(root, arguments);
+        return log.apply(this, arguments);
       }
     }
 
@@ -238,7 +239,7 @@
       // Use XHR when available.
       try {
         // Inspired by https://gist.github.com/Xeoncross/7663273
-        var x = new(root.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
+        var x = new(window.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
         x.open('GET', url, config('async', true));
         x.send();
         incrementErrorsCount();
