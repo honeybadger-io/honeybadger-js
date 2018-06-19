@@ -2,7 +2,7 @@
   honeybadger.js v0.5.4
   A JavaScript Notifier for Honeybadger
   https://github.com/honeybadger-io/honeybadger-js
-  https://www.honeybadger.io/
+  https://www.honeybadger.io/f
   MIT license
 */
 
@@ -40,7 +40,7 @@
     // AMD. Register as an anonymous module.
     define([], factory);
   } else if (typeof module === 'object' && module.exports) {
-    // Browserfy. Does not work with strict CommonJS, but
+    // Browserify. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Browserfy/Node.
     module.exports = factory();
