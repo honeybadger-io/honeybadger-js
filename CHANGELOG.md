@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file. See [Keep a
 CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.5] - 2018-06-19
+### Fixed
+- Fixed an issue with the console binding fix. See #96.
+
 ## [0.5.4] - 2018-02-20
 ### Fixed
 - Fix a problem with console binding with uglify and webpack. PR #92 by @geoffreak
