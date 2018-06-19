@@ -40,7 +40,7 @@
     // AMD. Register as an anonymous module.
     define([], factory);
   } else if (typeof module === 'object' && module.exports) {
-    // Browserfy. Does not work with strict CommonJS, but
+    // Browserify. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Browserfy/Node.
     module.exports = factory();
