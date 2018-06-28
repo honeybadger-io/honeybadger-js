@@ -50,7 +50,7 @@
     "lodash.find": "^4.3.0",
     "lodash.foreach": "^4.2.0",
     "lodash.reduce": "^4.3.0",
-    "request": "^2.72.0",
+    "request": "^2.87.0",
     "verror": "^1.6.1"
   }
 }
