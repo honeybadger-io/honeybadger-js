@@ -4,7 +4,7 @@ import VError from 'verror';
 import find from 'lodash.find';
 import reduce from 'lodash.reduce';
 import { handleError, validateOptions } from './helpers';
-import { ENDPOINT } from './constants';
+import { ENDPOINT, PLUGIN_NAME } from './constants';
 
 class HoneybadgerSourceMapPlugin {
   constructor({
@@ -42,7 +42,11 @@ class HoneybadgerSourceMapPlugin {
   }
 
   apply(compiler) {
-    compiler.plugin('after-emit', this.afterEmit.bind(this));
+    if (compiler.hooks) {
+      compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, this.afterEmit.bind(this));
+    } else {
+      compiler.plugin('after-emit', this.afterEmit.bind(this));
+    }
   }
 
   getAssets(compilation) {
