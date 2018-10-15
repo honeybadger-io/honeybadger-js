@@ -6,4 +6,8 @@ jobs:
     steps:
       - checkout
       - run: npm install
+      - save_cache:
+        key: dependency-cache-{{ checksum "package.json" }}
+        paths:
+          - node_modules
       - run: npm test
