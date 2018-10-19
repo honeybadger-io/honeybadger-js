@@ -2,8 +2,7 @@
   <div class="miniwolf" v-on:customEvent="blowup()">
     <h1>{{ msg }}</h1>
     <button id="#componentButton" v-on:click="makeSomething()">Trigger a component Error</button>
-    <button id="#setValueButton" v-on:click="setSomethingValue(100)">Set a value</button>
-
+    <button id="#setValueButton" v-on:click="setSomethingValue(100)">Set a value (no error)</button>
     <div>{{something | formatSomething}}</div>
   </div>
 </template>
@@ -26,17 +25,13 @@ export default {
       console.log(this.something)
     },
     setSomethingValue: function (value) {
-      console.log('something invoked, was ' + this.something)
       this.something = value
-      this.message = 'Ya fool'
       console.log(this.something)
     }
   },
   filters: {
     formatSomething: function (value) {
-      console.log('formatSomething: ' + value)
       if (value === 'unrenderable') {
-        console.log('formatting unrenderable')
         throw new Error('Something is Unrenderable')
       }
       if (!parseInt(value)) { return '<Empty>' }
