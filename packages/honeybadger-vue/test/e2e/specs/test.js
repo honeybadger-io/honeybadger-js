@@ -11,7 +11,7 @@ module.exports = {
     browser
       .url(devServer)
       .waitForElementVisible('#app', 5000)
-      .click('#errantButton')
+      .click('#componentErrantButton')
       .end()
   }
 }
