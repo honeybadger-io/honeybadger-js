@@ -7,11 +7,14 @@ module.exports = {
     // default: http://localhost:8080
     // see nightwatch.conf.js
     const devServer = browser.globals.devServerURL
-
     browser
       .url(devServer)
-      .waitForElementVisible('#app', 5000)
-      .click('#componentErrantButton')
+      .waitForElementVisible('#componentErrantButton', 5000)
+      .waitForXHR('', 5000, function browserTrigger () {
+        browser.click('#componentErrantButton')
+      }, function assertValues (xhrs) {
+        browser.assert.equal(xhrs[0].httpResponseCode, '201')
+      })
       .end()
   }
 }

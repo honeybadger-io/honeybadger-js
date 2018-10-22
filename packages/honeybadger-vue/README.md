@@ -13,8 +13,29 @@ This version is not yet ready for general use.
 
 ## Quick Start
 
-When released, you should be able to consume it with a single `<script>` tag and a simple init call,
-as you migh
+When released, you should be able to consume it with a single `<script>`
+tag and a simple init call, as you might do in a minimalist Vue
+application. For now, you can simply add it as a dependency to your
+project.
+
+```
+npm add javascript-vue
+```
+
+In your main.js:
+
+```
+import HoneybadgerVue from 'honeybadger-vue'
+
+const config = { api_key: (process.env.HONEYBADGER_API_KEY || prompt('Enter the API key for your Honeybadger project:')) }
+Vue.use(HoneybadgerVue, config)
+```
+
+## Key Assumptions
+
+This project is built using a webpack-based Vue template. It's possible
+your own build environment may be just different enough to require some
+adjustments. If you find
 
 ## Documentation and Support
 
