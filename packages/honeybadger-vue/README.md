@@ -35,7 +35,8 @@ Vue.use(HoneybadgerVue, config)
 
 This project is built using a webpack-based Vue template. It's possible
 your own build environment may be just different enough to require some
-adjustments. If you find
+adjustments. If you find that our artifacts don't quite meet your needs,
+please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-vue/issues.
 
 ## Documentation and Support
 

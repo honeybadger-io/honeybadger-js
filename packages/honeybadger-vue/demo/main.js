@@ -4,7 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import HoneybadgerVue from '@/index.js'
 
-const config = { api_key: (process.env.HONEYBADGER_API_KEY || prompt('Enter the API key for your Honeybadger project:')) }
+const config = { api_key: 'your-public-api-key' }
 Vue.use(HoneybadgerVue, config)
 
 /* eslint-disable no-new */
