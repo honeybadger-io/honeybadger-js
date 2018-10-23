@@ -1,7 +1,7 @@
 <template>
   <div class="miniwolf" v-on:customEvent="blowup()">
     <h1>{{ msg }}</h1>
-    <button id="componentErrantButton" v-on:click="makeSomething()">Trigger a component Error</button>
+    <button id="componentErrantButton" v-on:click="makeSomethingUnrenderable()">Trigger a component Error</button>
     <button id="setValueButton" v-on:click="setSomethingValue(100)">Set a value (no error)</button>
     <div>{{something | formatSomething}}</div>
   </div>
