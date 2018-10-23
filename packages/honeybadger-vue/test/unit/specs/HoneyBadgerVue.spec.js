@@ -1,20 +1,21 @@
 import Vue from 'vue'
-import HoneyBadger from 'honeybadger-js'
 import HoneyBadgerVue from '@/index.js'
+import HoneyBadger from 'honeybadger-js'
+import TestComponent from '../TestComponent.vue'
 
 describe('HoneyBadgerVue', () => {
   let config = {api_key: 'FFAACCCC00', onerror: false}
   let constructor = Vue.use(HoneyBadgerVue, config)
-
   var requests, xhr
 
+  var sandbox = sinon.createSandbox()
   beforeEach(function () {
     // Refresh singleton state.
     // HoneyBadger.reset()
 
     // Stub HTTP requests.
     requests = []
-    xhr = sinon.useFakeXMLHttpRequest()
+    xhr = sandbox.useFakeXMLHttpRequest()
 
     xhr.onCreate = function (xhr) {
       return requests.push(xhr)
@@ -22,7 +23,8 @@ describe('HoneyBadgerVue', () => {
   })
 
   afterEach(function () {
-    xhr.restore()
+    // xhr.restore()
+    sandbox.restore()
   })
 
   function afterNotify (done, run) {
@@ -63,12 +65,20 @@ describe('HoneyBadgerVue', () => {
   // })
 
   it("should invoke HoneyBadger's notify", (done) => {
+    sandbox.spy(constructor.honeybadger, 'notify')
     var err = new Error('oops')
-    sinon.spy(constructor.honeybadger, 'notify')
     constructor.config.errorHandler(err, { $root: true, $options: {} }, 'some descriptive context')
-
     afterNotify(done, function () {
       expect(constructor.honeybadger.notify.called).toBeTruthy()
+    })
+  })
+  it('Should bubble up a rendering error to errorHandler', (done) => {
+    const Tc = constructor.extend(TestComponent)
+    const vm = new Tc().$mount()
+    sandbox.spy(constructor.honeybadger, 'notify')
+    vm.makeSomethingUnrenderable()
+    afterNotify(done, function () {
+      expect(vm.honeybadger.notify.called).toBeTruthy()
     })
   })
 })
