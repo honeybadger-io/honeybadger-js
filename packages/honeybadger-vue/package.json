@@ -9,8 +9,8 @@
     "type": "git",
     "url": "git@github.com:honeybadger-io/honeybadger-vue.git"
   },
-  "main": "dist/honeybadger-vue.js",
-  "module": "dist/honeybadger-vue.js",
+  "main": "dist/honeybadger-vue.umd.js",
+  "module": "dist/honeybadger-vue.umd.js",
   "unpkg": "dist/honeybadger-vue.min.js",
   "files": [
     "dist"
