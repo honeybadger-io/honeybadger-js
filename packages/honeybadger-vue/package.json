@@ -9,6 +9,12 @@
     "type": "git",
     "url": "git@github.com:honeybadger-io/honeybadger-vue.git"
   },
+  "main": "dist/honeybadger-vue.js",
+  "module": "dist/honeybadger-vue.js",
+  "unpkg": "dist/honeybadger-vue.min.js",
+  "files": [
+    "dist"
+  ],
   "homepage": "https://github.com/honeybadger-io/honeybadger-vue#readme",
   "private": false,
   "scripts": {
@@ -18,11 +24,13 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
-    "build": "node build/build.js"
+    "build": "npm run build:umd & npm run build:es & npm run build:unpkg",
+    "build:umd": "rollup --config build/rollup.config.js --format umd --file dist/honeybadger-vue.umd.js",
+    "build:es": "rollup --config build/rollup.config.js --format es --file dist/honeybadger-vue.esm.js",
+    "build:unpkg": "rollup --config build/rollup.config.js --format iife --file dist/honeybadger-vue.min.js"
   },
   "dependencies": {
-    "honeybadger-js": "^0.5.5",
-    "vue": "^2.5.2"
+    "honeybadger-js": "^0.5.5"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
@@ -72,12 +80,16 @@
     "postcss-loader": "^2.0.8",
     "postcss-url": "^7.2.1",
     "rimraf": "^2.6.0",
+    "rollup": "^0.66.6",
+    "rollup-plugin-buble": "^0.19.4",
+    "rollup-plugin-vue": "^4.3.2",
     "selenium-server": "^3.0.1",
     "semver": "^5.3.0",
     "shelljs": "^0.7.6",
     "sinon": "^6.3.5",
     "uglifyjs-webpack-plugin": "^1.1.1",
     "url-loader": "^1.1.2",
+    "vue": "^2.5.2",
     "vue-jest": "^1.0.2",
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",
