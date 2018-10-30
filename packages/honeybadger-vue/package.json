@@ -2,7 +2,7 @@
   "name": "honeybadger-vue",
   "version": "0.0.1",
   "license": "MIT",
-  "description": "HoneyBadger Vue.js client",
+  "description": "Honeybadger Vue.js client",
   "author": "Jason Truesdell <jason@yuzuten.com> (https://github.com/JasonTrue)",
   "bugs": "https://github.com/honeybadger-io/honeybadger-vue/issues",
   "repository": {
@@ -27,10 +27,13 @@
     "build": "npm run build:umd & npm run build:es & npm run build:unpkg",
     "build:umd": "rollup --config build/rollup.config.js --format umd --file dist/honeybadger-vue.umd.js",
     "build:es": "rollup --config build/rollup.config.js --format es --file dist/honeybadger-vue.esm.js",
-    "build:unpkg": "rollup --config build/rollup.config.js --format iife --file dist/honeybadger-vue.min.js"
+    "build:unpkg": "rollup --config build/rollup.config.js --format iife --file dist/honeybadger-vue.js",
+    "build:unpkg-minify": "rollup MINIFY=true --config build/rollup.config.js --format iife --file dist/honeybadger-vue.min.js"
+
   },
   "dependencies": {
-    "honeybadger-js": "^0.5.5"
+    "honeybadger-js": "^0.5.5",
+    "postcss": "^7.0.5"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
@@ -82,6 +85,8 @@
     "rimraf": "^2.6.0",
     "rollup": "^0.66.6",
     "rollup-plugin-buble": "^0.19.4",
+    "rollup-plugin-conditional": "^2.1.1",
+    "rollup-plugin-terser": "^3.0.0",
     "rollup-plugin-vue": "^4.3.2",
     "selenium-server": "^3.0.1",
     "semver": "^5.3.0",

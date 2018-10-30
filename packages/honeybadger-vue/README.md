@@ -4,7 +4,7 @@
 
 ## Project Goals
 
-The goal is to provide an idiomatic, simple integration of HoneyBadger's
+The goal is to provide an idiomatic, simple integration of Honeybadger's
 exception monitoring service with Vue.js applications.
 
 ## Project Status

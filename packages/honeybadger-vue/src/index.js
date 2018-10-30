@@ -1,9 +1,9 @@
-import HoneyBadger from 'honeybadger-js'
+import Honeybadger from 'honeybadger-js'
 
-const HoneyBadgerVue = {
+const HoneybadgerVue = {
   install (Vue, options) {
     console.log('Configuring with ' + options.api_key)
-    const honeybadger = HoneyBadger.configure(options)
+    const honeybadger = Honeybadger.configure(options)
     Vue.honeybadger = honeybadger
     Vue.prototype.honeybadger = Vue.honeybadger
     const chainedErrorHandler = Vue.config.errorHandler
@@ -28,13 +28,7 @@ const HoneyBadgerVue = {
         chainedErrorHandler.call(this.Vue, error, vm, info)
       }
     }
-    // window.addEventListener('error', event => {
-    //   console.log('Captured in error EventListener', event.error)
-    // })
-    // window.addEventListener('unhandledrejection', event => {
-    //   console.log('Captured in unhandledrejection EventListener', event.reason)
-    // })
   }
 }
 
-export default HoneyBadgerVue
+export default HoneybadgerVue
