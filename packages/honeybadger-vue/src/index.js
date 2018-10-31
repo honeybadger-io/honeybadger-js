@@ -4,8 +4,8 @@ const HoneybadgerVue = {
   install (Vue, options) {
     console.log('Configuring with ' + options.api_key)
     const honeybadger = Honeybadger.configure(options)
-    Vue.honeybadger = honeybadger
-    Vue.prototype.honeybadger = Vue.honeybadger
+    Vue.$honeybadger = honeybadger
+    Vue.prototype.$honeybadger = Vue.$honeybadger
     const chainedErrorHandler = Vue.config.errorHandler
     let extractContext = function (vm) {
       var options = typeof vm === 'function' && vm.cid != null ? vm.options : vm._isVue ? vm.$options ||

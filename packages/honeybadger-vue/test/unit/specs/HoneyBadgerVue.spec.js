@@ -35,7 +35,7 @@ describe('HoneybadgerVue', () => {
   }
   it('should bind the client when we add the Honeybadger component', () => {
     // const vm = new Constructor().$mount()
-    expect(constructor.honeybadger).toBe(Honeybadger)
+    expect(constructor.$honeybadger).toBe(Honeybadger)
   })
 
   it('should add an errorHandler', () => {
@@ -65,20 +65,20 @@ describe('HoneybadgerVue', () => {
   // })
 
   it("should invoke Honeybadger's notify", (done) => {
-    sandbox.spy(constructor.honeybadger, 'notify')
+    sandbox.spy(constructor.$honeybadger, 'notify')
     var err = new Error('oops')
     constructor.config.errorHandler(err, { $root: true, $options: {} }, 'some descriptive context')
     afterNotify(done, function () {
-      expect(constructor.honeybadger.notify.called).toBeTruthy()
+      expect(constructor.$honeybadger.notify.called).toBeTruthy()
     })
   })
   it('Should bubble up a rendering error to errorHandler', (done) => {
     const Tc = constructor.extend(TestComponent)
     const vm = new Tc().$mount()
-    sandbox.spy(constructor.honeybadger, 'notify')
+    sandbox.spy(constructor.$honeybadger, 'notify')
     vm.makeSomethingUnrenderable()
     afterNotify(done, function () {
-      expect(vm.honeybadger.notify.called).toBeTruthy()
+      expect(vm.$honeybadger.notify.called).toBeTruthy()
     })
   })
 })

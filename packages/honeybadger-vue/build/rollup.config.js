@@ -7,7 +7,7 @@ const isTerse = process.env.minify === true;
 
 export default {
   input: 'src/index.js', // Path relative to package.json
-  external: [ 'honeybadger-js' ],
+  external: [ '$honeybadger-js' ],
   output: {
     name: 'HoneybadgerVue',
     exports: 'named',
