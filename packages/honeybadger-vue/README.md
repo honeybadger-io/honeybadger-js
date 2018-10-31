@@ -9,27 +9,66 @@ exception monitoring service with Vue.js applications.
 
 ## Project Status
 
-This version is not yet ready for general use.
+This version is considered suitable for preview.
 
-## Quick Start
+## Getting Started
 
-When released, you should be able to consume it with a single `<script>`
-tag and a simple init call, as you might do in a minimalist Vue
-application. For now, you can simply add it as a dependency to your
-project.
+If you're using webpack, simply add honeybadger-vue as a dependency and
+configure.
 
 ```
-npm add javascript-vue
+npm add honeybadger-vue
 ```
 
 In your main.js:
 
-```
+```javascript
 import HoneybadgerVue from 'honeybadger-vue'
 
-const config = { api_key: 'your-public-api-key' }
+const config = {
+    api_key: 'your-public-api-key',
+    environment: 'production',
+    revision: 'git SHA/project version'
+}
+
 Vue.use(HoneybadgerVue, config)
 ```
+
+If you're building a Vue app that just uses `<script>` tags to pull in
+the vue library, you may reference the library on a CDN instead.
+
+## Limitations
+
+Honeybadger-vue hooks in to the error handler in Vue. This means we only
+notify Honeybadger of Vue context for errors that Vue handles. Some
+errors inside Vue code may propagate to the window onerror handler
+instead.
+
+In those cases, Honeybadger Javascript library's default error notifier
+is invoked, which will contain a stack trace but none of the Vue
+variables.
+
+## Usage
+
+Using the example configuration above, you'll install honeybadger-vue
+as Vue's error handler.
+
+If, for some reason, you do not wish to install Honeybadger's
+error handler on the global window onerror handler, you may add
+```{ onerror: false }``` to the configuration you're invoking. Because
+not all Vue errors bubble up through the `Vue.config.errorHandler`,
+please consider the use case carefully. It may make sense to disable
+the window.onerror handler if you have a hybrid application with its
+own error handler, for example.
+
+You may also manually report errors by directly invoking the
+honeybadger-js API.
+
+```javascript
+    Vue.$honeybadger.notify(error)
+```
+
+See the Honeybadger-js documentation for more options.
 
 ## Key Assumptions
 
@@ -40,7 +79,7 @@ please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-v
 
 ## Documentation and Support
 
-For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/lib/javascript/index.html).
+For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/lib/vue/index.html).
 
 ## Changelog
 
@@ -52,7 +91,7 @@ See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
 2. Create a topic branch `git checkout -b my_branch`
 3. Commit your changes `git commit -am "Boom"`
 3. Push to your branch `git push origin my_branch`
-4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)
+4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-vue/pulls)
 
 ## Development
 

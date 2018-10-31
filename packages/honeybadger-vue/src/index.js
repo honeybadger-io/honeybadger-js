@@ -21,8 +21,6 @@ const HoneybadgerVue = {
       }
     }
     Vue.config.errorHandler = (error, vm, info) => {
-      console.log('we are erroring.')
-      console.log(vm)
       honeybadger.notify(error, {context: { vm: extractContext(vm), info: info }})
       if (typeof chainedErrorHandler === 'function') {
         chainedErrorHandler.call(this.Vue, error, vm, info)
