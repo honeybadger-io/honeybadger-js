@@ -12,10 +12,10 @@ const HoneybadgerVue = {
         vm.constructor.options : vm || {}
       var name = options.name || options._componentTag
       var file = options.__file
-
       return {
         isRoot: vm.$root === vm,
         name: name,
+        options: vm.$options,
         props: vm.$props,
         file: file
       }
