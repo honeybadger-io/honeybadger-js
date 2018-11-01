@@ -17,7 +17,7 @@ If you're using webpack, simply add honeybadger-vue as a dependency and
 configure.
 
 ```
-npm add honeybadger-vue
+npm add honeybadger-vue --save
 ```
 
 In your main.js:
@@ -79,11 +79,11 @@ please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-v
 
 ## Documentation and Support
 
-For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/lib/vue/index.html).
+For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/lib/vue.html).
 
 ## Changelog
 
-See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
+See https://github.com/honeybadger-io/honeybadger-vue/blob/master/CHANGELOG.md
 
 ## Contributing
 
@@ -95,13 +95,12 @@ See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
 
 ## Development
 
-<!--TODO: Replace this with something narrowly appropriate for this project -->
 ``` bash
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8080
-npm run dev
+# Serve the demo app with hot reload at localhost:8080
+HONEYBADGER_API_KEY=yourkey npm run dev
 
 # build for production with minification
 npm run build

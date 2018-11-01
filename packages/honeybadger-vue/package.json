@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "honeybadger-js": "^0.5.5",
-    "postcss": "^7.0.5"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
@@ -80,6 +79,7 @@
     "ora": "^1.2.0",
     "portfinder": "^1.0.13",
     "postcss-import": "^11.0.0",
+    "postcss": "^7.0.5",
     "postcss-loader": "^2.0.8",
     "postcss-url": "^7.2.1",
     "rimraf": "^2.6.0",
