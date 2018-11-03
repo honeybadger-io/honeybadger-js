@@ -79,7 +79,7 @@ please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-v
 
 ## Documentation and Support
 
-For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/lib/vue.html).
+For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/).
 
 ## Changelog
 
