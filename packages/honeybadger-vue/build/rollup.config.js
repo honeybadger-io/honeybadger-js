@@ -2,7 +2,7 @@ import buble from 'rollup-plugin-buble'; // Transpile/polyfill with reasonable b
 import vue from 'rollup-plugin-vue'; // Handle .vue SFC files
 import {terser} from 'rollup-plugin-terser'
 import conditional from "rollup-plugin-conditional";
-
+import path from 'path';
 const isTerse = process.env.minify === true;
 
 export default {
@@ -11,6 +11,12 @@ export default {
   output: {
     name: 'HoneybadgerVue',
     exports: 'named',
+    globals: {'honeybadger-js': 'Honeybadger'},
+    sourcemap: true,
+    sourcemapPathTransform: relativePath => {
+      // will transform e.g. "src/main.js" -> "main.js"
+      return path.relative('src', relativePath)
+    },
   },
   plugins: [
     vue({
