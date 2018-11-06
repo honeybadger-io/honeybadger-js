@@ -32,7 +32,7 @@
 
   },
   "dependencies": {
-    "honeybadger-js": "^0.5.5",
+    "honeybadger-js": "^0.5.5"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
