@@ -1,4 +1,5 @@
 # Honeybadger Vue.js Integration
+[![Build Status](https://travis-ci.org/honeybadger-io/honeybadger-vue.svg?branch=master)](https://travis-ci.org/honeybadger-io/honeybadger-vue)
 
 > [Vue.js integration for Honeybadger.io](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=vue&utm_content=Vue.js+integration+for+Honeybadger.io)
 
