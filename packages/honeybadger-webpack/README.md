@@ -65,7 +65,7 @@ const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
 // named GIT_COMMIT, HONEYBADGER_API_KEY, ASSETS_URL
 const revision = process.env.GIT_COMMIT || 'master'
 
-environment.plugins.set(
+environment.plugins.append(
   'HoneybadgerSourceMap',
   new HoneybadgerSourceMapPlugin({
     apiKey: process.env.HONEYBADGER_API_KEY,
