@@ -68,7 +68,7 @@ honeybadger-js API.
     Vue.$honeybadger.notify(error)
 ```
 
-See the Honeybadger-js documentation for more options.
+See the honeybadger-js documentation for more options.
 
 ## Key Assumptions
 
@@ -80,6 +80,8 @@ please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-v
 ## Documentation and Support
 
 For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/).
+
+The documentation includes a detailed [Vue integration guide](http://docs.honeybadger.io/lib/javascript/integration/vue.html))
 
 ## Changelog
 
