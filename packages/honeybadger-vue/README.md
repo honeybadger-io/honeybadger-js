@@ -1,6 +1,6 @@
 # honeybadger-vue
 
-> Honeybadger.io integration for Vue.js
+> [Honeybadger.io integration for Vue](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=vue&utm_content=Honeybadger+integration+for+Vue)
 
 ## Project Goals
 
