@@ -1,6 +1,12 @@
-# honeybadger-vue
+# Honeybadger Vue.js Integration
 
-> [Honeybadger.io integration for Vue.js](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=vuejs&utm_content=Honeybadger+integration+for+Vue)
+> [Vue.js integration for Honeybadger.io](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=vuejs&utm_content=Honeybadger+integration+for+Vue)
+
+## Documentation and Support
+
+For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/).
+
+The documentation includes a detailed [Vue integration guide](http://docs.honeybadger.io/lib/javascript/integration/vue.html))
 
 ## Project Goals
 
@@ -10,32 +16,6 @@ exception monitoring service with Vue.js applications.
 ## Project Status
 
 This version is considered suitable for preview.
-
-## Getting Started
-
-If you're using webpack, simply add honeybadger-vue as a dependency and
-configure.
-
-```
-npm add honeybadger-vue --save
-```
-
-In your main.js:
-
-```javascript
-import HoneybadgerVue from 'honeybadger-vue'
-
-const config = {
-    api_key: 'your-public-api-key',
-    environment: 'production',
-    revision: 'git SHA/project version'
-}
-
-Vue.use(HoneybadgerVue, config)
-```
-
-If you're building a Vue app that just uses `<script>` tags to pull in
-the vue library, you may reference the library on a CDN instead.
 
 ## Limitations
 
@@ -48,40 +28,12 @@ In those cases, Honeybadger Javascript library's default error notifier
 is invoked, which will contain a stack trace but none of the Vue
 variables.
 
-## Usage
-
-Using the example configuration above, you'll install honeybadger-vue
-as Vue's error handler.
-
-If, for some reason, you do not wish to install Honeybadger's
-error handler on the global window onerror handler, you may add
-```{ onerror: false }``` to the configuration you're invoking. Because
-not all Vue errors bubble up through the `Vue.config.errorHandler`,
-please consider the use case carefully. It may make sense to disable
-the window.onerror handler if you have a hybrid application with its
-own error handler, for example.
-
-You may also manually report errors by directly invoking the
-[honeybadger-js](https://docs.honeybadger.io/lib/javascript/) API.
-
-```javascript
-    Vue.$honeybadger.notify(error)
-```
-
-See the [honeybadger-js documentation](https://docs.honeybadger.io/lib/javascript/) for more options.
-
 ## Key Assumptions
 
 This project is built using a webpack-based Vue template. It's possible
 your own build environment may be just different enough to require some
 adjustments. If you find that our artifacts don't quite meet your needs,
 please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-vue/issues.
-
-## Documentation and Support
-
-For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/).
-
-The documentation includes a detailed [Vue integration guide](http://docs.honeybadger.io/lib/javascript/integration/vue.html))
 
 ## Changelog
 
