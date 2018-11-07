@@ -1,9 +1,5 @@
-sudo: false
-dist: trusty
 language: node_js
+cache: yarn
 node_js:
+  - "9"
   - "8"
-addons:
-  chrome: stable
-before_install:
-after_success:
