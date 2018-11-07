@@ -4,7 +4,7 @@ import Honeybadger from 'honeybadger-js'
 import TestComponent from '../TestComponent.vue'
 
 describe('HoneybadgerVue', () => {
-  let config = {api_key: 'FFAACCCC00', onerror: false}
+  let config = {apiKey: 'FFAACCCC00', onerror: false}
   let constructor = Vue.use(HoneybadgerVue, config)
   var requests, xhr
 
