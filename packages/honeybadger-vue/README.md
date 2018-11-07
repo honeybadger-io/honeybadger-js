@@ -62,13 +62,13 @@ the window.onerror handler if you have a hybrid application with its
 own error handler, for example.
 
 You may also manually report errors by directly invoking the
-honeybadger-js API.
+[honeybadger-js](https://docs.honeybadger.io/lib/javascript/) API.
 
 ```javascript
     Vue.$honeybadger.notify(error)
 ```
 
-See the honeybadger-js documentation for more options.
+See the [honeybadger-js documentation](https://docs.honeybadger.io/lib/javascript/) for more options.
 
 ## Key Assumptions
 
