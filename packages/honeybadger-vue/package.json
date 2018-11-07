@@ -4,10 +4,12 @@
   "license": "MIT",
   "description": "Honeybadger Vue.js client",
   "author": "Jason Truesdell <jason@yuzuten.com> (https://github.com/JasonTrue)",
-  "bugs": "https://github.com/honeybadger-io/honeybadger-vue/issues",
+  "bugs": {
+    "url": "https://github.com/honeybadger-io/honeybadger-vue/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git@github.com:honeybadger-io/honeybadger-vue.git"
+    "url": "git+ssh://git@github.com/honeybadger-io/honeybadger-vue.git"
   },
   "keywords": [
     "vue",
@@ -18,10 +20,10 @@
   "module": "dist/honeybadger-vue.umd.js",
   "unpkg": "dist/honeybadger-vue.min.js",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "homepage": "https://github.com/honeybadger-io/honeybadger-vue#readme",
-  "private": false,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
@@ -117,5 +119,8 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "directories": {
+    "test": "test"
+  }
 }
