@@ -52,25 +52,25 @@ See https://github.com/honeybadger-io/honeybadger-vue/blob/master/CHANGELOG.md
 
 ``` bash
 # install dependencies
-npm install
+yarn install
 
 # Serve the demo app with hot reload at localhost:8080
 HONEYBADGER_API_KEY=yourkey npm run dev
 
 # build for production with minification
-npm run build
+yarn run build
 
 # build for production and view the bundle analyzer report
-npm run build --report
+yarn run build --report
 
 # run unit tests
-npm run unit
+yarn run unit
 
 # run e2e tests
-HONEYBADGER_API_KEY=yourkey npm run e2e
+HONEYBADGER_API_KEY=yourkey yarn run e2e
 
 # run all tests
-HONEYBADGER_API_KEY=yourkey npm test
+HONEYBADGER_API_KEY=yourkey yarn test:all
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
