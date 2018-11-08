@@ -7,7 +7,7 @@
 
 For comprehensive documentation and support, [check out our documentation site](https://docs.honeybadger.io/lib/javascript/index.html).
 
-The documentation includes a detailed [Vue integration guide](https://docs.honeybadger.io/lib/javascript/integration/vue.html))
+The documentation includes a detailed [Vue integration guide](https://docs.honeybadger.io/lib/javascript/integration/vue.html)
 
 ## Project Goals
 
@@ -34,7 +34,7 @@ variables.
 This project is built using a webpack-based Vue template. It's possible
 your own build environment may be just different enough to require some
 adjustments. If you find that our artifacts don't quite meet your needs,
-please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-vue/issues.
+please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-vue/issues).
 
 ## Changelog
 
