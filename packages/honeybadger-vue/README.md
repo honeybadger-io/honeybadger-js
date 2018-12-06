@@ -55,19 +55,19 @@ See https://github.com/honeybadger-io/honeybadger-vue/blob/master/CHANGELOG.md
 yarn install
 
 # Serve the demo app with hot reload at localhost:8080
-HONEYBADGER_API_KEY=yourkey yarn run dev
+HONEYBADGER_API_KEY=yourkey yarn dev
 
 # build for production with minification
-yarn run build
+yarn build
 
 # build for production and view the bundle analyzer report
-yarn run build --report
+yarn build --report
 
 # run unit tests
-yarn run unit
+yarn unit
 
 # run e2e tests
-HONEYBADGER_API_KEY=yourkey yarn run e2e
+HONEYBADGER_API_KEY=yourkey yarn e2e
 
 # run all tests
 HONEYBADGER_API_KEY=yourkey yarn test:all
