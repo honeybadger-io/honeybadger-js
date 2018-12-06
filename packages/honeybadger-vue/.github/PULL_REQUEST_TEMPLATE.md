@@ -23,6 +23,6 @@ Outline the steps to test or reproduce the PR here.
 ```bash
 > git pull --prune
 > git checkout <branch>
-> npm test
+> yarn test
 ```
 1.
