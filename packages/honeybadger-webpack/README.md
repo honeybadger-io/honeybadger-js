@@ -1,6 +1,7 @@
 # Honeybadger's Webpack Source Map Plugin
 
 [![CircleCI honeybadger-io/honeybadger-webpack](https://circleci.com/gh/honeybadger-io/honeybadger-webpack.svg?style=shield&circle-token=73022b639c6abad8d31c13cb1225c14eb5e37631)](https://circleci.com/gh/honeybadger-io/honeybadger-webpack)
+[![npm version](https://badge.fury.io/js/@honeybadger-io/webpack.svg)](https://badge.fury.io/js/@honeybadger-io/webpack)
 
 This is a [webpack](https://webpack.js.org/) plugin to upload javascript
 sourcemaps to [Honeybadger's](https://honeybadger.io/)
