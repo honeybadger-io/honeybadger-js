@@ -70,6 +70,8 @@ class HoneybadgerSourceMapPlugin {
   }
 
   uploadSourceMap(compilation, { sourceFile, sourceMap }, done) {
+    sourceFile = sourceFile.replace(/^\//, '')
+    
     const req = request.post(ENDPOINT, (err, res, body) => {
       if (!err && res.statusCode === 201) {
         if (!this.silent) {
