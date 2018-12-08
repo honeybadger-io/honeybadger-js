@@ -18,5 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.0.4] - 2018-11-07
 * Minor changes in Readme and travis configuration (no code changes)
 
-## [0.0.4] - 2018-11-08
+## [0.0.5] - 2018-12-07
 * Dependency updates, additional documentation changes
+
+## [0.0.6] - 2018-12-08
+* Reduced size of context information sent to Notify
+* We now send the props value to honeybadger
