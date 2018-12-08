@@ -79,6 +79,7 @@ describe('HoneybadgerVue', () => {
     vm.makeSomethingUnrenderable()
     afterNotify(done, function () {
       expect(vm.$honeybadger.notify.called).toBeTruthy()
+      expect(vm.$honeybadger.notify.calledOnce).toBeTruthy()
     })
   })
 })

@@ -14,7 +14,6 @@ const HoneybadgerVue = {
         vm.constructor.options : vm || {}
       var name = options.name || options._componentTag
       var file = options.__file
-      console.log(options)
       return {
         isRoot: vm.$root === vm,
         name: name,
