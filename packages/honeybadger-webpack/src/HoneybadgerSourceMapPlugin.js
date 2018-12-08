@@ -70,8 +70,6 @@ class HoneybadgerSourceMapPlugin {
   }
 
   uploadSourceMap(compilation, { sourceFile, sourceMap }, done) {
-    sourceFile = sourceFile.replace(/^\//, '')
-    
     const req = request.post(ENDPOINT, (err, res, body) => {
       if (!err && res.statusCode === 201) {
         if (!this.silent) {
@@ -95,7 +93,7 @@ class HoneybadgerSourceMapPlugin {
 
     const form = req.form();
     form.append('api_key', this.apiKey);
-    form.append('minified_url', `${this.assetsUrl}/${sourceFile}`);
+    form.append('minified_url', `${this.assetsUrl}/${sourceFile.replace(/^\//, '')}`);
     form.append('minified_file', compilation.assets[sourceFile].source(), {
       filename: sourceFile,
       contentType: 'application/javascript'
