@@ -2,6 +2,7 @@ import Vue from 'vue'
 import HoneybadgerVue from '@/index.js'
 import Honeybadger from 'honeybadger-js'
 import TestComponent from '../TestComponent.vue'
+import TestCanvasForProps from '../TestCanvasForProps.vue'
 
 describe('HoneybadgerVue', () => {
   let config = {apiKey: 'FFAACCCC00', onerror: false}
@@ -33,6 +34,7 @@ describe('HoneybadgerVue', () => {
       done()
     }, 50)
   }
+
   it('should bind the client when we add the Honeybadger component', () => {
     // const vm = new Constructor().$mount()
     expect(constructor.$honeybadger).toBe(Honeybadger)
@@ -73,13 +75,27 @@ describe('HoneybadgerVue', () => {
     })
   })
   it('Should bubble up a rendering error to errorHandler', (done) => {
+    sandbox.spy(constructor.$honeybadger, 'notify')
     const Tc = constructor.extend(TestComponent)
     const vm = new Tc().$mount()
-    sandbox.spy(constructor.$honeybadger, 'notify')
     vm.makeSomethingUnrenderable()
     afterNotify(done, function () {
       expect(vm.$honeybadger.notify.called).toBeTruthy()
       expect(vm.$honeybadger.notify.calledOnce).toBeTruthy()
+    })
+  })
+  describe('when a component has props', () => {
+    it('should pass the props in the error notification', (done) => {
+      sandbox.spy(constructor.$honeybadger, 'notify')
+      const Tc = constructor.extend(TestCanvasForProps)
+      const vm = new Tc().$mount()
+
+      afterNotify(done, function () {
+        expect(vm.$honeybadger.notify.called).toBeTruthy()
+        sandbox.assert.calledWith(vm.$honeybadger.notify, sandbox.match.any, sandbox.match(
+          { context: { vm: { props: { count: -1, title: 'Component 1' } } } })
+        )
+      })
     })
   })
 })
