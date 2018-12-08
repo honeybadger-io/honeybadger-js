@@ -3,7 +3,7 @@ import Honeybadger from 'honeybadger-js'
 const HoneybadgerVue = {
   install (Vue, options) {
     if (Vue.config.debug) {
-      console.log('Honeybadger configured with ' + options.apiKey)
+      console.log(`Honeybadger configured with ${options.apiKey}`)
     }
     const honeybadger = Honeybadger.configure(options)
     Vue.$honeybadger = honeybadger

@@ -1,16 +1,31 @@
-import Vue from 'vue'
 import HoneybadgerVue from '@/index.js'
 import Honeybadger from 'honeybadger-js'
 import TestComponent from '../TestComponent.vue'
 import TestCanvasForProps from '../TestCanvasForProps.vue'
 
 describe('HoneybadgerVue', () => {
-  let config = {apiKey: 'FFAACCCC00', onerror: false}
-  let constructor = Vue.use(HoneybadgerVue, config)
   var requests, xhr
+  let Vue
+  let sandbox
 
-  var sandbox = sinon.createSandbox()
+  function factory (config = {}) {
+    return Vue.use(HoneybadgerVue, Object.assign({}, {
+      apiKey: 'FFAACCCC00',
+      onerror: false
+    }, config))
+  }
+
   beforeEach(function () {
+    jest.resetModules()
+
+    global.console = {
+      log: jest.fn()
+    }
+
+    Vue = require('vue')
+
+    sandbox = sinon.createSandbox()
+
     // Refresh singleton state.
     // Honeybadger.reset()
 
@@ -36,11 +51,27 @@ describe('HoneybadgerVue', () => {
   }
 
   it('should bind the client when we add the Honeybadger component', () => {
+    const constructor = factory()
     // const vm = new Constructor().$mount()
     expect(constructor.$honeybadger).toBe(Honeybadger)
   })
 
+  it('Should output debug information', () => {
+    Vue.config.debug = true
+    factory()
+    expect(global.console.log).toHaveBeenCalledWith('Honeybadger configured with FFAACCCC00')
+  })
+
+  it('Should not output debug information', () => {
+    Vue.config.debug = false
+    factory(Vue)
+
+    expect(global.console.log).not.toHaveBeenCalled()
+  })
+
   it('should add an errorHandler', () => {
+    const constructor = factory()
+
     // Until we .use the plugin, the Vue errorHandler is of type "object."
     expect(typeof constructor.config.errorHandler).toEqual('function')
   })
@@ -67,6 +98,8 @@ describe('HoneybadgerVue', () => {
   // })
 
   it("should invoke Honeybadger's notify", (done) => {
+    const constructor = factory()
+
     sandbox.spy(constructor.$honeybadger, 'notify')
     var err = new Error('oops')
     constructor.config.errorHandler(err, { $root: true, $options: {} }, 'some descriptive context')
@@ -74,7 +107,9 @@ describe('HoneybadgerVue', () => {
       expect(constructor.$honeybadger.notify.called).toBeTruthy()
     })
   })
+
   it('Should bubble up a rendering error to errorHandler', (done) => {
+    const constructor = factory()
     sandbox.spy(constructor.$honeybadger, 'notify')
     const Tc = constructor.extend(TestComponent)
     const vm = new Tc().$mount()
@@ -86,6 +121,7 @@ describe('HoneybadgerVue', () => {
   })
   describe('when a component has props', () => {
     it('should pass the props in the error notification', (done) => {
+      const constructor = factory()
       sandbox.spy(constructor.$honeybadger, 'notify')
       const Tc = constructor.extend(TestCanvasForProps)
       const vm = new Tc().$mount()
