@@ -1,16 +1,18 @@
 var url = 'global';
 
 describe('Honeybadger', function() {
-  var requests, xhr;
+  var requests, request, xhr;
 
   beforeEach(function() {
     // Refresh singleton state.
     Honeybadger.reset();
 
     // Stub HTTP requests.
+    request = undefined;
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
     xhr.onCreate = function(xhr) {
+      request = xhr;
       return requests.push(xhr);
     };
   });
@@ -21,6 +23,9 @@ describe('Honeybadger', function() {
 
   function afterNotify(done, run) {
     setTimeout(function() {
+      for(var i=0; i<requests.length; i++) {
+        requests[i].payload = JSON.parse(requests[i].requestBody);
+      }
       run();
       done();
     }, 50);
@@ -372,7 +377,7 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bparams%5D%5Bfoo%5D=bar');
+        expect(request.payload.request.params.foo).toEqual('bar');
       });
     });
 
@@ -387,7 +392,7 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
+        expect(request.payload.request.cgi_data.HTTP_COOKIE).toEqual('foo=bar');
       });
     });
 
@@ -404,7 +409,7 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
+        expect(request.payload.request.cgi_data.HTTP_COOKIE).toEqual('foo=bar');
       });
     });
 
@@ -413,7 +418,7 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      var err = new Error("Test message");
+      var err = new Error('Test message');
       try {
         throw err;
       } catch (e) {
@@ -422,8 +427,8 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('%5Bclass%5D=Error');
-        expect(requests[0].url).toMatch('%5Bmessage%5D=Test%20message');
+        expect(request.payload.error.class).toEqual('Error');
+        expect(request.payload.error.message).toEqual('Test message');
       });
     });
 
@@ -445,7 +450,7 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('unique%20context');
+        expect(request.payload.request.context.key).toEqual('unique context');
       });
     });
 
@@ -527,7 +532,7 @@ describe('Honeybadger', function() {
       expect(caughtError).toEqual(error);
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
+        expect(request.payload.error.message).toEqual('testing');
       });
     });
   });
@@ -571,11 +576,101 @@ describe('Honeybadger', function() {
     });
   });
 
-  describe('payload query string', function() {
+  describe('window.onerror callback', function() {
+    describe('default behavior', function() {
+      beforeEach(function() {
+        Honeybadger.configure({
+          api_key: 'asdf'
+        });
+      });
+
+      it('notifies Honeybadger of unhandled exceptions', function(done) {
+        window.onerror('testing', 'http://foo.bar', '123');
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+        });
+      });
+
+      it('skips cross-domain script errors', function(done) {
+        window.onerror('Script error', 'http://foo.bar', 0);
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(0);
+        });
+      });
+
+      it('reports error object when it is available', function(done) {
+        var err = new Error('expected-message');
+        window.onerror('foo', 'http://foo.bar', '123', '456', err);
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.message).toEqual('expected-message');
+        });
+      });
+
+      it('reports stack from error object when available', function(done) {
+        window.onerror('testing', 'http://foo.bar', '123', '345', {stack: 'expected'});
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.backtrace).toEqual('expected');
+        });
+      });
+
+      it('coerces unknown objects into string error message ', function(done) {
+        window.onerror(null, null, null, null, 'testing');
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.message).toEqual('testing');
+        });
+      });
+
+      it('supplements stack property when the error object does not have one', function(done) {
+        window.onerror('testing', 'http://foo.bar', '123', '345', 'testing');
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.message).toEqual('testing');
+        });
+      });
+    });
+
+    describe('when onerror is disabled', function() {
+      beforeEach(function() {
+        Honeybadger.configure({
+          api_key: 'asdf',
+          onerror: false
+        });
+      });
+
+      it('ignores unhandled errors', function(done) {
+        window.onerror('testing', 'http://foo.bar', 0);
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(0);
+        });
+      });
+    });
+  });
+
+  describe('getVersion', function() {
+    it('returns the current version', function() {
+      expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
+    });
+  });
+
+
+
+
+
+
+
+
+  pending('payload query string', function() {
     beforeEach(function() {
       Honeybadger.configure({
         api_key: 'asdf'
       });
+
+      xhr.onCreate = function() {
+        throw new Error('Unable to create XMLHttpRequest ¯\_(ツ)_/¯');
+      };
     });
 
     it('serializes an object to a query string', function(done) {
@@ -672,85 +767,6 @@ describe('Honeybadger', function() {
         });
       });
     }
-  });
-
-  describe('window.onerror callback', function() {
-    describe('default behavior', function() {
-      beforeEach(function() {
-        Honeybadger.configure({
-          api_key: 'asdf'
-        });
-      });
-
-      it('notifies Honeybadger of unhandled exceptions', function(done) {
-        window.onerror('testing', 'http://foo.bar', '123');
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-        });
-      });
-
-      it('skips cross-domain script errors', function(done) {
-        window.onerror('Script error', 'http://foo.bar', 0);
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(0);
-        });
-      });
-
-      it('reports error object when it is available', function(done) {
-        var err = new Error('expected-message');
-        window.onerror('foo', 'http://foo.bar', '123', '456', err);
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=expected-message');
-        });
-      });
-
-      it('reports stack from error object when available', function(done) {
-        window.onerror('testing', 'http://foo.bar', '123', '345', {stack: 'expected'});
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch(/notice%5Berror%5D%5Bbacktrace%5D=expected/);
-        });
-      });
-
-      it('coerces unknown objects into string error message ', function(done) {
-        window.onerror(null, null, null, null, 'testing');
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
-        });
-      });
-
-      it('supplements stack property when the error object does not have one', function(done) {
-        window.onerror('testing', 'http://foo.bar', '123', '345', 'testing');
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bbacktrace%5D=testing');
-        });
-      });
-    });
-
-    describe('when onerror is disabled', function() {
-      beforeEach(function() {
-        Honeybadger.configure({
-          api_key: 'asdf',
-          onerror: false
-        });
-      });
-
-      it('ignores unhandled errors', function(done) {
-        window.onerror('testing', 'http://foo.bar', 0);
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(0);
-        });
-      });
-    });
-  });
-
-  describe('getVersion', function() {
-    it('returns the current version', function() {
-      expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
-    });
   });
 
 });
