@@ -6,9 +6,10 @@
 
   <script type="text/javascript" src="../vendor/sinon-1.17.3.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="../vendor/jasmine-1.3.1/jasmine.css">
-  <script type="text/javascript" src="../vendor/jasmine-1.3.1/jasmine.js"></script>
-  <script type="text/javascript" src="../vendor/jasmine-1.3.1/jasmine-html.js"></script>
+  <link rel="stylesheet" type="text/css" href="../vendor/jasmine-3.3.0/jasmine.css">
+  <script type="text/javascript" src="../vendor/jasmine-3.3.0/jasmine.js"></script>
+  <script type="text/javascript" src="../vendor/jasmine-3.3.0/jasmine-html.js"></script>
+  <script type="text/javascript" src="../vendor/jasmine-3.3.0/boot.js"></script>
 
   <script type="text/javascript" src="../vendor/jasmine-jsreporter-1.0.0/jasmine-jsreporter.js"></script>
 
@@ -18,87 +19,6 @@
   <!-- include spec files here... -->
   <script type="text/javascript" src="../spec/honeybadger.spec.js"></script>
 
-  <script>
-    // Thanks @gordonwoodhull https://github.com/axemclion/grunt-saucelabs/issues/109#issuecomment-166767282
-    (function () {
-      var reporter = new jasmine.JSReporter();
-      var oldReportRunnerResults = reporter.reportRunnerResults;
-      reporter.reportRunnerResults = function(runner) {
-        oldReportRunnerResults(runner);
-        var results = jasmine.runnerResults;
-        if (results) {
-          jasmine.runnerResults = {
-            durationSec: results.durationSec,
-            suites: removePassingTests(results.suites),
-            passed: results.passed
-          };
-        }
-      };
-      jasmine.getEnv().addReporter(reporter);
-
-      function removePassingTests(suites) {
-        var result = [];
-        suites = takeItems(suites, specFailed);
-        for (i = 0; i < suites.length; ++i) {
-          result.push(mapSuite(suites[i]));
-        }
-        return result;
-      }
-
-      function mapSuite(suite) {
-        var result = {};
-        for (var s in suite) {
-          result[s] = suite[s];
-        }
-        result.specs = takeItems(suite.specs, specFailed);
-        result.suites = removePassingTests(suite.suites);
-        return result;
-      }
-
-      function takeItems(items, func) {
-        var result = [];
-        for (i = 0; i < items.length; ++i) {
-          if (!!func(items[i])) {
-            result.push(items[i]);
-          }
-        }
-        return result;
-      }
-
-      function specFailed(item) {
-        return !item.passed;
-      }
-    })();
-  </script>
-
-  <script type="text/javascript">
-    (function() {
-      var jasmineEnv = jasmine.getEnv();
-      jasmineEnv.updateInterval = 1000;
-
-      var htmlReporter = new jasmine.HtmlReporter();
-
-      jasmineEnv.addReporter(htmlReporter);
-
-      jasmineEnv.specFilter = function(spec) {
-        return htmlReporter.specFilter(spec);
-      };
-
-      var currentWindowOnload = window.onload;
-
-      window.onload = function() {
-        if (currentWindowOnload) {
-          currentWindowOnload();
-        }
-        execJasmine();
-      };
-
-      function execJasmine() {
-        jasmineEnv.execute();
-      }
-
-    })();
-  </script>
 </head>
 
 <body>
