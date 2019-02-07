@@ -24,10 +24,11 @@
     "connect": "~3.6.5",
     "grunt": "~1.0.1",
     "grunt-contrib-connect": "~1.0.2",
-    "grunt-contrib-jasmine": "~1.1.0",
+    "grunt-contrib-jasmine": "~2.0.3",
     "grunt-contrib-watch": "~1.0.0",
     "grunt-saucelabs": "~9.0.0",
     "grunt-shell": "~2.1.0",
+    "jasmine": "^3.3.1",
     "phantomjs-prebuilt": "~2.1.15"
   },
   "readmeFilename": "README.md",
