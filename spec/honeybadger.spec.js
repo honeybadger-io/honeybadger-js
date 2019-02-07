@@ -7,6 +7,10 @@ describe('Honeybadger', function() {
     // Refresh singleton state.
     Honeybadger.reset();
 
+    Honeybadger.configure({
+      _onerror_call_orig: false
+    });
+
     // Stub HTTP requests.
     request = undefined;
     requests = [];
@@ -653,5 +657,104 @@ describe('Honeybadger', function() {
     it('returns the current version', function() {
       expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
     });
+  });
+
+  describe('JSON encoding', function() {
+    beforeEach(function() {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+    });
+
+    it('drops undefined values', function(done) {
+      Honeybadger.notify("testing", {
+        context: {
+          foo: void 0,
+          bar: 'baz'
+        }
+      });
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.request.context).toEqual({bar: 'baz'});
+      });
+    });
+
+    it('drops function values', function(done) {
+      Honeybadger.notify("testing", {
+        context: {
+          foo: function() {},
+          bar: 'baz'
+        }
+      });
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.request.context).toEqual({foo: '[object Function]', bar: 'baz'});
+      });
+    });
+
+    it('enforces configured max depth', function(done) {
+      Honeybadger.notify("testing", {
+        context: {
+          one: { two: { three: { four: { five: { six: { seven: { eight: { nine: 'nine' }}}}}}}}
+        }
+      });
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.request.context).toEqual(
+          {one: { two: { three: { four: { five: { six: '[MAX DEPTH REACHED]'}}}}}}
+        );
+      });
+    });
+
+    if (typeof Object.create === 'function') {
+      it('handles objects without prototypes as values', function(done) {
+        var obj = Object.create(null);
+
+        Honeybadger.notify("Test error message", {
+          context: {
+            key: obj,
+          }
+        });
+
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.request.context).toEqual({key: '[object Object]'});
+        });
+      });
+    }
+
+    if (typeof Symbol === 'function') {
+      it('serializes symbol values', function(done) {
+        var sym = Symbol();
+
+        Honeybadger.notify("testing", {
+          context: {
+            key: sym,
+          }
+        });
+
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.request.context).toEqual({key: '[object Symbol]'});
+        });
+      });
+
+      it('drops symbol keys', function(done) {
+        var sym = Symbol();
+        var context = {};
+
+        context[sym] = 'value';
+
+        Honeybadger.notify("testing", { context: context });
+
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.request.context).toEqual({});
+        });
+      });
+    }
   });
 });

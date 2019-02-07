@@ -214,26 +214,21 @@
       return true;
     }
 
-    function serialize(obj, prefix, depth) {
-      var k, pk, ret, v;
-      ret = [];
+    function serialize(obj, depth) {
+      var k, v, ret;
+      ret = {};
       if (!depth) { depth = 0; }
       if (depth >= config('max_depth', 8)) {
-        return encodeURIComponent(prefix) + '=[MAX DEPTH REACHED]';
+        return '[MAX DEPTH REACHED]';
       }
       for (k in obj) {
         v = obj[k];
         if (obj.hasOwnProperty(k) && (k != null) && (v != null)) {
           if (!canSerialize(v)) { v = Object.prototype.toString.call(v); }
-          pk = (prefix ? prefix + '[' + k + ']' : k);
-          ret.push(typeof v === 'object' ? serialize(v, pk, depth+1) : encodeURIComponent(pk) + '=' + encodeURIComponent(v));
+          ret[k] = (typeof v === 'object' ? serialize(v, depth+1) : v);
         }
       }
-      return ret.join('&');
-    }
-
-    function jsonify(obj) {
-      return JSON.stringify(obj);
+      return ret;
     }
 
     function request(apiKey, payload) {
@@ -248,7 +243,7 @@
         x.setRequestHeader('X-API-Key', apiKey);
         x.setRequestHeader('Content-Type', 'application/json');
         x.setRequestHeader('Accept', 'text/json, application/json');
-        x.send(jsonify(payload));
+        x.send(JSON.stringify(serialize(payload)));
 
         incrementErrorsCount();
       } catch(e) {
@@ -578,7 +573,7 @@
       // See https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
       return function(msg, url, line, col, err) {
         onerror(msg, url, line, col, err);
-        if (typeof original === 'function') {
+        if (typeof original === 'function' && config('_onerror_call_orig', true)) {
           return original.apply(this, arguments);
         }
         return false;
