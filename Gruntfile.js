@@ -29,7 +29,7 @@ module.exports = function(grunt) {
   }, {
     browserName: 'internet explorer',
     platform: 'Windows 7',
-    version: '8.0'
+    version: '9.0'
   }];
 
   grunt.initConfig({
