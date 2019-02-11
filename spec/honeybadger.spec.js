@@ -7,6 +7,9 @@ describe('Honeybadger', function() {
     // Refresh singleton state.
     Honeybadger.reset();
 
+    // Configure the global window.onerror handler not to call the original
+    // because calling Jasmine/Puppeteer's global error handler causes issues.
+    // Would be nice to find a better way to test our global instrumentation.
     Honeybadger.configure({
       _onerror_call_orig: false
     });
