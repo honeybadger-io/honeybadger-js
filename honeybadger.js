@@ -236,13 +236,13 @@
       if (exceedsMaxErrors()) { return false; }
 
       try {
-        // Inspired by https://gist.github.com/Xeoncross/7663273
-        var x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
-
+        var x = new XMLHttpRequest();
         x.open('POST', baseURL() + '/v1/notices/js', config('async', true));
+
         x.setRequestHeader('X-API-Key', apiKey);
         x.setRequestHeader('Content-Type', 'application/json');
         x.setRequestHeader('Accept', 'text/json, application/json');
+
         x.send(JSON.stringify(serialize(payload)));
 
         incrementErrorsCount();
