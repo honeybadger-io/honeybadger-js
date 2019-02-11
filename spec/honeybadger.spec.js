@@ -583,85 +583,6 @@ describe('Honeybadger', function() {
     });
   });
 
-  describe('window.onerror callback', function() {
-    describe('default behavior', function() {
-      beforeEach(function() {
-        Honeybadger.configure({
-          api_key: 'asdf'
-        });
-      });
-
-      it('notifies Honeybadger of unhandled exceptions', function(done) {
-        window.onerror('testing', 'http://foo.bar', '123');
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-        });
-      });
-
-      it('skips cross-domain script errors', function(done) {
-        window.onerror('Script error', 'http://foo.bar', 0);
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(0);
-        });
-      });
-
-      it('reports error object when it is available', function(done) {
-        var err = new Error('expected-message');
-        window.onerror('foo', 'http://foo.bar', '123', '456', err);
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(request.payload.error.message).toEqual('expected-message');
-        });
-      });
-
-      it('reports stack from error object when available', function(done) {
-        window.onerror('testing', 'http://foo.bar', '123', '345', {stack: 'expected'});
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(request.payload.error.backtrace).toEqual('expected');
-        });
-      });
-
-      it('coerces unknown objects into string error message ', function(done) {
-        window.onerror(null, null, null, null, 'testing');
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(request.payload.error.message).toEqual('testing');
-        });
-      });
-
-      it('supplements stack property when the error object does not have one', function(done) {
-        window.onerror('testing', 'http://foo.bar', '123', '345', 'testing');
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(request.payload.error.message).toEqual('testing');
-        });
-      });
-    });
-
-    describe('when onerror is disabled', function() {
-      beforeEach(function() {
-        Honeybadger.configure({
-          api_key: 'asdf',
-          onerror: false
-        });
-      });
-
-      it('ignores unhandled errors', function(done) {
-        window.onerror('testing', 'http://foo.bar', 0);
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(0);
-        });
-      });
-    });
-  });
-
-  describe('getVersion', function() {
-    it('returns the current version', function() {
-      expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
-    });
-  });
-
   describe('JSON encoding', function() {
     beforeEach(function() {
       Honeybadger.configure({
@@ -759,5 +680,84 @@ describe('Honeybadger', function() {
         });
       });
     }
+  });
+
+  describe('window.onerror callback', function() {
+    describe('default behavior', function() {
+      beforeEach(function() {
+        Honeybadger.configure({
+          api_key: 'asdf'
+        });
+      });
+
+      it('notifies Honeybadger of unhandled exceptions', function(done) {
+        window.onerror('testing', 'http://foo.bar', '123');
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+        });
+      });
+
+      it('skips cross-domain script errors', function(done) {
+        window.onerror('Script error', 'http://foo.bar', 0);
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(0);
+        });
+      });
+
+      it('reports error object when it is available', function(done) {
+        var err = new Error('expected-message');
+        window.onerror('foo', 'http://foo.bar', '123', '456', err);
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.message).toEqual('expected-message');
+        });
+      });
+
+      it('reports stack from error object when available', function(done) {
+        window.onerror('testing', 'http://foo.bar', '123', '345', {stack: 'expected'});
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.backtrace).toEqual('expected');
+        });
+      });
+
+      it('coerces unknown objects into string error message ', function(done) {
+        window.onerror(null, null, null, null, 'testing');
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.message).toEqual('testing');
+        });
+      });
+
+      it('supplements stack property when the error object does not have one', function(done) {
+        window.onerror('testing', 'http://foo.bar', '123', '345', 'testing');
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.message).toEqual('testing');
+        });
+      });
+    });
+
+    describe('when onerror is disabled', function() {
+      beforeEach(function() {
+        Honeybadger.configure({
+          api_key: 'asdf',
+          onerror: false
+        });
+      });
+
+      it('ignores unhandled errors', function(done) {
+        window.onerror('testing', 'http://foo.bar', 0);
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(0);
+        });
+      });
+    });
+  });
+
+  describe('getVersion', function() {
+    it('returns the current version', function() {
+      expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
+    });
   });
 });
