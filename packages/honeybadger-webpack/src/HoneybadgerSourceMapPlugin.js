@@ -93,7 +93,7 @@ class HoneybadgerSourceMapPlugin {
 
     const form = req.form();
     form.append('api_key', this.apiKey);
-    form.append('minified_url', `${this.assetsUrl}/${sourceFile.replace(/^\//, '')}`);
+    form.append('minified_url', `${this.assetsUrl.toString().replace(/^\//, '')}/${sourceFile.replace(/^\//, '')}`);
     form.append('minified_file', compilation.assets[sourceFile].source(), {
       filename: sourceFile,
       contentType: 'application/javascript'
