@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file. See [Keep a
 CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Changed
+- Send requests via POST (#100).
+- Remove support for IE 8 and IE 9.
+
 ## [0.5.5] - 2018-06-19
 ### Fixed
 - Fixed an issue with the console binding fix. See #96.
