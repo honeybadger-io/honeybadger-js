@@ -1,16 +1,25 @@
 var url = 'global';
 
 describe('Honeybadger', function() {
-  var requests, xhr;
+  var requests, request, xhr;
 
   beforeEach(function() {
     // Refresh singleton state.
     Honeybadger.reset();
 
+    // Configure the global window.onerror handler not to call the original
+    // because calling Jasmine/Puppeteer's global error handler causes issues.
+    // Would be nice to find a better way to test our global instrumentation.
+    Honeybadger.configure({
+      _onerror_call_orig: false
+    });
+
     // Stub HTTP requests.
+    request = undefined;
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
     xhr.onCreate = function(xhr) {
+      request = xhr;
       return requests.push(xhr);
     };
   });
@@ -21,6 +30,9 @@ describe('Honeybadger', function() {
 
   function afterNotify(done, run) {
     setTimeout(function() {
+      for(var i=0; i<requests.length; i++) {
+        requests[i].payload = JSON.parse(requests[i].requestBody);
+      }
       run();
       done();
     }, 50);
@@ -372,7 +384,7 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bparams%5D%5Bfoo%5D=bar');
+        expect(request.payload.request.params.foo).toEqual('bar');
       });
     });
 
@@ -387,7 +399,7 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
+        expect(request.payload.request.cgi_data.HTTP_COOKIE).toEqual('foo=bar');
       });
     });
 
@@ -404,7 +416,7 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcgi_data%5D%5BHTTP_COOKIE%5D=foo%3Dbar');
+        expect(request.payload.request.cgi_data.HTTP_COOKIE).toEqual('foo=bar');
       });
     });
 
@@ -413,7 +425,7 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      var err = new Error("Test message");
+      var err = new Error('Test message');
       try {
         throw err;
       } catch (e) {
@@ -422,8 +434,8 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('%5Bclass%5D=Error');
-        expect(requests[0].url).toMatch('%5Bmessage%5D=Test%20message');
+        expect(request.payload.error.class).toEqual('Error');
+        expect(request.payload.error.message).toEqual('Test message');
       });
     });
 
@@ -445,7 +457,7 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('unique%20context');
+        expect(request.payload.request.context.key).toEqual('unique context');
       });
     });
 
@@ -527,7 +539,7 @@ describe('Honeybadger', function() {
       expect(caughtError).toEqual(error);
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
+        expect(request.payload.error.message).toEqual('testing');
       });
     });
   });
@@ -571,41 +583,10 @@ describe('Honeybadger', function() {
     });
   });
 
-  describe('payload query string', function() {
+  describe('JSON encoding', function() {
     beforeEach(function() {
       Honeybadger.configure({
         api_key: 'asdf'
-      });
-    });
-
-    it('serializes an object to a query string', function(done) {
-      Honeybadger.notify("testing", {
-        context: {
-          foo: 'foo',
-          bar: {
-            baz: 'baz'
-          }
-        }
-      });
-
-      afterNotify(done, function() {
-        expect(requests.length).toEqual(1);
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcontext%5D%5Bfoo%5D=foo&notice%5Brequest%5D%5Bcontext%5D%5Bbar%5D%5Bbaz%5D=baz');
-      });
-    });
-
-    it('drops null values', function(done) {
-      Honeybadger.notify("testing", {
-        context: {
-          foo: null,
-          bar: 'baz'
-        }
-      });
-
-      afterNotify(done, function() {
-        expect(requests.length).toEqual(1);
-        expect(requests[0].url).not.toMatch('foo');
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcontext%5D%5Bbar%5D=baz');
       });
     });
 
@@ -619,15 +600,42 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(requests[0].url).not.toMatch('foo');
-        expect(requests[0].url).toMatch('notice%5Brequest%5D%5Bcontext%5D%5Bbar%5D=baz');
+        expect(request.payload.request.context).toEqual({bar: 'baz'});
+      });
+    });
+
+    it('drops function values', function(done) {
+      Honeybadger.notify("testing", {
+        context: {
+          foo: function() {},
+          bar: 'baz'
+        }
+      });
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.request.context).toEqual({foo: '[object Function]', bar: 'baz'});
+      });
+    });
+
+    it('enforces configured max depth', function(done) {
+      Honeybadger.notify("testing", {
+        context: {
+          one: { two: { three: { four: { five: { six: { seven: { eight: { nine: 'nine' }}}}}}}}
+        }
+      });
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.request.context).toEqual(
+          {one: { two: { three: { four: { five: { six: '[MAX DEPTH REACHED]'}}}}}}
+        );
       });
     });
 
     if (typeof Object.create === 'function') {
       it('handles objects without prototypes as values', function(done) {
         var obj = Object.create(null);
-        obj.foo = 'bar';
 
         Honeybadger.notify("Test error message", {
           context: {
@@ -637,13 +645,13 @@ describe('Honeybadger', function() {
 
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('Test%20error%20message');
+          expect(request.payload.request.context).toEqual({key: '[object Object]'});
         });
       });
     }
 
     if (typeof Symbol === 'function') {
-      it('handles symbols as values', function(done) {
+      it('serializes symbol values', function(done) {
         var sym = Symbol();
 
         Honeybadger.notify("testing", {
@@ -654,11 +662,11 @@ describe('Honeybadger', function() {
 
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('js.gif?');
+          expect(request.payload.request.context).toEqual({key: '[object Symbol]'});
         });
       });
 
-      it('handles symbol as a key', function(done) {
+      it('drops symbol keys', function(done) {
         var sym = Symbol();
         var context = {};
 
@@ -668,7 +676,7 @@ describe('Honeybadger', function() {
 
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('js.gif?');
+          expect(request.payload.request.context).toEqual({});
         });
       });
     }
@@ -701,7 +709,7 @@ describe('Honeybadger', function() {
         window.onerror('foo', 'http://foo.bar', '123', '456', err);
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=expected-message');
+          expect(request.payload.error.message).toEqual('expected-message');
         });
       });
 
@@ -709,7 +717,7 @@ describe('Honeybadger', function() {
         window.onerror('testing', 'http://foo.bar', '123', '345', {stack: 'expected'});
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch(/notice%5Berror%5D%5Bbacktrace%5D=expected/);
+          expect(request.payload.error.backtrace).toEqual('expected');
         });
       });
 
@@ -717,7 +725,7 @@ describe('Honeybadger', function() {
         window.onerror(null, null, null, null, 'testing');
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bmessage%5D=testing');
+          expect(request.payload.error.message).toEqual('testing');
         });
       });
 
@@ -725,7 +733,7 @@ describe('Honeybadger', function() {
         window.onerror('testing', 'http://foo.bar', '123', '345', 'testing');
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(requests[0].url).toMatch('notice%5Berror%5D%5Bbacktrace%5D=testing');
+          expect(request.payload.error.message).toEqual('testing');
         });
       });
     });
@@ -752,5 +760,4 @@ describe('Honeybadger', function() {
       expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
     });
   });
-
 });

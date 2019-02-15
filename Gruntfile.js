@@ -10,14 +10,10 @@ module.exports = function(grunt) {
     platform: 'Windows 10'
   }, {
     browserName: 'googlechrome',
-    platform: 'OS X 10.11'
-  }, {
-    browserName: 'googlechrome',
-    platform: 'linux'
+    platform: 'Windows 10'
   }, {
     browserName: 'MicrosoftEdge',
-    platform: 'Windows 10',
-    version: '14.14393'
+    platform: 'Windows 10'
   }, {
     browserName: 'internet explorer',
     platform: 'Windows 8.1',
@@ -26,10 +22,6 @@ module.exports = function(grunt) {
     browserName: 'internet explorer',
     platform: 'Windows 8',
     version: '10.0'
-  }, {
-    browserName: 'internet explorer',
-    platform: 'Windows 7',
-    version: '8.0'
   }];
 
   grunt.initConfig({
@@ -51,7 +43,7 @@ module.exports = function(grunt) {
     'saucelabs-jasmine': {
       all: {
         options: {
-          urls: ['http://127.0.0.1:9999/spec/runner.html'],
+          urls: ['http://localhost:9999/spec/runner.html'],
           build: process.env.TRAVIS_JOB_ID,
           browsers: browsers,
           testname: 'honeybadger.js specs',

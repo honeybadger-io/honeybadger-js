@@ -214,43 +214,41 @@
       return true;
     }
 
-    function serialize(obj, prefix, depth) {
-      var k, pk, ret, v;
-      ret = [];
+    function serialize(obj, depth) {
+      var k, v, ret;
+      ret = {};
       if (!depth) { depth = 0; }
       if (depth >= config('max_depth', 8)) {
-        return encodeURIComponent(prefix) + '=[MAX DEPTH REACHED]';
+        return '[MAX DEPTH REACHED]';
       }
       for (k in obj) {
         v = obj[k];
         if (obj.hasOwnProperty(k) && (k != null) && (v != null)) {
           if (!canSerialize(v)) { v = Object.prototype.toString.call(v); }
-          pk = (prefix ? prefix + '[' + k + ']' : k);
-          ret.push(typeof v === 'object' ? serialize(v, pk, depth+1) : encodeURIComponent(pk) + '=' + encodeURIComponent(v));
+          ret[k] = (typeof v === 'object' ? serialize(v, depth+1) : v);
         }
       }
-      return ret.join('&');
+      return ret;
     }
 
-    function request(url) {
+    function request(apiKey, payload) {
       if (config('disabled', false)) { return false; }
       if (exceedsMaxErrors()) { return false; }
 
-      // Use XHR when available.
       try {
-        // Inspired by https://gist.github.com/Xeoncross/7663273
-        var x = new(window.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
-        x.open('GET', url, config('async', true));
-        x.send();
-        incrementErrorsCount();
-        return;
-      } catch(e) {
-        log('Error encountered during XHR request (will retry): ' + e);
-      }
+        var x = new XMLHttpRequest();
+        x.open('POST', baseURL() + '/v1/notices/js', config('async', true));
 
-      // Fall back to Image transport.
-      var img = new Image();
-      img.src = url;
+        x.setRequestHeader('X-API-Key', apiKey);
+        x.setRequestHeader('Content-Type', 'application/json');
+        x.setRequestHeader('Accept', 'text/json, application/json');
+
+        x.send(JSON.stringify(serialize(payload)));
+
+        incrementErrorsCount();
+      } catch(e) {
+        log('Error encountered during XHR/POST request: ' + e);
+      }
     }
 
     function send(payload) {
@@ -262,10 +260,7 @@
         return false;
       }
 
-      var url = baseURL() + '/v1/notices/js.gif?' + serialize({'notice': payload}) +
-        '&api_key=' + apiKey + '&t=' + new Date().getTime();
-
-      request(url);
+      request(apiKey, payload);
 
       return true;
     }
@@ -578,7 +573,7 @@
       // See https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
       return function(msg, url, line, col, err) {
         onerror(msg, url, line, col, err);
-        if (typeof original === 'function') {
+        if (typeof original === 'function' && config('_onerror_call_orig', true)) {
           return original.apply(this, arguments);
         }
         return false;
