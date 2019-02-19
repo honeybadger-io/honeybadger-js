@@ -17,6 +17,7 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "scripts": {
+    "build": "make",
     "test": "make test",
     "bump": "bin/bump"
   },
@@ -29,7 +30,8 @@
     "grunt-saucelabs": "~9.0.0",
     "grunt-shell": "~2.1.0",
     "jasmine": "^3.3.1",
-    "phantomjs-prebuilt": "~2.1.15"
+    "phantomjs-prebuilt": "~2.1.15",
+    "uglify-js": "^3.4.9"
   },
   "readmeFilename": "README.md",
   "typings": "./honeybadger-js.d.ts"
