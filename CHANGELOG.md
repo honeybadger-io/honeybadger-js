@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.0-beta.0] - 2019-02-19
 ### Changed
 - Send requests via POST (#100).
 - Remove support for IE 8 and IE 9.
