@@ -14,7 +14,7 @@ clean:
 	rm -rf build/
 
 minify:
-	uglifyjs --compress --mangle --source-map $(SOURCE_MAP) --source-map-url $(CDN)/$(SOURCE_MAP) -o $(MINIFIED) $(FINAL)
+	uglifyjs --compress --mangle --source-map "filename='$(SOURCE_MAP)',url='$(CDN)/$(SOURCE_MAP)'" -o $(MINIFIED) $(FINAL)
 	mkdir -p $(BUILD_DIR)
 	cp $(FINAL) $(BUILD_DIR)
 	mv $(MINIFIED) $(BUILD_DIR)
