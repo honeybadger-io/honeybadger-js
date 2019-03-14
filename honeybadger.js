@@ -166,6 +166,7 @@
 
   // Client factory.
   var factory = (function(opts) {
+    var notSingleton = installed;
     var defaultProps = [];
     var queue = [];
     var self = {
@@ -198,6 +199,11 @@
       if (value === 'false') { value = false; }
       if (value !== undefined) { return value; }
       return fallback;
+    }
+
+    function onErrorEnabled() {
+      if (notSingleton) { return false; }
+      return config('onerror', true);
     }
 
     function baseURL() {
@@ -388,7 +394,7 @@
         if (!objectIsExtensible(fn))  { return fn; }
         if (!fn.___hb) {
           fn.___hb = function() {
-            var onerror = config('onerror', true);
+            var onerror = onErrorEnabled();
             // Don't catch if the browser is old or supports the new error
             // object and there is a window.onerror handler available instead.
             if ((preferCatch && (onerror || force)) || (force && !onerror)) {
@@ -495,7 +501,7 @@
     // Install instrumentation.
     // This should happen once for the first factory call.
     function instrument(object, name, replacement) {
-      if (installed) { return; }
+      if (notSingleton) { return; }
       if (!object || !name || !replacement) { return; }
       var original = object[name];
       object[name] = replacement(original);
@@ -553,7 +559,7 @@
         // Skip if the error is already being sent.
         if (currentErr) { return; }
 
-        if (!config('onerror', true)) { return; }
+        if (!onErrorEnabled()) { return; }
 
         if (line === 0 && /Script error\.?/.test(msg)) {
           // See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes
