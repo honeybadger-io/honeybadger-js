@@ -223,7 +223,7 @@
       }
       for (k in obj) {
         v = obj[k];
-        if (obj.hasOwnProperty(k) && (k != null) && (v != null)) {
+        if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
           if (!canSerialize(v)) { v = Object.prototype.toString.call(v); }
           ret[k] = (typeof v === 'object' ? serialize(v, depth+1) : v);
         }
@@ -298,7 +298,7 @@
         var k, results;
         results = [];
         for (k in err) {
-          if (!{}.hasOwnProperty.call(err, k)) continue;
+          if (!Object.prototype.hasOwnProperty.call(err, k)) continue;
           results.push(k);
         }
         return results;
