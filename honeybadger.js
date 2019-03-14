@@ -252,11 +252,23 @@
       }
     }
 
+    function inDevelopmentEnvironment(payload) {
+      var environments = config('developmentEnvironments', ['development', 'test']);
+      var environment = payload.server.environment_name;
+
+      return environments.includes(environment);
+    }
+
     function send(payload) {
       currentErr = currentPayload = null;
 
       if (config('disabled', false)) {
         debug('Dropping notice: honeybadger.js is disabled', payload);
+        return false;
+      }
+
+      if (inDevelopmentEnvironment(payload)) {
+        debug('Dropping notice: development environment', payload);
         return false;
       }
 
