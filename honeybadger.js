@@ -349,14 +349,14 @@
       currentErr = err;
 
       if (loaded) {
-        debug('Deferring notice.', err, payload);
+        debug('Deferring notice', err, payload);
         window.setTimeout(function(){
           if (currentErrIs(err)) {
             send(payload);
           }
         });
       } else {
-        debug('Queuing notice.', err, payload);
+        debug('Queuing notice', err, payload);
         queue.push(payload);
       }
 
@@ -548,7 +548,7 @@
 
     instrument(window, 'onerror', function(original) {
       function onerror(msg, url, line, col, err) {
-        debug('window.onerror callback invoked.', arguments);
+        debug('window.onerror callback invoked', arguments);
 
         // Skip if the error is already being sent.
         if (currentErr) { return; }
@@ -557,7 +557,7 @@
 
         if (line === 0 && /Script error\.?/.test(msg)) {
           // See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes
-          log('Ignoring cross-domain script error. Use CORS to enable tracking of these types of errors.', arguments);
+          log('Ignoring cross-domain script error: enable CORS to track these types of errors', arguments);
           return;
         }
 
