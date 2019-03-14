@@ -232,9 +232,6 @@
     }
 
     function request(apiKey, payload) {
-      if (config('disabled', false)) { return false; }
-      if (exceedsMaxErrors()) { return false; }
-
       try {
         var x = new XMLHttpRequest();
         x.open('POST', baseURL() + '/v1/notices/js', config('async', true));
@@ -244,21 +241,31 @@
         x.setRequestHeader('Accept', 'text/json, application/json');
 
         x.send(JSON.stringify(serialize(payload)));
-
-        incrementErrorsCount();
-      } catch(e) {
-        log('Error encountered during XHR/POST request: ' + e);
+      } catch(err) {
+        log('Unable to send error report: error while initializing request', err, payload);
       }
     }
 
     function send(payload) {
       currentErr = currentPayload = null;
 
-      var apiKey = config('apiKey', config('api_key'));
-      if (!apiKey) {
-        log('Unable to send error report: no API key has been configured.');
+      if (config('disabled', false)) {
+        debug('Dropping notice: honeybadger.js is disabled', payload);
         return false;
       }
+
+      var apiKey = config('apiKey', config('api_key'));
+      if (!apiKey) {
+        log('Unable to send error report: no API key has been configured');
+        return false;
+      }
+
+      if (exceedsMaxErrors()) {
+        debug('Dropping notice: max errors exceeded', payload);
+        return false;
+      }
+
+      incrementErrorsCount();
 
       request(apiKey, payload);
 
