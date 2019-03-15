@@ -26,6 +26,7 @@
     "@babel/preset-env": "^7.3.4",
     "connect": "~3.6.5",
     "grunt": "~1.0.1",
+    "grunt-aws": "^0.7.1",
     "grunt-babel": "^8.0.0",
     "grunt-contrib-connect": "~1.0.2",
     "grunt-contrib-jasmine": "~2.0.3",
