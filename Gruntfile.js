@@ -1,5 +1,4 @@
 module.exports = function(grunt) {
-
   // NOTE: If certain OS/browser platforms start failing when grunt-sauselabs
   //       sends jobs to Sauce Labs, check that they still support the
   //       OS/browser platforms listed here.
@@ -24,7 +23,11 @@ module.exports = function(grunt) {
     version: '10.0'
   }];
 
+  var pkg = grunt.file.readJSON('package.json');
+
   grunt.initConfig({
+    pkg: pkg,
+    buildDir: 'v' + pkg.version.match(/\d\.\d/)[0],
     connect: {
       server: {
         options: {
@@ -54,16 +57,52 @@ module.exports = function(grunt) {
     watch: {
       specs: {
         files: ['spec/**/*.js', 'honeybadger.js'],
-        tasks: 'jasmine'
+        tasks: ['jasmine']
+      }
+    },
+    copy: {
+      dist: {
+        files: [
+          {src: 'honeybadger.js', dest: 'dist/honeybadger.js'},
+        ]
+      }
+    },
+    uglify: {
+      dist: {
+        options: {
+          sourceMap: true,
+          sourceMapName: 'dist/honeybadger.min.js.map'
+        },
+        files: {
+          'dist/honeybadger.min.js': ['dist/honeybadger.js']
+        }
+      }
+    },
+    s3: {
+      options: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_ΚΕY,
+        bucket: process.env.HONEYBADGER_JS_S3_BUCKET,
+        access: 'public-read',
+        gzip: true
+      },
+      cdn: {
+        cwd: 'dist/',
+        src: ['honeybadger.js', 'honeybadger.min.js', 'honeybadger.min.js.map'],
+        dest: '<%= buildDir %>/'
       }
     }
   });
 
   // Loading dependencies
-  for (var key in grunt.file.readJSON('package.json').devDependencies) {
+  for (var key in pkg.devDependencies) {
     if (key !== 'grunt' && key.indexOf('grunt') === 0) grunt.loadNpmTasks(key);
   }
 
+  grunt.registerTask('build', ['copy', 'uglify']);
+  grunt.registerTask('release:cdn', ['test', 'build', 's3:cdn']);
   grunt.registerTask('dev', ['connect', 'watch']);
-  grunt.registerTask('test', ['connect', 'saucelabs-jasmine']);
+  grunt.registerTask('test', ['jasmine']);
+  grunt.registerTask('test:ci', ['jasmine', 'connect', 'saucelabs-jasmine']);
+  grunt.registerTask('default', ['test']);
 };
