@@ -57,42 +57,14 @@ module.exports = function(grunt) {
     watch: {
       specs: {
         files: ['spec/**/*.js', 'honeybadger.js'],
-        tasks: ['babel:test', 'jasmine']
+        tasks: ['jasmine']
       }
     },
-    babel: {
-      options: {
-        presets: ['@babel/preset-env']
-      },
-      test: {
-        files: {
-          'tmp/test/honeybadger.js': 'honeybadger.js',
-          'tmp/test/honeybadger.spec.js': 'spec/honeybadger.spec.js'
-        }
-      }
-    },
-    browserify: {
+    copy: {
       dist: {
-        src: [
-          "honeybadger.js"
-        ],
-        dest: './dist/honeybadger.js',
-        options: {
-          browserifyOptions: { debug: true },
-          transform: [
-            ['babelify', { 'presets': ['@babel/preset-env'], sourceMaps: true, comments: false }],
-            ['browserify-versionify']
-          ],
-          plugin: [['browser-pack-flat']]
-        }
-      }
-    },
-    exorcise: {
-      bundle: {
-        options: {},
-        files: {
-          'dist/honeybadger.js.map': ['dist/honeybadger.js'],
-        }
+        files: [
+          {src: 'honeybadger.js', dest: 'dist/honeybadger.js'},
+        ]
       }
     },
     uglify: {
@@ -116,7 +88,7 @@ module.exports = function(grunt) {
       },
       cdn: {
         cwd: 'dist/',
-        src: '**',
+        src: ['honeybadger.js', 'honeybadger.min.js', 'honeybadger.min.js.map'],
         dest: '<%= buildDir %>/'
       }
     }
@@ -127,10 +99,10 @@ module.exports = function(grunt) {
     if (key !== 'grunt' && key.indexOf('grunt') === 0) grunt.loadNpmTasks(key);
   }
 
-  grunt.registerTask('build', ['browserify:dist', 'exorcise', 'uglify']);
-  grunt.registerTask('release:cdn', ['build', 's3:cdn']);
-  grunt.registerTask('dev', ['babel:test', 'connect', 'watch']);
+  grunt.registerTask('build', ['copy', 'uglify']);
+  grunt.registerTask('release:cdn', ['test', 'build', 's3:cdn']);
+  grunt.registerTask('dev', ['connect', 'watch']);
   grunt.registerTask('test', ['jasmine']);
-  grunt.registerTask('test:ci', ['jasmine', 'babel:test', 'connect', 'saucelabs-jasmine']);
+  grunt.registerTask('test:ci', ['jasmine', 'connect', 'saucelabs-jasmine']);
   grunt.registerTask('default', ['test']);
 };

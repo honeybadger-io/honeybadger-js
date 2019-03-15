@@ -1,5 +1,5 @@
 /*
-  honeybadger.js
+  honeybadger.js v1.0.0-beta.0
   A JavaScript Notifier for Honeybadger
   https://github.com/honeybadger-io/honeybadger-js
   https://www.honeybadger.io/
@@ -49,7 +49,7 @@
     root.Honeybadger = factory();
   }
 }(typeof self !== 'undefined' ? self : this, function () {
-  var VERSION = '__VERSION__',
+  var VERSION = '1.0.0-beta.0',
       NOTIFIER = {
         name: 'honeybadger.js',
         url: 'https://github.com/honeybadger-io/honeybadger-js',
