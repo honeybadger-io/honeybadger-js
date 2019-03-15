@@ -60,22 +60,35 @@ module.exports = function(grunt) {
         tasks: ['babel:test', 'jasmine']
       }
     },
-    "babel": {
+    babel: {
       options: {
         presets: ['@babel/preset-env']
-      },
-      dist: {
-        options: {
-          sourceMap: true
-        },
-        files: {
-          'dist/honeybadger.js': 'honeybadger.js'
-        }
       },
       test: {
         files: {
           'tmp/test/honeybadger.js': 'honeybadger.js',
           'tmp/test/honeybadger.spec.js': 'spec/honeybadger.spec.js'
+        }
+      }
+    },
+    browserify: {
+      dist: {
+        src: [
+          "honeybadger.js"
+        ],
+        dest: './dist/honeybadger.js',
+        options: {
+          browserifyOptions: { debug: true },
+          transform: [['babelify', { 'presets': ['@babel/preset-env'], sourceMaps: true }]],
+          plugin: [['browser-pack-flat']]
+        }
+      }
+    },
+    exorcise: {
+      bundle: {
+        options: {},
+        files: {
+          'dist/honeybadger.js.map': ['dist/honeybadger.js'],
         }
       }
     },
@@ -111,7 +124,7 @@ module.exports = function(grunt) {
     if (key !== 'grunt' && key.indexOf('grunt') === 0) grunt.loadNpmTasks(key);
   }
 
-  grunt.registerTask('build', ['babel:dist', 'uglify']);
+  grunt.registerTask('build', ['browserify:dist', 'exorcise', 'uglify']);
   grunt.registerTask('release:cdn', ['build', 's3:cdn']);
   grunt.registerTask('dev', ['babel:test', 'connect', 'watch']);
   grunt.registerTask('test', ['jasmine']);

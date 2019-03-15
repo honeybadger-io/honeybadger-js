@@ -1,3 +1,5 @@
+(function(){
+var _$honeybadger_1 = { exports: {} };
 "use strict";
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -52,11 +54,11 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
     define([], factory);
-  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+  } else if (("object" === "undefined" ? "undefined" : _typeof(_$honeybadger_1)) === 'object' && _$honeybadger_1.exports) {
     // Browserify. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Browserfy/Node.
-    module.exports = factory();
+    _$honeybadger_1.exports = factory();
   } else {
     // Browser globals (root is window).
     root.Honeybadger = factory();
@@ -788,4 +790,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
   return factory;
 });
+
+_$honeybadger_1 = _$honeybadger_1.exports
+}());
 //# sourceMappingURL=honeybadger.js.map
