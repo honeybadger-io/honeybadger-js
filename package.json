@@ -17,15 +17,19 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "scripts": {
-    "build": "make",
-    "test": "make test",
+    "build": "grunt build",
+    "test": "grunt test",
     "bump": "bin/bump"
   },
   "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
     "connect": "~3.6.5",
     "grunt": "~1.0.1",
+    "grunt-babel": "^8.0.0",
     "grunt-contrib-connect": "~1.0.2",
     "grunt-contrib-jasmine": "~2.0.3",
+    "grunt-contrib-uglify": "^4.0.0",
     "grunt-contrib-watch": "~1.0.0",
     "grunt-saucelabs": "~9.0.0",
     "grunt-shell": "~2.1.0",

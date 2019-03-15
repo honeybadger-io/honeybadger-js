@@ -1,5 +1,4 @@
 module.exports = function(grunt) {
-
   // NOTE: If certain OS/browser platforms start failing when grunt-sauselabs
   //       sends jobs to Sauce Labs, check that they still support the
   //       OS/browser platforms listed here.
@@ -54,7 +53,37 @@ module.exports = function(grunt) {
     watch: {
       specs: {
         files: ['spec/**/*.js', 'honeybadger.js'],
-        tasks: 'jasmine'
+        tasks: ['babel:test', 'jasmine']
+      }
+    },
+    "babel": {
+      options: {
+        presets: ["@babel/preset-env"]
+      },
+      dist: {
+        options: {
+          sourceMap: true
+        },
+        files: {
+          "dist/honeybadger.js": "honeybadger.js"
+        }
+      },
+      test: {
+        files: {
+          "tmp/test/honeybadger.js": "honeybadger.js",
+          "tmp/test/honeybadger.spec.js": "spec/honeybadger.spec.js"
+        }
+      }
+    },
+    uglify: {
+      dist: {
+        options: {
+          sourceMap: true,
+          sourceMapName: 'dist/honeybadger.min.js.map'
+        },
+        files: {
+          'dist/honeybadger.min.js': ['dist/honeybadger.js']
+        }
       }
     }
   });
@@ -64,6 +93,9 @@ module.exports = function(grunt) {
     if (key !== 'grunt' && key.indexOf('grunt') === 0) grunt.loadNpmTasks(key);
   }
 
-  grunt.registerTask('dev', ['connect', 'watch']);
-  grunt.registerTask('test', ['connect', 'saucelabs-jasmine']);
+  grunt.registerTask('build', ['babel:dist', 'uglify']);
+  grunt.registerTask('dev', ['babel:test', 'connect', 'watch']);
+  grunt.registerTask('test', ['jasmine']);
+  grunt.registerTask('test:ci', ['babel:test', 'connect', 'saucelabs-jasmine']);
+  grunt.registerTask('default', ['test']);
 };
