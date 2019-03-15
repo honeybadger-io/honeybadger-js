@@ -115,6 +115,6 @@ module.exports = function(grunt) {
   grunt.registerTask('release:cdn', ['build', 's3:cdn']);
   grunt.registerTask('dev', ['babel:test', 'connect', 'watch']);
   grunt.registerTask('test', ['jasmine']);
-  grunt.registerTask('test:ci', ['babel:test', 'connect', 'saucelabs-jasmine']);
+  grunt.registerTask('test:ci', ['jasmine', 'babel:test', 'connect', 'saucelabs-jasmine']);
   grunt.registerTask('default', ['test']);
 };
