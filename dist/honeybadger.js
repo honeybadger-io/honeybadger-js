@@ -4,15 +4,8 @@ var _$honeybadger_1 = { exports: {} };
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-/*
-  honeybadger.js v1.0.0-beta.0
-  A JavaScript Notifier for Honeybadger
-  https://github.com/honeybadger-io/honeybadger-js
-  https://www.honeybadger.io/
-  MIT license
-*/
 (function (root, builder) {
-  'use strict'; // Read default configuration from script tag if available.
+  'use strict';
 
   var scriptConfig = {};
 
@@ -38,29 +31,20 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
         scriptConfig[RegExp.$1] = value;
       }
     }
-  })(); // Build the singleton factory. The factory can be accessed through
-  // singleton.factory() to instantiate a new instance.
-
+  })();
 
   var factory = function factory() {
     var f = builder();
     var singleton = f(scriptConfig);
     singleton.factory = f;
     return singleton;
-  }; // UMD (Universal Module Definition)
-  // See https://github.com/umdjs/umd
-
+  };
 
   if (typeof define === 'function' && define.amd) {
-    // AMD. Register as an anonymous module.
     define([], factory);
   } else if (("object" === "undefined" ? "undefined" : _typeof(_$honeybadger_1)) === 'object' && _$honeybadger_1.exports) {
-    // Browserify. Does not work with strict CommonJS, but
-    // only CommonJS-like environments that support module.exports,
-    // like Browserfy/Node.
     _$honeybadger_1.exports = factory();
   } else {
-    // Browser globals (root is window).
     root.Honeybadger = factory();
   }
 })(typeof self !== 'undefined' ? self : void 0, function () {
@@ -70,12 +54,10 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     url: 'https://github.com/honeybadger-io/honeybadger-js',
     version: VERSION,
     language: 'javascript'
-  }; // Used to control initial setup across clients.
-
+  };
   var loaded = false,
-      installed = false; // Used to prevent reporting duplicate errors across instances.
-
-  var currentErr, currentPayload; // Utilities.
+      installed = false;
+  var currentErr, currentPayload;
 
   function merge(obj1, obj2) {
     var obj3 = {};
@@ -149,8 +131,6 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
   }
 
   function stackTrace(err) {
-    // From TraceKit: Opera 10 *destroys* its stacktrace property if you try to
-    // access the stack property first.
     return err.stacktrace || err.stack || undefined;
   }
 
@@ -211,8 +191,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     }
 
     return false;
-  } // Client factory.
-
+  }
 
   var factory = function factory(opts) {
     var notSingleton = installed;
@@ -277,11 +256,9 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     }
 
     function canSerialize(obj) {
-      // Functions are TMI and Symbols can't convert to strings.
       if (/function|symbol/.test(_typeof(obj))) {
         return false;
-      } // No prototype, likely created with `Object.create(null)`.
-
+      }
 
       if (_typeof(obj) === 'object' && typeof obj.hasOwnProperty === 'undefined') {
         return false;
@@ -377,13 +354,10 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
       }
 
       if (currentErrIs(err)) {
-        // Skip the duplicate error.
         return false;
       } else if (currentPayload && loaded) {
-        // This is a different error, send the old one now.
         send(currentPayload);
-      } // Halt if err is empty.
-
+      }
 
       if (function () {
         var k, results;
@@ -468,12 +442,11 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
       return Object.isExtensible(obj);
     }
 
-    var preferCatch = true; // IE < 10
+    var preferCatch = true;
 
     if (!window.atob) {
       preferCatch = false;
-    } // See https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
-
+    }
 
     if (window.ErrorEvent) {
       try {
@@ -481,9 +454,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
           preferCatch = false;
         }
       } catch (_e) {}
-    } // wrap always returns the same function so that callbacks can be removed via
-    // removeEventListener.
-
+    }
 
     function wrap(fn, force) {
       try {
@@ -497,8 +468,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
         if (!fn.___hb) {
           fn.___hb = function () {
-            var onerror = onErrorEnabled(); // Don't catch if the browser is old or supports the new error
-            // object and there is a window.onerror handler available instead.
+            var onerror = onErrorEnabled();
 
             if (preferCatch && (onerror || force) || force && !onerror) {
               try {
@@ -518,8 +488,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
       } catch (_e) {
         return fn;
       }
-    } // Public API.
-
+    }
 
     self.notify = function (err, name, extra) {
       if (!err) {
@@ -623,9 +592,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
     self.getVersion = function () {
       return VERSION;
-    }; // Install instrumentation.
-    // This should happen once for the first factory call.
-
+    };
 
     function instrument(object, name, replacement) {
       if (notSingleton) {
@@ -641,7 +608,6 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     }
 
     var instrumentTimer = function instrumentTimer(original) {
-      // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
       return function (func, delay) {
         if (typeof func === 'function') {
           var args = Array.prototype.slice.call(arguments, 2);
@@ -656,22 +622,18 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     };
 
     instrument(window, 'setTimeout', instrumentTimer);
-    instrument(window, 'setInterval', instrumentTimer); // Event targets borrowed from bugsnag-js:
-    // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
-
+    instrument(window, 'setInterval', instrumentTimer);
     'EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload'.replace(/\w+/g, function (prop) {
       var prototype = window[prop] && window[prop].prototype;
 
       if (prototype && prototype.hasOwnProperty && prototype.hasOwnProperty('addEventListener')) {
         instrument(prototype, 'addEventListener', function (original) {
-          // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
           return function (type, listener, useCapture, wantsUntrusted) {
             try {
               if (listener && listener.handleEvent != null) {
                 listener.handleEvent = wrap(listener.handleEvent);
               }
             } catch (e) {
-              // Ignore 'Permission denied to access property "handleEvent"' errors.
               log(e);
             }
 
@@ -688,7 +650,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     });
     instrument(window, 'onerror', function (original) {
       function onerror(msg, url, line, col, err) {
-        debug('window.onerror callback invoked', arguments); // Skip if the error is already being sent.
+        debug('window.onerror callback invoked', arguments);
 
         if (currentErr) {
           return;
@@ -699,11 +661,9 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
         }
 
         if (line === 0 && /Script error\.?/.test(msg)) {
-          // See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes
           log('Ignoring cross-domain script error: enable CORS to track these types of errors', arguments);
           return;
-        } // simulate v8 stack
-
+        }
 
         var stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
 
@@ -727,8 +687,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
           message: msg,
           stack: stack
         });
-      } // See https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
-
+      }
 
       return function (msg, url, line, col, err) {
         onerror(msg, url, line, col, err);
@@ -748,19 +707,15 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     function exceedsMaxErrors() {
       var maxErrors = config('maxErrors');
       return maxErrors && self.errorsSent >= maxErrors;
-    } // End of instrumentation.
+    }
 
-
-    installed = true; // Save original state for reset()
+    installed = true;
 
     for (var k in self) {
       defaultProps.push(k);
-    } // Initialization.
+    }
 
-
-    debug('Initializing honeybadger.js ' + VERSION); // See https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
-    // https://www.w3.org/TR/html5/dom.html#dom-document-readystate
-    // The 'loaded' state is for older versions of Safari.
+    debug('Initializing honeybadger.js ' + VERSION);
 
     if (/complete|interactive|loaded/.test(document.readyState)) {
       loaded = true;

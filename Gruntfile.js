@@ -79,7 +79,7 @@ module.exports = function(grunt) {
         dest: './dist/honeybadger.js',
         options: {
           browserifyOptions: { debug: true },
-          transform: [['babelify', { 'presets': ['@babel/preset-env'], sourceMaps: true }]],
+          transform: [['babelify', { 'presets': ['@babel/preset-env'], sourceMaps: true, comments: false }]],
           plugin: [['browser-pack-flat']]
         }
       }
