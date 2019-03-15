@@ -26,6 +26,7 @@
     "@babel/preset-env": "^7.3.4",
     "babelify": "^10.0.0",
     "browser-pack-flat": "^3.3.0",
+    "browserify-versionify": "^1.0.6",
     "connect": "~3.6.5",
     "grunt": "~1.0.1",
     "grunt-aws": "^0.7.1",
