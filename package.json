@@ -23,8 +23,7 @@
     "dev": "rollup -c -w",
     "pretest": "npm run build",
     "test": "karma start",
-    "test:ci": "npm run pretest && karma start karma.conf-ci.js",
-    "bump": "bin/bump"
+    "test:ci": "npm run pretest && karma start karma.conf-ci.js"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",
