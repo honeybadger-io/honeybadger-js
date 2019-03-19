@@ -22,7 +22,6 @@ jobs:
             - v1-dependencies-
 
       - run: npm install
-      - run: sudo npm install -g karma-cli
 
       - save_cache:
           paths:
