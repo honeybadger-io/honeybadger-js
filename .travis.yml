@@ -1,6 +1,4 @@
 language: node_js
 node_js:
   - '10'
-before_script:
-  - npm install grunt-cli -g
-script: grunt test:ci
+script: npm run test:ci

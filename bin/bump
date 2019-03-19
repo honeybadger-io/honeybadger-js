@@ -36,8 +36,7 @@ unless contents =~ Regexp.new(Regexp.escape("## [#{new_version}]"))
   File.write(CHANGELOG_FILE, contents.gsub(CHANGELOG_HEADING, "#{CHANGELOG_HEADING}\n\n## [#{new_version}] - #{Time.now.strftime("%Y-%m-%d")}"))
 end
 
-# Update honeybadger.js and finish.
+# Interactive git add
 system(<<-BASH)
-  sed -i 's/#{old_version}/#{new_version}/g' honeybadger.js
   git add -p
 BASH

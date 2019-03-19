@@ -1,4 +1,6 @@
-var url = 'global';
+const Honeybadger = require('..')
+
+const url = 'global';
 
 describe('Honeybadger', function() {
   var requests, request, xhr;
