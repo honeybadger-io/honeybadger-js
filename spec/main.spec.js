@@ -1,4 +1,4 @@
-const Honeybadger = require('..')
+import Honeybadger from '..'
 
 const url = 'global';
 
