@@ -1,7 +1,7 @@
 # Honeybadger Client-Side Javascript Library
 
-[![Build
-Status](https://travis-ci.org/honeybadger-io/honeybadger-js.png?branch=master&1)](https://travis-ci.org/honeybadger-io/honeybadger-js)
+[![CircleCI](https://circleci.com/gh/honeybadger-io/honeybadger-js.svg?style=svg)](https://circleci.com/gh/honeybadger-io/honeybadger-js)
+[![Build Status](https://app.saucelabs.com/browser-matrix/honeybadger_os.svg)](https://app.saucelabs.com/builds/16ac6c22e2ea4140b3051bf21fb579da)
 
 A client-side JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io). For server-side javascript, check out our [NodeJS library](https://github.com/honeybadger-io/honeybadger-node).
 
