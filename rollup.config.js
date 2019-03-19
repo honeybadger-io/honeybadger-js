@@ -2,7 +2,26 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import babel from 'rollup-plugin-babel';
 import replace from 'rollup-plugin-replace';
+import { uglify } from 'rollup-plugin-uglify';
 import pkg from './package.json';
+
+// These plugins are used for all builds
+const sharedPlugins = [
+  replace({
+    exclude: 'node_modules/**',
+    __VERSION__: pkg.version,
+  }),
+];
+
+// These plugins are used for UMD builds
+const umdPlugins = [
+  resolve(),
+  commonjs(),
+  babel({
+    exclude: 'node_modules/**',
+  }),
+  ...sharedPlugins,
+];
 
 export default [
   // browser-friendly UMD build
@@ -12,18 +31,20 @@ export default [
       name: 'honeybadger',
       file: pkg.browser,
       format: 'umd',
+      sourcemap: true,
     },
-    plugins: [
-      resolve(),  // so Rollup can find `ms`
-      commonjs(), // so Rollup can convert `ms` to an ES module
-      babel({
-        exclude: 'node_modules/**',
-      }),
-      replace({
-        exclude: 'node_modules/**',
-        __VERSION__: pkg.version,
-      }),
-    ],
+    plugins: umdPlugins,
+  },
+  // minified build
+  {
+    input: 'src/main.js',
+    output: {
+      name: 'honeybadger',
+      file: 'dist/honeybadger.min.js',
+      format: 'umd',
+      sourcemap: true,
+    },
+    plugins: [...umdPlugins, uglify()],
   },
 
   // CommonJS (for Node) and ES module (for bundlers) build.
@@ -39,11 +60,6 @@ export default [
       { file: pkg.main, format: 'cjs' },
       { file: pkg.module, format: 'es' },
     ],
-    plugins: [
-      replace({
-        exclude: 'node_modules/**',
-        __VERSION__: pkg.version,
-      }),
-    ]
+    plugins: [...sharedPlugins]
   },
 ];

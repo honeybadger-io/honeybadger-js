@@ -10,7 +10,7 @@
   },
   "main": "dist/honeybadger.cjs.js",
   "module": "dist/honeybadger.esm.js",
-  "browser": "dist/honeybadger.umd.js",
+  "browser": "dist/honeybadger.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:honeybadger-io/honeybadger-js.git"
@@ -42,6 +42,7 @@
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-replace": "^2.1.1",
+    "rollup-plugin-uglify": "^6.0.2",
     "sinon": "^1.17.3"
   },
   "readmeFilename": "README.md",
