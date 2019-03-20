@@ -24,12 +24,10 @@ See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
 
 ## Development
 
-First, install the required npm packages with `npm install`. After that you can run the dev server with `grunt dev`; this will launch a development server at *http://127.0.0.1:9999*. It will also run the test suite automatically when files change.
-
-To run the test suite by itself, use `grunt test`.
-
-To run the tests across all supported platforms, set up a [Sauce Labs](https://saucelabs.com/)
-account and use `SAUCE_USERNAME=your_username SAUCE_ACCESS_KEY=your-access-key grunt test:ci`.
+1. Run `npm install`.
+2. To run the test suite by itself, use `npm test`.
+3. To run the tests across all supported platforms, set up a [Sauce Labs](https://saucelabs.com/)
+account and use `SAUCE_USERNAME=your_username SAUCE_ACCESS_KEY=your-access-key npm run test:ci`.
 
 ## Releasing
 
