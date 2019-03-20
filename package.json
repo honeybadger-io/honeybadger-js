@@ -8,7 +8,9 @@
     "name": "Joshua Wood",
     "email": "josh@honeybadger.io"
   },
-  "main": "honeybadger.js",
+  "main": "dist/honeybadger.cjs.js",
+  "module": "dist/honeybadger.esm.js",
+  "browser": "dist/honeybadger.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:honeybadger-io/honeybadger-js.git"
@@ -17,22 +19,38 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "scripts": {
-    "build": "grunt build",
-    "test": "grunt test",
-    "bump": "bin/bump"
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "pretest": "npm run build",
+    "test": "karma start",
+    "test:ci": "npm run pretest && karma start karma.conf-ci.js",
+    "prepublishOnly": "npm test",
+    "postpublish": "scripts/release-cdn.sh",
+    "release-cdn": "npm run test && scripts/release-cdn.sh"
   },
   "devDependencies": {
-    "grunt": "~1.0.1",
-    "grunt-aws": "^0.7.1",
-    "grunt-contrib-connect": "~1.0.2",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-jasmine": "~2.0.3",
-    "grunt-contrib-uglify": "^4.0.0",
-    "grunt-contrib-watch": "~1.0.0",
-    "grunt-saucelabs": "~9.0.0",
-    "grunt-shell": "~2.1.0",
-    "jasmine": "^3.3.1"
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "jasmine": "^3.3.1",
+    "jasmine-core": "^3.3.0",
+    "karma": "^4.0.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-jasmine": "^2.0.1",
+    "karma-rollup-preprocessor": "^7.0.0",
+    "karma-sauce-launcher": "^2.0.2",
+    "karma-sinon": "^1.0.5",
+    "puppeteer": "^1.13.0",
+    "rollup": "^1.0.0",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-replace": "^2.1.1",
+    "rollup-plugin-uglify": "^6.0.2",
+    "sinon": "^1.17.3"
   },
   "readmeFilename": "README.md",
+  "files": [
+    "dist"
+  ],
   "typings": "./honeybadger-js.d.ts"
 }

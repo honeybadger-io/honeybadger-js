@@ -1,5 +1,3 @@
-dist/
-node_modules/
-lib/closure/compiler.jar
-spec/pid.txt
-honeybadger.min.js
+.DS_Store
+node_modules
+dist

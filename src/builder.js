@@ -1,55 +1,5 @@
-/*
-  honeybadger.js v1.0.0-beta.0
-  A JavaScript Notifier for Honeybadger
-  https://github.com/honeybadger-io/honeybadger-js
-  https://www.honeybadger.io/
-  MIT license
-*/
-
-(function (root, builder) {
-  'use strict';
-  // Read default configuration from script tag if available.
-  var scriptConfig = {};
-  (function() {
-    var tags = document.getElementsByTagName("script");
-    var tag = tags[tags.length - 1];
-    if (!tag) { return; }
-    var attrs = tag.attributes;
-    var value;
-    for (var i = 0, len = attrs.length; i < len; i++) {
-      if (/data-(\w+)$/.test(attrs[i].nodeName)) {
-        value = attrs[i].nodeValue;
-        if (value === 'false') { value = false; }
-        scriptConfig[RegExp.$1] = value;
-      }
-    }
-  })();
-
-  // Build the singleton factory. The factory can be accessed through
-  // singleton.factory() to instantiate a new instance.
-  var factory = function(){
-    var f = builder();
-    var singleton = f(scriptConfig);
-    singleton.factory = f;
-    return singleton;
-  };
-
-  // UMD (Universal Module Definition)
-  // See https://github.com/umdjs/umd
-  if (typeof define === 'function' && define.amd) {
-    // AMD. Register as an anonymous module.
-    define([], factory);
-  } else if (typeof module === 'object' && module.exports) {
-    // Browserify. Does not work with strict CommonJS, but
-    // only CommonJS-like environments that support module.exports,
-    // like Browserfy/Node.
-    module.exports = factory();
-  } else {
-    // Browser globals (root is window).
-    root.Honeybadger = factory();
-  }
-}(typeof self !== 'undefined' ? self : this, function () {
-  var VERSION = '1.0.0-beta.0',
+export default function builder() {
+  var VERSION = '__VERSION__',
       NOTIFIER = {
         name: 'honeybadger.js',
         url: 'https://github.com/honeybadger-io/honeybadger-js',
@@ -640,4 +590,4 @@
   });
 
   return factory;
-}));
+}

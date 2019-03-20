@@ -1,4 +1,6 @@
-var url = 'global';
+import Honeybadger from '..'
+
+const url = 'global';
 
 describe('Honeybadger', function() {
   var requests, request, xhr;
