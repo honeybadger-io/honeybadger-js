@@ -31,6 +31,33 @@ To run the test suite by itself, use `grunt test`.
 To run the tests across all supported platforms, set up a [Sauce Labs](https://saucelabs.com/)
 account and use `SAUCE_USERNAME=your_username SAUCE_ACCESS_KEY=your-access-key grunt test:ci`.
 
+### Releasing
+
+Releasing is done with two commands: `npm version` and `npm publish`. **Both
+commands should be used with care.** The `npm publish` command publishes to NPM
+**and** to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront).
+
+For the CDN release, make sure you have the following environment variable
+available in your shell:
+
+```
+export HONEYBADGER_JS_S3_BUCKET=honeybadger-js
+```
+
+AWS credentials are read from *~/.aws/credentials*, using the default profile.
+
+To perform a full release:
+
+1. With a clean working tree, use `npm version [new version]` to bump the version, commit the
+   changes, tag the release, and push to GitHub. See `npm help version` for
+   documentation.
+
+2. To publish the release, use `npm publish`. See `npm help publish` for
+   documentation.
+
+If the CDN release fails for some reason (bad AWS credentials, for instance),
+re-run the release manually with `npm run release-cdn`.
+
 ### License
 
 The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
