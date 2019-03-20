@@ -22,7 +22,7 @@ See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
 3. Push to your branch `git push origin my_branch`
 4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)
 
-### Development
+## Development
 
 First, install the required npm packages with `npm install`. After that you can run the dev server with `grunt dev`; this will launch a development server at *http://127.0.0.1:9999*. It will also run the test suite automatically when files change.
 
@@ -31,7 +31,7 @@ To run the test suite by itself, use `grunt test`.
 To run the tests across all supported platforms, set up a [Sauce Labs](https://saucelabs.com/)
 account and use `SAUCE_USERNAME=your_username SAUCE_ACCESS_KEY=your-access-key grunt test:ci`.
 
-### Releasing
+## Releasing
 
 Releasing is done with two commands: `npm version` and `npm publish`. **Both
 commands should be used with care.** The `npm publish` command publishes to NPM
@@ -58,6 +58,6 @@ To perform a full release:
 If the CDN release fails for some reason (bad AWS credentials, for instance),
 re-run the release manually with `npm run release-cdn`.
 
-### License
+## License
 
 The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
