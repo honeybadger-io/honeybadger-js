@@ -24,6 +24,9 @@
     "pretest": "npm run build",
     "test": "karma start",
     "test:ci": "npm run pretest && karma start karma.conf-ci.js",
+    "preversion": "npm test",
+    "version": "scripts/update-versions.sh",
+    "postversion": "git push && git push --tags",
     "prepublishOnly": "npm test",
     "postpublish": "scripts/release-cdn.sh",
     "release-cdn": "npm run test && scripts/release-cdn.sh"
