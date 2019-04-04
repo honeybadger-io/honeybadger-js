@@ -7823,10 +7823,10 @@ rollup-plugin-buble@^0.19.4:
     buble "^0.19.4"
     rollup-pluginutils "^2.3.3"
 
-rollup-plugin-conditional@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-conditional/-/rollup-plugin-conditional-2.1.1.tgz#699d4331f0cfe7e7595b80080e73b7a78df5c1e0"
-  integrity sha512-nAS4SGvdyyEtGTE0fYPqreqcHru7SCa2KpubFKtOJ2SxJgH9PAAzu/NF5KawOR0s4KfGdEFe/h71MLc5vTqFaQ==
+rollup-plugin-conditional@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-conditional/-/rollup-plugin-conditional-3.1.2.tgz#396f81b77d0db31dc3eeb88774ff9411f4de9f37"
+  integrity sha512-1QKQ8gz3MZea4mieMocJC2pua2BhAt7RF19/wURxEvjDwD5l2y/Bkipix45CvtzDC400biBqJLNFhtB+I6qnoA==
 
 rollup-plugin-terser@^3.0.0:
   version "3.0.0"
