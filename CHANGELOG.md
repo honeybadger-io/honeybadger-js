@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.1] - 2019-04-16
 ### Fixed
 - Fix an issue in the browser/CDN build where the global export was named
   `honeybadger` instead of `Honeybadger`.
