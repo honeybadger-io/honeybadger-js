@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.0] - 2019-04-16
 ### Changed
 - Removed support for config via `<script>` tag attributes. Use
   `Honeybadger.configure` instead.
