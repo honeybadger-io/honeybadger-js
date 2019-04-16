@@ -83,12 +83,16 @@ class HoneybadgerSourceMapPlugin {
         return done(new VError(err, errMessage));
       }
 
+      let result;
+
       try {
         const { error } = JSON.parse(body);
-        return done(new Error(error ? `${errMessage}: ${error}` : errMessage));
+        result = new Error(error ? `${errMessage}: ${error}` : errMessage);
       } catch (parseErr) {
-        return done(new VError(parseErr, errMessage));
+        result = new VError(parseErr, errMessage);
       }
+
+      return done(result);
     });
 
     const form = req.form();
