@@ -39,7 +39,7 @@
     "build:unpkg-minify": "rollup MINIFY=true --config build/rollup.config.js --format iife --file dist/honeybadger-vue.min.js"
   },
   "dependencies": {
-    "honeybadger-js": "^0.5.5"
+    "honeybadger-js": "^1.0.1"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
