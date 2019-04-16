@@ -24,7 +24,7 @@ export default [
   {
     input: 'src/main.js',
     output: {
-      name: 'honeybadger',
+      name: 'Honeybadger',
       file: pkg.browser,
       format: 'umd',
       sourcemap: true,
@@ -35,7 +35,7 @@ export default [
   {
     input: 'src/main.js',
     output: {
-      name: 'honeybadger',
+      name: 'Honeybadger',
       file: 'dist/honeybadger.min.js',
       format: 'umd',
       sourcemap: true,
