@@ -4,14 +4,9 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-
-## [1.0.0-beta.1] - 2019-03-20
 ### Changed
 - Removed support for config via `<script>` tag attributes. Use
   `Honeybadger.configure` instead.
-
-## [1.0.0-beta.0] - 2019-02-19
-### Changed
 - Send requests via POST (#100).
 - Remove support for IE 8 and IE 9.
 
