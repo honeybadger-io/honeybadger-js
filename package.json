@@ -53,7 +53,8 @@
   },
   "readmeFilename": "README.md",
   "files": [
-    "dist"
+    "dist",
+    "honeybadger-js.d.ts"
   ],
-  "typings": "./honeybadger-js.d.ts"
+  "types": "./honeybadger-js.d.ts"
 }
