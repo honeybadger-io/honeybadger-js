@@ -327,7 +327,7 @@ describe('Honeybadger', function() {
       });
 
       try {
-        throw new Error("Honeybadger don't care, but you might.");
+        throw new Error('expected message');
       } catch (e) {
         Honeybadger.notify({
           error: e
@@ -345,13 +345,34 @@ describe('Honeybadger', function() {
       });
 
       try {
-        throw new Error("Honeybadger don't care, but you might.");
+        throw new Error('expected message');
       } catch (e) {
-        Honeybadger.notify(e, 'CustomError');
+        Honeybadger.notify(e, 'expected name');
       }
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
+        expect(request.payload.error.message).toEqual('expected message');
+        expect(request.payload.error.class).toEqual('expected name');
+      });
+    });
+
+    it('accepts options as second argument', function(done) {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      try {
+        throw new Error('original message');
+      } catch (e) {
+        Honeybadger.notify(e, {
+          message: 'expected message'
+        });
+      }
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.error.message).toEqual('expected message');
       });
     });
 
@@ -361,15 +382,17 @@ describe('Honeybadger', function() {
       });
 
       try {
-        throw new Error("Honeybadger don't care, but you might.");
+        throw new Error('original message');
       } catch (e) {
-        Honeybadger.notify(e, 'CustomError', {
-          message: 'Custom message'
+        Honeybadger.notify(e, 'expected name', {
+          message: 'expected message'
         });
       }
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
+        expect(request.payload.error.class).toEqual('expected name');
+        expect(request.payload.error.message).toEqual('expected message');
       });
     });
 
