@@ -4,6 +4,9 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Context is now merged if existing in both `err.context` and `opts.context`
+  when: `Honeybadger.notify(err, opts)`.
 
 ## [1.0.2] - 2019-04-17
 ### Fixed
