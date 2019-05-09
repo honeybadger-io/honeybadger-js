@@ -24,7 +24,7 @@ export default function builder() {
   }
 
   function mergeErr(err1, err2) {
-    let ret =  merge(err2, err2);
+    let ret = merge(err1, err2);
 
     if (err1.context && err2.context) {
       ret.context = merge(err1.context, err2.context);
