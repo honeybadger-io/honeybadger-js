@@ -447,9 +447,7 @@ describe('Honeybadger', function() {
       });
 
       var err = new Error("Testing");
-      err.context = {
-        key: 'unique context'
-      }
+      err.component = 'expected component';
 
       try {
         throw err;
@@ -459,7 +457,29 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(request.payload.request.context.key).toEqual('unique context');
+        expect(request.payload.request.component).toEqual('expected component');
+      });
+    });
+
+    it('merges context from error objects', function(done) {
+      Honeybadger.configure({
+        api_key: 'asdf'
+      });
+
+      var err = new Error("Testing");
+      err.context = {
+        foo: 'foo'
+      }
+
+      try {
+        throw err;
+      } catch (e) {
+        Honeybadger.notify(e, { context: { bar: 'bar' } });
+      }
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.request.context).toEqual({ foo: 'foo', bar: 'bar' });
       });
     });
 
