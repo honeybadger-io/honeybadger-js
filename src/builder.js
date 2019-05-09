@@ -23,6 +23,16 @@ export default function builder() {
     return obj3;
   }
 
+  function mergeErr(err1, err2) {
+    let ret = merge(err1, err2);
+
+    if (err1.context && err2.context) {
+      ret.context = merge(err1.context, err2.context);
+    }
+
+    return ret;
+  }
+
   function currentErrIs(err) {
     if (!currentErr) { return false; }
     if (currentErr.name !== err.name) { return false; }
@@ -386,10 +396,10 @@ export default function builder() {
       }
 
       if (name) {
-        err = merge(err, name);
+        err = mergeErr(err, name);
       }
       if (typeof extra === 'object') {
-        err = merge(err, extra);
+        err = mergeErr(err, extra);
       }
 
       return notify(err, generateStackTrace(err));
