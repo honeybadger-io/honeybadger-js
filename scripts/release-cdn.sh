@@ -7,6 +7,11 @@ if [[ -z "${HONEYBADGER_JS_S3_BUCKET}" ]]; then
   exit 1
 fi
 
+if [[ -z "${HONEYBADGER_DISTRIBUTION_ID}" ]]; then
+  echo "Error: please set HONEYBADGER_DISTRIBUTION_ID"
+  exit 1
+fi
+
 VERSION_INFO=$(cat package.json | jq '.version | capture("^(?<minor>[0-9]+.[0-9]+).[0-9]+((?<tag>-beta).[0-9]+)?$")')
 VERSION=$(echo $VERSION_INFO | jq -r '.minor')
 TAG=$(echo $VERSION_INFO | jq -r '.tag')
@@ -28,3 +33,5 @@ aws s3 sync dist/ s3://$HONEYBADGER_JS_S3_BUCKET/$PREFIX \
   --include 'honeybadger.js.map'\
   --include 'honeybadger.min.js' \
   --include 'honeybadger.min.js.map'
+
+aws cloudfront create-invalidation --distribution-id $HONEYBADGER_DISTRIBUTION_ID --paths "/$PREFIX/*"

@@ -40,6 +40,7 @@ available in your shell:
 
 ```
 export HONEYBADGER_JS_S3_BUCKET=honeybadger-js
+export HONEYBADGER_DISTRIBUTION_ID=cloudfront-id
 ```
 
 AWS credentials are read from *~/.aws/credentials*, using the default profile.
