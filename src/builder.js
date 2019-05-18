@@ -166,6 +166,11 @@ export default function builder() {
       return config('onerror', true);
     }
 
+    function onUnhandledRejectionEnabled() {
+      if (notSingleton) { return false; }
+      return config('onunhandledrejection', true);
+    }
+
     function baseURL() {
       return 'http' + ((config('ssl', true) && 's') || '') + '://' + config('host', 'api.honeybadger.io');
     }
@@ -552,6 +557,55 @@ export default function builder() {
         return false;
       };
     });
+
+    instrument(window, 'onunhandledrejection', function(original) {
+      // See https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event
+      function onunhandledrejection(promiseRejectionEvent) {
+        debug('window.onunhandledrejection callback invoked', arguments);
+
+        // Skip if the error is already being sent.
+        if (currentErr) { return; }
+
+        if (!onUnhandledRejectionEnabled()) { return; }
+
+        let { reason } = promiseRejectionEvent
+        
+        // This error message is copied from the Node.js warning
+        // See https://nodejs.org/api/process.html#process_event_unhandledrejection
+        const PROMISE_REJECTION_WARNING = 'UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch().'
+
+        if (reason instanceof Error) {
+          // simulate v8 stack
+          let fileName = reason.fileName || 'unknown'
+          let lineNumber = reason.lineNumber || 0
+          let stackFallback = `${reason.message}\n    at ? (${fileName}:${lineNumber})`
+
+          let stack = stackTrace(reason) || stackFallback
+
+          notify(reason, {
+            message: `UnhandledPromiseRejectionWarning: ${reason}`,  
+            stack: stack + "\n" + PROMISE_REJECTION_WARNING
+          });
+
+          return;
+        }
+
+        let message = typeof reason === 'string' ? reason : JSON.stringify(reason)
+        notify({
+          name: 'window.onunhandledrejection',
+          message: `UnhandledPromiseRejectionWarning: ${message}`,
+          stack: PROMISE_REJECTION_WARNING
+        });
+      }
+
+      return function(promiseRejectionEvent) {
+        onunhandledrejection(promiseRejectionEvent);
+        if (typeof original === 'function') {
+          return original.apply(this, arguments);
+        }
+        return false;
+      }
+    })
 
     function incrementErrorsCount() {
       return self.errorsSent++;
