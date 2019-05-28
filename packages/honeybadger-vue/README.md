@@ -75,6 +75,20 @@ HONEYBADGER_API_KEY=yourkey yarn test:all
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
 
+## Releasing
+
+Releasing is done with two commands: `npm version` and `npm publish`. **Both
+commands should be used with care.**
+
+To perform a release:
+
+1. With a clean working tree, use `npm version [new version]` to bump the version, commit the
+   changes, tag the release, and push to GitHub. See `npm help version` for
+   documentation.
+
+2. To publish the release, use `npm publish`. See `npm help publish` for
+   documentation.
+
 ### License
 
 *honeybadger-vue* is MIT licensed. See the [LICENSE](https://raw.github.com/honeybadger-io/honeybadger-vue/master/LICENSE) file in this repository for details.
