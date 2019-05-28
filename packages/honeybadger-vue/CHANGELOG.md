@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.0.8] - 2019-05-28
+### Fixed
+- Added missing dist/ directory to release
+
 ## [0.0.7] - 2019-04-16
-## Changed
+### Changed
 - Refactored tests to include debug mode output
 - Changed the debug output based on Vue debug mode
 - Update honeybadger-js to v1.0. See
