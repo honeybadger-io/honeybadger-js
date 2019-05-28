@@ -36,7 +36,11 @@
     "build:umd": "rollup --config build/rollup.config.js --format umd --file dist/honeybadger-vue.umd.js",
     "build:es": "rollup --config build/rollup.config.js --format es --file dist/honeybadger-vue.esm.js",
     "build:unpkg": "rollup --config build/rollup.config.js --format iife --file dist/honeybadger-vue.js",
-    "build:unpkg-minify": "rollup MINIFY=true --config build/rollup.config.js --format iife --file dist/honeybadger-vue.min.js"
+    "build:unpkg-minify": "rollup MINIFY=true --config build/rollup.config.js --format iife --file dist/honeybadger-vue.min.js",
+    "preversion": "yarn test",
+    "version": "scripts/update-versions.sh",
+    "postversion": "git push && git push --tags",
+    "prepublishOnly": "yarn test && yarn build"
   },
   "dependencies": {
     "honeybadger-js": "^1.0.1"
