@@ -596,9 +596,8 @@ export default function builder() {
       return function(promiseRejectionEvent) {
         onunhandledrejection(promiseRejectionEvent);
         if (typeof original === 'function') {
-          return original.apply(this, arguments);
+          original.apply(this, arguments);
         }
-        return false;
       }
     })
 
