@@ -818,9 +818,9 @@ describe('Honeybadger', function() {
 
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(request.payload.error.class).toEqual('window.onunhandledrejection')
+          expect(request.payload.error.class).toEqual('window.onunhandledrejection');
           expect(request.payload.error.message).toEqual('UnhandledPromiseRejectionWarning: Something has gone wrong');
-          expect(request.payload.error.backtrace).toEqual('UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch().')
+          expect(request.payload.error.backtrace).toBeUndefined();
         });
       });
 
@@ -835,9 +835,9 @@ describe('Honeybadger', function() {
 
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(request.payload.error.class).toEqual('Error')
+          expect(request.payload.error.class).toEqual('Error');
           expect(request.payload.error.message).toEqual('UnhandledPromiseRejectionWarning: Error: Something has gone wrong');
-          expect(request.payload.error.backtrace).toEqual('the stack trace\nUnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch().')
+          expect(request.payload.error.backtrace).toEqual('the stack trace');
         });
       });
 
@@ -868,9 +868,9 @@ describe('Honeybadger', function() {
 
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(request.payload.error.class).toEqual('window.onunhandledrejection')
+          expect(request.payload.error.class).toEqual('window.onunhandledrejection');
           expect(request.payload.error.message).toEqual('UnhandledPromiseRejectionWarning: {"errorCode":"123"}');
-          expect(request.payload.error.backtrace).toEqual('UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch().')
+          expect(request.payload.error.backtrace).toBeUndefined();
         });
       });
 

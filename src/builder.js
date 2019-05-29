@@ -570,10 +570,6 @@ export default function builder() {
 
         let { reason } = promiseRejectionEvent
         
-        // This error message is copied from the Node.js warning
-        // See https://nodejs.org/api/process.html#process_event_unhandledrejection
-        const PROMISE_REJECTION_WARNING = 'UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch().'
-
         if (reason instanceof Error) {
           // simulate v8 stack
           let fileName = reason.fileName || 'unknown'
@@ -584,7 +580,7 @@ export default function builder() {
 
           notify(reason, {
             message: `UnhandledPromiseRejectionWarning: ${reason}`,  
-            stack: stack + "\n" + PROMISE_REJECTION_WARNING
+            stack
           });
 
           return;
@@ -594,7 +590,6 @@ export default function builder() {
         notify({
           name: 'window.onunhandledrejection',
           message: `UnhandledPromiseRejectionWarning: ${message}`,
-          stack: PROMISE_REJECTION_WARNING
         });
       }
 
