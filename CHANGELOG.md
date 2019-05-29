@@ -5,6 +5,9 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Report unhandled promise rejections using `window.onunhandledrejection`. PR #140 by @ryanoglesby08
+
 ## [1.0.3] - 2019-05-15
 ### Fixed
 - Context is now merged if existing in both `err.context` and `opts.context`
