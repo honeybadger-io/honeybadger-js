@@ -276,6 +276,17 @@ export default function builder() {
         err = merge(err, generated);
       }
 
+      err = merge(err, {
+        name: err.name || 'Error',
+        context: merge(self.context, err.context),
+        url: err.url || document.URL,
+        projectRoot: err.projectRoot || err.project_root || config('projectRoot', config('project_root', window.location.protocol + '//' + window.location.host)),
+        environment: err.environment || config('environment'),
+        component: err.component || config('component'),
+        action: err.action || config('action'),
+        revision: err.revision || config('revision')
+      });
+
       if (isIgnored(err, config('ignorePatterns'))) { return false; }
 
       if (checkHandlers(self.beforeNotifyHandlers, err)) { return false; }
@@ -290,24 +301,24 @@ export default function builder() {
       var payload = {
         'notifier': NOTIFIER,
         'error': {
-          'class': err.name || 'Error',
+          'class': err.name,
           'message': err.message,
           'backtrace': err.stack,
           'generator': err.generator,
           'fingerprint': err.fingerprint
         },
         'request': {
-          'url': err.url || document.URL,
-          'component': err.component || config('component'),
-          'action': err.action || config('action'),
-          'context': merge(self.context, err.context),
+          'url': err.url,
+          'component': err.component,
+          'action': err.action,
+          'context': err.context,
           'cgi_data': data,
           'params': err.params
         },
         'server': {
-          'project_root': err.projectRoot || err.project_root || config('projectRoot', config('project_root', window.location.protocol + '//' + window.location.host)),
-          'environment_name': err.environment || config('environment'),
-          'revision': err.revision || config('revision')
+          'project_root': err.projectRoot,
+          'environment_name': err.environment,
+          'revision': err.revision
         }
       };
 

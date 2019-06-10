@@ -592,7 +592,7 @@ describe('Honeybadger', function() {
   describe('beforeNotify', function() {
     beforeEach(function() {
       Honeybadger.configure({
-        api_key: 'asdf'
+        apiKey: 'asdf'
       });
     });
 
@@ -624,6 +624,84 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
+      });
+    });
+
+    it('it is called with default notice properties', function(done) {
+      Honeybadger.configure({
+        environment: 'config environment',
+        component: 'config component',
+        action: 'config action',
+        revision: 'config revision',
+        projectRoot: 'config projectRoot'
+      });
+
+      var notice;
+
+      Honeybadger.beforeNotify(function(n) {
+        notice = n;
+      });
+
+      Honeybadger.notify('expected message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+
+        expect(notice.stack).toEqual(jasmine.any(String));
+        expect(notice.name).toEqual('Error');
+        expect(notice.message).toEqual('expected message');
+        expect(notice.url).toEqual(jasmine.any(String));
+        expect(notice.projectRoot).toEqual('config projectRoot');
+        expect(notice.environment).toEqual('config environment');
+        expect(notice.component).toEqual('config component');
+        expect(notice.action).toEqual('config action');
+        expect(notice.fingerprint).toEqual(undefined);
+        expect(notice.context).toEqual({});
+        expect(notice.params).toEqual(undefined);
+        expect(notice.cookies).toEqual(undefined);
+        expect(notice.revision).toEqual('config revision');
+      });
+    });
+
+    it('it is called with passed notice properties', function(done) {
+      var notice;
+
+      Honeybadger.beforeNotify(function(n) {
+        notice = n;
+      });
+
+      Honeybadger.notify({
+        stack: 'expected stack',
+        name: 'expected name',
+        message: 'expected message',
+        url: 'expected url',
+        projectRoot: 'expected projectRoot',
+        environment: 'expected environment',
+        component: 'expected component',
+        action: 'expected action',
+        fingerprint: 'expected fingerprint',
+        context: { expected_context_key: 'expected value' },
+        params: { expected_params_key: 'expected value' },
+        cookies: { expected_cookies_key: 'expected value' },
+        revision: 'expected revision'
+      });
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+
+        expect(notice.stack).toEqual('expected stack');
+        expect(notice.name).toEqual('expected name');
+        expect(notice.message).toEqual('expected message');
+        expect(notice.url).toEqual('expected url');
+        expect(notice.projectRoot).toEqual('expected projectRoot');
+        expect(notice.environment).toEqual('expected environment');
+        expect(notice.component).toEqual('expected component');
+        expect(notice.action).toEqual('expected action');
+        expect(notice.fingerprint).toEqual('expected fingerprint');
+        expect(notice.context).toEqual({ expected_context_key: 'expected value' });
+        expect(notice.params).toEqual({ expected_params_key: 'expected value' });
+        expect(notice.cookies).toEqual({ expected_cookies_key: 'expected value' });
+        expect(notice.revision).toEqual('expected revision');
       });
     });
   });
