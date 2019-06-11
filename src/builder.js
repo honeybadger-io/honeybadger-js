@@ -272,8 +272,10 @@ export default function builder() {
         return false;
       }
 
+      let generator;
       if (generated) {
-        err = merge(err, generated);
+        err.stack = generated.stack;
+        generator = generated.generator;
       }
 
       err = merge(err, {
@@ -287,7 +289,12 @@ export default function builder() {
         revision: err.revision || config('revision')
       });
 
+      let stack_before_handlers = err.stack;
       if (checkHandlers(self.beforeNotifyHandlers, err)) { return false; }
+      if (err.stack != stack_before_handlers) {
+        // Stack changed, so it's not generated.
+        generator = undefined;
+      }
 
       if (isIgnored(err, config('ignorePatterns'))) { return false; }
 
@@ -304,7 +311,7 @@ export default function builder() {
           'class': err.name,
           'message': err.message,
           'backtrace': err.stack,
-          'generator': err.generator,
+          'generator': generator,
           'fingerprint': err.fingerprint
         },
         'request': {

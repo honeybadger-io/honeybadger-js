@@ -311,13 +311,13 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      var notice = Honeybadger.notify("Honeybadger don't care, but you might.");
+      Honeybadger.notify('expected message');
 
-      expect(notice.stack).toEqual(jasmine.any(String));
-      expect(notice.generator).toEqual(jasmine.any(String));
-      expect(notice.message).toEqual("Honeybadger don't care, but you might.");
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
+        expect(request.payload.error.message).toEqual('expected message');
+        expect(request.payload.error.generator).toEqual('throw');
+        expect(request.payload.error.backtrace).toEqual(jasmine.any(String));
       });
     });
 
@@ -636,8 +636,7 @@ describe('Honeybadger', function() {
         projectRoot: 'config projectRoot'
       });
 
-      var notice;
-
+      let notice;
       Honeybadger.beforeNotify(function(n) {
         notice = n;
       });
@@ -664,8 +663,7 @@ describe('Honeybadger', function() {
     });
 
     it('it is called with passed notice properties', function(done) {
-      var notice;
-
+      let notice;
       Honeybadger.beforeNotify(function(n) {
         notice = n;
       });
@@ -702,6 +700,36 @@ describe('Honeybadger', function() {
         expect(notice.params).toEqual({ expected_params_key: 'expected value' });
         expect(notice.cookies).toEqual({ expected_cookies_key: 'expected value' });
         expect(notice.revision).toEqual('expected revision');
+      });
+    });
+
+    it('does not expose the stack generator', function(done) {
+      let notice;
+      Honeybadger.beforeNotify(function(n) {
+        notice = n;
+      });
+
+      Honeybadger.notify('expected message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(notice.generator).toEqual(undefined);
+        expect(request.payload.error.backtrace).toEqual(jasmine.any(String));
+        expect(request.payload.error.generator).toEqual('throw');
+      });
+    });
+
+    it('it resets generator when stack changes', function(done) {
+      Honeybadger.beforeNotify(function(notice) {
+        notice.stack = 'expected stack';
+      });
+
+      Honeybadger.notify('expected message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.error.backtrace).toEqual(jasmine.any(String));
+        expect(request.payload.error.generator).toEqual(undefined);
       });
     });
   });
