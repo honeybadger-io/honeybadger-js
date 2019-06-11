@@ -124,6 +124,18 @@ export default function builder() {
     return false;
   }
 
+  function objectIsEmpty(obj) {
+    return ((function() {
+      var k, results;
+      results = [];
+      for (k in obj) {
+        if (!Object.prototype.hasOwnProperty.call(obj, k)) continue;
+        results.push(k);
+      }
+      return results;
+    })()).length === 0;
+  }
+
   // Client factory.
   var factory = (function(opts) {
     var notSingleton = installed;
@@ -259,18 +271,7 @@ export default function builder() {
         send(currentPayload);
       }
 
-      // Halt if err is empty.
-      if (((function() {
-        var k, results;
-        results = [];
-        for (k in err) {
-          if (!Object.prototype.hasOwnProperty.call(err, k)) continue;
-          results.push(k);
-        }
-        return results;
-      })()).length === 0) {
-        return false;
-      }
+      if (objectIsEmpty(err)) { return false; }
 
       let generator;
       if (generated) {
