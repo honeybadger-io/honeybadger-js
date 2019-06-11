@@ -311,13 +311,13 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      var notice = Honeybadger.notify("Honeybadger don't care, but you might.");
+      Honeybadger.notify('expected message');
 
-      expect(notice.stack).toEqual(jasmine.any(String));
-      expect(notice.generator).toEqual(jasmine.any(String));
-      expect(notice.message).toEqual("Honeybadger don't care, but you might.");
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
+        expect(request.payload.error.message).toEqual('expected message');
+        expect(request.payload.error.generator).toEqual('throw');
+        expect(request.payload.error.backtrace).toEqual(jasmine.any(String));
       });
     });
 
@@ -592,7 +592,12 @@ describe('Honeybadger', function() {
   describe('beforeNotify', function() {
     beforeEach(function() {
       Honeybadger.configure({
-        api_key: 'asdf'
+        apiKey: 'asdf',
+        environment: 'config environment',
+        component: 'config component',
+        action: 'config action',
+        revision: 'config revision',
+        projectRoot: 'config projectRoot'
       });
     });
 
@@ -600,7 +605,7 @@ describe('Honeybadger', function() {
       Honeybadger.beforeNotify(function() {
         return false;
       });
-      Honeybadger.notify("testing");
+      Honeybadger.notify('testing');
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(0);
@@ -611,7 +616,7 @@ describe('Honeybadger', function() {
       Honeybadger.beforeNotify(function() {
         return true;
       });
-      Honeybadger.notify("testing");
+      Honeybadger.notify('testing');
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
@@ -620,10 +625,146 @@ describe('Honeybadger', function() {
 
     it('delivers notice when beforeNotify has no return', function(done) {
       Honeybadger.beforeNotify(function() {});
-      Honeybadger.notify("testing");
+      Honeybadger.notify('testing');
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
+      });
+    });
+
+    it('it is called with default notice properties', function(done) {
+      let notice;
+      Honeybadger.beforeNotify(function(n) {
+        notice = n;
+      });
+
+      Honeybadger.notify('expected message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+
+        expect(notice.stack).toEqual(jasmine.any(String));
+        expect(notice.name).toEqual('Error');
+        expect(notice.message).toEqual('expected message');
+        expect(notice.url).toEqual(jasmine.any(String));
+        expect(notice.projectRoot).toEqual('config projectRoot');
+        expect(notice.environment).toEqual('config environment');
+        expect(notice.component).toEqual('config component');
+        expect(notice.action).toEqual('config action');
+        expect(notice.fingerprint).toEqual(undefined);
+        expect(notice.context).toEqual({});
+        expect(notice.params).toEqual(undefined);
+        expect(notice.cookies).toEqual(undefined);
+        expect(notice.revision).toEqual('config revision');
+      });
+    });
+
+    it('it is called with overridden notice properties', function(done) {
+      let notice;
+      Honeybadger.beforeNotify(function(n) {
+        notice = n;
+      });
+
+      Honeybadger.notify({
+        stack: 'expected stack',
+        name: 'expected name',
+        message: 'expected message',
+        url: 'expected url',
+        projectRoot: 'expected projectRoot',
+        environment: 'expected environment',
+        component: 'expected component',
+        action: 'expected action',
+        fingerprint: 'expected fingerprint',
+        context: { expected_context_key: 'expected value' },
+        params: { expected_params_key: 'expected value' },
+        cookies: { expected_cookies_key: 'expected value' },
+        revision: 'expected revision'
+      });
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+
+        expect(notice.stack).toEqual('expected stack');
+        expect(notice.name).toEqual('expected name');
+        expect(notice.message).toEqual('expected message');
+        expect(notice.url).toEqual('expected url');
+        expect(notice.projectRoot).toEqual('expected projectRoot');
+        expect(notice.environment).toEqual('expected environment');
+        expect(notice.component).toEqual('expected component');
+        expect(notice.action).toEqual('expected action');
+        expect(notice.fingerprint).toEqual('expected fingerprint');
+        expect(notice.context).toEqual({ expected_context_key: 'expected value' });
+        expect(notice.params).toEqual({ expected_params_key: 'expected value' });
+        expect(notice.cookies).toEqual({ expected_cookies_key: 'expected value' });
+        expect(notice.revision).toEqual('expected revision');
+      });
+    });
+
+    it('it assigns notice properties', function(done) {
+      Honeybadger.beforeNotify(function(notice) {
+        notice.stack = 'expected stack',
+        notice.name = 'expected name',
+        notice.message = 'expected message',
+        notice.url = 'expected url',
+        notice.projectRoot = 'expected projectRoot',
+        notice.environment = 'expected environment',
+        notice.component = 'expected component',
+        notice.action = 'expected action',
+        notice.fingerprint = 'expected fingerprint',
+        notice.context = { expected_context_key: 'expected value' },
+        notice.params = { expected_params_key: 'expected value' },
+        notice.cookies = 'expected cookie value';
+        notice.revision = 'expected revision'
+      });
+
+      Honeybadger.notify('notify message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+
+        expect(request.payload.error.backtrace).toEqual('expected stack');
+        expect(request.payload.error.class).toEqual('expected name');
+        expect(request.payload.error.message).toEqual('expected message');
+        expect(request.payload.request.url).toEqual('expected url');
+        expect(request.payload.server.project_root).toEqual('expected projectRoot');
+        expect(request.payload.server.environment_name).toEqual('expected environment');
+        expect(request.payload.request.component).toEqual('expected component');
+        expect(request.payload.request.action).toEqual('expected action');
+        expect(request.payload.error.fingerprint).toEqual('expected fingerprint');
+        expect(request.payload.request.context).toEqual({ expected_context_key: 'expected value' });
+        expect(request.payload.request.params).toEqual({ expected_params_key: 'expected value' });
+        expect(request.payload.request.cgi_data.HTTP_COOKIE).toEqual('expected cookie value');
+        expect(request.payload.server.revision).toEqual('expected revision');
+      });
+    });
+
+    it('does not expose the stack generator', function(done) {
+      let notice;
+      Honeybadger.beforeNotify(function(n) {
+        notice = n;
+      });
+
+      Honeybadger.notify('expected message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(notice.generator).toEqual(undefined);
+        expect(request.payload.error.backtrace).toEqual(jasmine.any(String));
+        expect(request.payload.error.generator).toEqual('throw');
+      });
+    });
+
+    it('it resets generator when stack changes', function(done) {
+      Honeybadger.beforeNotify(function(notice) {
+        notice.stack = 'expected stack';
+      });
+
+      Honeybadger.notify('expected message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+        expect(request.payload.error.backtrace).toEqual(jasmine.any(String));
+        expect(request.payload.error.generator).toEqual(undefined);
       });
     });
   });

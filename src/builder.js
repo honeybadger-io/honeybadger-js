@@ -124,6 +124,20 @@ export default function builder() {
     return false;
   }
 
+  function objectIsEmpty(obj) {
+    for (let k in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, k)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function objectIsExtensible(obj) {
+    if (typeof Object.isExtensible !== 'function') { return true; }
+    return Object.isExtensible(obj);
+  }
+
   // Client factory.
   var factory = (function(opts) {
     var notSingleton = installed;
@@ -259,26 +273,33 @@ export default function builder() {
         send(currentPayload);
       }
 
-      // Halt if err is empty.
-      if (((function() {
-        var k, results;
-        results = [];
-        for (k in err) {
-          if (!Object.prototype.hasOwnProperty.call(err, k)) continue;
-          results.push(k);
-        }
-        return results;
-      })()).length === 0) {
-        return false;
+      if (objectIsEmpty(err)) { return false; }
+
+      let generator;
+      if (generated) {
+        err.stack = generated.stack;
+        generator = generated.generator;
       }
 
-      if (generated) {
-        err = merge(err, generated);
+      err = merge(err, {
+        name: err.name || 'Error',
+        context: merge(self.context, err.context),
+        url: err.url || document.URL,
+        projectRoot: err.projectRoot || err.project_root || config('projectRoot', config('project_root', window.location.protocol + '//' + window.location.host)),
+        environment: err.environment || config('environment'),
+        component: err.component || config('component'),
+        action: err.action || config('action'),
+        revision: err.revision || config('revision')
+      });
+
+      let stack_before_handlers = err.stack;
+      if (checkHandlers(self.beforeNotifyHandlers, err)) { return false; }
+      if (err.stack != stack_before_handlers) {
+        // Stack changed, so it's not generated.
+        generator = undefined;
       }
 
       if (isIgnored(err, config('ignorePatterns'))) { return false; }
-
-      if (checkHandlers(self.beforeNotifyHandlers, err)) { return false; }
 
       var data = cgiData();
       if (typeof err.cookies === 'string') {
@@ -290,24 +311,24 @@ export default function builder() {
       var payload = {
         'notifier': NOTIFIER,
         'error': {
-          'class': err.name || 'Error',
+          'class': err.name,
           'message': err.message,
           'backtrace': err.stack,
-          'generator': err.generator,
+          'generator': generator,
           'fingerprint': err.fingerprint
         },
         'request': {
-          'url': err.url || document.URL,
-          'component': err.component || config('component'),
-          'action': err.action || config('action'),
-          'context': merge(self.context, err.context),
+          'url': err.url,
+          'component': err.component,
+          'action': err.action,
+          'context': err.context,
           'cgi_data': data,
           'params': err.params
         },
         'server': {
-          'project_root': err.projectRoot || err.project_root || config('projectRoot', config('project_root', window.location.protocol + '//' + window.location.host)),
-          'environment_name': err.environment || config('environment'),
-          'revision': err.revision || config('revision')
+          'project_root': err.projectRoot,
+          'environment_name': err.environment,
+          'revision': err.revision
         }
       };
 
@@ -327,11 +348,6 @@ export default function builder() {
       }
 
       return err;
-    }
-
-    function objectIsExtensible(obj) {
-      if (typeof Object.isExtensible !== 'function') { return true; }
-      return Object.isExtensible(obj);
     }
 
     var preferCatch = true;
