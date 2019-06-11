@@ -125,15 +125,12 @@ export default function builder() {
   }
 
   function objectIsEmpty(obj) {
-    return ((function() {
-      var k, results;
-      results = [];
-      for (k in obj) {
-        if (!Object.prototype.hasOwnProperty.call(obj, k)) continue;
-        results.push(k);
+    for (let k in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, k)) {
+        return false;
       }
-      return results;
-    })()).length === 0;
+    }
+    return true;
   }
 
   function objectIsExtensible(obj) {
