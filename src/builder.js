@@ -136,6 +136,11 @@ export default function builder() {
     })()).length === 0;
   }
 
+  function objectIsExtensible(obj) {
+    if (typeof Object.isExtensible !== 'function') { return true; }
+    return Object.isExtensible(obj);
+  }
+
   // Client factory.
   var factory = (function(opts) {
     var notSingleton = installed;
@@ -346,11 +351,6 @@ export default function builder() {
       }
 
       return err;
-    }
-
-    function objectIsExtensible(obj) {
-      if (typeof Object.isExtensible !== 'function') { return true; }
-      return Object.isExtensible(obj);
     }
 
     var preferCatch = true;
