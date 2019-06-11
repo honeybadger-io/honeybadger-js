@@ -287,9 +287,9 @@ export default function builder() {
         revision: err.revision || config('revision')
       });
 
-      if (isIgnored(err, config('ignorePatterns'))) { return false; }
-
       if (checkHandlers(self.beforeNotifyHandlers, err)) { return false; }
+
+      if (isIgnored(err, config('ignorePatterns'))) { return false; }
 
       var data = cgiData();
       if (typeof err.cookies === 'string') {
