@@ -803,6 +803,12 @@ describe('Honeybadger', function() {
   describe('window.onunhandledrejection callback', function() {
     describe('default behavior', function() {
       beforeEach(function() {
+        if (typeof PromiseRejectionEvent === 'undefined') {
+          pending();
+        }
+      });
+
+      beforeEach(function() {
         Honeybadger.configure({
           api_key: 'asdf'
         });
@@ -881,7 +887,7 @@ describe('Honeybadger', function() {
             onunhandledrejection: false
           });
         });
-  
+
         it('ignores unhandled promise rejections', function(done) {
           let reason = 'Something has gone wrong'
           let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
