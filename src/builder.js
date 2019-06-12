@@ -569,7 +569,7 @@ export default function builder() {
         if (!onUnhandledRejectionEnabled()) { return; }
 
         let { reason } = promiseRejectionEvent
-        
+
         if (reason instanceof Error) {
           // simulate v8 stack
           let fileName = reason.fileName || 'unknown'
@@ -579,7 +579,7 @@ export default function builder() {
           let stack = stackTrace(reason) || stackFallback
 
           notify(reason, {
-            message: `UnhandledPromiseRejectionWarning: ${reason}`,  
+            message: `UnhandledPromiseRejectionWarning: ${reason}`,
             stack
           });
 
