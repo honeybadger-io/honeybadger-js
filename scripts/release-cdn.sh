@@ -28,7 +28,7 @@ fi
 
 aws s3 sync dist/ s3://$HONEYBADGER_JS_S3_BUCKET/$PREFIX \
   --acl 'public-read' \
-  --cache-control 'max-age=31536000'
+  --cache-control 'max-age=31536000' \
   --exclude '*' \
   --include 'honeybadger.js' \
   --include 'honeybadger.js.map'\
