@@ -584,17 +584,18 @@ export default function builder() {
 
         if (!onUnhandledRejectionEnabled()) { return; }
 
-        let { reason } = promiseRejectionEvent
+        let { reason } = promiseRejectionEvent;
 
         if (reason instanceof Error) {
           // simulate v8 stack
-          let fileName = reason.fileName || 'unknown'
-          let lineNumber = reason.lineNumber || 0
-          let stackFallback = `${reason.message}\n    at ? (${fileName}:${lineNumber})`
+          let fileName = reason.fileName || 'unknown';
+          let lineNumber = reason.lineNumber || 0;
+          let stackFallback = `${reason.message}\n    at ? (${fileName}:${lineNumber})`;
 
-          let stack = stackTrace(reason) || stackFallback
+          let stack = stackTrace(reason) || stackFallback;
 
-          notify(reason, {
+          notify({
+            name,
             message: `UnhandledPromiseRejectionWarning: ${reason}`,
             stack
           });
