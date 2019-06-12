@@ -591,11 +591,10 @@ export default function builder() {
           let fileName = reason.fileName || 'unknown';
           let lineNumber = reason.lineNumber || 0;
           let stackFallback = `${reason.message}\n    at ? (${fileName}:${lineNumber})`;
-
           let stack = stackTrace(reason) || stackFallback;
 
           notify({
-            name,
+            name: reason.name,
             message: `UnhandledPromiseRejectionWarning: ${reason}`,
             stack
           });
