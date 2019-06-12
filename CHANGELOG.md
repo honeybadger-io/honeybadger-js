@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.4] - 2019-06-12
 ### Fixed
 - Fix a bug in `beforeNotify` logic where notice properties were not
   correctly passed to the handlers. All properties now [work as
