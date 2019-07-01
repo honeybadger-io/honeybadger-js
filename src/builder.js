@@ -180,6 +180,11 @@ export default function builder() {
       return config('onerror', true);
     }
 
+    function onUnhandledRejectionEnabled() {
+      if (notSingleton) { return false; }
+      return config('onunhandledrejection', true);
+    }
+
     function baseURL() {
       return 'http' + ((config('ssl', true) && 's') || '') + '://' + config('host', 'api.honeybadger.io');
     }
@@ -568,6 +573,49 @@ export default function builder() {
         return false;
       };
     });
+
+    instrument(window, 'onunhandledrejection', function(original) {
+      // See https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event
+      function onunhandledrejection(promiseRejectionEvent) {
+        debug('window.onunhandledrejection callback invoked', arguments);
+
+        // Skip if the error is already being sent.
+        if (currentErr) { return; }
+
+        if (!onUnhandledRejectionEnabled()) { return; }
+
+        let { reason } = promiseRejectionEvent;
+
+        if (reason instanceof Error) {
+          // simulate v8 stack
+          let fileName = reason.fileName || 'unknown';
+          let lineNumber = reason.lineNumber || 0;
+          let stackFallback = `${reason.message}\n    at ? (${fileName}:${lineNumber})`;
+          let stack = stackTrace(reason) || stackFallback;
+
+          notify({
+            name: reason.name,
+            message: `UnhandledPromiseRejectionWarning: ${reason}`,
+            stack
+          });
+
+          return;
+        }
+
+        let message = typeof reason === 'string' ? reason : JSON.stringify(reason)
+        notify({
+          name: 'window.onunhandledrejection',
+          message: `UnhandledPromiseRejectionWarning: ${message}`,
+        });
+      }
+
+      return function(promiseRejectionEvent) {
+        onunhandledrejection(promiseRejectionEvent);
+        if (typeof original === 'function') {
+          original.apply(this, arguments);
+        }
+      }
+    })
 
     function incrementErrorsCount() {
       return self.errorsSent++;

@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Report unhandled promise rejections using `window.onunhandledrejection`. PR #140 by @ryanoglesby08
 
 ## [1.0.4] - 2019-06-12
 ### Fixed

@@ -941,6 +941,110 @@ describe('Honeybadger', function() {
     });
   });
 
+  describe('window.onunhandledrejection callback', function() {
+    describe('default behavior', function() {
+      beforeEach(function() {
+        if (typeof PromiseRejectionEvent === 'undefined') {
+          pending();
+        }
+      });
+
+      beforeEach(function() {
+        Honeybadger.configure({
+          api_key: 'asdf'
+        });
+      });
+
+      it('reports the promise rejection reason when it is a string', function(done) {
+        let reason = 'Something has gone wrong'
+        let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
+          promise: Promise.reject(reason),
+          reason
+        })
+        window.onunhandledrejection(promiseRejection);
+
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.class).toEqual('window.onunhandledrejection');
+          expect(request.payload.error.message).toEqual('UnhandledPromiseRejectionWarning: Something has gone wrong');
+          expect(request.payload.error.backtrace).toBeUndefined();
+        });
+      });
+
+      it('reports the promise rejection reason when it is an Error object', function(done) {
+        let reason = new Error('Something has gone wrong')
+        reason.stack = "the stack trace"
+        let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
+          promise: Promise.reject(reason),
+          reason
+        })
+        window.onunhandledrejection(promiseRejection);
+
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.class).toEqual('Error');
+          expect(request.payload.error.message).toEqual('UnhandledPromiseRejectionWarning: Error: Something has gone wrong');
+          expect(request.payload.error.backtrace).toEqual('the stack trace');
+        });
+      });
+
+      it('supplements the stack when the promise rejection reason is an Error but does not have one', function(done) {
+        let reason = new Error('Something has gone wrong')
+        reason.stack = undefined
+        reason.fileName = 'file.js'
+        reason.lineNumber = 25
+        let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
+          promise: Promise.reject(reason),
+          reason
+        })
+        window.onunhandledrejection(promiseRejection);
+
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.backtrace).toContain('Something has gone wrong\n    at ? (file.js:25)')
+        });
+      });
+
+      it('reports the promise rejection reason when it is a custom object', function(done) {
+        let reason = { errorCode: '123' }
+        let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
+          promise: Promise.reject(reason),
+          reason
+        })
+        window.onunhandledrejection(promiseRejection);
+
+        afterNotify(done, function() {
+          expect(requests.length).toEqual(1);
+          expect(request.payload.error.class).toEqual('window.onunhandledrejection');
+          expect(request.payload.error.message).toEqual('UnhandledPromiseRejectionWarning: {"errorCode":"123"}');
+          expect(request.payload.error.backtrace).toBeUndefined();
+        });
+      });
+
+      describe('when onunhandledrejection is disabled', function() {
+        beforeEach(function() {
+          Honeybadger.configure({
+            api_key: 'asdf',
+            onunhandledrejection: false
+          });
+        });
+
+        it('ignores unhandled promise rejections', function(done) {
+          let reason = 'Something has gone wrong'
+          let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
+            promise: Promise.reject(reason),
+            reason
+          })
+          window.onunhandledrejection(promiseRejection);
+
+          afterNotify(done, function() {
+            expect(requests.length).toEqual(0);
+          });
+        });
+      });
+    })
+  })
+
   describe('getVersion', function() {
     it('returns the current version', function() {
       expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
