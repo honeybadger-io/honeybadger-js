@@ -43,7 +43,7 @@
     "prepublishOnly": "yarn test && yarn build"
   },
   "dependencies": {
-    "honeybadger-js": "^1.0.1"
+    "honeybadger-js": "^2.0.0"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
