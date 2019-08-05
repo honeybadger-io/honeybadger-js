@@ -26,6 +26,7 @@ declare module "honeybadger-js" {
         action: string;
         fingerprint: string;
         context: any;
+        cookies?: string;
     }
 
     class Honeybadger {
