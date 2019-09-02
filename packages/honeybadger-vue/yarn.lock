@@ -6161,9 +6161,9 @@ next-tick@1:
   integrity sha1-yobR/ogoFpsBICCOPchCS524NCw=
 
 nightwatch-xhr@^0.4.6:
-  version "0.4.6"
-  resolved "https://registry.yarnpkg.com/nightwatch-xhr/-/nightwatch-xhr-0.4.6.tgz#2d875622c35332eb22a96e2b20645ac1e6e4b1ed"
-  integrity sha512-hMvmQzUfIgnRV6vKe6FIIMXmD4cCO1tuJ1cWdYg4DciLkUtrCO3wKQQyWUVv/LIhLbv83vXj/TxVaxl8K4in/A==
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/nightwatch-xhr/-/nightwatch-xhr-0.4.7.tgz#79cbc9b91c594aeb36a38e8a40903ca42eb0266a"
+  integrity sha512-tExe01qlN+ql0jZfNdufl4ALQBM8EHgVc77SYJoikoxCoXF9fw9Ko1igkj05st5V3feZH/Ps6OKUJS0YSaL3MA==
 
 nightwatch@^0.9.12:
   version "0.9.21"
