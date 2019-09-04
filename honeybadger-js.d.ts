@@ -11,6 +11,7 @@ declare module "honeybadger-js" {
         action?: string;
         onerror?: boolean;
         disabled?: boolean;
+        maxErrors?: number;
         ignorePatterns?: RegExp[];
         async?: boolean;
     }
