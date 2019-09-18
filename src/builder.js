@@ -146,7 +146,8 @@ export default function builder() {
     var self = {
       context: {},
       beforeNotifyHandlers: [],
-      errorsSent: 0
+      breadcrumbs: [],
+      errorsSent: 0,
     }
     if (typeof opts === 'object') {
       for (var k in opts) { self[k] = opts[k]; }
@@ -183,6 +184,10 @@ export default function builder() {
     function onUnhandledRejectionEnabled() {
       if (notSingleton) { return false; }
       return config('onunhandledrejection', true);
+    }
+
+    function breadcrumbsEnabled() {
+      return config('breadcrumbsEnabled', true)
     }
 
     function baseURL() {
@@ -462,6 +467,7 @@ export default function builder() {
     self.reset = function() {
       self.context = {};
       self.beforeNotifyHandlers = [];
+      self.breadcrumbs = [];
       for (var k in self) {
         if (indexOf.call(defaultProps, k) == -1) {
           self[k] = undefined;
@@ -477,6 +483,30 @@ export default function builder() {
 
     self.getVersion = function() {
       return VERSION;
+    }
+
+    self.addBreadcrumb = function(message, opts) {
+      if (!breadcrumbsEnabled()) return
+
+      opts = opts || {}
+
+      const metadata = opts.metadata || undefined
+      const category = opts.category || "custom"
+      const timestamp = new Date().toISOString()
+
+      self.breadcrumbs.push({
+        category: category,
+        message: message,
+        metadata: metadata || {},
+        timestamp: timestamp,
+      })
+
+      const limit = config('maxBreadcrumbs', 40)
+      if (self.breadcrumbs.length > limit) {
+        self.breadcrumbs = self.breadcrumbs.slice(self.breadcrumbs.length - limit)
+      }
+
+      return self
     }
 
     // Install instrumentation.

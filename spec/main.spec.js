@@ -1050,4 +1050,61 @@ describe('Honeybadger', function() {
       expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
     });
   });
+
+  describe('addBreadcrumb', function() {
+    beforeEach(function() {
+      Honeybadger.configure({
+        api_key: 'asdf',
+        breadcrumbsEnabled: true,
+      })
+    })
+
+    it('has default breadcrumbs', function() {
+      expect(Honeybadger.breadcrumbs).toEqual([])
+    })
+
+    it('adds a breadcrumb with defaults', function() {
+      Honeybadger.addBreadcrumb('expected message')
+
+      expect(Honeybadger.breadcrumbs.length).toBe(1)
+
+      const crumb = Honeybadger.breadcrumbs[0]
+
+      expect(crumb.message).toEqual('expected message')
+      expect(crumb.category).toEqual('custom')
+      expect(crumb.metadata).toEqual({})
+      expect(crumb.timestamp).toEqual(jasmine.any(String))
+    })
+
+    it('overrides the default category', function() {
+      Honeybadger.addBreadcrumb('message', {
+        category: 'test'
+      })
+
+      expect(Honeybadger.breadcrumbs.length).toBe(1)
+      expect(Honeybadger.breadcrumbs[0].category).toEqual('test')
+    })
+
+    it('overrides the default metadata', function() {
+      Honeybadger.addBreadcrumb('message', {
+        metadata: {
+          key: 'expected value'
+        }
+      })
+
+      expect(Honeybadger.breadcrumbs.length).toBe(1)
+      expect(Honeybadger.breadcrumbs[0].metadata).toEqual({ key: 'expected value' })
+    })
+
+    it('maintains the size of the breadcrumbs queue', function() {
+      for (let i=0; i<=45; i++) {
+        Honeybadger.addBreadcrumb('expected message ' + i)
+      }
+
+      expect(Honeybadger.breadcrumbs.length).toBe(40)
+
+      expect(Honeybadger.breadcrumbs[0].message).toEqual('expected message 6')
+      expect(Honeybadger.breadcrumbs[39].message).toEqual('expected message 45')
+    })
+  })
 });
