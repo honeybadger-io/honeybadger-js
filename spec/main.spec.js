@@ -1093,7 +1093,9 @@ describe('Honeybadger', function() {
       })
 
       expect(Honeybadger.breadcrumbs.length).toBe(1)
-      expect(Honeybadger.breadcrumbs[0].metadata).toEqual({ key: 'expected value' })
+      expect(Honeybadger.breadcrumbs[0].metadata).toEqual({
+        key: 'expected value'
+      })
     })
 
     it('maintains the size of the breadcrumbs queue', function() {
