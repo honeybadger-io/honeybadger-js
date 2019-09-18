@@ -187,7 +187,7 @@ export default function builder() {
     }
 
     function breadcrumbsEnabled() {
-      return config('breadcrumbsEnabled', true)
+      return config('breadcrumbsEnabled', false)
     }
 
     function baseURL() {
