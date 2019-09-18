@@ -205,12 +205,16 @@ export default function builder() {
     }
 
     function serialize(obj, depth) {
-      var k, v, ret;
-      ret = {};
       if (!depth) { depth = 0; }
       if (depth >= config('max_depth', 8)) {
         return '[MAX DEPTH REACHED]';
       }
+
+      if (Array.isArray(obj)) {
+        return obj.map(o => serialize(o, depth+1));
+      }
+
+      let k, v, ret = {};
       for (k in obj) {
         v = obj[k];
         if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
@@ -318,8 +322,14 @@ export default function builder() {
         data['HTTP_COOKIE'] = encodeCookie(err.cookies);
       }
 
+      const breadcrumbs = {
+        'enabled': breadcrumbsEnabled(),
+        'trail': self.breadcrumbs.slice(0),
+      }
+
       var payload = {
         'notifier': NOTIFIER,
+        'breadcrumbs': breadcrumbs,
         'error': {
           'class': err.name,
           'message': err.message,

@@ -1106,5 +1106,32 @@ describe('Honeybadger', function() {
       expect(Honeybadger.breadcrumbs[0].message).toEqual('expected message 6')
       expect(Honeybadger.breadcrumbs[39].message).toEqual('expected message 45')
     })
+
+    it('sends breadcrumbs when enabled', function(done) {
+      Honeybadger.addBreadcrumb('expected message')
+      Honeybadger.notify('message')
+
+      afterNotify(done, function() {
+        expect(requests.length).toBe(1)
+        expect(request.payload.breadcrumbs.enabled).toBe(true)
+        expect(request.payload.breadcrumbs.trail.length).toBe(1)
+        expect(request.payload.breadcrumbs.trail[0].message).toEqual('expected message')
+      });
+    });
+
+    it('sends empty breadcrumbs when disabled', function(done) {
+      Honeybadger.configure({
+        breadcrumbsEnabled: false,
+      })
+
+      Honeybadger.addBreadcrumb('message')
+      Honeybadger.notify('message')
+
+      afterNotify(done, function() {
+        expect(requests.length).toBe(1);
+        expect(request.payload.breadcrumbs.enabled).toBe(false)
+        expect(request.payload.breadcrumbs.trail).toEqual([])
+      });
+    });
   })
 });
