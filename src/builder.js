@@ -324,7 +324,7 @@ export default function builder() {
 
       const breadcrumbs = {
         'enabled': breadcrumbsEnabled(),
-        'trail': self.breadcrumbs.slice(0),
+        'trail': self.breadcrumbs.slice(),
       }
 
       var payload = {
