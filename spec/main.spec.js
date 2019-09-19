@@ -809,13 +809,54 @@ describe('Honeybadger', function() {
         context: {
           one: { two: { three: { four: { five: { six: { seven: { eight: { nine: 'nine' }}}}}}}}
         }
+      })
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1)
+        expect(request.payload.request.context).toEqual(
+          {one: { two: { three: { four: { five: { six: '[MAX DEPTH REACHED]'}}}}}}
+        )
+      })
+    })
+
+    it('handles recursively nested objects via max depth', function(done) {
+      let obj = {}
+      obj.obj = obj
+
+      Honeybadger.notify("testing", {
+        context: obj
+      })
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1)
+        expect(request.payload.request.context).toEqual({
+          obj: {
+            obj: {
+              obj: {
+                obj: {
+                  obj: {
+                    obj: '[MAX DEPTH REACHED]'
+                  }
+                }
+              }
+            }
+          }
+        })
+      })
+    })
+
+    it('enforces max depth in arrays', function(done) {
+      Honeybadger.notify("testing", {
+        context: {
+          'one': ['two', ['three', [ 'four', [ 'five', [ 'six', [ 'seven', [ 'eight', [ 'nine' ]]]]]]]]
+        }
       });
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(1);
-        expect(request.payload.request.context).toEqual(
-          {one: { two: { three: { four: { five: { six: '[MAX DEPTH REACHED]'}}}}}}
-        );
+        expect(request.payload.request.context).toEqual({
+          'one': ['two', ['three', [ 'four', [ 'five', [ '[MAX DEPTH REACHED]', '[MAX DEPTH REACHED]' ]]]]]
+        });
       });
     });
 

@@ -210,19 +210,28 @@ export default function builder() {
         return '[MAX DEPTH REACHED]';
       }
 
+      // Inspect invalid types
+      if (!canSerialize(obj)) { return Object.prototype.toString.call(obj); }
+
+      // Serialize inside arrays
       if (Array.isArray(obj)) {
         return obj.map(o => serialize(o, depth+1));
       }
 
-      let k, v, ret = {};
-      for (k in obj) {
-        v = obj[k];
-        if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
-          if (!canSerialize(v)) { v = Object.prototype.toString.call(v); }
-          ret[k] = (typeof v === 'object' ? serialize(v, depth+1) : v);
+      // Serialize inside objects
+      if (typeof(obj) === 'object') {
+        let ret = {};
+        for (const k in obj) {
+          const v = obj[k];
+          if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
+            ret[k] = serialize(v, depth+1)
+          }
         }
+        return ret;
       }
-      return ret;
+
+      // Return everything else untouched
+      return obj;
     }
 
     function request(apiKey, payload) {
