@@ -532,7 +532,7 @@ export default function builder() {
     // This should happen once for the first factory call.
     function instrument(object, name, replacement) {
       if (notSingleton) { return; }
-      if (!object || !name || !replacement) { return; }
+      if (!object || !name || !replacement || !(name in object)) { return; }
       var original = object[name];
       object[name] = replacement(original);
     }
@@ -665,6 +665,42 @@ export default function builder() {
         }
       }
     })
+
+    // Breadcrumbs: instrument console
+    const CONSOLE_LEVELS = ['debug', 'info', 'warn', 'error', 'log']
+    CONSOLE_LEVELS.forEach(level => {
+      instrument(window.console, level, function(original) {
+        return function() {
+          const args = Array.prototype.slice.call(arguments)
+          const message = inspectArray(args)
+          const opts = {
+            category: 'log',
+            metadata: {
+              level: level,
+              arguments: serialize(args),
+            }
+          }
+
+          self.addBreadcrumb(message, opts)
+
+          if (typeof original === 'function') {
+            Function.prototype.apply.call(original, window.console, arguments)
+          }
+        }
+      })
+    })
+
+    function inspectArray(obj) {
+      if (!Array.isArray(obj)) { return '' }
+
+      return obj.map(value => {
+        try {
+          return String(value)
+        } catch (e) {
+          return '[UNKNOWN VALUE]'
+        }
+      }).join(' ')
+    }
 
     function incrementErrorsCount() {
       return self.errorsSent++;
