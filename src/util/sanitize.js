@@ -1,9 +1,9 @@
 export default function sanitize(obj, maxDepth) {
-  let seenObjects = [];
+  let seenObjects = []
   function seen(obj) {
     if (!obj || typeof(obj) !== 'object') { return false }
     for (let i = 0; i < seenObjects.length; i++) {
-      const value = seenObjects[i];
+      const value = seenObjects[i]
       if (value === obj) {
         return true
       }
@@ -23,13 +23,13 @@ export default function sanitize(obj, maxDepth) {
   }
 
   function serialize(obj, depth) {
-    if (!depth) { depth = 0; }
+    if (!depth) { depth = 0 }
     if (depth >= maxDepth) {
       return '[MAX DEPTH REACHED]'
     }
 
     // Inspect invalid types
-    if (!canSerialize(obj)) { return Object.prototype.toString.call(obj); }
+    if (!canSerialize(obj)) { return Object.prototype.toString.call(obj) }
 
     // Halt circular references
     if (seen(obj)) {
@@ -38,23 +38,23 @@ export default function sanitize(obj, maxDepth) {
 
     // Serialize inside arrays
     if (Array.isArray(obj)) {
-      return obj.map(o => serialize(o, depth+1));
+      return obj.map(o => serialize(o, depth+1))
     }
 
     // Serialize inside objects
     if (typeof(obj) === 'object') {
-      let ret = {};
+      let ret = {}
       for (const k in obj) {
-        const v = obj[k];
+        const v = obj[k]
         if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
           ret[k] = serialize(v, depth+1)
         }
       }
-      return ret;
+      return ret
     }
 
     // Return everything else untouched
-    return obj;
+    return obj
   }
 
   return serialize(obj)
