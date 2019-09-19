@@ -7,11 +7,13 @@
 
 	<title>Honeybadger.js global example</title>
 
-	<script type="text/javascript" src="../../honeybadger.js" data-debug="true"></script>
+	<script type="text/javascript" src="../../dist/honeybadger.js" data-debug="true"></script>
 
   <script>
     Honeybadger.configure({
-      apiKey: prompt("Enter the API key for your Honeybadger project:")
+      apiKey: prompt("Enter the API key for your Honeybadger project:"),
+      debug: true,
+      breadcrumbsEnabled: true
     });
 
     (function(){

@@ -1,7 +1,9 @@
+import sanitize from './util/sanitize.js'
+
 export default function builder() {
   var VERSION = '__VERSION__',
       NOTIFIER = {
-        name: 'honeybadger.js',
+        name: 'honeybadger-js',
         url: 'https://github.com/honeybadger-io/honeybadger-js',
         version: VERSION,
         language: 'javascript'
@@ -194,46 +196,6 @@ export default function builder() {
       return 'http' + ((config('ssl', true) && 's') || '') + '://' + config('host', 'api.honeybadger.io');
     }
 
-    function canSerialize(obj) {
-      // Functions are TMI and Symbols can't convert to strings.
-      if (/function|symbol/.test(typeof(obj))) { return false; }
-
-      // No prototype, likely created with `Object.create(null)`.
-      if (typeof obj === 'object' && typeof obj.hasOwnProperty === 'undefined') { return false; }
-
-      return true;
-    }
-
-    function serialize(obj, depth) {
-      if (!depth) { depth = 0; }
-      if (depth >= config('max_depth', 8)) {
-        return '[MAX DEPTH REACHED]';
-      }
-
-      // Inspect invalid types
-      if (!canSerialize(obj)) { return Object.prototype.toString.call(obj); }
-
-      // Serialize inside arrays
-      if (Array.isArray(obj)) {
-        return obj.map(o => serialize(o, depth+1));
-      }
-
-      // Serialize inside objects
-      if (typeof(obj) === 'object') {
-        let ret = {};
-        for (const k in obj) {
-          const v = obj[k];
-          if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
-            ret[k] = serialize(v, depth+1)
-          }
-        }
-        return ret;
-      }
-
-      // Return everything else untouched
-      return obj;
-    }
-
     function request(apiKey, payload) {
       try {
         var x = new XMLHttpRequest();
@@ -243,7 +205,7 @@ export default function builder() {
         x.setRequestHeader('Content-Type', 'application/json');
         x.setRequestHeader('Accept', 'text/json, application/json');
 
-        x.send(JSON.stringify(serialize(payload)));
+        x.send(JSON.stringify(sanitize(payload, config('max_depth', 8))));
       } catch(err) {
         log('Unable to send error report: error while initializing request', err, payload);
       }
@@ -677,7 +639,7 @@ export default function builder() {
             category: 'log',
             metadata: {
               level: level,
-              arguments: serialize(args),
+              arguments: sanitize(args, 3),
             }
           }
 
