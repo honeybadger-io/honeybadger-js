@@ -5,5 +5,12 @@
 */
 export function stringNameOfElement(element) {
   if (!element || !element.tagName) return ''
-  return element.tagName.toLowerCase()
+
+  let name = element.tagName.toLowerCase()
+
+  if (element.id) {
+    name += `#${element.id}`
+  }
+
+  return name
 }

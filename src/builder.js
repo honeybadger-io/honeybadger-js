@@ -529,7 +529,7 @@ export default function builder() {
       if (message.length === 0) return
 
       self.addBreadcrumb(message, {
-        category: 'ui.click'
+        category: 'ui.click',
       })
     }, true)
 

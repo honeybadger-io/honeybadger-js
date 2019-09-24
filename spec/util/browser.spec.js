@@ -27,5 +27,16 @@ describe('utils/browser', () => {
         ''
       )
     })
+
+    it('includes the element id when available', () => {
+      let element = document.createElement('button')
+      element.id = 'expected_id'
+
+      expect(
+        stringNameOfElement(element)
+      ).toEqual(
+        'button#expected_id'
+      )
+    })
   })
 })
