@@ -1,4 +1,5 @@
 import sanitize from './util/sanitize.js'
+import { stringNameOfElement } from './util/browser.js'
 
 export default function builder() {
   var VERSION = '__VERSION__',
@@ -516,6 +517,22 @@ export default function builder() {
     instrument(window, 'setTimeout', instrumentTimer);
     instrument(window, 'setInterval', instrumentTimer);
 
+    // Breadcrumbs: instrument click events
+    window.addEventListener('click', (event) => {
+      let message
+      try {
+        message = stringNameOfElement(event.target)
+      } catch(e) {
+        message = '[unknown]'
+      }
+
+      if (message.length === 0) return
+
+      self.addBreadcrumb(message, {
+        category: 'ui.click'
+      })
+    }, true)
+
     // Event targets borrowed from bugsnag-js:
     // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
     'EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload'.replace(/\w+/g, function (prop) {
@@ -640,7 +657,7 @@ export default function builder() {
             metadata: {
               level: level,
               arguments: sanitize(args, 3),
-            }
+            },
           }
 
           self.addBreadcrumb(message, opts)
