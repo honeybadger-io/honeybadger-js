@@ -589,6 +589,58 @@ export default function builder() {
       }
     })
 
+    // Breadcrumbs: instrument fetch
+    instrument(window, 'fetch', function(original) {
+      return function() {
+        const input = arguments[0]
+
+        let method = 'GET'
+        let url
+
+        if (typeof input === 'string') {
+          url = input
+        } else if ('Request' in window && input instanceof Request) {
+          url = input.url
+          if (input.method) {
+            method = input.method
+          }
+        } else {
+          url = String(input)
+        }
+
+        if (arguments[1] && arguments[1].method) {
+          method = arguments[1].method
+        }
+
+        if (typeof method === 'string') {
+          method = method.toUpperCase()
+        }
+
+        let metadata = {
+          method,
+          url,
+        }
+
+        return original
+          .apply(this, arguments)
+          .then((response) => {
+            metadata.status_code = response.status
+            self.addBreadcrumb('fetch', {
+              category: 'request',
+              metadata,
+            })
+          })
+          .catch((error) => {
+            self.addBreadcrumb('fetch error', {
+              category: 'error',
+              metadata,
+            })
+
+            throw error
+          })
+      }
+    })
+
     // Event targets borrowed from bugsnag-js:
     // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
     'EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload'.replace(/\w+/g, function (prop) {
