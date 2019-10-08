@@ -533,6 +533,62 @@ export default function builder() {
       })
     }, true)
 
+    // Breadcrumbs: instrument XMLHttpRequest
+    // -- On xhr.open: capture initial metadata
+    instrument(XMLHttpRequest.prototype, 'open', function(original) {
+      return function() {
+        const xhr = this
+        const url = arguments[1]
+        const method = typeof arguments[0] === 'string' ? arguments[0].toUpperCase() : arguments[0]
+
+        this.__hb_xhr = {
+          method,
+          url,
+        }
+
+        if (typeof original === 'function') {
+          original.apply(xhr, arguments)
+        }
+      }
+    })
+    // -- On xhr.send: set up xhr.onreadystatechange to report breadcrumb
+    instrument(XMLHttpRequest.prototype, 'send', function(original) {
+      return function() {
+        const xhr = this
+
+        function onreadystatechangeHandler() {
+          if (xhr.readyState === 4) {
+            if (xhr.__hb_xhr) {
+              xhr.__hb_xhr.status_code = xhr.status;
+            }
+
+            self.addBreadcrumb('XMLHttpRequest', {
+              category: 'xhr',
+              metadata: xhr.__hb_xhr,
+            })
+          }
+        }
+
+        if ('onreadystatechange' in xhr && typeof xhr.onreadystatechange === 'function') {
+          instrument(xhr, 'onreadystatechange', function(original) {
+            return function() {
+              onreadystatechangeHandler()
+
+              if (typeof original === 'function') {
+                original.apply(this, arguments)
+              }
+            }
+          })
+        } else {
+          xhr.onreadystatechange = onreadystatechangeHandler;
+        }
+
+        if (typeof original === 'function') {
+          original.apply(xhr, arguments)
+        }
+      }
+    })
+
     // Event targets borrowed from bugsnag-js:
     // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
     'EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload'.replace(/\w+/g, function (prop) {
