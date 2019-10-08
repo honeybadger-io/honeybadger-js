@@ -563,7 +563,7 @@ export default function builder() {
             }
 
             self.addBreadcrumb('XMLHttpRequest', {
-              category: 'xhr',
+              category: 'request',
               metadata: xhr.__hb_xhr,
             })
           }
