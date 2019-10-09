@@ -643,6 +643,7 @@ export default function builder() {
 
     // Breadcrumbs: instrument navigation
     (function() {
+      // The last known href of the current page
       let lastHref = window.location.href
 
       function recordUrlChange(from, to) {
@@ -656,16 +657,28 @@ export default function builder() {
         })
       }
 
+      // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
       instrument(window, 'onpopstate', function(original) {
         return function() {
           recordUrlChange(lastHref, window.location.href)
-
           if (original) {
             return original.apply(this, arguments)
           }
         }
       })
-    }())
+
+      // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+      // https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
+      function historyWrapper(original) {
+        const url = arguments.length > 2 ? arguments[2] : undefined
+        if (url) {
+          recordUrlChange(lastHref, String(url))
+        }
+        return original.apply(this, arguments)
+      }
+      instrument(window, 'pushState', historyWrapper)
+      instrument(window, 'replaceState', historyWrapper)
+    })()
 
     // Event targets borrowed from bugsnag-js:
     // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
