@@ -639,7 +639,7 @@ export default function builder() {
             throw error
           })
       }
-    })
+    });
 
     // Breadcrumbs: instrument navigation
     (function() {
