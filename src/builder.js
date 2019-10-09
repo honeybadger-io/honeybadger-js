@@ -641,6 +641,32 @@ export default function builder() {
       }
     })
 
+    // Breadcrumbs: instrument navigation
+    (function() {
+      let lastHref = window.location.href
+
+      function recordUrlChange(from, to) {
+        lastHref = to
+        self.addBreadcrumb('Page changed', {
+          category: 'navigation',
+          metadata: {
+            from,
+            to,
+          },
+        })
+      }
+
+      instrument(window, 'onpopstate', function(original) {
+        return function() {
+          recordUrlChange(lastHref, window.location.href)
+
+          if (original) {
+            return original.apply(this, arguments)
+          }
+        }
+      })
+    }())
+
     // Event targets borrowed from bugsnag-js:
     // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
     'EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload'.replace(/\w+/g, function (prop) {
