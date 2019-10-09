@@ -1,4 +1,4 @@
-import sanitize from '../../src/util/sanitize.js'
+import sanitize from '../../src/util/sanitize.js';
 
 describe('utils/sanitize', () => {
   it('enforces configured max depth', () => {
@@ -9,8 +9,8 @@ describe('utils/sanitize', () => {
       )
     ).toEqual(
       { one: { two: { three: '[MAX DEPTH REACHED]' } } }
-    )
-  })
+    );
+  });
 
   it('drops undefined values', () => {
     expect(
@@ -19,8 +19,8 @@ describe('utils/sanitize', () => {
       )
     ).toEqual(
       { bar: 'baz' }
-    )
-  })
+    );
+  });
 
   it('drops function values', () => {
     expect(
@@ -29,12 +29,12 @@ describe('utils/sanitize', () => {
       )
     ).toEqual(
       { foo: '[object Function]', bar: 'baz' }
-    )
-  })
+    );
+  });
 
   it('drops circular references', () => {
-    let obj = {}
-    obj.obj = obj
+    let obj = {};
+    obj.obj = obj;
 
     expect(
       sanitize(obj)
@@ -42,8 +42,8 @@ describe('utils/sanitize', () => {
       {
         obj: '[RECURSION]'
       }
-    )
-  })
+    );
+  });
 
   it('enforces max depth in arrays', () => {
     expect(
@@ -57,12 +57,12 @@ describe('utils/sanitize', () => {
       {
         'one': ['two', ['three', [ 'four', [ 'five', [ '[MAX DEPTH REACHED]', '[MAX DEPTH REACHED]' ]]]]]
       }
-    )
-  })
+    );
+  });
 
   if (typeof Object.create === 'function') {
     it('handles objects without prototypes as values', () => {
-      const obj = Object.create(null)
+      const obj = Object.create(null);
 
       expect(
         sanitize(
@@ -72,13 +72,13 @@ describe('utils/sanitize', () => {
         )
       ).toEqual(
         {key: '[object Object]'}
-      )
-    })
+      );
+    });
   }
 
   if (typeof Symbol === 'function') {
     it('serializes symbol values', () => {
-      const sym = Symbol()
+      const sym = Symbol();
 
       expect(
         sanitize(
@@ -88,17 +88,17 @@ describe('utils/sanitize', () => {
         )
       ).toEqual(
         { key: '[object Symbol]' }
-      )
-    })
+      );
+    });
 
     it('drops symbol keys', () => {
-      const sym = Symbol()
-      let obj = {}
-      obj[sym] = 'value'
+      const sym = Symbol();
+      let obj = {};
+      obj[sym] = 'value';
 
       expect(
         sanitize(obj)
-      ).toEqual({})
-    })
+      ).toEqual({});
+    });
   }
-})
+});
