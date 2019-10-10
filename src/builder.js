@@ -500,22 +500,25 @@ export default function builder() {
       object[name] = replacement(original);
     }
 
-    var instrumentTimer = function(original) {
-      // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
-      return function(func, delay) {
-        if (typeof func === 'function') {
-          var args = Array.prototype.slice.call(arguments, 2);
-          func = wrap(func);
-          return original(function() {
-            func.apply(null, args);
-          }, delay);
-        } else {
-          return original(func, delay);
-        }
+    // Wrap timers
+    (function() {
+      function instrumentTimer(original) {
+        // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
+        return function(func, delay) {
+          if (typeof func === 'function') {
+            var args = Array.prototype.slice.call(arguments, 2);
+            func = wrap(func);
+            return original(function() {
+              func.apply(null, args);
+            }, delay);
+          } else {
+            return original(func, delay);
+          }
+        };
       };
-    };
-    instrument(window, 'setTimeout', instrumentTimer);
-    instrument(window, 'setInterval', instrumentTimer);
+      instrument(window, 'setTimeout', instrumentTimer);
+      instrument(window, 'setInterval', instrumentTimer);
+    })();
 
     // Breadcrumbs: instrument click events
     window.addEventListener('click', (event) => {
