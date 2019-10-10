@@ -500,149 +500,135 @@ export default function builder() {
       object[name] = replacement(original);
     }
 
-    // Wrap timers
-    (function() {
-      function instrumentTimer(original) {
-        // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
-        return function(func, delay) {
-          if (typeof func === 'function') {
-            var args = Array.prototype.slice.call(arguments, 2);
-            func = wrap(func);
-            return original(function() {
-              func.apply(null, args);
-            }, delay);
-          } else {
-            return original(func, delay);
-          }
-        };
-      };
-      instrument(window, 'setTimeout', instrumentTimer);
-      instrument(window, 'setInterval', instrumentTimer);
-    })();
-
     // Breadcrumbs: instrument click events
-    window.addEventListener('click', (event) => {
-      let message;
-      try {
-        message = stringNameOfElement(event.target);
-      } catch(e) {
-        message = '[unknown]';
-      }
+    (function() {
+      window.addEventListener('click', (event) => {
+        let message;
+        try {
+          message = stringNameOfElement(event.target);
+        } catch(e) {
+          message = '[unknown]';
+        }
 
-      if (message.length === 0) return;
+        if (message.length === 0) return;
 
-      self.addBreadcrumb(message, {
-        category: 'ui.click',
-      });
-    }, true);
+        self.addBreadcrumb(message, {
+          category: 'ui.click',
+        });
+      }, true);
+    })();
 
     // Breadcrumbs: instrument XMLHttpRequest
     // -- On xhr.open: capture initial metadata
-    instrument(XMLHttpRequest.prototype, 'open', function(original) {
-      return function() {
-        const xhr = this;
-        const url = arguments[1];
-        const method = typeof arguments[0] === 'string' ? arguments[0].toUpperCase() : arguments[0];
+    (function() {
+      instrument(XMLHttpRequest.prototype, 'open', function(original) {
+        return function() {
+          const xhr = this;
+          const url = arguments[1];
+          const method = typeof arguments[0] === 'string' ? arguments[0].toUpperCase() : arguments[0];
 
-        this.__hb_xhr = {
-          method,
-          url,
-        };
+          this.__hb_xhr = {
+            method,
+            url,
+          };
 
-        if (typeof original === 'function') {
-          original.apply(xhr, arguments);
-        }
-      };
-    });
-    // -- On xhr.send: set up xhr.onreadystatechange to report breadcrumb
-    instrument(XMLHttpRequest.prototype, 'send', function(original) {
-      return function() {
-        const xhr = this;
-
-        function onreadystatechangeHandler() {
-          if (xhr.readyState === 4) {
-            if (xhr.__hb_xhr) {
-              xhr.__hb_xhr.status_code = xhr.status;
-            }
-
-            self.addBreadcrumb('XMLHttpRequest', {
-              category: 'request',
-              metadata: xhr.__hb_xhr,
-            });
+          if (typeof original === 'function') {
+            original.apply(xhr, arguments);
           }
-        }
+        };
+      });
+      // -- On xhr.send: set up xhr.onreadystatechange to report breadcrumb
+      instrument(XMLHttpRequest.prototype, 'send', function(original) {
+        return function() {
+          const xhr = this;
 
-        if ('onreadystatechange' in xhr && typeof xhr.onreadystatechange === 'function') {
-          instrument(xhr, 'onreadystatechange', function(original) {
-            return function() {
-              onreadystatechangeHandler();
-
-              if (typeof original === 'function') {
-                original.apply(this, arguments);
+          function onreadystatechangeHandler() {
+            if (xhr.readyState === 4) {
+              if (xhr.__hb_xhr) {
+                xhr.__hb_xhr.status_code = xhr.status;
               }
-            };
-          });
-        } else {
-          xhr.onreadystatechange = onreadystatechangeHandler;
-        }
 
-        if (typeof original === 'function') {
-          original.apply(xhr, arguments);
-        }
-      };
-    });
+              self.addBreadcrumb('XMLHttpRequest', {
+                category: 'request',
+                metadata: xhr.__hb_xhr,
+              });
+            }
+          }
+
+          if ('onreadystatechange' in xhr && typeof xhr.onreadystatechange === 'function') {
+            instrument(xhr, 'onreadystatechange', function(original) {
+              return function() {
+                onreadystatechangeHandler();
+
+                if (typeof original === 'function') {
+                  original.apply(this, arguments);
+                }
+              };
+            });
+          } else {
+            xhr.onreadystatechange = onreadystatechangeHandler;
+          }
+
+          if (typeof original === 'function') {
+            original.apply(xhr, arguments);
+          }
+        };
+      });
+    })();
 
     // Breadcrumbs: instrument fetch
-    instrument(window, 'fetch', function(original) {
-      return function() {
-        const input = arguments[0];
+    (function() {
+      instrument(window, 'fetch', function(original) {
+        return function() {
+          const input = arguments[0];
 
-        let method = 'GET';
-        let url;
+          let method = 'GET';
+          let url;
 
-        if (typeof input === 'string') {
-          url = input;
-        } else if ('Request' in window && input instanceof Request) {
-          url = input.url;
-          if (input.method) {
-            method = input.method;
+          if (typeof input === 'string') {
+            url = input;
+          } else if ('Request' in window && input instanceof Request) {
+            url = input.url;
+            if (input.method) {
+              method = input.method;
+            }
+          } else {
+            url = String(input);
           }
-        } else {
-          url = String(input);
-        }
 
-        if (arguments[1] && arguments[1].method) {
-          method = arguments[1].method;
-        }
+          if (arguments[1] && arguments[1].method) {
+            method = arguments[1].method;
+          }
 
-        if (typeof method === 'string') {
-          method = method.toUpperCase();
-        }
+          if (typeof method === 'string') {
+            method = method.toUpperCase();
+          }
 
-        let metadata = {
-          method,
-          url,
+          let metadata = {
+            method,
+            url,
+          };
+
+          return original
+            .apply(this, arguments)
+            .then((response) => {
+              metadata.status_code = response.status;
+              self.addBreadcrumb('fetch', {
+                category: 'request',
+                metadata,
+              });
+            })
+            .catch((error) => {
+              self.addBreadcrumb('fetch error', {
+                category: 'error',
+                metadata,
+              });
+
+              throw error;
+            });
         };
-
-        return original
-          .apply(this, arguments)
-          .then((response) => {
-            metadata.status_code = response.status;
-            self.addBreadcrumb('fetch', {
-              category: 'request',
-              metadata,
-            });
-          })
-          .catch((error) => {
-            self.addBreadcrumb('fetch error', {
-              category: 'error',
-              metadata,
-            });
-
-            throw error;
-          });
-      };
-    });
+      });
+    })();
 
     // Breadcrumbs: instrument navigation
     (function() {
@@ -683,6 +669,64 @@ export default function builder() {
       instrument(window, 'replaceState', historyWrapper);
     })();
 
+    // Breadcrumbs: instrument console
+    (function() {
+      function inspectArray(obj) {
+        if (!Array.isArray(obj)) { return ''; }
+
+        return obj.map(value => {
+          try {
+            return String(value);
+          } catch (e) {
+            return '[UNKNOWN VALUE]';
+          }
+        }).join(' ');
+      }
+
+      ['debug', 'info', 'warn', 'error', 'log'].forEach(level => {
+        instrument(window.console, level, function(original) {
+          return function() {
+            const args = Array.prototype.slice.call(arguments);
+            const message = inspectArray(args);
+            const opts = {
+              category: 'log',
+              metadata: {
+                level: level,
+                arguments: sanitize(args, 3),
+              },
+            };
+
+            self.addBreadcrumb(message, opts);
+
+            if (typeof original === 'function') {
+              Function.prototype.apply.call(original, window.console, arguments);
+            }
+          };
+        });
+      });
+    })();
+
+    // Wrap timers
+    (function() {
+      function instrumentTimer(original) {
+        // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
+        return function(func, delay) {
+          if (typeof func === 'function') {
+            var args = Array.prototype.slice.call(arguments, 2);
+            func = wrap(func);
+            return original(function() {
+              func.apply(null, args);
+            }, delay);
+          } else {
+            return original(func, delay);
+          }
+        };
+      };
+      instrument(window, 'setTimeout', instrumentTimer);
+      instrument(window, 'setInterval', instrumentTimer);
+    })();
+
+    // Wrap event listeners
     // Event targets borrowed from bugsnag-js:
     // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
     'EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload'.replace(/\w+/g, function (prop) {
@@ -711,6 +755,7 @@ export default function builder() {
       }
     });
 
+    // Wrap window.onerror
     instrument(window, 'onerror', function(original) {
       function onerror(msg, url, line, col, err) {
         debug('window.onerror callback invoked', arguments);
@@ -752,6 +797,7 @@ export default function builder() {
       };
     });
 
+    // Wrap window.onunhandledrejection
     instrument(window, 'onunhandledrejection', function(original) {
       // See https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event
       function onunhandledrejection(promiseRejectionEvent) {
@@ -794,42 +840,6 @@ export default function builder() {
         }
       };
     });
-
-    // Breadcrumbs: instrument console
-    const CONSOLE_LEVELS = ['debug', 'info', 'warn', 'error', 'log'];
-    CONSOLE_LEVELS.forEach(level => {
-      instrument(window.console, level, function(original) {
-        return function() {
-          const args = Array.prototype.slice.call(arguments);
-          const message = inspectArray(args);
-          const opts = {
-            category: 'log',
-            metadata: {
-              level: level,
-              arguments: sanitize(args, 3),
-            },
-          };
-
-          self.addBreadcrumb(message, opts);
-
-          if (typeof original === 'function') {
-            Function.prototype.apply.call(original, window.console, arguments);
-          }
-        };
-      });
-    });
-
-    function inspectArray(obj) {
-      if (!Array.isArray(obj)) { return ''; }
-
-      return obj.map(value => {
-        try {
-          return String(value);
-        } catch (e) {
-          return '[UNKNOWN VALUE]';
-        }
-      }).join(' ');
-    }
 
     function incrementErrorsCount() {
       return self.errorsSent++;
