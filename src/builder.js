@@ -519,8 +519,8 @@ export default function builder() {
     })();
 
     // Breadcrumbs: instrument XMLHttpRequest
-    // -- On xhr.open: capture initial metadata
     (function() {
+      // -- On xhr.open: capture initial metadata
       instrument(XMLHttpRequest.prototype, 'open', function(original) {
         return function() {
           const xhr = this;
@@ -537,6 +537,7 @@ export default function builder() {
           }
         };
       });
+
       // -- On xhr.send: set up xhr.onreadystatechange to report breadcrumb
       instrument(XMLHttpRequest.prototype, 'send', function(original) {
         return function() {
