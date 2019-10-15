@@ -10,7 +10,7 @@
   <script type="text/javascript" src="/base/dist/honeybadger.js"></script>
 
   <script>
-    window.results = {
+    var results = {
       notices: []
     };
 
@@ -20,7 +20,7 @@
     });
 
     Honeybadger.beforeNotify(function(notice) {
-      window.results.notices.push(notice);
+      results.notices.push(notice);
     });
   </script>
 </head>

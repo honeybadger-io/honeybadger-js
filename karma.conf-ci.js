@@ -11,7 +11,7 @@ module.exports = function(config) {
     'SL_Chrome': {
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: '68.0',
+      version: 'latest',
       platform: 'Windows 10'
     },
     'SL_Firefox': {
@@ -52,7 +52,14 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'spec/**/*.spec.js'
+      'node_modules/babel-polyfill/dist/polyfill.js',
+
+      // Spec files
+      { pattern: 'spec/**/*.spec.js' },
+
+      // Integration sandbox
+      { pattern: 'spec/sandbox.html', included: false },
+      { pattern: 'dist/honeybadger.js', included: false }
     ],
 
     preprocessors: {
@@ -96,6 +103,10 @@ module.exports = function(config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: Object.keys(customLaunchers),
-    singleRun: true
+
+    singleRun: true,
+    autoWatch: false,
+
+    concurrency: 2
   });
 };

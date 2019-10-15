@@ -54,6 +54,7 @@ describe('browser integration', function() {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].message).toEqual('unhandled exception');
         done();
-      });
+      })
+      .catch(done);
   });
 });
