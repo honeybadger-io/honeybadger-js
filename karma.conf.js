@@ -1,7 +1,7 @@
 // Karma configuration
 // Generated on Fri Mar 15 2019 21:04:41 GMT-0700 (Pacific Daylight Time)
 
-process.env.CHROME_BIN = require('puppeteer').executablePath()
+process.env.CHROME_BIN = require('puppeteer').executablePath();
 
 module.exports = function(config) {
   config.set({
@@ -21,7 +21,13 @@ module.exports = function(config) {
        * Make sure to disable Karma’s file watcher
        * because the preprocessor will use its own.
        */
-      { pattern: 'spec/**/*.spec.js', watched: false }
+
+      // Spec files
+      { pattern: 'spec/**/*.spec.js', watched: false },
+
+      // Integration sandbox
+      { pattern: 'spec/sandbox.html', watched: false, included: false },
+      { pattern: 'dist/honeybadger.js', watched: false, included: false }
     ],
 
 
@@ -85,5 +91,5 @@ module.exports = function(config) {
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity
-  })
-}
+  });
+};
