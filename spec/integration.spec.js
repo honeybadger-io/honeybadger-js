@@ -28,6 +28,11 @@ function createSandbox(callback) {
     });
   };
 
+  // Use `sandbox.destroy()` to stop using the sandbox.
+  sandbox.destroy = function() {
+    document.body.removeChild(sandbox);
+  };
+
   document.body.appendChild(sandbox);
 
   return sandbox;
@@ -42,7 +47,7 @@ describe('browser integration', function() {
   });
 
   afterEach(function() {
-    document.body.removeChild(sandbox);
+    sandbox.destroy();
   });
 
   it('notifies Honeybadger of unhandled exceptions', function(done) {
