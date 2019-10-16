@@ -12,20 +12,43 @@ function createSandbox(callback) {
 
   function sandboxEval(code) {
     sandbox.contentWindow.eval(
-      'setTimeout(' + code.toString() + ');'
+      'setTimeout(function() {' +
+        'var func = ' + code.toString() + ';' +
+        'func(window.report);' +
+      '});'
     );
   }
 
   // Use `sandbox.run(function() {})` to execute the function inside
   // the sandboxed environment.
   sandbox.run = function(code) {
+    let resolve;
+    const promise = new Promise(function(r) {
+      resolve = r;
+    });
+
+    sandbox.contentWindow.reportResults = function(results) {
+      resolve(results);
+    };
+
+    const report = function() {
+      setTimeout(function() {
+        window.reportResults(results);
+      });
+    };
+
+    sandbox.contentWindow.report = function() {
+      sandboxEval(report);
+    };
+
     sandboxEval(code);
 
-    return new Promise(function(resolve) {
-      setTimeout(function() {
-        resolve(sandbox.contentWindow.results);
-      });
-    });
+    // If the code expects an argument, it is responsible to report.
+    if (code.length === 0) {
+      sandboxEval(report);
+    }
+
+    return promise;
   };
 
   // Use `sandbox.destroy()` to stop using the sandbox.
@@ -125,6 +148,26 @@ describe('browser integration', function() {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].breadcrumbs.length).toEqual(1);
         expect(results.notices[0].breadcrumbs[0].message).toEqual('XMLHttpRequest');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
+        done();
+      })
+      .catch(done);
+  });
+
+  it('sends fetch breadcrumbs', function(done) {
+    sandbox
+      .run(function(report) {
+        fetch('/example/path', { method: 'GET' }).then(function() {
+          Honeybadger.notify('testing');
+          report();
+        }).catch(function() {
+          report();
+        });
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('fetch');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
         done();
       })
