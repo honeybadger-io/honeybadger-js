@@ -175,7 +175,7 @@ describe('browser integration', function() {
   it('sends navigation breadcrumbs', function(done) {
     sandbox
       .run(function() {
-        window.location.href = '#anchor';
+        history.pushState({}, '', 'foo.html');
         Honeybadger.notify('testing');
       })
       .then(function(results) {
@@ -185,7 +185,7 @@ describe('browser integration', function() {
         expect(results.notices[0].breadcrumbs[0].category).toEqual('navigation');
         expect(results.notices[0].breadcrumbs[0].metadata).toEqual({
           from: 'http://localhost:9876/base/spec/sandbox.html',
-          to: 'http://localhost:9876/base/spec/sandbox.html#anchor'
+          to: 'foo.html'
         });
         done();
       })

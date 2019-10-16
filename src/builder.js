@@ -660,14 +660,16 @@ export default function builder() {
       // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
       // https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
       function historyWrapper(original) {
-        const url = arguments.length > 2 ? arguments[2] : undefined;
-        if (url) {
-          recordUrlChange(lastHref, String(url));
-        }
-        return original.apply(this, arguments);
+        return function() {
+          const url = arguments.length > 2 ? arguments[2] : undefined;
+          if (url) {
+            recordUrlChange(lastHref, String(url));
+          }
+          return original.apply(this, arguments);
+        };
       }
-      instrument(window, 'pushState', historyWrapper);
-      instrument(window, 'replaceState', historyWrapper);
+      instrument(window.history, 'pushState', historyWrapper);
+      instrument(window.history, 'replaceState', historyWrapper);
     })();
 
     // Breadcrumbs: instrument console
