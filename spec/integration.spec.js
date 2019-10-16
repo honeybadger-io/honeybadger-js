@@ -160,9 +160,7 @@ describe('browser integration', function() {
         fetch('/example/path', { method: 'GET' }).then(function() {
           Honeybadger.notify('testing');
           report();
-        }).catch(function() {
-          report();
-        });
+        }).catch(report);
       })
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
