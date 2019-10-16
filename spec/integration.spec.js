@@ -86,6 +86,24 @@ describe('browser integration', function() {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].breadcrumbs.length).toEqual(1);
         expect(results.notices[0].breadcrumbs[0].message).toEqual('expected message');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('log');
+        done();
+      })
+      .catch(done);
+  });
+
+  it('sends click breadcrumbs', function(done) {
+    sandbox
+      .run(function() {
+        var button = document.getElementById('buttonId');
+        button.click();
+        Honeybadger.notify('testing');
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('button#buttonId');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('ui.click');
         done();
       })
       .catch(done);
