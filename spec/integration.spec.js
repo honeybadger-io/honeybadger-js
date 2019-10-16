@@ -171,4 +171,24 @@ describe('browser integration', function() {
       })
       .catch(done);
   });
+
+  it('sends navigation breadcrumbs', function(done) {
+    sandbox
+      .run(function() {
+        window.location.href = '#anchor';
+        Honeybadger.notify('testing');
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('Page changed');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('navigation');
+        expect(results.notices[0].breadcrumbs[0].metadata).toEqual({
+          from: 'http://localhost:9876/base/spec/sandbox.html',
+          to: 'http://localhost:9876/base/spec/sandbox.html#anchor'
+        });
+        done();
+      })
+      .catch(done);
+  });
 });
