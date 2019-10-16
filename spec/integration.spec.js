@@ -62,4 +62,17 @@ describe('browser integration', function() {
       })
       .catch(done);
   });
+
+  it('notifies Honeybadger manually', function(done) {
+    sandbox
+      .run(function() {
+        Honeybadger.notify('expected message');
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].message).toEqual('expected message');
+        done();
+      })
+      .catch(done);
+  });
 });
