@@ -278,6 +278,8 @@ export default function builder() {
         revision: err.revision || config('revision')
       });
 
+      err.breadcrumbs = self.breadcrumbs.slice();
+
       let stack_before_handlers = err.stack;
       if (checkHandlers(self.beforeNotifyHandlers, err)) { return false; }
       if (err.stack != stack_before_handlers) {
@@ -294,14 +296,12 @@ export default function builder() {
         data['HTTP_COOKIE'] = encodeCookie(err.cookies);
       }
 
-      const breadcrumbs = {
-        'enabled': breadcrumbsEnabled(),
-        'trail': self.breadcrumbs.slice(),
-      };
-
       var payload = {
         'notifier': NOTIFIER,
-        'breadcrumbs': breadcrumbs,
+        'breadcrumbs': {
+          'enabled': breadcrumbsEnabled(),
+          'trail': err.breadcrumbs,
+        },
         'error': {
           'class': err.name,
           'message': err.message,

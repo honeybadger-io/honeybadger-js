@@ -75,4 +75,19 @@ describe('browser integration', function() {
       })
       .catch(done);
   });
+
+  it('sends console breadcrumbs', function(done) {
+    sandbox
+      .run(function() {
+        console.log('expected message');
+        Honeybadger.notify('testing');
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('expected message');
+        done();
+      })
+      .catch(done);
+  });
 });
