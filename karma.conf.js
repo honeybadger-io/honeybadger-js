@@ -31,6 +31,13 @@ module.exports = function(config) {
     ],
 
 
+    proxies: {
+      // Used in integration tests; send to sandbox file for now since the
+      // response body doesn't matter. May change later.
+      '/example/path': '/base/spec/sandbox.html'
+    },
+
+
     // list of files / patterns to exclude
     exclude: [
     ],

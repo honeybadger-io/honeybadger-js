@@ -108,4 +108,26 @@ describe('browser integration', function() {
       })
       .catch(done);
   });
+
+  it('sends XHR breadcrumbs', function(done) {
+    sandbox
+      .run(function() {
+        var request = new XMLHttpRequest();
+        request.open('GET', '/example/path', false);
+        request.onreadystatechange = function() {
+          if (request.readyState === 4) {
+            Honeybadger.notify('testing');
+          }
+        };
+        request.send(null);
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('XMLHttpRequest');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
+        done();
+      })
+      .catch(done);
+  });
 });

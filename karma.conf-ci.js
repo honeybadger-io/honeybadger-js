@@ -62,6 +62,12 @@ module.exports = function(config) {
       { pattern: 'dist/honeybadger.js', included: false }
     ],
 
+    proxies: {
+      // Used in integration tests; send to sandbox file for now since the
+      // response body doesn't matter. May change later.
+      '/example/path': '/base/spec/sandbox.html'
+    },
+
     preprocessors: {
       'spec/**/*.spec.js': ['rollup']
     },
