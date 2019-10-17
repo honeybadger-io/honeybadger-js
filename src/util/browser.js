@@ -28,8 +28,10 @@ export function nativeFetch() {
     const result = sandbox.contentWindow.fetch && isNative(sandbox.contentWindow.fetch);
     document.head.removeChild(sandbox);
     return result;
-  } catch(e) {
-    log('failed to detect native fetch via iframe', e);
+  } catch(err) {
+    if (console && console.warn) {
+      console.warn('failed to detect native fetch via iframe: ' + err);
+    }
   }
 
   return false;
