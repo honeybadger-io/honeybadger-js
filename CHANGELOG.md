@@ -4,6 +4,10 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Add Breadcrumbs (#210). See [the
+  docs](https://docs.honeybadger.io/lib/javascript/guides/breadcrumbs.html)
+  for more info.
 
 ## [2.0.0] - 2019-07-24
 ### Added
