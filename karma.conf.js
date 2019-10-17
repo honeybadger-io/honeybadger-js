@@ -22,6 +22,10 @@ module.exports = function(config) {
        * because the preprocessor will use its own.
        */
 
+      // polyfills
+      'node_modules/promise-polyfill/dist/polyfill.js',
+      'node_modules/whatwg-fetch/dist/fetch.umd.js',
+
       // Spec files
       { pattern: 'spec/**/*.spec.js', watched: false },
 

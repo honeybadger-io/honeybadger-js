@@ -1,3 +1,5 @@
+import { nativeFetch } from '../src/util/browser.js';
+
 /**
  * Creates a new integration sandbox.
  * @param {function} callback Invoked when the sandbox is ready.
@@ -134,12 +136,13 @@ describe('browser integration', function() {
 
   it('sends XHR breadcrumbs', function(done) {
     sandbox
-      .run(function() {
+      .run(function(report) {
         var request = new XMLHttpRequest();
         request.open('GET', '/example/path', false);
         request.onreadystatechange = function() {
           if (request.readyState === 4) {
             Honeybadger.notify('testing');
+            report();
           }
         };
         request.send(null);
@@ -157,15 +160,18 @@ describe('browser integration', function() {
   it('sends fetch breadcrumbs', function(done) {
     sandbox
       .run(function(report) {
-        fetch('/example/path', { method: 'GET' }).then(function() {
-          Honeybadger.notify('testing');
-          report();
-        }).catch(report);
+        fetch('/example/path')
+          .then(function() {
+            Honeybadger.notify('testing');
+            report();
+          })
+          .catch(report);
       })
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].breadcrumbs.length).toEqual(1);
-        expect(results.notices[0].breadcrumbs[0].message).toEqual('fetch');
+        // fetch polyfill uses XHR.
+        expect(results.notices[0].breadcrumbs[0].message).toEqual(nativeFetch() ? 'fetch' : 'XMLHttpRequest');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
         done();
       })

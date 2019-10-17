@@ -1,5 +1,5 @@
 import sanitize from './util/sanitize.js';
-import { stringNameOfElement } from './util/browser.js';
+import { stringNameOfElement, nativeFetch } from './util/browser.js';
 
 export default function builder() {
   var VERSION = '__VERSION__',
@@ -579,6 +579,11 @@ export default function builder() {
 
     // Breadcrumbs: instrument fetch
     (function() {
+      if (!nativeFetch()) {
+        // Polyfills use XHR.
+        return;
+      }
+
       instrument(window, 'fetch', function(original) {
         return function() {
           const input = arguments[0];
@@ -612,14 +617,15 @@ export default function builder() {
 
           return original
             .apply(this, arguments)
-            .then((response) => {
+            .then(function(response) {
               metadata.status_code = response.status;
               self.addBreadcrumb('fetch', {
                 category: 'request',
                 metadata,
               });
+              return response;
             })
-            .catch((error) => {
+            .catch(function(error) {
               self.addBreadcrumb('fetch error', {
                 category: 'error',
                 metadata,

@@ -14,3 +14,27 @@ export function stringNameOfElement(element) {
 
   return name;
 }
+
+export function nativeFetch() {
+  if (!window.fetch) { return false; }
+  if (isNative(window.fetch)) { return true; }
+
+  // If fetch isn't native, it may be wrapped by someone else. Try to get
+  // a pristine function from an iframe.
+  try {
+    const sandbox = document.createElement('iframe');
+    sandbox.style.display = 'none';
+    document.head.appendChild(sandbox);
+    const result = sandbox.contentWindow.fetch && isNative(sandbox.contentWindow.fetch);
+    document.head.removeChild(sandbox);
+    return result;
+  } catch(e) {
+    log('failed to detect native fetch via iframe', e);
+  }
+
+  return false;
+}
+
+function isNative(func) {
+  return func.toString().indexOf('native') !== -1;
+}

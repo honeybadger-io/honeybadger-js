@@ -52,7 +52,9 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'node_modules/babel-polyfill/dist/polyfill.js',
+      // polyfills
+      'node_modules/promise-polyfill/dist/polyfill.js',
+      'node_modules/whatwg-fetch/dist/fetch.umd.js',
 
       // Spec files
       { pattern: 'spec/**/*.spec.js' },
