@@ -8,7 +8,7 @@ describe('utils/sanitize', () => {
         3
       )
     ).toEqual(
-      { one: { two: { three: '[MAX DEPTH REACHED]' } } }
+      { one: { two: { three: '[DEPTH]' } } }
     );
   });
 
@@ -55,7 +55,7 @@ describe('utils/sanitize', () => {
       )
     ).toEqual(
       {
-        'one': ['two', ['three', [ 'four', [ 'five', [ '[MAX DEPTH REACHED]', '[MAX DEPTH REACHED]' ]]]]]
+        'one': ['two', ['three', [ 'four', [ 'five', [ '[DEPTH]', '[DEPTH]' ]]]]]
       }
     );
   });

@@ -25,7 +25,7 @@ export default function sanitize(obj, maxDepth) {
   function serialize(obj, depth) {
     if (!depth) { depth = 0; }
     if (depth >= maxDepth) {
-      return '[MAX DEPTH REACHED]';
+      return '[DEPTH]';
     }
 
     // Inspect invalid types
