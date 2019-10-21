@@ -865,13 +865,19 @@ export default function builder() {
           let lineNumber = reason.lineNumber || 0;
           let stackFallback = `${reason.message}\n    at ? (${fileName}:${lineNumber})`;
           let stack = stackTrace(reason) || stackFallback;
-
-          notify({
+          let err = {
             name: reason.name,
             message: `UnhandledPromiseRejectionWarning: ${reason}`,
             stack
-          });
-
+          };
+          self.addBreadcrumb(
+            `window.onunhandledrejection: ${err.name}`,
+            {
+              category: 'error',
+              metadata: err
+            }
+          );
+          notify(err);
           return;
         }
 
