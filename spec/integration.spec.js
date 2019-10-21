@@ -241,4 +241,28 @@ describe('browser integration', function() {
       })
       .catch(done);
   });
+
+  it('sends Honeybadger.wrap breadcrumbs when onerror is disabled', function(done) {
+    sandbox
+      .run(function() {
+        Honeybadger.configure({ onerror: false });
+        results.error = new Error('expected message');
+        Honeybadger.wrap(function() {
+          throw(results.error);
+        })();
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('Error');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('error');
+        expect(results.notices[0].breadcrumbs[0].metadata).toEqual(jasmine.objectContaining({
+          message: 'expected message',
+          name: 'Error',
+          stack: results.error.stack
+        }));
+        done();
+      })
+      .catch(done);
+  });
 });

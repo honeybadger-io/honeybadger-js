@@ -365,7 +365,8 @@ export default function builder() {
 
     // wrap always returns the same function so that callbacks can be removed via
     // removeEventListener.
-    function wrap(fn, force) {
+    function wrap(fn, opts) {
+      if (!opts) { opts = {}; }
       try {
         if (typeof fn !== 'function') { return fn; }
         if (!objectIsExtensible(fn))  { return fn; }
@@ -374,12 +375,24 @@ export default function builder() {
             var onerror = onErrorEnabled();
             // Don't catch if the browser is old or supports the new error
             // object and there is a window.onerror handler available instead.
-            if ((preferCatch && (onerror || force)) || (force && !onerror)) {
+            if ((preferCatch && (onerror || opts.force)) || (opts.force && !onerror)) {
               try {
                 return fn.apply(this, arguments);
-              } catch (e) {
-                notify(e);
-                throw(e);
+              } catch (err) {
+                let generated = { stack: stackTrace(err) };
+                self.addBreadcrumb(
+                  opts.component ? `${opts.component}: ${err.name}` : err.name,
+                  {
+                    category: 'error',
+                    metadata: {
+                      message: err.message,
+                      name: err.name,
+                      stack: generated.stack
+                    }
+                  }
+                );
+                notify(err, generated);
+                throw(err);
               }
             } else {
               return fn.apply(this, arguments);
@@ -423,7 +436,7 @@ export default function builder() {
     };
 
     self.wrap = function(func) {
-      return wrap(func, true);
+      return wrap(func, { force: true });
     };
 
     self.setContext = function(context) {
@@ -726,22 +739,24 @@ export default function builder() {
 
     // Wrap timers
     (function() {
-      function instrumentTimer(original) {
-        // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
-        return function(func, delay) {
-          if (typeof func === 'function') {
-            var args = Array.prototype.slice.call(arguments, 2);
-            func = wrap(func);
-            return original(function() {
-              func.apply(null, args);
-            }, delay);
-          } else {
-            return original(func, delay);
-          }
+      function instrumentTimer(wrapOpts) {
+        return function(original) {
+          // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
+          return function(func, delay) {
+            if (typeof func === 'function') {
+              var args = Array.prototype.slice.call(arguments, 2);
+              func = wrap(func, wrapOpts);
+              return original(function() {
+                func.apply(null, args);
+              }, delay);
+            } else {
+              return original(func, delay);
+            }
+          };
         };
       };
-      instrument(window, 'setTimeout', instrumentTimer);
-      instrument(window, 'setInterval', instrumentTimer);
+      instrument(window, 'setTimeout', instrumentTimer({ component: 'setTimeout' }));
+      instrument(window, 'setInterval', instrumentTimer({ component: 'setInterval' }));
     })();
 
     // Wrap event listeners
@@ -751,17 +766,19 @@ export default function builder() {
       var prototype = window[prop] && window[prop].prototype;
       if (prototype && prototype.hasOwnProperty && prototype.hasOwnProperty('addEventListener')) {
         instrument(prototype, 'addEventListener', function(original) {
+          const wrapOpts = {component: `${prop}.prototype.addEventListener`};
+
           // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
           return function(type, listener, useCapture, wantsUntrusted) {
             try {
               if (listener && listener.handleEvent != null) {
-                listener.handleEvent = wrap(listener.handleEvent);
+                listener.handleEvent = wrap(listener.handleEvent, wrapOpts);
               }
             } catch(e) {
               // Ignore 'Permission denied to access property "handleEvent"' errors.
               log(e);
             }
-            return original.call(this, type, wrap(listener), useCapture, wantsUntrusted);
+            return original.call(this, type, wrap(listener, wrapOpts), useCapture, wantsUntrusted);
           };
         });
         instrument(prototype, 'removeEventListener', function(original) {
