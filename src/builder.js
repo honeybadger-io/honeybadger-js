@@ -789,21 +789,35 @@ export default function builder() {
           return;
         }
 
-        // simulate v8 stack
-        var stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
+        // Simulate v8 stack
+        const simulatedStack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
 
+        let generated;
         if (err) {
-          var generated = { stack: stackTrace(err) };
-          if (!generated.stack) { generated = {stack: stack}; }
-          notify(err, generated);
-          return;
+          generated = { stack: stackTrace(err) };
+          if (!generated.stack) { generated = {stack: simulatedStack}; }
+        } else {
+          // Important: leave `generated` undefined
+          err = {
+            name: 'window.onerror',
+            message: msg,
+            stack: simulatedStack
+          };
         }
 
-        notify({
-          name: 'window.onerror',
-          message: msg,
-          stack: stack
-        });
+        self.addBreadcrumb(
+          (err.name === 'window.onerror' || !err.name) ? 'window.onerror' : `window.onerror: ${err.name}`,
+          {
+            category: 'error',
+            metadata: {
+              message: err.message,
+              name: err.name,
+              stack: generated ? generated.stack : err.stack
+            }
+          }
+        );
+
+        notify(err, generated);
       }
       // See https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
       return function(msg, url, line, col, err) {
