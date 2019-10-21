@@ -109,7 +109,7 @@ describe('browser integration', function() {
       })
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(2);
         expect(results.notices[0].breadcrumbs[0].message).toEqual('expected message');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('log');
         done();
@@ -126,7 +126,7 @@ describe('browser integration', function() {
       })
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(2);
         expect(results.notices[0].breadcrumbs[0].message).toEqual('button#buttonId');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('ui.click');
         done();
@@ -149,7 +149,7 @@ describe('browser integration', function() {
       })
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(2);
         expect(results.notices[0].breadcrumbs[0].message).toEqual('XMLHttpRequest');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
         done();
@@ -169,7 +169,7 @@ describe('browser integration', function() {
       })
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(2);
         // fetch polyfill uses XHR.
         expect(results.notices[0].breadcrumbs[0].message).toEqual(nativeFetch() ? 'fetch' : 'XMLHttpRequest');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
@@ -186,13 +186,36 @@ describe('browser integration', function() {
       })
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(2);
         expect(results.notices[0].breadcrumbs[0].message).toEqual('Page changed');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('navigation');
         expect(results.notices[0].breadcrumbs[0].metadata).toEqual({
           from: 'http://localhost:9876/base/spec/sandbox.html',
           to: 'foo.html'
         });
+        done();
+      })
+      .catch(done);
+  });
+
+  it('sends notify breadcrumbs', function(done) {
+    sandbox
+      .run(function() {
+        Honeybadger.notify('expected message', { name: 'expected name' });
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('Honeybadger Notice');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('notice');
+        expect(results.notices[0].breadcrumbs[0].metadata).toEqual(jasmine.objectContaining({
+          name: 'expected name',
+          message: 'expected message',
+          stack: jasmine.any(String)
+        }));
+        expect(results.notices[0].breadcrumbs[0].metadata).not.toEqual(jasmine.objectContaining({
+          context: jasmine.anything()
+        }));
         done();
       })
       .catch(done);

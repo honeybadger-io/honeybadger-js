@@ -278,6 +278,15 @@ export default function builder() {
         revision: err.revision || config('revision')
       });
 
+      self.addBreadcrumb('Honeybadger Notice', {
+        category: 'notice',
+        metadata: {
+          message: err.message,
+          name: err.name,
+          stack: err.stack
+        }
+      });
+
       err.breadcrumbs = self.breadcrumbs.slice();
 
       let stack_before_handlers = err.stack;

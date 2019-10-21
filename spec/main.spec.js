@@ -1017,7 +1017,7 @@ describe('Honeybadger', function() {
       afterNotify(done, function() {
         expect(requests.length).toBe(1);
         expect(request.payload.breadcrumbs.enabled).toBe(true);
-        expect(request.payload.breadcrumbs.trail.length).toBe(1);
+        expect(request.payload.breadcrumbs.trail.length).toBe(2);
         expect(request.payload.breadcrumbs.trail[0].message).toEqual('expected message');
       });
     });
