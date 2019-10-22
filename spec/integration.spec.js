@@ -243,6 +243,8 @@ describe('browser integration', function() {
   });
 
   it('sends window.onunhandledrejection breadcrumbs when rejection is an Error', function(done) {
+    if (!('onunhandledrejection' in window)) { pending(); }
+
     sandbox
       .run(function() {
         results.error = new Error('expected message');
@@ -269,6 +271,8 @@ describe('browser integration', function() {
   });
 
   it('skips window.onunhandledrejection breadcrumbs when rejection is not Error', function(done) {
+    if (!('onunhandledrejection' in window)) { pending(); }
+
     sandbox
       .run(function() {
         var myPromise = new Promise(function (resolve, reject) {
