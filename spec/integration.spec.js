@@ -230,7 +230,7 @@ describe('browser integration', function() {
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].breadcrumbs[0].message).toEqual('window.onerror: Error');
+        expect(results.notices[0].breadcrumbs[0].message).toMatch('Error');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('error');
         expect(results.notices[0].breadcrumbs[0].metadata).toEqual(jasmine.objectContaining({
           message: 'expected message',
