@@ -150,8 +150,10 @@ describe('browser integration', function() {
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].breadcrumbs[0].message).toEqual('XMLHttpRequest');
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('GET /example/path');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
+        expect(results.notices[0].breadcrumbs[0].metadata.type).toEqual('xhr');
+        expect('message' in results.notices[0].breadcrumbs[0].metadata).toBe(false);
         done();
       })
       .catch(done);
@@ -170,9 +172,10 @@ describe('browser integration', function() {
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].breadcrumbs.length).toEqual(2);
-        // fetch polyfill uses XHR.
-        expect(results.notices[0].breadcrumbs[0].message).toEqual(nativeFetch() ? 'fetch' : 'XMLHttpRequest');
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('GET /example/path');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
+        // fetch polyfill uses XHR.
+        expect(results.notices[0].breadcrumbs[0].metadata.type).toEqual(nativeFetch() ? 'fetch' : 'xhr');
         done();
       })
       .catch(done);

@@ -1,5 +1,5 @@
 import sanitize from './util/sanitize.js';
-import { stringNameOfElement, nativeFetch } from './util/browser.js';
+import { stringNameOfElement, nativeFetch, localURLPathname } from './util/browser.js';
 
 export default function builder() {
   var VERSION = '__VERSION__',
@@ -548,10 +548,13 @@ export default function builder() {
           const xhr = this;
           const url = arguments[1];
           const method = typeof arguments[0] === 'string' ? arguments[0].toUpperCase() : arguments[0];
+          const message = `${method} ${localURLPathname(url)}`;
 
           this.__hb_xhr = {
+            type: 'xhr',
             method,
             url,
+            message,
           };
 
           if (typeof original === 'function') {
@@ -567,11 +570,15 @@ export default function builder() {
 
           function onreadystatechangeHandler() {
             if (xhr.readyState === 4) {
+              let message;
+
               if (xhr.__hb_xhr) {
                 xhr.__hb_xhr.status_code = xhr.status;
+                message = xhr.__hb_xhr.message;
+                delete xhr.__hb_xhr.message;
               }
 
-              self.addBreadcrumb('XMLHttpRequest', {
+              self.addBreadcrumb(message || 'XMLHttpRequest', {
                 category: 'request',
                 metadata: xhr.__hb_xhr,
               });
@@ -632,7 +639,9 @@ export default function builder() {
             method = method.toUpperCase();
           }
 
-          let metadata = {
+          const message = `${method} ${localURLPathname(url)}`;
+          const metadata = {
+            type: 'fetch',
             method,
             url,
           };
@@ -641,7 +650,7 @@ export default function builder() {
             .apply(this, arguments)
             .then(function(response) {
               metadata.status_code = response.status;
-              self.addBreadcrumb('fetch', {
+              self.addBreadcrumb(message, {
                 category: 'request',
                 metadata,
               });
