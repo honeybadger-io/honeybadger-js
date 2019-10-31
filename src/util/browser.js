@@ -41,31 +41,14 @@ function isNative(func) {
   return func.toString().indexOf('native') !== -1;
 }
 
-// Thanks Cory! (https://www.abeautifulsite.net/parsing-urls-in-javascript)
 export function parseURL(url) {
-  let parser = document.createElement('a'),
-    searchObject = {},
-    queries, split, i;
-
-  // Let the browser do the work
-  parser.href = url;
-
-  // Convert query string to object
-  queries = parser.search.replace(/^\?/, '').split('&');
-  for(i = 0; i < queries.length; i++) {
-    split = queries[i].split('=');
-    searchObject[split[0]] = split[1];
-  }
+  // Regexp: https://tools.ietf.org/html/rfc3986#appendix-B
+  const match = url.match(/^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?$/) || {};
 
   return {
-    protocol: parser.protocol,
-    host: parser.host,
-    hostname: parser.hostname,
-    port: parser.port,
-    pathname: parser.pathname,
-    search: parser.search,
-    searchObject: searchObject,
-    hash: parser.hash
+    protocol: match[2],
+    host: match[4],
+    pathname: match[5],
   };
 }
 
@@ -73,9 +56,14 @@ export function localURLPathname(url) {
   const parsed = parseURL(url);
   const parsedDocURL = parseURL(document.URL);
 
+  // URL must be relative
+  if (!parsed.host || parsed.protocol) { return parsed.pathname; }
+
+  // Same domain
   if (parsed.protocol === parsedDocURL.protocol && parsed.host === parsedDocURL.host) {
     return parsed.pathname;
   }
 
+  // x-domain
   return `${parsed.protocol}://${parsed.host}${parsed.pathname}`;
 }
