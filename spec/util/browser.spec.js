@@ -38,5 +38,20 @@ describe('utils/browser', () => {
         'button#expected_id'
       );
     });
+
+    it('includes parent elements', () => {
+      let body = document.createElement('body');
+      let div = document.createElement('div');
+      let element = document.createElement('button');
+
+      body.appendChild(div);
+      div.appendChild(element);
+
+      expect(
+        stringNameOfElement(element)
+      ).toEqual(
+        'body > div > button'
+      );
+    });
   });
 });

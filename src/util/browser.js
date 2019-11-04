@@ -4,12 +4,16 @@
  * @return {string}
  */
 export function stringNameOfElement(element) {
-  if (!element || !element.tagName) return '';
+  if (!element || !element.tagName) { return ''; }
 
   let name = element.tagName.toLowerCase();
 
   if (element.id) {
     name += `#${element.id}`;
+  }
+
+  if (element.parentNode && element.parentNode.tagName) {
+    return `${stringNameOfElement(element.parentNode)} > ${name}`;
   }
 
   return name;
