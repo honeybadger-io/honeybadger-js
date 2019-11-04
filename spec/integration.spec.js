@@ -127,8 +127,10 @@ describe('browser integration', function() {
       .then(function(results) {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].breadcrumbs[0].message).toEqual('html > body > div#buttonDivId > button#buttonId');
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('button#buttonId');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('ui.click');
+        expect(results.notices[0].breadcrumbs[0].metadata.targetSelector).toEqual('html > body > div#buttonDivId > button#buttonId');
+        expect(results.notices[0].breadcrumbs[0].metadata.targetText).toEqual('button text');
         done();
       })
       .catch(done);

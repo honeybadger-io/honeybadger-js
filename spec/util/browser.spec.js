@@ -1,4 +1,4 @@
-import { stringNameOfElement } from '../../src/util/browser.js';
+import { stringNameOfElement, stringSelectorOfElement, stringTextOfElement } from '../../src/util/browser.js';
 
 describe('utils/browser', () => {
   describe('stringNameOfElement', () => {
@@ -38,7 +38,9 @@ describe('utils/browser', () => {
         'button#expected_id'
       );
     });
+  });
 
+  describe('stringSelectorOfElement', () => {
     it('includes parent elements', () => {
       let body = document.createElement('body');
       let div = document.createElement('div');
@@ -48,9 +50,24 @@ describe('utils/browser', () => {
       div.appendChild(element);
 
       expect(
-        stringNameOfElement(element)
+        stringSelectorOfElement(element)
       ).toEqual(
         'body > div > button'
+      );
+    });
+  });
+
+  describe('stringTextOfElement', () => {
+    it('returns the text of the element', () => {
+      let element = document.createElement('div');
+      let node = document.createTextNode('expected text');
+
+      element.appendChild(node);
+
+      expect(
+        stringTextOfElement(element)
+      ).toEqual(
+        'expected text'
       );
     });
   });

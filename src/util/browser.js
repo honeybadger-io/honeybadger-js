@@ -12,11 +12,21 @@ export function stringNameOfElement(element) {
     name += `#${element.id}`;
   }
 
+  return name;
+}
+
+export function stringSelectorOfElement(element) {
+  const name = stringNameOfElement(element);
+
   if (element.parentNode && element.parentNode.tagName) {
-    return `${stringNameOfElement(element.parentNode)} > ${name}`;
+    return `${stringSelectorOfElement(element.parentNode)} > ${name}`;
   }
 
   return name;
+}
+
+export function stringTextOfElement(element) {
+  return (element.textContent || element.innerText || element.value || '').trim();
 }
 
 export function nativeFetch() {

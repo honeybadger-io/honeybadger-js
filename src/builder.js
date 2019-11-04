@@ -1,5 +1,5 @@
 import sanitize from './util/sanitize.js';
-import { stringNameOfElement, nativeFetch, localURLPathname } from './util/browser.js';
+import { stringNameOfElement, stringSelectorOfElement, stringTextOfElement, nativeFetch, localURLPathname } from './util/browser.js';
 
 export default function builder() {
   var VERSION = '__VERSION__',
@@ -525,17 +525,26 @@ export default function builder() {
     // Breadcrumbs: instrument click events
     (function() {
       window.addEventListener('click', (event) => {
-        let message;
+        let message, targetSelector, targetText;
         try {
           message = stringNameOfElement(event.target);
+          targetSelector = stringSelectorOfElement(event.target);
+          targetText = stringTextOfElement(event.target);
         } catch(e) {
-          message = '[unknown]';
+          message = 'UI Click';
+          targetSelector = '[unknown]';
+          targetText = '[unknown]';
         }
 
-        if (message.length === 0) return;
+        // There's nothing to display
+        if (message.length === 0) { return; };
 
         self.addBreadcrumb(message, {
           category: 'ui.click',
+          metadata: {
+            targetSelector,
+            targetText
+          },
         });
       }, true);
     })();
@@ -718,7 +727,7 @@ export default function builder() {
           try {
             return String(value);
           } catch (e) {
-            return '[UNKNOWN VALUE]';
+            return '[unknown]';
           }
         }).join(' ');
       }
