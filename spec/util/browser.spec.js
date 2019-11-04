@@ -38,6 +38,18 @@ describe('utils/browser', () => {
         'button#expected_id'
       );
     });
+
+    it('includes nth-child(i) when it has siblings', () => {
+      const container = document.createElement('button');
+      const element1 = document.createElement('button');
+      const element2 = document.createElement('button');
+
+      container.appendChild(element1);
+      container.appendChild(element2);
+
+      expect(stringNameOfElement(element1)).toEqual('button:nth-child(1)');
+      expect(stringNameOfElement(element2)).toEqual('button:nth-child(2)');
+    });
   });
 
   describe('stringSelectorOfElement', () => {

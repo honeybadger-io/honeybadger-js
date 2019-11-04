@@ -12,6 +12,11 @@ export function stringNameOfElement(element) {
     name += `#${element.id}`;
   }
 
+  const siblings = getSiblings(element);
+  if (siblings.length > 1) {
+    name += `:nth-child(${Array.prototype.indexOf.call(siblings, element) + 1})`;
+  }
+
   return name;
 }
 
@@ -80,4 +85,24 @@ export function localURLPathname(url) {
 
   // x-domain
   return `${parsed.protocol}://${parsed.host}${parsed.pathname}`;
+}
+
+
+// Helpers
+
+function getSiblings(element) {
+  try {
+    const nodes = element.parentNode.childNodes;
+    const siblings = [];
+
+    nodes.forEach(node => {
+      if (node.tagName && node.tagName === element.tagName) {
+        siblings.push(node);
+      }
+    });
+
+    return siblings;
+  } catch(e) {
+    return [];
+  }
 }
