@@ -129,8 +129,8 @@ describe('browser integration', function() {
         expect(results.notices[0].breadcrumbs.length).toEqual(2);
         expect(results.notices[0].breadcrumbs[0].message).toEqual('button#buttonId');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('ui.click');
-        expect(results.notices[0].breadcrumbs[0].metadata.targetSelector).toEqual('html > body > div#buttonDivId > button#buttonId');
-        expect(results.notices[0].breadcrumbs[0].metadata.targetText).toEqual('button text');
+        expect(results.notices[0].breadcrumbs[0].metadata.selector).toEqual('html > body > div#buttonDivId > button#buttonId');
+        expect(results.notices[0].breadcrumbs[0].metadata.text).toEqual('button text');
         done();
       })
       .catch(done);

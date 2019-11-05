@@ -525,15 +525,15 @@ export default function builder() {
     // Breadcrumbs: instrument click events
     (function() {
       window.addEventListener('click', (event) => {
-        let message, targetSelector, targetText;
+        let message, selector, text;
         try {
           message = stringNameOfElement(event.target);
-          targetSelector = stringSelectorOfElement(event.target);
-          targetText = stringTextOfElement(event.target);
+          selector = stringSelectorOfElement(event.target);
+          text = stringTextOfElement(event.target);
         } catch(e) {
           message = 'UI Click';
-          targetSelector = '[unknown]';
-          targetText = '[unknown]';
+          selector = '[unknown]';
+          text = '[unknown]';
         }
 
         // There's nothing to display
@@ -542,8 +542,9 @@ export default function builder() {
         self.addBreadcrumb(message, {
           category: 'ui.click',
           metadata: {
-            targetSelector,
-            targetText
+            selector,
+            text,
+            event,
           },
         });
       }, true);
