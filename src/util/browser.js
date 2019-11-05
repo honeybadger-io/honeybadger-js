@@ -109,7 +109,7 @@ function getSiblings(element) {
     const nodes = element.parentNode.childNodes;
     const siblings = [];
 
-    nodes.forEach(node => {
+    Array.prototype.forEach.call(nodes, node => {
       if (node.tagName && node.tagName === element.tagName) {
         siblings.push(node);
       }
