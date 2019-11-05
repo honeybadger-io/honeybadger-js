@@ -12,6 +12,13 @@ export function stringNameOfElement(element) {
     name += `#${element.id}`;
   }
 
+  ['alt', 'name', 'title', 'type'].forEach(attrName => {
+    let attr = element.getAttribute(attrName);
+    if (attr) {
+      name += `[${attrName}="${attr}"]`;
+    }
+  });
+
   const siblings = getSiblings(element);
   if (siblings.length > 1) {
     name += `:nth-child(${Array.prototype.indexOf.call(siblings, element) + 1})`;

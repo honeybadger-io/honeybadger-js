@@ -50,6 +50,29 @@ describe('utils/browser', () => {
       expect(stringNameOfElement(element1)).toEqual('button:nth-child(1)');
       expect(stringNameOfElement(element2)).toEqual('button:nth-child(2)');
     });
+
+    it('includes whitelisted attributes', () => {
+      let element = document.createElement('button');
+      element.setAttribute('alt', 'alt value');
+      element.setAttribute('name', 'name value');
+      element.setAttribute('title', 'title value');
+      element.setAttribute('type', 'type value');
+
+      expect(
+        stringNameOfElement(element)
+      ).toEqual(
+        'button[alt="alt value"][name="name value"][title="title value"][type="type value"]'
+      );
+    });
+
+    it('excludes non-whitelisted attributes', () => {
+      let element = document.createElement('button');
+      element.setAttribute('other', 'other value');
+
+      expect(
+        stringNameOfElement(element)
+      ).not.toMatch('other');
+    });
   });
 
   describe('stringSelectorOfElement', () => {
