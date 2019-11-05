@@ -73,6 +73,15 @@ describe('utils/browser', () => {
         stringNameOfElement(element)
       ).not.toMatch('other');
     });
+
+    it('includes CSS class names', () => {
+      let element = document.createElement('button');
+      element.setAttribute('class', 'foo bar baz');
+
+      expect(
+        stringNameOfElement(element)
+      ).toEqual('button.foo.bar.baz');
+    });
   });
 
   describe('stringSelectorOfElement', () => {

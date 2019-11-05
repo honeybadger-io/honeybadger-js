@@ -12,6 +12,13 @@ export function stringNameOfElement(element) {
     name += `#${element.id}`;
   }
 
+  const stringClassNames = element.getAttribute('class');
+  if (stringClassNames) {
+    stringClassNames.split(/\s+/).forEach(className => {
+      name += `.${className}`;
+    });
+  }
+
   ['alt', 'name', 'title', 'type'].forEach(attrName => {
     let attr = element.getAttribute(attrName);
     if (attr) {
