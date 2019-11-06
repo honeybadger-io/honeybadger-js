@@ -1,7 +1,6 @@
 # Honeybadger Client-Side Javascript Library
 
 [![CircleCI](https://circleci.com/gh/honeybadger-io/honeybadger-js.svg?style=svg)](https://circleci.com/gh/honeybadger-io/honeybadger-js)
-[![Build Status](https://app.saucelabs.com/buildstatus/honeybadger_os)](https://app.saucelabs.com/builds/16ac6c22e2ea4140b3051bf21fb579da)
 
 A client-side JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io). For server-side javascript, check out our [NodeJS library](https://github.com/honeybadger-io/honeybadger-node).
 
@@ -25,8 +24,8 @@ See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
 
 1. Run `npm install`.
 2. To run the test suite by itself, use `npm test`.
-3. To run the tests across all supported platforms, set up a [Sauce Labs](https://saucelabs.com/)
-account and use `SAUCE_USERNAME=your_username SAUCE_ACCESS_KEY=your-access-key npm run test:ci`.
+3. To run the tests across all supported platforms, set up a [BrowserStack](https://www.browserstack.com/)
+account and use `BROWSERSTACK_USERNAME=your_username BROWSERSTACK_ACCESS_KEY=your-access-key npm run test:ci`.
 
 ## Releasing
 

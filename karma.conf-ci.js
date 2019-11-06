@@ -2,48 +2,55 @@ module.exports = function(config) {
 
   // Browsers to run on Sauce Labs
   var customLaunchers = {
-    'SL_Safari': {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'macOS 10.14',
-      version: 'latest'
+    bs_safari: {
+      base: 'BrowserStack',
+      browser: 'Safari',
+      browser_version: 'latest',
+      os: 'OS X',
+      os_version: 'Mojave'
     },
-    'SL_Chrome': {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      version: 'latest',
-      platform: 'Windows 10'
+    bs_chrome: {
+      base: 'BrowserStack',
+      browser: 'Chrome',
+      browser_version: 'latest',
+      os: 'Windows',
+      os_version: '10'
     },
-    'SL_Firefox': {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      version: '64.0',
-      platform: 'Windows 10'
+    bs_firefox: {
+      base: 'BrowserStack',
+      browser: 'Firefox',
+      browser_version: '64.0',
+      os: 'Windows',
+      os_version: '10'
     },
-    'SL_Edge': {
-      base: 'SauceLabs',
-      browserName: 'MicrosoftEdge',
-      platform: 'Windows 10'
+    bs_edge: {
+      base: 'BrowserStack',
+      browser: 'Edge',
+      os: 'Windows',
+      os_version: '10'
     },
-    'SL_InternetExplorer': {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      version: '11.0',
-      platform: 'Windows 8.1'
+    bs_ie11: {
+      base: 'BrowserStack',
+      browser: 'IE',
+      browser_version: '11',
+      os: 'Windows',
+      os_version: '8.1'
     },
-    'SL_InternetExplorer': {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      version: '10.0',
-      platform: 'Windows 8'
-    }
+    bs_ie10: {
+      base: 'BrowserStack',
+      browser: 'IE',
+      browser_version: '10',
+      os: 'Windows',
+      os_version: '8'
+    },
   };
 
   config.set({
-
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
+    // Required for BrowserStack
+    hostname: 'bs-local.com',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
@@ -90,7 +97,7 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['dots', 'saucelabs'],
+    reporters: ['dots', 'BrowserStack'],
 
 
     // web server port
@@ -102,10 +109,6 @@ module.exports = function(config) {
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
 
-    sauceLabs: {
-      testName: 'honeybadger.js karma runner'
-    },
-    captureTimeout: 120000,
     customLaunchers: customLaunchers,
 
     // start these browsers
@@ -115,6 +118,13 @@ module.exports = function(config) {
     singleRun: true,
     autoWatch: false,
 
-    concurrency: 2
+    concurrency: 2,
+
+    browserDisconnectTolerance: 5,
+    retryLimit: 5,
+
+    browserSocketTimeout: 120000,
+    browserNoActivityTimeout: 120000,
+    captureTimeout: 120000,
   });
 };

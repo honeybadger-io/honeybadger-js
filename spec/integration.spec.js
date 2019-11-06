@@ -195,7 +195,8 @@ describe('browser integration', function() {
         expect(results.notices[0].breadcrumbs[0].message).toEqual('Page changed');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('navigation');
         expect(results.notices[0].breadcrumbs[0].metadata).toEqual({
-          from: 'http://localhost:9876/base/spec/sandbox.html',
+          // The hostname is different when running locally vs. in CI.
+          from: jasmine.stringMatching(/http:\/\/.+:9876\/base\/spec\/sandbox\.html/),
           to: 'foo.html'
         });
         done();
