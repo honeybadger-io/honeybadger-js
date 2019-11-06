@@ -116,15 +116,23 @@ describe('utils/browser', () => {
     });
 
     it('truncates long strings', () => {
+      function repeat(string, num) {
+        let result = string;
+        for (let i = 1; i < num; i++) {
+          result += string;
+        }
+        return result;
+      }
+
       const element = document.createElement('div');
-      const node = document.createTextNode('*'.repeat(400));
+      const node = document.createTextNode(repeat('*', 400));
 
       element.appendChild(node);
 
       expect(
         stringTextOfElement(element)
       ).toEqual(
-        '*'.repeat(300) + '...'
+        repeat('*', 300) + '...'
       );
     });
   });
