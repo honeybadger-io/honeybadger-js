@@ -59,3 +59,7 @@ re-run the release manually with `npm run release-cdn`.
 ## License
 
 The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
+
+---
+<p><a href="https://www.browserstack.com/"><img src="/browserstack-logo.png" width="150"></a><br>
+ <small>We use <a href="https://www.browserstack.com/">BrowserStack</a> to run our automated integration tests on multiple platforms in CI.</small></p>
