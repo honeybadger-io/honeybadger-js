@@ -114,5 +114,18 @@ describe('utils/browser', () => {
         'expected text'
       );
     });
+
+    it('truncates long strings', () => {
+      const element = document.createElement('div');
+      const node = document.createTextNode('*'.repeat(400));
+
+      element.appendChild(node);
+
+      expect(
+        stringTextOfElement(element)
+      ).toEqual(
+        '*'.repeat(300) + '...'
+      );
+    });
   });
 });

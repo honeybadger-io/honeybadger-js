@@ -45,7 +45,7 @@ export function stringSelectorOfElement(element) {
 }
 
 export function stringTextOfElement(element) {
-  return (element.textContent || element.innerText || element.value || '').trim();
+  return truncate((element.textContent || element.innerText || element.value || '').trim(), 300);
 }
 
 export function nativeFetch() {
@@ -119,4 +119,11 @@ function getSiblings(element) {
   } catch(e) {
     return [];
   }
+}
+
+function truncate(string, length) {
+  if (string.length > length) {
+    string = string.substr(0, length) + '...';
+  }
+  return string;
 }
