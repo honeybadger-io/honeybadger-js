@@ -118,7 +118,7 @@ module.exports = function(config) {
     singleRun: true,
     autoWatch: false,
 
-    concurrency: 2,
+    concurrency: 5,
 
     browserDisconnectTolerance: 5,
     retryLimit: 5,
