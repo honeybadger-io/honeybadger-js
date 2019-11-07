@@ -86,10 +86,12 @@ describe('utils/browser', () => {
 
   describe('stringSelectorOfElement', () => {
     it('includes parent elements', () => {
+      let html = document.createElement('html');
       let body = document.createElement('body');
       let div = document.createElement('div');
       let element = document.createElement('button');
 
+      html.appendChild(body);
       body.appendChild(div);
       div.appendChild(element);
 

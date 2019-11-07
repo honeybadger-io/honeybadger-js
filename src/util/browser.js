@@ -8,6 +8,9 @@ export function stringNameOfElement(element) {
 
   let name = element.tagName.toLowerCase();
 
+  // Ignore the root <html> element in selectors and events.
+  if (name === 'html') { return ''; }
+
   if (element.id) {
     name += `#${element.id}`;
   }
@@ -38,7 +41,10 @@ export function stringSelectorOfElement(element) {
   const name = stringNameOfElement(element);
 
   if (element.parentNode && element.parentNode.tagName) {
-    return `${stringSelectorOfElement(element.parentNode)} > ${name}`;
+    const parentName = stringSelectorOfElement(element.parentNode);
+    if (parentName.length > 0) {
+      return `${parentName} > ${name}`;
+    }
   }
 
   return name;
