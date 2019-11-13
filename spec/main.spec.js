@@ -1,4 +1,4 @@
-import Honeybadger from '..'
+import Honeybadger from '..';
 
 const url = 'global';
 
@@ -141,7 +141,7 @@ describe('Honeybadger', function() {
       });
 
       try {
-        throw new Error("Testing");
+        throw new Error('Testing');
       } catch (e) {
         Honeybadger.notify(e);
       }
@@ -157,7 +157,7 @@ describe('Honeybadger', function() {
       });
 
       try {
-        throw new Error("Testing");
+        throw new Error('Testing');
       } catch (e) {
         Honeybadger.notify(e);
       }
@@ -173,7 +173,7 @@ describe('Honeybadger', function() {
       });
 
       try {
-        throw new Error("Testing");
+        throw new Error('Testing');
       } catch (e) {
         Honeybadger.notify(e);
       }
@@ -185,7 +185,7 @@ describe('Honeybadger', function() {
 
     it('does not deliver notice when not configured', function(done) {
       try {
-        throw new Error("Testing");
+        throw new Error('Testing');
       } catch (e) {
         Honeybadger.notify(e);
       }
@@ -202,7 +202,7 @@ describe('Honeybadger', function() {
       });
 
       try {
-        throw new Error("Testing");
+        throw new Error('Testing');
       } catch (e) {
         Honeybadger.notify(e);
       }
@@ -233,7 +233,7 @@ describe('Honeybadger', function() {
         ignorePatterns: [/care/i]
       });
 
-      var notice = Honeybadger.notify("Honeybadger don't care, but you might.");
+      var notice = Honeybadger.notify('Honeybadger don\'t care, but you might.');
 
       afterNotify(done, function() {
         expect(requests.length).toEqual(0);
@@ -247,7 +247,7 @@ describe('Honeybadger', function() {
 
       for(var i=0; i<3; i++) {
         try {
-          throw new Error("Testing " + (i+1));
+          throw new Error('Testing ' + (i+1));
         } catch (e) {
           Honeybadger.notify(e);
         }
@@ -266,7 +266,7 @@ describe('Honeybadger', function() {
 
       for(var i=0; i<3; i++) {
         try {
-          throw new Error("Testing " + (i+1));
+          throw new Error('Testing ' + (i+1));
         } catch (e) {
           Honeybadger.notify(e);
         }
@@ -276,7 +276,7 @@ describe('Honeybadger', function() {
 
       for(var i=0; i<3; i++) {
         try {
-          throw new Error("Testing " + (i+1));
+          throw new Error('Testing ' + (i+1));
         } catch (e) {
           Honeybadger.notify(e);
         }
@@ -295,7 +295,7 @@ describe('Honeybadger', function() {
 
       for(var i=0; i<3; i++) {
         try {
-          throw new Error("Testing " + (i+1));
+          throw new Error('Testing ' + (i+1));
         } catch (e) {
           Honeybadger.notify(e);
         }
@@ -401,7 +401,7 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      Honeybadger.notify("testing", {
+      Honeybadger.notify('testing', {
         params: {
           foo: 'bar'
         }
@@ -418,7 +418,7 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      Honeybadger.notify("testing", {
+      Honeybadger.notify('testing', {
         cookies: 'foo=bar'
       });
 
@@ -433,7 +433,7 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      Honeybadger.notify("testing", {
+      Honeybadger.notify('testing', {
         cookies: {
           foo: 'bar'
         }
@@ -469,7 +469,7 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      var err = new Error("Testing");
+      var err = new Error('Testing');
       err.component = 'expected component';
 
       try {
@@ -489,10 +489,10 @@ describe('Honeybadger', function() {
         api_key: 'asdf'
       });
 
-      var err = new Error("Testing");
+      var err = new Error('Testing');
       err.context = {
         foo: 'foo'
-      }
+      };
 
       try {
         throw err;
@@ -512,7 +512,7 @@ describe('Honeybadger', function() {
       });
 
       try {
-        throw new Error("Testing");
+        throw new Error('Testing');
       } catch (e) {
         Honeybadger.notify(e);
       }
@@ -534,7 +534,7 @@ describe('Honeybadger', function() {
     it('notifies Honeybadger of errors and re-throws', function(done) {
       var error, func, caughtError;
 
-      error = new Error("Testing");
+      error = new Error('Testing');
       func = function() {
         throw(error);
       };
@@ -560,7 +560,7 @@ describe('Honeybadger', function() {
     }
 
     it('returns the same function when wrapping itself', function() {
-      var f = function() {}
+      var f = function() {};
       var w = Honeybadger.wrap;
 
       expect(w(w(f))).toEqual(w(f));
@@ -714,7 +714,7 @@ describe('Honeybadger', function() {
         notice.context = { expected_context_key: 'expected value' },
         notice.params = { expected_params_key: 'expected value' },
         notice.cookies = 'expected cookie value';
-        notice.revision = 'expected revision'
+        notice.revision = 'expected revision';
       });
 
       Honeybadger.notify('notify message');
@@ -767,105 +767,6 @@ describe('Honeybadger', function() {
         expect(request.payload.error.generator).toEqual(undefined);
       });
     });
-  });
-
-  describe('JSON encoding', function() {
-    beforeEach(function() {
-      Honeybadger.configure({
-        api_key: 'asdf'
-      });
-    });
-
-    it('drops undefined values', function(done) {
-      Honeybadger.notify("testing", {
-        context: {
-          foo: void 0,
-          bar: 'baz'
-        }
-      });
-
-      afterNotify(done, function() {
-        expect(requests.length).toEqual(1);
-        expect(request.payload.request.context).toEqual({bar: 'baz'});
-      });
-    });
-
-    it('drops function values', function(done) {
-      Honeybadger.notify("testing", {
-        context: {
-          foo: function() {},
-          bar: 'baz'
-        }
-      });
-
-      afterNotify(done, function() {
-        expect(requests.length).toEqual(1);
-        expect(request.payload.request.context).toEqual({foo: '[object Function]', bar: 'baz'});
-      });
-    });
-
-    it('enforces configured max depth', function(done) {
-      Honeybadger.notify("testing", {
-        context: {
-          one: { two: { three: { four: { five: { six: { seven: { eight: { nine: 'nine' }}}}}}}}
-        }
-      });
-
-      afterNotify(done, function() {
-        expect(requests.length).toEqual(1);
-        expect(request.payload.request.context).toEqual(
-          {one: { two: { three: { four: { five: { six: '[MAX DEPTH REACHED]'}}}}}}
-        );
-      });
-    });
-
-    if (typeof Object.create === 'function') {
-      it('handles objects without prototypes as values', function(done) {
-        var obj = Object.create(null);
-
-        Honeybadger.notify("Test error message", {
-          context: {
-            key: obj,
-          }
-        });
-
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(request.payload.request.context).toEqual({key: '[object Object]'});
-        });
-      });
-    }
-
-    if (typeof Symbol === 'function') {
-      it('serializes symbol values', function(done) {
-        var sym = Symbol();
-
-        Honeybadger.notify("testing", {
-          context: {
-            key: sym,
-          }
-        });
-
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(request.payload.request.context).toEqual({key: '[object Symbol]'});
-        });
-      });
-
-      it('drops symbol keys', function(done) {
-        var sym = Symbol();
-        var context = {};
-
-        context[sym] = 'value';
-
-        Honeybadger.notify("testing", { context: context });
-
-        afterNotify(done, function() {
-          expect(requests.length).toEqual(1);
-          expect(request.payload.request.context).toEqual({});
-        });
-      });
-    }
   });
 
   describe('window.onerror callback', function() {
@@ -956,11 +857,11 @@ describe('Honeybadger', function() {
       });
 
       it('reports the promise rejection reason when it is a string', function(done) {
-        let reason = 'Something has gone wrong'
+        let reason = 'Something has gone wrong';
         let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
           promise: Promise.reject(reason),
           reason
-        })
+        });
         window.onunhandledrejection(promiseRejection);
 
         afterNotify(done, function() {
@@ -972,12 +873,12 @@ describe('Honeybadger', function() {
       });
 
       it('reports the promise rejection reason when it is an Error object', function(done) {
-        let reason = new Error('Something has gone wrong')
-        reason.stack = "the stack trace"
+        let reason = new Error('Something has gone wrong');
+        reason.stack = 'the stack trace';
         let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
           promise: Promise.reject(reason),
           reason
-        })
+        });
         window.onunhandledrejection(promiseRejection);
 
         afterNotify(done, function() {
@@ -989,28 +890,28 @@ describe('Honeybadger', function() {
       });
 
       it('supplements the stack when the promise rejection reason is an Error but does not have one', function(done) {
-        let reason = new Error('Something has gone wrong')
-        reason.stack = undefined
-        reason.fileName = 'file.js'
-        reason.lineNumber = 25
+        let reason = new Error('Something has gone wrong');
+        reason.stack = undefined;
+        reason.fileName = 'file.js';
+        reason.lineNumber = 25;
         let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
           promise: Promise.reject(reason),
           reason
-        })
+        });
         window.onunhandledrejection(promiseRejection);
 
         afterNotify(done, function() {
           expect(requests.length).toEqual(1);
-          expect(request.payload.error.backtrace).toContain('Something has gone wrong\n    at ? (file.js:25)')
+          expect(request.payload.error.backtrace).toContain('Something has gone wrong\n    at ? (file.js:25)');
         });
       });
 
       it('reports the promise rejection reason when it is a custom object', function(done) {
-        let reason = { errorCode: '123' }
+        let reason = { errorCode: '123' };
         let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
           promise: Promise.reject(reason),
           reason
-        })
+        });
         window.onunhandledrejection(promiseRejection);
 
         afterNotify(done, function() {
@@ -1030,11 +931,11 @@ describe('Honeybadger', function() {
         });
 
         it('ignores unhandled promise rejections', function(done) {
-          let reason = 'Something has gone wrong'
+          let reason = 'Something has gone wrong';
           let promiseRejection = new PromiseRejectionEvent('unhandledrejection', {
             promise: Promise.reject(reason),
             reason
-          })
+          });
           window.onunhandledrejection(promiseRejection);
 
           afterNotify(done, function() {
@@ -1042,12 +943,98 @@ describe('Honeybadger', function() {
           });
         });
       });
-    })
-  })
+    });
+  });
 
   describe('getVersion', function() {
     it('returns the current version', function() {
-      expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/)
+      expect(Honeybadger.getVersion()).toMatch(/\d\.\d\.\d/);
+    });
+  });
+
+  describe('addBreadcrumb', function() {
+    beforeEach(function() {
+      Honeybadger.configure({
+        api_key: 'asdf',
+        breadcrumbsEnabled: true,
+      });
+    });
+
+    it('has default breadcrumbs', function() {
+      expect(Honeybadger.breadcrumbs).toEqual([]);
+    });
+
+    it('adds a breadcrumb with defaults', function() {
+      Honeybadger.addBreadcrumb('expected message');
+
+      expect(Honeybadger.breadcrumbs.length).toBe(1);
+
+      const crumb = Honeybadger.breadcrumbs[0];
+
+      expect(crumb.message).toEqual('expected message');
+      expect(crumb.category).toEqual('custom');
+      expect(crumb.metadata).toEqual({});
+      expect(crumb.timestamp).toEqual(jasmine.any(String));
+    });
+
+    it('overrides the default category', function() {
+      Honeybadger.addBreadcrumb('message', {
+        category: 'test'
+      });
+
+      expect(Honeybadger.breadcrumbs.length).toBe(1);
+      expect(Honeybadger.breadcrumbs[0].category).toEqual('test');
+    });
+
+    it('overrides the default metadata', function() {
+      Honeybadger.addBreadcrumb('message', {
+        metadata: {
+          key: 'expected value'
+        }
+      });
+
+      expect(Honeybadger.breadcrumbs.length).toBe(1);
+      expect(Honeybadger.breadcrumbs[0].metadata).toEqual({
+        key: 'expected value'
+      });
+    });
+
+    it('maintains the size of the breadcrumbs queue', function() {
+      for (let i=0; i<=45; i++) {
+        Honeybadger.addBreadcrumb('expected message ' + i);
+      }
+
+      expect(Honeybadger.breadcrumbs.length).toBe(40);
+
+      expect(Honeybadger.breadcrumbs[0].message).toEqual('expected message 6');
+      expect(Honeybadger.breadcrumbs[39].message).toEqual('expected message 45');
+    });
+
+    it('sends breadcrumbs when enabled', function(done) {
+      Honeybadger.addBreadcrumb('expected message');
+      Honeybadger.notify('message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toBe(1);
+        expect(request.payload.breadcrumbs.enabled).toBe(true);
+        expect(request.payload.breadcrumbs.trail.length).toBe(2);
+        expect(request.payload.breadcrumbs.trail[0].message).toEqual('expected message');
+      });
+    });
+
+    it('sends empty breadcrumbs when disabled', function(done) {
+      Honeybadger.configure({
+        breadcrumbsEnabled: false,
+      });
+
+      Honeybadger.addBreadcrumb('message');
+      Honeybadger.notify('message');
+
+      afterNotify(done, function() {
+        expect(requests.length).toBe(1);
+        expect(request.payload.breadcrumbs.enabled).toBe(false);
+        expect(request.payload.breadcrumbs.trail).toEqual([]);
+      });
     });
   });
 });

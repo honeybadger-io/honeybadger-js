@@ -1,7 +1,10 @@
+import sanitize from './util/sanitize.js';
+import { stringNameOfElement, stringSelectorOfElement, stringTextOfElement, nativeFetch, localURLPathname } from './util/browser.js';
+
 export default function builder() {
   var VERSION = '__VERSION__',
       NOTIFIER = {
-        name: 'honeybadger.js',
+        name: 'honeybadger-js',
         url: 'https://github.com/honeybadger-io/honeybadger-js',
         version: VERSION,
         language: 'javascript'
@@ -76,7 +79,7 @@ export default function builder() {
   function stackTrace(err) {
     // From TraceKit: Opera 10 *destroys* its stacktrace property if you try to
     // access the stack property first.
-    return err.stacktrace || err.stack || undefined
+    return err.stacktrace || err.stack || undefined;
   }
 
   function generateStackTrace(err) {
@@ -146,8 +149,9 @@ export default function builder() {
     var self = {
       context: {},
       beforeNotifyHandlers: [],
-      errorsSent: 0
-    }
+      breadcrumbs: [],
+      errorsSent: 0,
+    };
     if (typeof opts === 'object') {
       for (var k in opts) { self[k] = opts[k]; }
     }
@@ -169,7 +173,7 @@ export default function builder() {
 
     function config(key, fallback) {
       var value = self[key];
-      if (value === undefined) { value = self[key.toLowerCase()] }
+      if (value === undefined) { value = self[key.toLowerCase()]; }
       if (value === 'false') { value = false; }
       if (value !== undefined) { return value; }
       return fallback;
@@ -185,35 +189,12 @@ export default function builder() {
       return config('onunhandledrejection', true);
     }
 
+    function breadcrumbsEnabled() {
+      return config('breadcrumbsEnabled', false);
+    }
+
     function baseURL() {
       return 'http' + ((config('ssl', true) && 's') || '') + '://' + config('host', 'api.honeybadger.io');
-    }
-
-    function canSerialize(obj) {
-      // Functions are TMI and Symbols can't convert to strings.
-      if (/function|symbol/.test(typeof(obj))) { return false; }
-
-      // No prototype, likely created with `Object.create(null)`.
-      if (typeof obj === 'object' && typeof obj.hasOwnProperty === 'undefined') { return false; }
-
-      return true;
-    }
-
-    function serialize(obj, depth) {
-      var k, v, ret;
-      ret = {};
-      if (!depth) { depth = 0; }
-      if (depth >= config('max_depth', 8)) {
-        return '[MAX DEPTH REACHED]';
-      }
-      for (k in obj) {
-        v = obj[k];
-        if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
-          if (!canSerialize(v)) { v = Object.prototype.toString.call(v); }
-          ret[k] = (typeof v === 'object' ? serialize(v, depth+1) : v);
-        }
-      }
-      return ret;
     }
 
     function request(apiKey, payload) {
@@ -225,7 +206,7 @@ export default function builder() {
         x.setRequestHeader('Content-Type', 'application/json');
         x.setRequestHeader('Accept', 'text/json, application/json');
 
-        x.send(JSON.stringify(serialize(payload)));
+        x.send(JSON.stringify(sanitize(payload, config('max_depth', 8))));
       } catch(err) {
         log('Unable to send error report: error while initializing request', err, payload);
       }
@@ -262,7 +243,7 @@ export default function builder() {
 
       if (Object.prototype.toString.call(err) === '[object Error]') {
         var e = err;
-        err = merge(err, {name: e.name, message: e.message, stack: stackTrace(e)})
+        err = merge(err, {name: e.name, message: e.message, stack: stackTrace(e)});
       }
 
       if (!(typeof err === 'object')) {
@@ -297,6 +278,17 @@ export default function builder() {
         revision: err.revision || config('revision')
       });
 
+      self.addBreadcrumb('Honeybadger Notice', {
+        category: 'notice',
+        metadata: {
+          message: err.message,
+          name: err.name,
+          stack: err.stack
+        }
+      });
+
+      err.breadcrumbs = self.breadcrumbs.slice();
+
       let stack_before_handlers = err.stack;
       if (checkHandlers(self.beforeNotifyHandlers, err)) { return false; }
       if (err.stack != stack_before_handlers) {
@@ -315,6 +307,10 @@ export default function builder() {
 
       var payload = {
         'notifier': NOTIFIER,
+        'breadcrumbs': {
+          'enabled': breadcrumbsEnabled(),
+          'trail': err.breadcrumbs,
+        },
         'error': {
           'class': err.name,
           'message': err.message,
@@ -369,7 +365,8 @@ export default function builder() {
 
     // wrap always returns the same function so that callbacks can be removed via
     // removeEventListener.
-    function wrap(fn, force) {
+    function wrap(fn, opts) {
+      if (!opts) { opts = {}; }
       try {
         if (typeof fn !== 'function') { return fn; }
         if (!objectIsExtensible(fn))  { return fn; }
@@ -378,12 +375,24 @@ export default function builder() {
             var onerror = onErrorEnabled();
             // Don't catch if the browser is old or supports the new error
             // object and there is a window.onerror handler available instead.
-            if ((preferCatch && (onerror || force)) || (force && !onerror)) {
+            if ((preferCatch && (onerror || opts.force)) || (opts.force && !onerror)) {
               try {
                 return fn.apply(this, arguments);
-              } catch (e) {
-                notify(e);
-                throw(e);
+              } catch (err) {
+                let generated = { stack: stackTrace(err) };
+                self.addBreadcrumb(
+                  opts.component ? `${opts.component}: ${err.name}` : err.name,
+                  {
+                    category: 'error',
+                    metadata: {
+                      message: err.message,
+                      name: err.name,
+                      stack: generated.stack
+                    }
+                  }
+                );
+                notify(err, generated);
+                throw(err);
               }
             } else {
               return fn.apply(this, arguments);
@@ -403,7 +412,7 @@ export default function builder() {
 
       if (Object.prototype.toString.call(err) === '[object Error]') {
         var e = err;
-        err = merge(err, {name: e.name, message: e.message, stack: stackTrace(e)})
+        err = merge(err, {name: e.name, message: e.message, stack: stackTrace(e)});
       }
 
       if (!(typeof err === 'object')) {
@@ -427,7 +436,7 @@ export default function builder() {
     };
 
     self.wrap = function(func) {
-      return wrap(func, true);
+      return wrap(func, { force: true });
     };
 
     self.setContext = function(context) {
@@ -462,6 +471,7 @@ export default function builder() {
     self.reset = function() {
       self.context = {};
       self.beforeNotifyHandlers = [];
+      self.breadcrumbs = [];
       for (var k in self) {
         if (indexOf.call(defaultProps, k) == -1) {
           self[k] = undefined;
@@ -477,51 +487,317 @@ export default function builder() {
 
     self.getVersion = function() {
       return VERSION;
-    }
+    };
+
+    self.addBreadcrumb = function(message, opts) {
+      if (!breadcrumbsEnabled()) return;
+
+      opts = opts || {};
+
+      const metadata = opts.metadata || undefined;
+      const category = opts.category || 'custom';
+      const timestamp = new Date().toISOString();
+
+      self.breadcrumbs.push({
+        category: category,
+        message: message,
+        metadata: metadata || {},
+        timestamp: timestamp,
+      });
+
+      const limit = config('maxBreadcrumbs', 40);
+      if (self.breadcrumbs.length > limit) {
+        self.breadcrumbs = self.breadcrumbs.slice(self.breadcrumbs.length - limit);
+      }
+
+      return self;
+    };
 
     // Install instrumentation.
     // This should happen once for the first factory call.
     function instrument(object, name, replacement) {
       if (notSingleton) { return; }
-      if (!object || !name || !replacement) { return; }
+      if (!object || !name || !replacement || !(name in object)) { return; }
       var original = object[name];
       object[name] = replacement(original);
     }
 
-    var instrumentTimer = function(original) {
-      // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
-      return function(func, delay) {
-        if (typeof func === 'function') {
-          var args = Array.prototype.slice.call(arguments, 2);
-          func = wrap(func);
-          return original(function() {
-            func.apply(null, args);
-          }, delay);
-        } else {
-          return original(func, delay);
+    // Breadcrumbs: instrument click events
+    (function() {
+      window.addEventListener('click', (event) => {
+        let message, selector, text;
+        try {
+          message = stringNameOfElement(event.target);
+          selector = stringSelectorOfElement(event.target);
+          text = stringTextOfElement(event.target);
+        } catch(e) {
+          message = 'UI Click';
+          selector = '[unknown]';
+          text = '[unknown]';
         }
-      }
-    };
-    instrument(window, 'setTimeout', instrumentTimer);
-    instrument(window, 'setInterval', instrumentTimer);
 
+        // There's nothing to display
+        if (message.length === 0) { return; };
+
+        self.addBreadcrumb(message, {
+          category: 'ui.click',
+          metadata: {
+            selector,
+            text,
+            event,
+          },
+        });
+      }, true);
+    })();
+
+    // Breadcrumbs: instrument XMLHttpRequest
+    (function() {
+      // -- On xhr.open: capture initial metadata
+      instrument(XMLHttpRequest.prototype, 'open', function(original) {
+        return function() {
+          const xhr = this;
+          const url = arguments[1];
+          const method = typeof arguments[0] === 'string' ? arguments[0].toUpperCase() : arguments[0];
+          const message = `${method} ${localURLPathname(url)}`;
+
+          this.__hb_xhr = {
+            type: 'xhr',
+            method,
+            url,
+            message,
+          };
+
+          if (typeof original === 'function') {
+            original.apply(xhr, arguments);
+          }
+        };
+      });
+
+      // -- On xhr.send: set up xhr.onreadystatechange to report breadcrumb
+      instrument(XMLHttpRequest.prototype, 'send', function(original) {
+        return function() {
+          const xhr = this;
+
+          function onreadystatechangeHandler() {
+            if (xhr.readyState === 4) {
+              let message;
+
+              if (xhr.__hb_xhr) {
+                xhr.__hb_xhr.status_code = xhr.status;
+                message = xhr.__hb_xhr.message;
+                delete xhr.__hb_xhr.message;
+              }
+
+              self.addBreadcrumb(message || 'XMLHttpRequest', {
+                category: 'request',
+                metadata: xhr.__hb_xhr,
+              });
+            }
+          }
+
+          if ('onreadystatechange' in xhr && typeof xhr.onreadystatechange === 'function') {
+            instrument(xhr, 'onreadystatechange', function(original) {
+              return function() {
+                onreadystatechangeHandler();
+
+                if (typeof original === 'function') {
+                  original.apply(this, arguments);
+                }
+              };
+            });
+          } else {
+            xhr.onreadystatechange = onreadystatechangeHandler;
+          }
+
+          if (typeof original === 'function') {
+            original.apply(xhr, arguments);
+          }
+        };
+      });
+    })();
+
+    // Breadcrumbs: instrument fetch
+    (function() {
+      if (!nativeFetch()) {
+        // Polyfills use XHR.
+        return;
+      }
+
+      instrument(window, 'fetch', function(original) {
+        return function() {
+          const input = arguments[0];
+
+          let method = 'GET';
+          let url;
+
+          if (typeof input === 'string') {
+            url = input;
+          } else if ('Request' in window && input instanceof Request) {
+            url = input.url;
+            if (input.method) {
+              method = input.method;
+            }
+          } else {
+            url = String(input);
+          }
+
+          if (arguments[1] && arguments[1].method) {
+            method = arguments[1].method;
+          }
+
+          if (typeof method === 'string') {
+            method = method.toUpperCase();
+          }
+
+          const message = `${method} ${localURLPathname(url)}`;
+          const metadata = {
+            type: 'fetch',
+            method,
+            url,
+          };
+
+          return original
+            .apply(this, arguments)
+            .then(function(response) {
+              metadata.status_code = response.status;
+              self.addBreadcrumb(message, {
+                category: 'request',
+                metadata,
+              });
+              return response;
+            })
+            .catch(function(error) {
+              self.addBreadcrumb('fetch error', {
+                category: 'error',
+                metadata,
+              });
+
+              throw error;
+            });
+        };
+      });
+    })();
+
+    // Breadcrumbs: instrument navigation
+    (function() {
+      // The last known href of the current page
+      let lastHref = window.location.href;
+
+      function recordUrlChange(from, to) {
+        lastHref = to;
+        self.addBreadcrumb('Page changed', {
+          category: 'navigation',
+          metadata: {
+            from,
+            to,
+          },
+        });
+      }
+
+      // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
+      instrument(window, 'onpopstate', function(original) {
+        return function() {
+          recordUrlChange(lastHref, window.location.href);
+          if (original) {
+            return original.apply(this, arguments);
+          }
+        };
+      });
+
+      // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+      // https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
+      function historyWrapper(original) {
+        return function() {
+          const url = arguments.length > 2 ? arguments[2] : undefined;
+          if (url) {
+            recordUrlChange(lastHref, String(url));
+          }
+          return original.apply(this, arguments);
+        };
+      }
+      instrument(window.history, 'pushState', historyWrapper);
+      instrument(window.history, 'replaceState', historyWrapper);
+    })();
+
+    // Breadcrumbs: instrument console
+    (function() {
+      function inspectArray(obj) {
+        if (!Array.isArray(obj)) { return ''; }
+
+        return obj.map(value => {
+          try {
+            return String(value);
+          } catch (e) {
+            return '[unknown]';
+          }
+        }).join(' ');
+      }
+
+      ['debug', 'info', 'warn', 'error', 'log'].forEach(level => {
+        instrument(window.console, level, function(original) {
+          return function() {
+            const args = Array.prototype.slice.call(arguments);
+            const message = inspectArray(args);
+            const opts = {
+              category: 'log',
+              metadata: {
+                level: level,
+                arguments: sanitize(args, 3),
+              },
+            };
+
+            self.addBreadcrumb(message, opts);
+
+            if (typeof original === 'function') {
+              Function.prototype.apply.call(original, window.console, arguments);
+            }
+          };
+        });
+      });
+    })();
+
+    // Wrap timers
+    (function() {
+      function instrumentTimer(wrapOpts) {
+        return function(original) {
+          // See https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout
+          return function(func, delay) {
+            if (typeof func === 'function') {
+              var args = Array.prototype.slice.call(arguments, 2);
+              func = wrap(func, wrapOpts);
+              return original(function() {
+                func.apply(null, args);
+              }, delay);
+            } else {
+              return original(func, delay);
+            }
+          };
+        };
+      };
+      instrument(window, 'setTimeout', instrumentTimer({ component: 'setTimeout' }));
+      instrument(window, 'setInterval', instrumentTimer({ component: 'setInterval' }));
+    })();
+
+    // Wrap event listeners
     // Event targets borrowed from bugsnag-js:
     // See https://github.com/bugsnag/bugsnag-js/blob/d55af916a4d3c7757f979d887f9533fe1a04cc93/src/bugsnag.js#L542
     'EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload'.replace(/\w+/g, function (prop) {
       var prototype = window[prop] && window[prop].prototype;
       if (prototype && prototype.hasOwnProperty && prototype.hasOwnProperty('addEventListener')) {
         instrument(prototype, 'addEventListener', function(original) {
+          const wrapOpts = {component: `${prop}.prototype.addEventListener`};
+
           // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
           return function(type, listener, useCapture, wantsUntrusted) {
             try {
               if (listener && listener.handleEvent != null) {
-                listener.handleEvent = wrap(listener.handleEvent);
+                listener.handleEvent = wrap(listener.handleEvent, wrapOpts);
               }
             } catch(e) {
               // Ignore 'Permission denied to access property "handleEvent"' errors.
               log(e);
             }
-            return original.call(this, type, wrap(listener), useCapture, wantsUntrusted);
+            return original.call(this, type, wrap(listener, wrapOpts), useCapture, wantsUntrusted);
           };
         });
         instrument(prototype, 'removeEventListener', function(original) {
@@ -533,6 +809,7 @@ export default function builder() {
       }
     });
 
+    // Wrap window.onerror
     instrument(window, 'onerror', function(original) {
       function onerror(msg, url, line, col, err) {
         debug('window.onerror callback invoked', arguments);
@@ -548,21 +825,35 @@ export default function builder() {
           return;
         }
 
-        // simulate v8 stack
-        var stack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
+        // Simulate v8 stack
+        const simulatedStack = [msg, '\n    at ? (', url || 'unknown', ':', line || 0, ':', col || 0, ')'].join('');
 
+        let generated;
         if (err) {
-          var generated = { stack: stackTrace(err) };
-          if (!generated.stack) { generated = {stack: stack}; }
-          notify(err, generated);
-          return;
+          generated = { stack: stackTrace(err) };
+          if (!generated.stack) { generated = {stack: simulatedStack}; }
+        } else {
+          // Important: leave `generated` undefined
+          err = {
+            name: 'window.onerror',
+            message: msg,
+            stack: simulatedStack
+          };
         }
 
-        notify({
-          name: 'window.onerror',
-          message: msg,
-          stack: stack
-        });
+        self.addBreadcrumb(
+          (err.name === 'window.onerror' || !err.name) ? 'window.onerror' : `window.onerror: ${err.name}`,
+          {
+            category: 'error',
+            metadata: {
+              message: err.message,
+              name: err.name,
+              stack: generated ? generated.stack : err.stack
+            }
+          }
+        );
+
+        notify(err, generated);
       }
       // See https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
       return function(msg, url, line, col, err) {
@@ -574,6 +865,7 @@ export default function builder() {
       };
     });
 
+    // Wrap window.onunhandledrejection
     instrument(window, 'onunhandledrejection', function(original) {
       // See https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event
       function onunhandledrejection(promiseRejectionEvent) {
@@ -592,17 +884,23 @@ export default function builder() {
           let lineNumber = reason.lineNumber || 0;
           let stackFallback = `${reason.message}\n    at ? (${fileName}:${lineNumber})`;
           let stack = stackTrace(reason) || stackFallback;
-
-          notify({
+          let err = {
             name: reason.name,
             message: `UnhandledPromiseRejectionWarning: ${reason}`,
             stack
-          });
-
+          };
+          self.addBreadcrumb(
+            `window.onunhandledrejection: ${err.name}`,
+            {
+              category: 'error',
+              metadata: err
+            }
+          );
+          notify(err);
           return;
         }
 
-        let message = typeof reason === 'string' ? reason : JSON.stringify(reason)
+        let message = typeof reason === 'string' ? reason : JSON.stringify(reason);
         notify({
           name: 'window.onunhandledrejection',
           message: `UnhandledPromiseRejectionWarning: ${message}`,
@@ -614,8 +912,8 @@ export default function builder() {
         if (typeof original === 'function') {
           original.apply(this, arguments);
         }
-      }
-    })
+      };
+    });
 
     function incrementErrorsCount() {
       return self.errorsSent++;
