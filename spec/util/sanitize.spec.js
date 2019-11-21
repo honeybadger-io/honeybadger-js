@@ -45,6 +45,17 @@ describe('utils/sanitize', () => {
     );
   });
 
+  it('drops null array items', function() {
+    expect(
+      sanitize(
+        {'obj': ['first', null]},
+        6
+      )
+    ).toEqual(
+      {'obj': ['first', '[object Null]']}
+    );
+  });
+
   it('enforces max depth in arrays', () => {
     expect(
       sanitize(
