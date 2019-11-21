@@ -16,6 +16,8 @@ export default function sanitize(obj, maxDepth) {
     // Functions are TMI and Symbols can't convert to strings.
     if (/function|symbol/.test(typeof(obj))) { return false; }
 
+    if (obj === null) { return false };
+
     // No prototype, likely created with `Object.create(null)`.
     if (typeof obj === 'object' && typeof obj.hasOwnProperty === 'undefined') { return false; }
 
