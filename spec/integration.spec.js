@@ -117,6 +117,22 @@ describe('browser integration', function() {
       .catch(done);
   });
 
+  it('sends string value console breadcrumbs when null', function(done) {
+    sandbox
+      .run(function() {
+        console.log(null);
+        Honeybadger.notify('testing');
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('null');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('log');
+        done();
+      })
+      .catch(done);
+  });
+
   it('sends click breadcrumbs', function(done) {
     sandbox
       .run(function() {
