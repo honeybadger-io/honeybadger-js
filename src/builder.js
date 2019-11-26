@@ -518,8 +518,12 @@ export default function builder() {
     function instrument(object, name, replacement) {
       if (notSingleton) { return; }
       if (!object || !name || !replacement || !(name in object)) { return; }
-      var original = object[name];
+      let original = object[name];
+      while (original && original.__hb_original) {
+        original = original.__hb_original;
+      }
       object[name] = replacement(original);
+      object[name].__hb_original = original;
     }
 
     // Breadcrumbs: instrument click events
