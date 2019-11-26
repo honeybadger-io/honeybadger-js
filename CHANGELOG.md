@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.1.0-beta.2] - 2019-11-26
 ### Fixed
 - Global browser instrumentation now unwraps previously wrapped
   functions prior to wrapping them.
