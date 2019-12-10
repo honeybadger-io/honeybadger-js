@@ -19,6 +19,12 @@ class HoneybadgerSourceMapPlugin {
     this.revision = revision;
     this.silent = silent;
     this.ignoreErrors = ignoreErrors;
+    this.emittedAssets = new Map();
+  }
+
+  assetEmitted(file, content, done) {
+    this.emittedAssets.set(file, content);
+    done();
   }
 
   afterEmit(compilation, done) {
@@ -37,6 +43,7 @@ class HoneybadgerSourceMapPlugin {
           compilation.warnings.push(...handleError(err));
         }
       }
+      this.emittedAssets.clear();
       done();
     });
   }
@@ -44,6 +51,9 @@ class HoneybadgerSourceMapPlugin {
   apply(compiler) {
     if (compiler.hooks) {
       compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, this.afterEmit.bind(this));
+      if (compiler.hooks.assetEmitted) {
+        compiler.hooks.assetEmitted.tapAsync(PLUGIN_NAME, this.assetEmitted.bind(this));
+      }
     } else {
       compiler.plugin('after-emit', this.afterEmit.bind(this));
     }
@@ -98,11 +108,11 @@ class HoneybadgerSourceMapPlugin {
     const form = req.form();
     form.append('api_key', this.apiKey);
     form.append('minified_url', `${this.assetsUrl.toString().replace(/^\//, '')}/${sourceFile.replace(/^\//, '')}`);
-    form.append('minified_file', compilation.assets[sourceFile].source(), {
+    form.append('minified_file', (this.emittedAssets.get(sourceFile) || compilation.assets[sourceFile].source()), {
       filename: sourceFile,
       contentType: 'application/javascript'
     });
-    form.append('source_map', compilation.assets[sourceMap].source(), {
+    form.append('source_map', (this.emittedAssets.get(sourceMap) || compilation.assets[sourceMap].source()), {
       filename: sourceMap,
       contentType: 'application/octet-stream'
     });
