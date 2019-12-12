@@ -31,14 +31,20 @@ declare module "honeybadger-js" {
     }
 
     class Honeybadger {
+        static apiKey: string;
         static configure(config: Config): void;
+        static context: any;
+        static environment: string;
         static notify(...args: any[]): void;
+        static onerror: boolean;
         static wrap<T extends Function>(func: T): T;
         static setContext<T extends Object>(context: T): void;
         static resetContext(): void;
         static beforeNotify(func: (notice?: Notice) => void): void;
+        static beforeNotifyHandlers: ((notice?: Notice) => void)[];
         static factory(config: Config): Honeybadger;
     }
+
 
     namespace Honeybadger {}
     export = Honeybadger;
