@@ -1,6 +1,6 @@
 # Honeybadger's Webpack Source Map Plugin
 
-[![CircleCI honeybadger-io/honeybadger-webpack](https://circleci.com/gh/honeybadger-io/honeybadger-webpack.svg?style=shield&circle-token=73022b639c6abad8d31c13cb1225c14eb5e37631)](https://circleci.com/gh/honeybadger-io/honeybadger-webpack)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fhoneybadger-io%2Fhoneybadger-webpack%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/honeybadger-io/honeybadger-webpack/goto?ref=master)
 [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)
 
 This is a [webpack](https://webpack.js.org/) plugin to upload javascript
