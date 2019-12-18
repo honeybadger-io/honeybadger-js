@@ -47,6 +47,8 @@ export default function builder() {
   function isIgnored(err, patterns) {
     var msg = err.message;
 
+    if (!msg)  { return false; }
+
     for (var p in patterns) {
       if (msg.match(patterns[p])) { return true; }
     }
