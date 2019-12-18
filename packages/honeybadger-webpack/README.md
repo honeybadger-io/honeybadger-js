@@ -90,11 +90,22 @@ https://github.com/honeybadger-io/honeybadger-rails-webpacker-example
 3. Push to your branch `git push origin my_branch`
 4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-webpack/pulls)
 
-### Development
+## Development
 
-Install the required npm packages with `npm install`.  Write code. Run tests `npm test`. Repeat.
+1. Run `npm install`
+2. Run the tests with `npm test`
+3. Build/test on save with `npm run build:watch` and `npm run test:watch`
 
-After that you can
+## Releasing
+
+1. With a clean working tree, use `npm version [new version]` to bump the version,
+   commit the changes, tag the release, and push to GitHub. See `npm help version`
+   for documentation.
+2. To publish the release, use `npm publish`. See `npm help publish` for
+   documentation.
+
+
+## License
 
 The Honeybadger's Webpack Source Map Plugin is MIT licensed. See the
 [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-webpack/master/MIT-LICENSE)
