@@ -92,7 +92,7 @@
     "postcss": "^7.0.5",
     "postcss-import": "^11.0.0",
     "postcss-loader": "^2.0.8",
-    "postcss-url": "^7.2.1",
+    "postcss-url": "^8.0.0",
     "rimraf": "^2.6.0",
     "rollup": "^0.66.6",
     "rollup-plugin-buble": "^0.19.4",
