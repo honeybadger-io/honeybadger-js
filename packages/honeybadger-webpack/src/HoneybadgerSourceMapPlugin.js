@@ -76,7 +76,7 @@ class HoneybadgerSourceMapPlugin {
         ...result,
         { sourceFile, sourceMap }
       ];
-    }, {});
+    }, []);
   }
 
   uploadSourceMap(compilation, { sourceFile, sourceMap }, done) {
