@@ -82,7 +82,7 @@
     "html-webpack-plugin": "^3.2.0",
     "interactive": "^0.1.9",
     "jest": "^22.0.4",
-    "jest-serializer-vue": "^0.3.0",
+    "jest-serializer-vue": "^2.0.2",
     "nightwatch": "^0.9.12",
     "nightwatch-xhr": "^0.4.6",
     "node-notifier": "^6.0.0",
