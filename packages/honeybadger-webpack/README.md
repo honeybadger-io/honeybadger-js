@@ -82,6 +82,10 @@ module.exports = environment
 See example Rails 5 application
 https://github.com/honeybadger-io/honeybadger-rails-webpacker-example
 
+## Changelog
+
+See https://github.com/honeybadger-io/honeybadger-webpack/blob/master/CHANGELOG.md
+
 ## Contributing
 
 1. Fork it.
@@ -103,7 +107,6 @@ https://github.com/honeybadger-io/honeybadger-rails-webpacker-example
    for documentation.
 2. To publish the release, use `npm publish`. See `npm help publish` for
    documentation.
-
 
 ## License
 
