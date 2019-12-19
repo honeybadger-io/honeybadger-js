@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Fix an error that occurs when a null error is passed with arguments and ignore patterns. -@littleredninja (#266, #270)
 
 ## [2.0.0] - 2019-07-24
 ### Added
