@@ -1,6 +1,6 @@
 # Honeybadger Vue.js Integration
-[![Build Status](https://travis-ci.org/honeybadger-io/honeybadger-vue.svg?branch=master)](https://travis-ci.org/honeybadger-io/honeybadger-vue)
-
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fhoneybadger-io%2Fhoneybadger-vue%2Fbadge&style=flat)](https://actions-badge.atrox.dev/honeybadger-io/honeybadger-vue/goto)
+[![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fvue.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fvue)
 > [Vue.js integration for Honeybadger.io](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=vue&utm_content=Vue.js+integration+for+Honeybadger.io)
 
 ## Documentation and Support
