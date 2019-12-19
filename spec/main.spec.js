@@ -227,6 +227,19 @@ describe('Honeybadger', function() {
       });
     });
 
+    it('does deliver notice with arguments when using ignore patterns and error is null', function(done) {
+      Honeybadger.configure({
+        api_key: 'asdf',
+        ignorePatterns: [/care/i],
+      });
+
+      Honeybadger.notify(null, 'custom class name');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+      });
+    });
+
     it('does not deliver notice for ignored message', function(done) {
       Honeybadger.configure({
         api_key: 'asdf',
