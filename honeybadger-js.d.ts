@@ -11,6 +11,7 @@ declare module "honeybadger-js" {
         action?: string;
         onerror?: boolean;
         disabled?: boolean;
+        maxErrors?: number;
         ignorePatterns?: RegExp[];
         async?: boolean;
     }
@@ -26,17 +27,24 @@ declare module "honeybadger-js" {
         action: string;
         fingerprint: string;
         context: any;
+        cookies?: string;
     }
 
     class Honeybadger {
-        static configure(config: Config): void;
-        static notify(...args: any[]): void;
+        static apiKey: string;
+        static configure(config: Config): Honeybadger;
+        static context: any;
+        static environment: string;
+        static notify(...args: any[]): any;
+        static onerror: boolean;
         static wrap<T extends Function>(func: T): T;
-        static setContext<T extends Object>(context: T): void;
-        static resetContext(): void;
-        static beforeNotify(func: (notice?: Notice) => void): void;
+        static setContext<T extends Object>(context: T): Honeybadger;
+        static resetContext(): Honeybadger;
+        static beforeNotify(func: (notice?: Notice) => void): Honeybadger;
+        static beforeNotifyHandlers: ((notice?: Notice) => void)[];
         static factory(config: Config): Honeybadger;
     }
+
 
     namespace Honeybadger {}
     export = Honeybadger;
