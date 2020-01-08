@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Fix TypeScript type definitions
 
 ## [2.1.0-beta.3] - 2019-12-18
 ### Fixed
