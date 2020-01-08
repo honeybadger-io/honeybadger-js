@@ -21,7 +21,8 @@
   "unpkg": "dist/honeybadger-vue.min.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "honeybadger-vue.d.ts"
   ],
   "homepage": "https://github.com/honeybadger-io/honeybadger-vue#readme",
   "scripts": {
@@ -136,5 +137,5 @@
     "https-proxy-agent": "^2.2.1",
     "socks-proxy-agent": "^4.0.1"
   },
-  "types": "./index.d.ts"
+  "types": "./honeybadger-vue.d.ts"
 }
