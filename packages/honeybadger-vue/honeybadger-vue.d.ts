@@ -1,9 +1,9 @@
 import Vue from 'vue';
 
 interface HoneybadgerVue {
-    notify(...args: any[]): void;
-    setContext<T extends object>(context: T): void;
-    resetContext(): void;
+    notify(...args: any[]): object;
+    setContext<T extends object>(context: T): Honeybadger;
+    resetContext(): Honeybadger;
 }
 
 declare module 'vue/types/vue' {
