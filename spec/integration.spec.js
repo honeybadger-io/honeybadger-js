@@ -152,7 +152,7 @@ describe('browser integration', function() {
       .catch(done);
   });
 
-  it('sends XHR breadcrumbs', function(done) {
+  it('sends XHR breadcrumbs for relative paths', function(done) {
     sandbox
       .run(function(report) {
         var request = new XMLHttpRequest();
@@ -169,6 +169,31 @@ describe('browser integration', function() {
         expect(results.notices.length).toEqual(1);
         expect(results.notices[0].breadcrumbs.length).toEqual(2);
         expect(results.notices[0].breadcrumbs[0].message).toEqual('GET /example/path');
+        expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
+        expect(results.notices[0].breadcrumbs[0].metadata.type).toEqual('xhr');
+        expect('message' in results.notices[0].breadcrumbs[0].metadata).toBe(false);
+        done();
+      })
+      .catch(done);
+  });
+
+  it('sends XHR breadcrumbs for absolute paths', function(done) {
+    sandbox
+      .run(function(report) {
+        var request = new XMLHttpRequest();
+        request.open('GET', 'https://example.com/example/path', true);
+        request.onreadystatechange = function() {
+          if (request.readyState === 4) {
+            Honeybadger.notify('testing');
+            report();
+          }
+        };
+        request.send(null);
+      })
+      .then(function(results) {
+        expect(results.notices.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs[0].message).toEqual('GET https://example.com/example/path');
         expect(results.notices[0].breadcrumbs[0].category).toEqual('request');
         expect(results.notices[0].breadcrumbs[0].metadata.type).toEqual('xhr');
         expect('message' in results.notices[0].breadcrumbs[0].metadata).toBe(false);

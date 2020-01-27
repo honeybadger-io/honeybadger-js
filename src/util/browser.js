@@ -96,7 +96,7 @@ export function localURLPathname(url) {
   const parsedDocURL = parseURL(document.URL);
 
   // URL must be relative
-  if (!parsed.host || parsed.protocol) { return parsed.pathname; }
+  if (!parsed.host || !parsed.protocol) { return parsed.pathname; }
 
   // Same domain
   if (parsed.protocol === parsedDocURL.protocol && parsed.host === parsedDocURL.host) {
