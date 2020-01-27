@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.1.0-beta.4] - 2020-01-27
 ### Fixed
 - Fix TypeScript type definitions
 - Fix local pathname bug in XHR breadcrumbs
