@@ -6,6 +6,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Fixed
 - Fix TypeScript type definitions
+- Fix local pathname bug in XHR breadcrumbs
 
 ## [2.1.0-beta.3] - 2019-12-18
 ### Fixed
