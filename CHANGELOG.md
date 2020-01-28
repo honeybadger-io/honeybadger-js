@@ -4,28 +4,22 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Add Breadcrumbs (#210). See [the
+  docs](https://docs.honeybadger.io/lib/javascript/guides/breadcrumbs.html) for
+  more info.
 
-## [2.1.0-beta.4] - 2020-01-27
-### Fixed
-- Fix TypeScript type definitions
-- Fix local pathname bug in XHR breadcrumbs
-
-## [2.1.0-beta.3] - 2019-12-18
-### Fixed
-- Fix an error that occurs when a null error is passed with arguments and ignore patterns. -@littleredninja (#266, #270)
-
-## [2.1.0-beta.2] - 2019-11-26
 ### Fixed
 - Global browser instrumentation now unwraps previously wrapped
   functions prior to wrapping them.
 
-## [2.1.0-beta.1] - 2019-11-21
+## [2.0.2] - 2020-01-08
+### Fixed
+- Fix TypeScript type definitions
 
-## [2.1.0-beta.0] - 2019-11-13
-### Added
-- Add Breadcrumbs (#210). See [the
-  docs](https://docs.honeybadger.io/lib/javascript/guides/breadcrumbs.html)
-  for more info.
+## [2.0.1] - 2020-01-07
+### Fixed
+- Fix an error that occurs when a null error is passed with arguments and ignore patterns. -@littleredninja (#266, #270)
 
 ## [2.0.0] - 2019-07-24
 ### Added
