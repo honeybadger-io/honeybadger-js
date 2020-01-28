@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.1.0] - 2020-01-28
 ### Added
 - Add Breadcrumbs (#210). See [the
   docs](https://docs.honeybadger.io/lib/javascript/guides/breadcrumbs.html) for
