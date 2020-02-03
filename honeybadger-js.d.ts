@@ -14,6 +14,7 @@ declare module "honeybadger-js" {
         maxErrors?: number;
         ignorePatterns?: RegExp[];
         async?: boolean;
+        breadcrumbsEnabled?: boolean;
     }
 
     interface Notice {
