@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Add `breadcrumbsEnabled` to TypeScript definition (#305)
 
 ## [2.1.0] - 2020-01-28
 ### Added
