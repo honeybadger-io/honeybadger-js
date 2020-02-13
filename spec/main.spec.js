@@ -227,19 +227,6 @@ describe('Honeybadger', function() {
       });
     });
 
-    it('does deliver notice with arguments when using ignore patterns and error is null', function(done) {
-      Honeybadger.configure({
-        api_key: 'asdf',
-        ignorePatterns: [/care/i],
-      });
-
-      Honeybadger.notify(null, 'custom class name');
-
-      afterNotify(done, function() {
-        expect(requests.length).toEqual(1);
-      });
-    });
-
     it('does not deliver notice for ignored message', function(done) {
       Honeybadger.configure({
         api_key: 'asdf',
@@ -532,6 +519,32 @@ describe('Honeybadger', function() {
 
       afterNotify(done, function() {
         expect(url).toEqual('global');
+      });
+    });
+
+    it('delivers notice with arguments when using ignore patterns and error is null', function(done) {
+      Honeybadger.configure({
+        api_key: 'asdf',
+        ignorePatterns: [/care/i],
+      });
+
+      Honeybadger.notify(null, 'custom class name');
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
+      });
+    });
+
+    it('delivers notice when using ignore patterns and message does not respond to match', function(done) {
+      Honeybadger.configure({
+        api_key: 'asdf',
+        ignorePatterns: [/care/i],
+      });
+
+      Honeybadger.notify({ message: {} });
+
+      afterNotify(done, function() {
+        expect(requests.length).toEqual(1);
       });
     });
   });
