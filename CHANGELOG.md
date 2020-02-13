@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Fix `n.match` is not a function error w/ ignorePatterns.
 
 ## [2.1.1] - 2020-02-03
 ### Fixed
