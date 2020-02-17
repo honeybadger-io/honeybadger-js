@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Fix TypeScript definition for `resetContext`. @atshakil (#310)
 
 ## [2.1.2] - 2020-02-13
 ### Fixed
