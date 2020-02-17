@@ -40,7 +40,7 @@ declare module "honeybadger-js" {
         static onerror: boolean;
         static wrap<T extends Function>(func: T): T;
         static setContext<T extends Object>(context: T): Honeybadger;
-        static resetContext(): Honeybadger;
+        static resetContext<T extends Object>(context?: T): Honeybadger;
         static beforeNotify(func: (notice?: Notice) => void): Honeybadger;
         static beforeNotifyHandlers: ((notice?: Notice) => void)[];
         static factory(config: Config): Honeybadger;
