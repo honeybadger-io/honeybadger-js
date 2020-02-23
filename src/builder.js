@@ -149,6 +149,7 @@ export default function builder() {
     var self = {
       context: {},
       beforeNotifyHandlers: [],
+      afterNotifyHandlers: [],
       breadcrumbs: [],
       errorsSent: 0,
     };
@@ -207,6 +208,14 @@ export default function builder() {
         x.setRequestHeader('Accept', 'text/json, application/json');
 
         x.send(JSON.stringify(sanitize(payload, config('max_depth', 8))));
+        x.onload = function() {
+          if (x.status !== 201) {
+            debug(`Unable to send error report: ${x.status}: ${x.statusText}`);
+            return;
+          }
+          checkHandlers(self.afterNotifyHandlers, x.response);
+          debug('Error report sent');
+        };
       } catch(err) {
         log('Unable to send error report: error while initializing request', err, payload);
       }
@@ -464,6 +473,11 @@ export default function builder() {
 
     self.beforeNotify = function(handler) {
       self.beforeNotifyHandlers.push(handler);
+      return self;
+    };
+
+    self.afterNotify = function(handler) {
+      self.afterNotifyHandlers.push(handler);
       return self;
     };
 
