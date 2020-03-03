@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Fix TypeScript definition for Config interface to include onunhandledrejection as boolean. @tojofo
 
 ## [2.1.3] - 2020-02-17
 ### Fixed
