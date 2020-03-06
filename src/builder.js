@@ -116,11 +116,11 @@ export default function builder() {
     return {stack: stack.join('\n'), generator: 'walk'};
   }
 
-  function checkHandlers(handlers, err) {
+  function checkHandlers(handlers, err, response) {
     var handler, i, len;
     for (i = 0, len = handlers.length; i < len; i++) {
       handler = handlers[i];
-      if (handler(err) === false) {
+      if (handler(err, response) === false) {
         return true;
       }
     }
@@ -210,13 +210,15 @@ export default function builder() {
         x.send(JSON.stringify(sanitize(payload, config('max_depth', 8))));
         x.onload = function() {
           if (x.status !== 201) {
+            checkHandlers(self.afterNotifyHandlers, JSON.parse(x.response));
             debug(`Unable to send error report: ${x.status}: ${x.statusText}`);
             return;
           }
-          checkHandlers(self.afterNotifyHandlers, x.response);
+          checkHandlers(self.afterNotifyHandlers, undefined, JSON.parse(x.response));
           debug('Error report sent');
         };
       } catch(err) {
+        checkHandlers(self.afterNotifyHandlers, err);
         log('Unable to send error report: error while initializing request', err, payload);
       }
     }
