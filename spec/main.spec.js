@@ -795,6 +795,53 @@ describe('Honeybadger', function() {
     });
   });
 
+  describe('afterNotify', function() {
+    beforeEach(function() {
+      Honeybadger.configure({
+        apiKey: 'asdf',
+        environment: 'config environment',
+        component: 'config component',
+        action: 'config action',
+        revision: 'config revision',
+        projectRoot: 'config projectRoot',
+        afterNotifyHandlers: []
+      });
+    });
+
+    it('success', function(done) {
+      const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa';
+      Honeybadger.afterNotify(function(err, res) {
+        expect(res.id).toBe(id);
+        expect(err).toBeUndefined();
+        done();
+      });
+      Honeybadger.notify('testing');
+
+      setTimeout(function() {
+        expect(requests.length).toEqual(1);
+        request.respond(201, {}, JSON.stringify({id}));
+      }, 50);
+    });
+
+    it('error', function(done) {
+      const payload = {
+        error:
+          'Either the API key is incorrect or the account has been deactivated.'
+      };
+      Honeybadger.afterNotify(function(err, res) {
+        expect(res).toBeUndefined();
+        expect(err.error).toBe(payload.error);
+        done();
+      });
+      Honeybadger.notify('testing');
+
+      setTimeout(function() {
+        expect(requests.length).toEqual(1);
+        request.respond(403, {}, JSON.stringify(payload));
+      }, 50);
+    });
+  });
+
   describe('window.onerror callback', function() {
     describe('default behavior', function() {
       beforeEach(function() {
