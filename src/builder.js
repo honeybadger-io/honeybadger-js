@@ -209,12 +209,15 @@ export default function builder() {
 
         x.send(JSON.stringify(sanitize(payload, config('max_depth', 8))));
         x.onload = function() {
+          let handlers = Array.prototype.slice.call(self.afterNotifyHandlers);
+          if (notice.afterNotify) { handlers.unshift(notice.afterNotify); }
+
           if (x.status !== 201) {
-            checkHandlers(self.afterNotifyHandlers, new Error(`Bad HTTP response: ${x.status}`), notice);
+            checkHandlers(handlers, new Error(`Bad HTTP response: ${x.status}`), notice);
             debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice);
             return;
           }
-          checkHandlers(self.afterNotifyHandlers, undefined, merge(notice, {
+          checkHandlers(handlers, undefined, merge(notice, {
             id: JSON.parse(x.response).id
           }));
           debug('Error report sent', payload);
