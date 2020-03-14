@@ -824,20 +824,16 @@ describe('Honeybadger', function() {
     });
 
     it('error', function(done) {
-      const payload = {
-        error:
-          'Either the API key is incorrect or the account has been deactivated.'
-      };
       Honeybadger.afterNotify(function(err, res) {
         expect(res).toBeUndefined();
-        expect(err.error).toBe(payload.error);
+        expect(err).toEqual(new Error('Bad HTTP response: 403'));
         done();
       });
       Honeybadger.notify('testing');
 
       setTimeout(function() {
         expect(requests.length).toEqual(1);
-        request.respond(403, {}, JSON.stringify(payload));
+        request.respond(403, {}, '');
       }, 50);
     });
   });

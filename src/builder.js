@@ -210,12 +210,12 @@ export default function builder() {
         x.send(JSON.stringify(sanitize(payload, config('max_depth', 8))));
         x.onload = function() {
           if (x.status !== 201) {
-            checkHandlers(self.afterNotifyHandlers, JSON.parse(x.response));
-            debug(`Unable to send error report: ${x.status}: ${x.statusText}`);
+            checkHandlers(self.afterNotifyHandlers, new Error(`Bad HTTP response: ${x.status}`));
+            debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, payload);
             return;
           }
           checkHandlers(self.afterNotifyHandlers, undefined, JSON.parse(x.response));
-          debug('Error report sent');
+          debug('Error report sent', payload);
         };
       } catch(err) {
         checkHandlers(self.afterNotifyHandlers, err);
