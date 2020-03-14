@@ -792,7 +792,7 @@ describe('Honeybadger', function() {
       });
     });
 
-    it('success', function(done) {
+    it('is called without an error when the request succeeds', function(done) {
       const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa';
       Honeybadger.afterNotify(function(err, notice) {
         expect(notice.message).toEqual('testing');
@@ -808,7 +808,7 @@ describe('Honeybadger', function() {
       }, 50);
     });
 
-    it('error', function(done) {
+    it('is called with an error when the request fails', function(done) {
       Honeybadger.afterNotify(function(err, notice) {
         expect(notice.message).toEqual('testing');
         expect(err).toEqual(new Error('Bad HTTP response: 403'));
