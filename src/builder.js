@@ -15,8 +15,7 @@ export default function builder() {
       installed = false;
 
   // Used to prevent reporting duplicate errors across instances.
-  var currentErr,
-      currentPayload;
+  var currentErr;
 
   // Utilities.
   function merge(obj1, obj2) {
@@ -198,9 +197,10 @@ export default function builder() {
       return 'http' + ((config('ssl', true) && 's') || '') + '://' + config('host', 'api.honeybadger.io');
     }
 
-    function request(apiKey, payload) {
+    function request(apiKey, notice) {
       try {
-        var x = new XMLHttpRequest();
+        let payload = buildPayload(notice);
+        let x = new XMLHttpRequest();
         x.open('POST', baseURL() + '/v1/notices/js', config('async', true));
 
         x.setRequestHeader('X-API-Key', apiKey);
@@ -210,24 +210,26 @@ export default function builder() {
         x.send(JSON.stringify(sanitize(payload, config('max_depth', 8))));
         x.onload = function() {
           if (x.status !== 201) {
-            checkHandlers(self.afterNotifyHandlers, new Error(`Bad HTTP response: ${x.status}`));
-            debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, payload);
+            checkHandlers(self.afterNotifyHandlers, new Error(`Bad HTTP response: ${x.status}`), notice);
+            debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice);
             return;
           }
-          checkHandlers(self.afterNotifyHandlers, undefined, JSON.parse(x.response));
+          checkHandlers(self.afterNotifyHandlers, undefined, merge(notice, {
+            id: JSON.parse(x.response).id
+          }));
           debug('Error report sent', payload);
         };
-      } catch(err) {
-        checkHandlers(self.afterNotifyHandlers, err);
-        log('Unable to send error report: error while initializing request', err, payload);
+      } catch(e) {
+        checkHandlers(self.afterNotifyHandlers, e, notice);
+        log('Unable to send error report: error while initializing request', e, notice);
       }
     }
 
-    function send(payload) {
-      currentErr = currentPayload = null;
+    function send(notice) {
+      currentErr = null;
 
       if (config('disabled', false)) {
-        debug('Dropping notice: honeybadger.js is disabled', payload);
+        debug('Dropping notice: honeybadger.js is disabled', notice);
         return false;
       }
 
@@ -238,15 +240,52 @@ export default function builder() {
       }
 
       if (exceedsMaxErrors()) {
-        debug('Dropping notice: max errors exceeded', payload);
+        debug('Dropping notice: max errors exceeded', notice);
         return false;
       }
 
       incrementErrorsCount();
 
-      request(apiKey, payload);
+      request(apiKey, notice);
 
       return true;
+    }
+
+    function buildPayload(err) {
+      let data = cgiData();
+      if (typeof err.cookies === 'string') {
+        data['HTTP_COOKIE'] = err.cookies;
+      } else if (typeof err.cookies === 'object') {
+        data['HTTP_COOKIE'] = encodeCookie(err.cookies);
+      }
+
+      return {
+        'notifier': NOTIFIER,
+        'breadcrumbs': {
+          'enabled': breadcrumbsEnabled(),
+          'trail': err.breadcrumbs,
+        },
+        'error': {
+          'class': err.name,
+          'message': err.message,
+          'backtrace': err.stack,
+          'generator': err.generator,
+          'fingerprint': err.fingerprint
+        },
+        'request': {
+          'url': err.url,
+          'component': err.component,
+          'action': err.action,
+          'context': err.context,
+          'cgi_data': data,
+          'params': err.params
+        },
+        'server': {
+          'project_root': err.projectRoot,
+          'environment_name': err.environment,
+          'revision': err.revision
+        }
+      };
     }
 
     function notify(err, generated) {
@@ -265,9 +304,9 @@ export default function builder() {
       if (currentErrIs(err)) {
         // Skip the duplicate error.
         return false;
-      } else if (currentPayload && loaded) {
+      } else if (currentErr && loaded) {
         // This is a different error, send the old one now.
-        send(currentPayload);
+        send(currentErr);
       }
 
       if (objectIsEmpty(err)) { return false; }
@@ -309,54 +348,20 @@ export default function builder() {
 
       if (isIgnored(err, config('ignorePatterns'))) { return false; }
 
-      var data = cgiData();
-      if (typeof err.cookies === 'string') {
-        data['HTTP_COOKIE'] = err.cookies;
-      } else if (typeof err.cookies === 'object') {
-        data['HTTP_COOKIE'] = encodeCookie(err.cookies);
-      }
+      err.generator = generator;
 
-      var payload = {
-        'notifier': NOTIFIER,
-        'breadcrumbs': {
-          'enabled': breadcrumbsEnabled(),
-          'trail': err.breadcrumbs,
-        },
-        'error': {
-          'class': err.name,
-          'message': err.message,
-          'backtrace': err.stack,
-          'generator': generator,
-          'fingerprint': err.fingerprint
-        },
-        'request': {
-          'url': err.url,
-          'component': err.component,
-          'action': err.action,
-          'context': err.context,
-          'cgi_data': data,
-          'params': err.params
-        },
-        'server': {
-          'project_root': err.projectRoot,
-          'environment_name': err.environment,
-          'revision': err.revision
-        }
-      };
-
-      currentPayload = payload;
       currentErr = err;
 
       if (loaded) {
-        debug('Deferring notice', err, payload);
+        debug('Deferring notice', err);
         window.setTimeout(function(){
           if (currentErrIs(err)) {
-            send(payload);
+            send(err);
           }
         });
       } else {
-        debug('Queuing notice', err, payload);
-        queue.push(payload);
+        debug('Queuing notice', err);
+        queue.push(err);
       }
 
       return err;
@@ -966,7 +971,7 @@ export default function builder() {
       var domReady = function() {
         loaded = true;
         debug('honeybadger.js ' + VERSION + ' ready');
-        var notice;
+        let notice;
         while (notice = queue.pop()) {
           send(notice);
         }

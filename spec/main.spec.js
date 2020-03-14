@@ -764,22 +764,6 @@ describe('Honeybadger', function() {
       });
     });
 
-    it('does not expose the stack generator', function(done) {
-      let notice;
-      Honeybadger.beforeNotify(function(n) {
-        notice = n;
-      });
-
-      Honeybadger.notify('expected message');
-
-      afterNotify(done, function() {
-        expect(requests.length).toEqual(1);
-        expect(notice.generator).toEqual(undefined);
-        expect(request.payload.error.backtrace).toEqual(jasmine.any(String));
-        expect(request.payload.error.generator).toEqual('throw');
-      });
-    });
-
     it('it resets generator when stack changes', function(done) {
       Honeybadger.beforeNotify(function(notice) {
         notice.stack = 'expected stack';
@@ -810,8 +794,9 @@ describe('Honeybadger', function() {
 
     it('success', function(done) {
       const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa';
-      Honeybadger.afterNotify(function(err, res) {
-        expect(res.id).toBe(id);
+      Honeybadger.afterNotify(function(err, notice) {
+        expect(notice.message).toEqual('testing');
+        expect(notice.id).toBe(id);
         expect(err).toBeUndefined();
         done();
       });
@@ -824,8 +809,8 @@ describe('Honeybadger', function() {
     });
 
     it('error', function(done) {
-      Honeybadger.afterNotify(function(err, res) {
-        expect(res).toBeUndefined();
+      Honeybadger.afterNotify(function(err, notice) {
+        expect(notice.message).toEqual('testing');
         expect(err).toEqual(new Error('Bad HTTP response: 403'));
         done();
       });
