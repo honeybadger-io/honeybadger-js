@@ -7,6 +7,9 @@ adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Add `afterNotify` callback, similar to `beforeNotify`. PR #314 by @anymaniax
 
+### Changed
+- [Breadcrumbs](https://docs.honeybadger.io/lib/javascript/guides/breadcrumbs.html) are now enabled by default.
+
 ### Fixed
 - Fix TypeScript definition for Config interface to include onunhandledrejection as boolean. @tojofo
 
