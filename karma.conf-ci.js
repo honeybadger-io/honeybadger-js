@@ -36,13 +36,6 @@ module.exports = function(config) {
       os: 'Windows',
       os_version: '8.1'
     },
-    bs_ie10: {
-      base: 'BrowserStack',
-      browser: 'IE',
-      browser_version: '10',
-      os: 'Windows',
-      os_version: '8'
-    },
   };
 
   config.set({
