@@ -533,7 +533,7 @@ export default function builder() {
       self.breadcrumbs.push({
         category: category,
         message: message,
-        metadata: metadata || {},
+        metadata: metadata,
         timestamp: timestamp,
       });
 
