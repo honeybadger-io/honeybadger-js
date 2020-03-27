@@ -1085,6 +1085,22 @@ describe('Honeybadger', function() {
       });
     });
 
+    it('duplicates metadata objects', function() {
+      let metadata = {
+        key: 'expected value'
+      };
+      Honeybadger.addBreadcrumb('message', {
+        metadata: metadata
+      });
+      Honeybadger.addBreadcrumb('message', {
+        metadata: metadata
+      });
+
+      expect(Honeybadger.breadcrumbs.length).toBe(2);
+      expect(Honeybadger.breadcrumbs[0].metadata).toEqual(Honeybadger.breadcrumbs[1].metadata);
+      expect(Honeybadger.breadcrumbs[0].metadata).not.toBe(Honeybadger.breadcrumbs[1].metadata);
+    });
+
     it('maintains the size of the breadcrumbs queue', function() {
       for (let i=0; i<=45; i++) {
         Honeybadger.addBreadcrumb('expected message ' + i);

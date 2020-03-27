@@ -25,6 +25,14 @@ export default function builder() {
     return obj3;
   }
 
+  // Returns a new object with properties from other object.
+  function newObject(obj) {
+    if (typeof(obj) !== 'object') { return {}; }
+    let new_obj = {};
+    for (var k in obj) { new_obj[k] = obj[k]; }
+    return new_obj;
+  }
+
   function mergeErr(err1, err2) {
     let ret = merge(err1, err2);
 
@@ -518,7 +526,7 @@ export default function builder() {
 
       opts = opts || {};
 
-      const metadata = opts.metadata || undefined;
+      const metadata = newObject(opts.metadata);
       const category = opts.category || 'custom';
       const timestamp = new Date().toISOString();
 

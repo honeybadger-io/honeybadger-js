@@ -4,6 +4,9 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Fix an issue where breadcrumbs metadata could incorrectly be marked recursive
+  when sanitizing.
 
 ## [2.2.0] - 2020-03-16
 ### Added
