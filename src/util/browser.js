@@ -51,7 +51,9 @@ export function stringSelectorOfElement(element) {
 }
 
 export function stringTextOfElement(element) {
-  return truncate((element.textContent || element.innerText || element.value || '').trim(), 300);
+  let text = element.textContent || element.innerText || '';
+  if (!text && (element.type === 'submit' || element.type === 'button')) { text = element.value; }
+  return truncate(text.trim(), 300);
 }
 
 export function nativeFetch() {

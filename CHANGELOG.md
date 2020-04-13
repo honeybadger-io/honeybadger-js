@@ -7,6 +7,9 @@ adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fix an issue where breadcrumbs metadata could incorrectly be marked recursive
   when sanitizing.
+- (security) Send event target value for buttons and submit elements only in click
+  events. Fixes an issue where input values could be leaked in breadcrumbs
+  metadata.
 
 ## [2.2.0] - 2020-03-16
 ### Added
