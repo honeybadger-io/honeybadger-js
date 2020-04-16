@@ -52,13 +52,8 @@ export default function builder() {
   }
 
   function isIgnored(err, patterns) {
-    var msg = err.message;
-
-    for (var p in patterns) {
-      if (patterns[p].test(msg)) { return true; }
-    }
-
-    return false;
+    if (!Array.isArray(patterns)) { return false; }
+    return patterns.some((p) => p.test(err.message));
   }
 
   function cgiData() {
