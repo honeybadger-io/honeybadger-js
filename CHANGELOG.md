@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Replace use of `for...in` over `Array` w/ `Array.prototype.some()` (#340)
 
 ## [2.2.1] - 2020-04-12
 ### Fixed
