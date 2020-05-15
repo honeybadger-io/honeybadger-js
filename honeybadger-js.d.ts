@@ -31,6 +31,11 @@ declare module "honeybadger-js" {
         context: any;
         cookies?: string;
     }
+    
+    interface BreadcrumbOptions {
+        category?: string;
+        metadata?: { [s: string]: boolean | number | string };
+    }
 
     class Honeybadger {
         static apiKey: string;
@@ -44,6 +49,7 @@ declare module "honeybadger-js" {
         static resetContext<T extends Object>(context?: T): Honeybadger;
         static beforeNotify(func: (notice?: Notice) => void): Honeybadger;
         static beforeNotifyHandlers: ((notice?: Notice) => void)[];
+        static addBreadcrumb(message: string, opts?: BreadcrumbOptions): Honeybadger;
         static factory(config: Config): Honeybadger;
     }
 
