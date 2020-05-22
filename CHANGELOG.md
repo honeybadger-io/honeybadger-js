@@ -6,6 +6,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Fixed
 - Replace use of `for...in` over `Array` w/ `Array.prototype.some()` (#340)
+- Add TypeScript definition for `Honeybadger.addBreadcrumb`
 
 ## [2.2.1] - 2020-04-12
 ### Fixed
