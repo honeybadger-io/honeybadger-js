@@ -12,7 +12,8 @@ export default function builder() {
 
   // Used to control initial setup across clients.
   var loaded = false,
-      installed = false;
+      installed = false,
+      factoryCount = 0;
 
   // Used to prevent reporting duplicate errors across instances.
   var currentErr;
@@ -145,15 +146,23 @@ export default function builder() {
 
   // Client factory.
   var factory = (function(opts) {
-    var notSingleton = installed;
-    var defaultProps = [];
-    var queue = [];
-    var self = {
+    factoryCount += 1;
+    const singleton = (factoryCount === 1);
+    const notSingleton = !singleton;
+    const defaultProps = [];
+    const queue = [];
+    const self = {
       context: {},
       beforeNotifyHandlers: [],
       afterNotifyHandlers: [],
       breadcrumbs: [],
       errorsSent: 0,
+      breadcrumbsEnabled: {
+        dom: true,
+        console: true,
+        network: true,
+        navigation: true
+      }
     };
     if (typeof opts === 'object') {
       for (var k in opts) { self[k] = opts[k]; }
@@ -192,8 +201,10 @@ export default function builder() {
       return config('onunhandledrejection', true);
     }
 
-    function breadcrumbsEnabled() {
-      return config('breadcrumbsEnabled', true);
+    function breadcrumbsEnabled(type) {
+      if (self.breadcrumbsEnabled === true) { return true; }
+      if (type) { return self.breadcrumbsEnabled[type] === true; }
+      return self.breadcrumbsEnabled !== false;
     }
 
     function baseURL() {
@@ -481,6 +492,10 @@ export default function builder() {
       for (var k in opts) {
         self[k] = opts[k];
       }
+      if (singleton && !installed) {
+        installed = true;
+        integrations.forEach((integration) => integration());
+      }
       return self;
     };
 
@@ -540,6 +555,8 @@ export default function builder() {
       return self;
     };
 
+    const integrations = [];
+
     // Install instrumentation.
     // This should happen once for the first factory call.
     function instrument(object, name, replacement) {
@@ -554,7 +571,9 @@ export default function builder() {
     }
 
     // Breadcrumbs: instrument click events
-    (function() {
+    integrations.push(function() {
+      if (!breadcrumbsEnabled('dom')) { return; }
+
       window.addEventListener('click', (event) => {
         let message, selector, text;
         try {
@@ -579,10 +598,12 @@ export default function builder() {
           },
         });
       }, true);
-    })();
+    });
 
     // Breadcrumbs: instrument XMLHttpRequest
-    (function() {
+    integrations.push(function() {
+      if (!breadcrumbsEnabled('network')) { return; }
+
       // -- On xhr.open: capture initial metadata
       instrument(XMLHttpRequest.prototype, 'open', function(original) {
         return function() {
@@ -645,10 +666,12 @@ export default function builder() {
           }
         };
       });
-    })();
+    });
 
     // Breadcrumbs: instrument fetch
-    (function() {
+    integrations.push(function() {
+      if (!breadcrumbsEnabled('network')) { return; }
+
       if (!nativeFetch()) {
         // Polyfills use XHR.
         return;
@@ -707,10 +730,12 @@ export default function builder() {
             });
         };
       });
-    })();
+    });
 
     // Breadcrumbs: instrument navigation
-    (function() {
+    integrations.push(function() {
+      if (!breadcrumbsEnabled('navigation')) { return; }
+
       // The last known href of the current page
       let lastHref = window.location.href;
 
@@ -748,10 +773,12 @@ export default function builder() {
       }
       instrument(window.history, 'pushState', historyWrapper);
       instrument(window.history, 'replaceState', historyWrapper);
-    })();
+    });
 
     // Breadcrumbs: instrument console
-    (function() {
+    integrations.push(function() {
+      if (!breadcrumbsEnabled('console')) { return; }
+
       function inspectArray(obj) {
         if (!Array.isArray(obj)) { return ''; }
 
@@ -785,7 +812,7 @@ export default function builder() {
           };
         });
       });
-    })();
+    });
 
     // Wrap timers
     (function() {
@@ -954,9 +981,6 @@ export default function builder() {
       var maxErrors = config('maxErrors');
       return maxErrors && self.errorsSent >= maxErrors;
     }
-
-    // End of instrumentation.
-    installed = true;
 
     // Save original state for reset()
     for (var k in self) {
