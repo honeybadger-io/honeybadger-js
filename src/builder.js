@@ -159,9 +159,9 @@ export default function builder() {
       errorsSent: 0,
       breadcrumbsEnabled: {
         dom: true,
-        console: true,
         network: true,
-        navigation: true
+        navigation: true,
+        console: true
       }
     };
     if (typeof opts === 'object') {
