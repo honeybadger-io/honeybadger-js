@@ -57,15 +57,6 @@ export default function builder() {
     return patterns.some((p) => p.test(err.message));
   }
 
-  function cgiData() {
-    var data = {};
-    data['HTTP_USER_AGENT'] = navigator.userAgent;
-    if (document.referrer.match(/\S/)) {
-      data['HTTP_REFERER'] = document.referrer;
-    }
-    return data;
-  }
-
   function encodeCookie(object) {
     if (typeof object !== 'object') {
       return undefined;
@@ -269,7 +260,9 @@ export default function builder() {
     }
 
     function buildPayload(err) {
-      let data = cgiData();
+      const data = {};
+      if (err.userAgent) { data['HTTP_USER_AGENT'] = err.userAgent; }
+      if (err.referrer) { data['HTTP_REFERER'] = document.referrer; }
       if (typeof err.cookies === 'string') {
         data['HTTP_COOKIE'] = err.cookies;
       } else if (typeof err.cookies === 'object') {
@@ -342,7 +335,9 @@ export default function builder() {
         environment: err.environment || config('environment'),
         component: err.component || config('component'),
         action: err.action || config('action'),
-        revision: err.revision || config('revision')
+        revision: err.revision || config('revision'),
+        userAgent: err.userAgent || navigator.userAgent,
+        referrer: err.referrer || document.referrer
       });
 
       self.addBreadcrumb('Honeybadger Notice', {
