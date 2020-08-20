@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.3.0-beta.1] - 2020-08-20
 ### Fixed
 - Add `referrer` and `userAgent` to notice object to support filtering
 
