@@ -7,7 +7,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.3.0-beta.1] - 2020-08-20
 ### Fixed
-- Add `referrer` and `userAgent` to notice object to support filtering
+- Add `referrer` and `userAgent` to notice object to support filtering (#418)
 
 ## [2.3.0-beta.0] - 2020-07-28
 ### Added
