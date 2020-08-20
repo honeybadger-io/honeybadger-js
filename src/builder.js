@@ -262,7 +262,7 @@ export default function builder() {
     function buildPayload(err) {
       const data = {};
       if (err.userAgent) { data['HTTP_USER_AGENT'] = err.userAgent; }
-      if (err.referrer) { data['HTTP_REFERER'] = document.referrer; }
+      if (err.referrer) { data['HTTP_REFERER'] = err.referrer; }
       if (typeof err.cookies === 'string') {
         data['HTTP_COOKIE'] = err.cookies;
       } else if (typeof err.cookies === 'object') {
