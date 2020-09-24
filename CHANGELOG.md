@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.3.0] - 2020-09-24
 ### Added
 - Perform breadcrumbs instrumentation on first `Honeybadger.configure` call (#406)
 - Add config option to disable auto breadcrumbs by type
