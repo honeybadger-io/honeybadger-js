@@ -12,7 +12,7 @@ if [[ -z "${HONEYBADGER_DISTRIBUTION_ID}" ]]; then
   exit 1
 fi
 
-VERSION_INFO=$(cat package.json | jq '.version | capture("^(?<minor>[0-9]+.[0-9]+).[0-9]+((?<tag>-beta).[0-9]+)?$")')
+VERSION_INFO=$(cat package.json | jq '.version | capture("^(?<minor>[0-9]+.[0-9]+).[0-9]+((?<tag>-(alpha|beta|rc)).[0-9]+)?$")')
 VERSION=$(echo $VERSION_INFO | jq -r '.minor')
 TAG=$(echo $VERSION_INFO | jq -r '.tag')
 
