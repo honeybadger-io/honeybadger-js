@@ -1,16 +1,26 @@
 {
-  "name": "honeybadger-js",
-  "description": "A JavaScript library for integrating apps with the Honeybadger Rails Error Notifier.",
-  "version": "2.3.0",
+  "name": "@honeybadger-io/js",
+  "version": "3.0.0-alpha.0",
   "license": "MIT",
   "homepage": "https://github.com/honeybadger-io/honeybadger-js",
   "author": {
     "name": "Joshua Wood",
     "email": "josh@honeybadger.io"
   },
-  "main": "dist/honeybadger.cjs.js",
-  "module": "dist/honeybadger.esm.js",
-  "browser": "dist/honeybadger.js",
+  "description": "Universal (Browser & Node) JavaScript error notifier for Honeybadger.io",
+  "keywords": [
+    "exception",
+    "error",
+    "honeybadger",
+    "javascript",
+    "node",
+    "browser",
+    "monitoring",
+    "isomorphic",
+    "universal"
+  ],
+  "main": "dist/server/honeybadger.js",
+  "browser": "dist/browser/honeybadger.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:honeybadger-io/honeybadger-js.git"
@@ -19,51 +29,44 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "pretest": "npm run build",
-    "test": "karma start",
-    "test:ci": "npm run pretest && karma start karma.conf-ci.js",
-    "preversion": "npm test",
-    "version": "scripts/update-versions.sh",
-    "postversion": "git push && git push --tags",
-    "prepublishOnly": "npm test",
-    "postpublish": "scripts/release-cdn.sh",
-    "release-cdn": "npm run test && scripts/release-cdn.sh"
+    "prepare": "npm run build",
+    "test": "concurrently 'npm run test:browser' 'npm run test:server'",
+    "test:browser": "jest --env=jsdom --testPathPattern='test\\/unit\\/.*(?<![\\.\\/]server)\\.test\\.(js|ts)'",
+    "test:server": "jest --env=node --testPathPattern='test\\/unit\\/.*(?<![\\.\\/]browser)\\.test\\.(js|ts)'",
+    "test:integration": "npm run build && test/integration/node_modules/karma/bin/karma start test/integration/karma.conf.js",
+    "test:integration:browserstack": "npm run test:integration",
+    "test:integration:headless": "HEADLESS=1 npm run test:integration",
+    "tsd": "npm run build && tsd",
+    "build": "rollup -c && cp honeybadger.d.ts dist/server && cp honeybadger.d.ts dist/browser"
+  },
+  "dependencies": {
+    "stacktrace-parser": "^0.1.10"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/preset-env": "^7.9.5",
-    "babel-eslint": "^10.0.3",
-    "eslint": "^7.4.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-prettier": "^3.1.3",
-    "jasmine": "^3.5.0",
-    "jasmine-core": "^3.5.0",
-    "karma": "^5.0.1",
-    "karma-browserstack-launcher": "^1.5.1",
-    "karma-chrome-launcher": "^3.0.0",
-    "karma-jasmine": "^3.1.0",
-    "karma-rollup-preprocessor": "^7.0.5",
-    "karma-sinon": "^1.0.5",
-    "prettier": "^2.0.4",
-    "promise-polyfill": "8.1.3",
-    "puppeteer": "^5.0.0",
-    "rollup": "^2.29.0",
-    "rollup-plugin-babel": "^4.3.2",
-    "rollup-plugin-commonjs": "^10.0.0",
-    "rollup-plugin-node-resolve": "^5.0.0",
-    "rollup-plugin-replace": "^2.1.1",
+    "@rollup/plugin-node-resolve": "^8.1.0",
+    "@rollup/plugin-replace": "^2.3.3",
+    "@rollup/plugin-typescript": "^5.0.2",
+    "@types/jest": "^26.0.13",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "concurrently": "^5.2.0",
+    "eslint": "^7.8.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.18.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "jest": "^26.4.2",
+    "nock": "^13.0.2",
+    "rollup": "^1.32.1",
     "rollup-plugin-uglify": "^6.0.2",
     "sinon": "^9.0.2",
-    "whatwg-fetch": "^3.0.0"
+    "ts-jest": "^26.3.0",
+    "typescript": "^4.0.2",
+    "tsd": "^0.13.1"
   },
   "readmeFilename": "README.md",
   "files": [
     "dist",
-    "honeybadger-js.d.ts"
+    "honeybadger.d.ts"
   ],
-  "types": "./honeybadger-js.d.ts"
+  "types": "./honeybadger.d.ts"
 }

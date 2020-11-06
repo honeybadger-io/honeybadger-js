@@ -7,13 +7,15 @@
 
   <title>Honeybadger.js global example</title>
 
-  <script type="text/javascript" src="../../dist/honeybadger.js" data-debug="true"></script>
+  <script type="text/javascript" src="../../dist/browser/honeybadger.js" data-debug="true"></script>
 
   <script>
     Honeybadger.configure({
       apiKey: prompt("Enter the API key for your Honeybadger project:"),
       debug: true,
       breadcrumbsEnabled: true
+    }).beforeNotify(function(notice) {
+      notice.cookies = document.cookie;
     });
 
     (function(){
@@ -25,20 +27,14 @@
         bar(callback);
       }
 
-      function log() {
-        if (window.console) {
-          console.log(arguments);
-        }
-      }
-
       window.onload = function(){
-        log("Attaching event");
+        console.log("Attaching event");
         die = Honeybadger.wrap(function(){
           throw new Error("This is a test error raised from an addEventListener callback.");
         });
         var btn = document.getElementById("btn");
         var listener = function() {
-          log("Failing in event listener...");
+          console.log("Failing in event listener...");
           foo(die);
         }
         if (btn.addEventListener) {

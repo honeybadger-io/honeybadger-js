@@ -26,7 +26,7 @@ if [ "$TAG" != "null" ] && [ ! -z "$TAG" ]; then
   PREFIX=$PREFIX$TAG
 fi
 
-aws s3 sync dist/ s3://$HONEYBADGER_JS_S3_BUCKET/$PREFIX \
+aws s3 sync dist/browser/ s3://$HONEYBADGER_JS_S3_BUCKET/$PREFIX \
   --acl 'public-read' \
   --cache-control 'max-age=31536000' \
   --exclude '*' \
