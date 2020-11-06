@@ -36,6 +36,9 @@ module.exports = {
       const yyyy = today.getFullYear();
       return `${yyyy}-${mm}-${dd}`
     }
+  },
+  afterPublish: ({ exec }) => {
+    exec(`./scripts/release-cdn.sh`)
   }
 }
 
