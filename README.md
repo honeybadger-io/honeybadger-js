@@ -5,6 +5,8 @@
 
 Universal JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io).
 
+❗*Note: This is the alpha release of the [**@honeybadger-io/js**](https://www.npmjs.com/package/@honeybadger-io/js) package. See the [v2-stable](https://github.com/honeybadger-io/honeybadger-js/tree/v2-stable) branch for the current [**honeybadger-js**](https://www.npmjs.com/package/honeybadger-js) package.*
+
 ## Documentation and Support
 
 For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/lib/javascript/index.html).
