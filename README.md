@@ -1,7 +1,7 @@
 # Honeybadger for JavaScript
 
 ![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
-[![npm version](https://badge.fury.io/js/honeybadger-js.svg)](https://badge.fury.io/js/honeybadger-js)
+[![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)
 
 Universal JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io).
 
