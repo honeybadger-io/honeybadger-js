@@ -11,9 +11,31 @@ module.exports = {
     const changelog = new Changelog(`${dir}/CHANGELOG.md`)
     return changelog.nextVersion(currentVersion)
   },
-  versionUpdated: ({ _version, _releaseType, _dir, _exec }) => {
+  versionUpdated: ({ version, _releaseType, dir, _exec }) => {
     // Update CHANGELOG.md heading for latest release
-    true
+    const parsedVersion = semver.parse(version)
+    if (parsedVersion.prerelease.length) { return }
+
+    const changelogFile = `${dir}/CHANGELOG.md`
+    fs.readFile(changelogFile, 'utf8', function (err, data) {
+      if (err) {
+        throw(err);
+      }
+      const match = data.match(/## \[Unreleased\](?:\[(.*)\])?/)
+      if (!match) { throw(new Error('Release heading not found in CHANGELOG.md')) }
+      const result = data.replace(match[0], `## [Unreleased][${match[1] || "latest"}]\n\n## [${version}] - ${getDateString()}`)
+      fs.writeFile(changelogFile, result, 'utf8', function (err) {
+        if (err) { throw(err) }
+      })
+    })
+
+    function getDateString() {
+      const today = new Date()
+      const dd = String(today.getDate()).padStart(2, '0')
+      const mm = String(today.getMonth() + 1).padStart(2, '0')
+      const yyyy = today.getFullYear();
+      return `${yyyy}-${mm}-${dd}`
+    }
   }
 }
 
