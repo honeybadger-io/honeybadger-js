@@ -1,3 +1,7 @@
+# [3.0.0-alpha.1](https://github.com/honeybadger-io/honeybadger-js/compare/v3.0.0-alpha.0...v3.0.0-alpha.1) (2020-11-06)
+
+
+
 # Changelog
 All notable changes to this project will be documented in this file.
 
