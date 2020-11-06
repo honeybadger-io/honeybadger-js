@@ -37,7 +37,8 @@
     "test:integration:browserstack": "npm run test:integration",
     "test:integration:headless": "HEADLESS=1 npm run test:integration",
     "tsd": "npm run build && tsd",
-    "build": "rollup -c && cp honeybadger.d.ts dist/server && cp honeybadger.d.ts dist/browser"
+    "build": "rollup -c && cp honeybadger.d.ts dist/server && cp honeybadger.d.ts dist/browser",
+    "release": "shipjs prepare"
   },
   "dependencies": {
     "stacktrace-parser": "^0.1.10"
@@ -58,15 +59,13 @@
     "nock": "^13.0.2",
     "rollup": "^1.32.1",
     "rollup-plugin-uglify": "^6.0.2",
+    "shipjs": "0.23.0",
     "sinon": "^9.0.2",
     "ts-jest": "^26.3.0",
-    "typescript": "^4.0.2",
-    "tsd": "^0.13.1"
+    "tsd": "^0.13.1",
+    "typescript": "^4.0.2"
   },
   "readmeFilename": "README.md",
-  "files": [
-    "dist",
-    "honeybadger.d.ts"
-  ],
+  "files": ["dist", "honeybadger.d.ts"],
   "types": "./honeybadger.d.ts"
 }
