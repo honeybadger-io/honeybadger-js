@@ -1,9 +1,9 @@
-# Honeybadger Client-Side Javascript Library
+# Honeybadger for JavaScript
 
 ![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
 [![npm version](https://badge.fury.io/js/honeybadger-js.svg)](https://badge.fury.io/js/honeybadger-js)
 
-A client-side JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io). For server-side javascript, check out our [NodeJS library](https://github.com/honeybadger-io/honeybadger-node).
+Universal JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io).
 
 ## Documentation and Support
 
@@ -18,15 +18,15 @@ See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
 1. Fork it.
 2. Create a topic branch `git checkout -b my_branch`
 3. Commit your changes `git commit -am "Boom"`
-3. Push to your branch `git push origin my_branch`
-4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)
+4. Push to your branch `git push origin my_branch`
+5. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)
 
 ## Development
 
 1. Run `npm install`.
 2. To run the test suite by itself, use `npm test`.
 3. To run the tests across all supported platforms, set up a [BrowserStack](https://www.browserstack.com/)
-account and use `BROWSERSTACK_USERNAME=your_username BROWSERSTACK_ACCESS_KEY=your-access-key npm run test:ci`.
+account and use `BROWSERSTACK_USERNAME=your_username BROWSERSTACK_ACCESS_KEY=your-access-key npm run test:integration`.
 
 ## Releasing
 

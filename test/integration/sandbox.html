@@ -7,10 +7,10 @@
 
   <title>Integration Sandbox</title>
 
-  <script type="text/javascript" src="/base/node_modules/promise-polyfill/dist/polyfill.js"></script>
-  <script type="text/javascript" src="/base/node_modules/whatwg-fetch/dist/fetch.umd.js"></script>
+  <script type="text/javascript" src="/base/test/integration/node_modules/promise-polyfill/dist/polyfill.js"></script>
+  <script type="text/javascript" src="/base/test/integration/node_modules/whatwg-fetch/dist/fetch.umd.js"></script>
 
-  <script type="text/javascript" src="/base/dist/honeybadger.js"></script>
+  <script type="text/javascript" src="/base/dist/browser/honeybadger.js"></script>
 
   <script>
     var results = {
@@ -18,11 +18,10 @@
     };
 
     Honeybadger.configure({
-      apiKey: 'integration sandbox',
-      disabled: true
+      apiKey: 'integration sandbox'
     });
 
-    Honeybadger.beforeNotify(function(notice) {
+    Honeybadger.__send = (function(notice) {
       results.notices.push(notice);
     });
   </script>
