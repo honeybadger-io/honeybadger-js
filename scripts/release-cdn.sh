@@ -2,12 +2,12 @@
 
 set -e
 
-if [[ -z "${HONEYBADGER_JS_S3_BUCKET}" ]]; then
+if [ -z "${HONEYBADGER_JS_S3_BUCKET}" ]; then
   echo "Error: please set HONEYBADGER_JS_S3_BUCKET"
   exit 1
 fi
 
-if [[ -z "${HONEYBADGER_DISTRIBUTION_ID}" ]]; then
+if [ -z "${HONEYBADGER_DISTRIBUTION_ID}" ]; then
   echo "Error: please set HONEYBADGER_DISTRIBUTION_ID"
   exit 1
 fi
@@ -16,7 +16,7 @@ VERSION_INFO=$(cat package.json | jq '.version | capture("^(?<minor>[0-9]+.[0-9]
 VERSION=$(echo $VERSION_INFO | jq -r '.minor')
 TAG=$(echo $VERSION_INFO | jq -r '.tag')
 
-if [[ -z "${VERSION}" ]]; then
+if [ -z "${VERSION}" ]; then
   echo "Not a production version; skipping CDN upload."
   exit
 fi
