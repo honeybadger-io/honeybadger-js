@@ -66,6 +66,9 @@
     "typescript": "^4.0.2"
   },
   "readmeFilename": "README.md",
-  "files": ["dist", "honeybadger.d.ts"],
+  "files": [
+    "dist",
+    "honeybadger.d.ts"
+  ],
   "types": "./honeybadger.d.ts"
 }
