@@ -31,3 +31,5 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: "us-east-1"
+          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
+          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
