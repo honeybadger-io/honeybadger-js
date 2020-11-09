@@ -9,7 +9,8 @@ describe('server client', function () {
 
   beforeEach(function () {
     client = Singleton.factory({
-      logger: nullLogger()
+      logger: nullLogger(),
+      environment: null
     })
   })
 

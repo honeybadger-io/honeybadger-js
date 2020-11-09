@@ -1,4 +1,4 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger } from './util'
+import { envVal, envBoolean, envNumber, envList, merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger } from './util'
 import { Config, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
 
 const notifier = {
@@ -19,18 +19,19 @@ export default class Client {
 
   constructor(opts: Partial<Config> = {}) {
     this.config = {
-      apiKey: null,
-      environment: null,
-      projectRoot: null,
-      component: null,
-      action: null,
-      revision: null,
-      disabled: false,
-      breadcrumbsEnabled: true,
-      maxBreadcrumbs: 40,
-      maxObjectDepth: 8,
+      apiKey: envVal('HONEYBADGER_API_KEY'),
+      environment: envVal('HONEYBADGER_ENVIRONMENT') || envVal('NODE_ENV'),
+      projectRoot: envVal('HONEYBADGER_PROJECT_ROOT'),
+      component: envVal('HONEYBADGER_COMPONENT'),
+      action: envVal('HONEYBADGER_ACTION'),
+      revision: envVal('HONEYBADGER_REVISION'),
+      disabled: envBoolean('HONEYBADGER_DISABLED', false),
+      breadcrumbsEnabled: envBoolean('HONEYBADGER_BREADCRUMBS_ENABLED', true),
+      maxBreadcrumbs: envNumber('HONEYBADGER_MAX_BREADCRUMBS') || 40,
+      maxObjectDepth: envNumber('HONEYBADGER_MAX_OBJECT_DEPTH') || 8,
       ignorePatterns: [],
       logger: logger(),
+      developmentEnvironments: envList('HONEYBADGER_DEVELOPMENT_ENVIRONMENTS') || ['dev', 'development', 'test'],
       __plugins: [],
 
       ...opts
@@ -89,7 +90,12 @@ export default class Client {
     }
 
     if (this.config.disabled) {
-      this.config.logger.debug('Dropping notice: honeybadger.js is disabled', notice)
+      this.config.logger.debug('Dropping notice: honeybadger.js is disabled')
+      return false
+    }
+
+    if (this.config.environment && this.config.developmentEnvironments.includes(this.config.environment)) {
+      this.config.logger.debug('Dropping notice: honeybadger.js is in development mode')
       return false
     }
 

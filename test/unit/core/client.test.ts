@@ -17,7 +17,8 @@ describe('client', function () {
 
   beforeEach(function () {
     client = new TestClient({
-      logger: nullLogger()
+      logger: nullLogger(),
+      environment: null
     })
   })
 
@@ -136,6 +137,14 @@ describe('client', function () {
       client.configure({
         apiKey: 'testing',
         disabled: true
+      })
+      expect(client.notify(new Error('test'))).toEqual(false)
+    })
+
+    it('doesn\'t send the notice when in a development environment', function () {
+      client.configure({
+        apiKey: 'testing',
+        environment: 'development'
       })
       expect(client.notify(new Error('test'))).toEqual(false)
     })
