@@ -17,7 +17,8 @@ describe('client', function () {
 
   beforeEach(function () {
     client = new TestClient({
-      logger: nullLogger()
+      logger: nullLogger(),
+      environment: null
     })
   })
 
@@ -138,6 +139,31 @@ describe('client', function () {
         disabled: true
       })
       expect(client.notify(new Error('test'))).toEqual(false)
+    })
+
+    it('doesn\'t send the notice when in a development environment', function () {
+      client.configure({
+        apiKey: 'testing',
+        environment: 'development'
+      })
+      expect(client.notify(new Error('test'))).toEqual(false)
+    })
+
+    it('doesn\'t send the notice when reportData is false', function () {
+      client.configure({
+        apiKey: 'testing',
+        reportData: false
+      })
+      expect(client.notify(new Error('test'))).toEqual(false)
+    })
+
+    it('does send the notice from a development environment when reportData is true', function () {
+      client.configure({
+        apiKey: 'testing',
+        environment: 'development',
+        reportData: true
+      })
+      expect(client.notify(new Error('test'))).toEqual(expect.any(Object))
     })
 
     it('does not send notice without arguments', function () {
