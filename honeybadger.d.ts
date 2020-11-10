@@ -17,13 +17,14 @@ declare namespace Honeybadger {
 
   interface Config {
     apiKey: string | undefined
-    developmentEnvironments: string[],
+    developmentEnvironments: string[]
     environment: string | undefined
     projectRoot: string | undefined
     component: string | undefined
     action: string | undefined
     revision: string | undefined
     disabled: boolean
+    reportData: boolean
     breadcrumbsEnabled: boolean | { dom: boolean, network: boolean, navigation: boolean, console: boolean }
     maxBreadcrumbs: number
     maxObjectDepth: number

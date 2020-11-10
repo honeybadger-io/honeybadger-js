@@ -25,13 +25,14 @@ export default class Client {
       component: envVal('HONEYBADGER_COMPONENT'),
       action: envVal('HONEYBADGER_ACTION'),
       revision: envVal('HONEYBADGER_REVISION'),
-      disabled: envBoolean('HONEYBADGER_DISABLED', false),
+      reportData: envBoolean('HONEYBADGER_REPORT_DATA', null),
       breadcrumbsEnabled: envBoolean('HONEYBADGER_BREADCRUMBS_ENABLED', true),
       maxBreadcrumbs: envNumber('HONEYBADGER_MAX_BREADCRUMBS') || 40,
       maxObjectDepth: envNumber('HONEYBADGER_MAX_OBJECT_DEPTH') || 8,
       ignorePatterns: [],
       logger: logger(),
       developmentEnvironments: envList('HONEYBADGER_DEVELOPMENT_ENVIRONMENTS') || ['dev', 'development', 'test'],
+      disabled: false,
       __plugins: [],
 
       ...opts
@@ -90,11 +91,11 @@ export default class Client {
     }
 
     if (this.config.disabled) {
-      this.config.logger.debug('Dropping notice: honeybadger.js is disabled')
+      this.config.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
       return false
     }
 
-    if (this.config.environment && this.config.developmentEnvironments.includes(this.config.environment)) {
+    if (!this.__reportData()) {
       this.config.logger.debug('Dropping notice: honeybadger.js is in development mode')
       return false
     }
@@ -165,6 +166,13 @@ export default class Client {
     }
 
     return this
+  }
+
+  private __reportData(): boolean {
+    if (this.config.reportData !== null) {
+      return this.config.reportData
+    }
+    return !(this.config.environment && this.config.developmentEnvironments.includes(this.config.environment))
   }
 
   protected __send(_notice: Partial<Notice>): unknown {
