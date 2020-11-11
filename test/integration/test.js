@@ -134,12 +134,12 @@ describe('browser integration', function () {
 
     sandbox
       .run(function () {
-        const promise = new Promise((resolutionFunc, rejectionFunc) => {
+        const promise = new Promise(function (resolutionFunc, rejectionFunc) {
           throw new Error('unhandled exception');
         });
         promise
-          .then((value) => console.log("value:", value))
-          .catch((err) => Honeybadger.notify(err));
+          .then(function (value) { console.log("value:", value) })
+          .catch(function (err) { Honeybadger.notify(err) });
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
