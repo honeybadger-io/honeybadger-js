@@ -30,9 +30,11 @@ declare namespace Honeybadger {
     maxBreadcrumbs: number
     maxObjectDepth: number
     ignorePatterns: RegExp[]
-    logger: Logger,
-    async: boolean,
-    maxErrors: number,
+    logger: Logger
+    async: boolean
+    maxErrors: number
+    onerror: boolean
+    onunhandledrejection: boolean
     [x: string]: unknown
   }
 

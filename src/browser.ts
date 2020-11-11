@@ -11,6 +11,8 @@ import eventListeners from './browser/integrations/event_listeners'
 interface BrowserConfig extends Config {
   async: boolean
   maxErrors: number
+  onerror: boolean
+  onunhandledrejection: boolean
 }
 
 interface WrappedFunc {
