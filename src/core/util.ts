@@ -1,4 +1,6 @@
 import * as stackTraceParser from 'stacktrace-parser'
+import Client from '../core/client'
+import { Logger } from '../core/types'
 
 export function merge(obj1: any, obj2: any): any {
   const result = {}
@@ -139,12 +141,12 @@ export function sanitize(obj, maxDepth = 8) {
   return serialize(obj)
 }
 
-export function logger() {
-  function log(method) {
-    return function () {
-      const args = Array.prototype.slice.call(arguments)
+export function logger(client: Client): Logger {
+  const log = (method: string) => {
+    return function (...args: unknown[]) {
+      if (method === 'debug' && !client.config.debug) { return }
       args.unshift('[Honeybadger]')
-      console[method].apply(console, args)
+      client.config.logger[method](...args)
     }
   }
   return {

@@ -27,7 +27,7 @@ class Honeybadger extends Client {
     if (notice.afterNotify) { handlers.unshift(notice.afterNotify) }
 
     const req = https.request(options, (res) => {
-      this.config.logger.debug(`statusCode: ${res.statusCode}`)
+      this.logger.debug(`statusCode: ${res.statusCode}`)
 
       let body = ''
       res.on('data', (chunk) => {
@@ -37,18 +37,18 @@ class Honeybadger extends Client {
       res.on('end', () => {
         if (res.statusCode !== 201) {
           runAfterNotifyHandlers(notice, handlers, new Error(`Bad HTTP response: ${res.statusCode}`))
-          this.config.logger.debug(`Unable to send error report: ${res.statusCode}`, res, notice)
+          this.logger.debug(`Unable to send error report: ${res.statusCode}`, res, notice)
           return
         }
         runAfterNotifyHandlers(merge(notice, {
           id: JSON.parse(body).id
         }), handlers)
-        this.config.logger.debug('Error report sent', notice)
+        this.logger.debug('Error report sent', notice)
       })
     })
 
     req.on('error', (err) => {
-      this.config.logger.error('Error: ' + err.message)
+      this.logger.error('Error: ' + err.message)
       runAfterNotifyHandlers(notice, handlers, err)
     })
 

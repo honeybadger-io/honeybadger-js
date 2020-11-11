@@ -27,7 +27,7 @@ class Honeybadger extends Client {
   protected __beforeNotifyHandlers = [
     (notice: Notice) => {
       if (this.__exceedsMaxErrors()) {
-        this.config.logger.debug('Dropping notice: max errors exceeded', notice)
+        this.logger.debug('Dropping notice: max errors exceeded', notice)
         return false
       }
 
@@ -101,17 +101,17 @@ class Honeybadger extends Client {
       x.onload = () => {
         if (x.status !== 201) {
           runAfterNotifyHandlers(notice, handlers, new Error(`Bad HTTP response: ${x.status}`))
-          this.config.logger.debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice)
+          this.logger.debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice)
           return
         }
         runAfterNotifyHandlers(merge(notice, {
           id: JSON.parse(x.response).id
         }), handlers)
-        this.config.logger.debug('Error report sent', notice)
+        this.logger.debug('Error report sent', notice)
       }
     } catch (err) {
       runAfterNotifyHandlers(notice, handlers, err)
-      this.config.logger.error('Unable to send error report: error while initializing request', err, notice)
+      this.logger.error('Unable to send error report: error while initializing request', err, notice)
     }
 
     return true

@@ -21,10 +21,10 @@ export function onError(_window: any = window): Plugin {
 
       instrument(_window, 'onerror', function (original) {
         const onerror = function (msg, url, line, col, err) {
-          client.config.logger.debug('window.onerror callback invoked', arguments)
+          client.logger.debug('window.onerror callback invoked', arguments)
 
           if (ignoreOnError > 0) {
-            client.config.logger.debug('Ignoring window.onerror (error likely reported earlier)', arguments)
+            client.logger.debug('Ignoring window.onerror (error likely reported earlier)', arguments)
             ignoreOnError -= 1
             return
           }
@@ -33,7 +33,7 @@ export function onError(_window: any = window): Plugin {
 
           if (line === 0 && /Script error\.?/.test(msg)) {
             // See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes
-            client.config.logger.info('Ignoring cross-domain script error: enable CORS to track these types of errors', arguments)
+            client.logger.info('Ignoring cross-domain script error: enable CORS to track these types of errors', arguments)
             return
           }
 

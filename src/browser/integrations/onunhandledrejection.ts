@@ -11,7 +11,7 @@ export default function (_window = window): Plugin {
       instrument(_window, 'onunhandledrejection', function (original) {
         // See https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event
         function onunhandledrejection(promiseRejectionEvent) {
-          client.config.logger.debug('window.onunhandledrejection callback invoked', arguments)
+          client.logger.debug('window.onunhandledrejection callback invoked', arguments)
 
           if (!client.config.onunhandledrejection) { return }
 

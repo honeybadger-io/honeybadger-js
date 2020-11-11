@@ -24,6 +24,7 @@ declare namespace Honeybadger {
     action: string | undefined
     revision: string | undefined
     disabled: boolean
+    debug: boolean
     reportData: boolean
     breadcrumbsEnabled: boolean | { dom: boolean, network: boolean, navigation: boolean, console: boolean }
     maxBreadcrumbs: number

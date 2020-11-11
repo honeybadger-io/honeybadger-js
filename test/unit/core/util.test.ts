@@ -1,7 +1,35 @@
 import sinon from 'sinon'
-import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, isIgnored, newObject, sanitize } from '../../../src/core/util'
+import Client from '../../../src/core/client'
+import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, isIgnored, newObject, sanitize, logger } from '../../../src/core/util'
+import { nullLogger } from '../helpers'
 
 describe('utils', function () {
+  describe('logger', function() {
+    it('skips debug logging by default', function () {
+      const mockDebug = jest.fn()
+      const console = nullLogger()
+      console.debug = mockDebug
+      const client = new Client({ logger: console })
+
+      logger(client).debug('expected')
+
+      expect(mockDebug.mock.calls.length).toBe(0)
+    })
+
+    it('logs debug to console when enabled', function () {
+      const mockDebug = jest.fn()
+      const console = nullLogger()
+      console.debug = mockDebug
+      const client = new Client({ logger: console, debug: true })
+
+      logger(client).debug('expected')
+
+      expect(mockDebug.mock.calls.length).toBe(1)
+      expect(mockDebug.mock.calls[0][0]).toBe('[Honeybadger]')
+      expect(mockDebug.mock.calls[0][1]).toBe('expected')
+    })
+  })
+
   describe('merge', function () {
     it('combines two objects', function () {
       expect(merge({ foo: 'foo' }, { bar: 'bar' })).toEqual({ foo: 'foo', bar: 'bar' })

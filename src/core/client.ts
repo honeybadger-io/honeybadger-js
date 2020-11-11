@@ -1,5 +1,5 @@
 import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger } from './util'
-import { Config, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
+import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
 
 const notifier = {
   name: 'honeybadger-js',
@@ -16,6 +16,7 @@ export default class Client {
   protected __afterNotifyHandlers = []
 
   config: Config
+  logger: Logger
 
   constructor(opts: Partial<Config> = {}) {
     this.config = {
@@ -30,13 +31,15 @@ export default class Client {
       maxBreadcrumbs: 40,
       maxObjectDepth: 8,
       ignorePatterns: [],
-      logger: logger(),
+      logger: console,
       developmentEnvironments: ['dev', 'development', 'test'],
       disabled: false,
+      debug: false,
       __plugins: [],
 
-      ...opts
+      ...opts,
     }
+    this.logger = logger(this)
   }
 
   factory(_opts?: Record<string, unknown>): unknown {
@@ -86,17 +89,17 @@ export default class Client {
 
   notify(notice: Partial<Notice>, name = undefined, extra = undefined): Record<string, unknown> | false | unknown {
     if (!this.config.apiKey) {
-      this.config.logger.warn('Unable to send error report: no API key has been configured')
+      this.logger.warn('Unable to send error report: no API key has been configured')
       return false
     }
 
     if (this.config.disabled) {
-      this.config.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
+      this.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
       return false
     }
 
     if (!this.__reportData()) {
-      this.config.logger.debug('Dropping notice: honeybadger.js is in development mode')
+      this.logger.debug('Dropping notice: honeybadger.js is in development mode')
       return false
     }
 

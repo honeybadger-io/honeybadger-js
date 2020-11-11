@@ -23,7 +23,7 @@ export default function (_window = window): Plugin {
                 }
               } catch (e) {
                 // Ignore 'Permission denied to access property "handleEvent"' errors.
-                client.config.logger.error(e)
+                client.logger.error(e)
               }
               return original.call(this, type, client.__wrap(listener, wrapOpts), useCapture, wantsUntrusted)
             }
