@@ -1,6 +1,6 @@
 import Client from './core/client'
 import { Config, Notice } from './core/types'
-import { merge, sanitize, runAfterNotifyHandlers, objectIsExtensible, envVal, envBoolean, envNumber } from './core/util'
+import { merge, sanitize, runAfterNotifyHandlers, objectIsExtensible } from './core/util'
 import { encodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandlerRejection from './browser/integrations/onunhandledrejection'
@@ -39,9 +39,9 @@ class Honeybadger extends Client {
 
   constructor(opts: Partial<BrowserConfig> = {}) {
     super({
-      async: envBoolean('HONEYBADGER_ASYNC', true),
-      maxErrors: envNumber('HONEYBADGER_MAX_ERRORS'),
-      projectRoot: envVal('HONEYBADGER_PROJECT_ROOT') || (window.location.protocol + '//' + window.location.host),
+      async: true,
+      maxErrors: null,
+      projectRoot: window.location.protocol + '//' + window.location.host,
       ...opts
     })
   }

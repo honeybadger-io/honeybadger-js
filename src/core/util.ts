@@ -194,38 +194,3 @@ export function instrument(object, name, replacement) {
   object[name] = replacement(original)
   object[name].__hb_original = original
 }
-
-export function envVal(key: string): string | null {
-  const val = getProcess().env[key.toUpperCase()]?.trim()
-  if (!val) { return null }
-  return val
-}
-
-export function envBoolean(key: string, fallback = false): boolean {
-  const val = envVal(key)
-  if (val === 'false' || val === '0') { return false }
-  if (val === 'true' || val === '1') { return true }
-  return fallback
-}
-
-export function envNumber(key: string): number | null {
-  const val = envVal(key)
-  if (!val) { return null }
-  return parseInt(val)
-}
-
-export function envList(key: string): string[] | null {
-  const val = envVal(key)
-  if (!val) { return null }
-  return val.split(/\s*,\s*/).map((v) => v.trim())
-}
-
-function getProcess(): {env: Record<string, string>} {
-  if (typeof process !== 'undefined') {
-    return process
-  } else {
-    return {
-      env: {}
-    }
-  }
-}

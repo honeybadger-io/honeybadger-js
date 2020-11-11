@@ -1,4 +1,4 @@
-import { envVal, envBoolean, envNumber, envList, merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger } from './util'
+import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger } from './util'
 import { Config, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
 
 const notifier = {
@@ -19,19 +19,19 @@ export default class Client {
 
   constructor(opts: Partial<Config> = {}) {
     this.config = {
-      apiKey: envVal('HONEYBADGER_API_KEY'),
-      environment: envVal('HONEYBADGER_ENVIRONMENT') || envVal('NODE_ENV'),
-      projectRoot: envVal('HONEYBADGER_PROJECT_ROOT'),
-      component: envVal('HONEYBADGER_COMPONENT'),
-      action: envVal('HONEYBADGER_ACTION'),
-      revision: envVal('HONEYBADGER_REVISION'),
-      reportData: envBoolean('HONEYBADGER_REPORT_DATA', null),
-      breadcrumbsEnabled: envBoolean('HONEYBADGER_BREADCRUMBS_ENABLED', true),
-      maxBreadcrumbs: envNumber('HONEYBADGER_MAX_BREADCRUMBS') || 40,
-      maxObjectDepth: envNumber('HONEYBADGER_MAX_OBJECT_DEPTH') || 8,
+      apiKey: null,
+      environment: null,
+      projectRoot: null,
+      component: null,
+      action: null,
+      revision: null,
+      reportData: null,
+      breadcrumbsEnabled: true,
+      maxBreadcrumbs: 40,
+      maxObjectDepth: 8,
       ignorePatterns: [],
       logger: logger(),
-      developmentEnvironments: envList('HONEYBADGER_DEVELOPMENT_ENVIRONMENTS') || ['dev', 'development', 'test'],
+      developmentEnvironments: ['dev', 'development', 'test'],
       disabled: false,
       __plugins: [],
 
