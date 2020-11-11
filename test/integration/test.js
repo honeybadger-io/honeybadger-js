@@ -101,6 +101,53 @@ describe('browser integration', function () {
       .catch(done);
   });
 
+  it('skips global onerror handler for wrapped errors', function (done) {
+    sandbox
+      .run(function () {
+        Honeybadger.wrap(function () {
+          throw (new Error('expected message'));
+        })();
+      })
+      .then(function (results) {
+        expect(results.notices.length).toEqual(1);
+        done();
+      })
+      .catch(done);
+  });
+
+  it('reports multiple errors in the same process', function (done) {
+    sandbox
+      .run(function () {
+        Honeybadger.notify('expected message 1');
+        Honeybadger.notify('expected message 2');
+        throw new Error('unhandled exception');
+      })
+      .then(function (results) {
+        expect(results.notices.length).toEqual(3);
+        done();
+      })
+      .catch(done);
+  });
+
+  it('skips onunhandledrejection when already sent', function (done) {
+    if (!('onunhandledrejection' in window)) { pending(); }
+
+    sandbox
+      .run(function () {
+        const promise = new Promise((resolutionFunc, rejectionFunc) => {
+          throw new Error('unhandled exception');
+        });
+        promise
+          .then((value) => console.log("value:", value))
+          .catch((err) => Honeybadger.notify(err));
+      })
+      .then(function (results) {
+        expect(results.notices.length).toEqual(1);
+        done();
+      })
+      .catch(done);
+  });
+
   it('sends console breadcrumbs', function (done) {
     sandbox
       .run(function () {
