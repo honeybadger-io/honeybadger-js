@@ -53,6 +53,7 @@ declare namespace Honeybadger {
     name: string,
     message: string,
     stack: string,
+    backtrace: BacktraceFrame[],
     fingerprint?: string | undefined,
     url?: string | undefined,
     component?: string | undefined,
@@ -65,6 +66,13 @@ declare namespace Honeybadger {
     environment?: string | undefined,
     revision?: string | undefined,
     afterNotify?: AfterNotifyHandler
+  }
+
+  interface BacktraceFrame {
+    file: string,
+    method: string,
+    number: number,
+    column: number
   }
 }
 

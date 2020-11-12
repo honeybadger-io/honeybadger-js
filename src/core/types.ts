@@ -47,6 +47,7 @@ export interface Notice {
   name: string,
   message: string,
   stack: string,
+  backtrace: BacktraceFrame[],
   fingerprint?: string | undefined,
   url?: string | undefined,
   component?: string | undefined,
@@ -60,6 +61,13 @@ export interface Notice {
   revision?: string | undefined,
   __breadcrumbs: BreadcrumbRecord[],
   afterNotify?: AfterNotifyHandler
+}
+
+export interface BacktraceFrame {
+  file: string,
+  method: string,
+  number: number,
+  column: number
 }
 
 export interface BreadcrumbRecord {

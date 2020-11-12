@@ -1,6 +1,6 @@
 import * as stackTraceParser from 'stacktrace-parser'
 import Client from '../core/client'
-import { Logger, Config } from '../core/types'
+import { Logger, Config, BacktraceFrame } from '../core/types'
 
 export function merge(obj1: any, obj2: any): any {
   const result = {}
@@ -31,7 +31,7 @@ export function objectIsExtensible(obj) {
   return Object.isExtensible(obj)
 }
 
-export function makeBacktrace(stack) {
+export function makeBacktrace(stack: string): BacktraceFrame[] {
   if (typeof stack !== 'string') { return [] }
   try {
     return stackTraceParser.parse(stack).map(line => {

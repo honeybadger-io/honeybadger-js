@@ -127,7 +127,8 @@ export default class Client {
       environment: notice.environment || this.config.environment,
       component: notice.component || this.config.component,
       action: notice.action || this.config.action,
-      revision: notice.revision || this.config.revision
+      revision: notice.revision || this.config.revision,
+      backtrace: makeBacktrace(notice.stack)
     })
 
     if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) { return false }
@@ -193,7 +194,7 @@ export default class Client {
       error: {
         class: notice.name,
         message: notice.message,
-        backtrace: makeBacktrace(notice.stack),
+        backtrace: notice.backtrace,
         raw_backtrace: notice.stack,
         fingerprint: notice.fingerprint
       },
