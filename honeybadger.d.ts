@@ -17,6 +17,7 @@ declare namespace Honeybadger {
 
   interface Config {
     apiKey: string | undefined
+    endpoint: string,
     developmentEnvironments: string[]
     environment: string | undefined
     projectRoot: string | undefined

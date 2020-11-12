@@ -53,7 +53,7 @@ export default [
   // Server build
   {
     input: 'src/server.ts',
-    external: ['https'],
+    external: ['http', 'https', 'url'],
     output: {
       file: pkg.main,
       format: 'cjs'

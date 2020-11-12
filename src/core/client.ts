@@ -21,6 +21,7 @@ export default class Client {
   constructor(opts: Partial<Config> = {}) {
     this.config = {
       apiKey: null,
+      endpoint: 'https://api.honeybadger.io',
       environment: null,
       projectRoot: null,
       component: null,

@@ -1,6 +1,6 @@
 import * as stackTraceParser from 'stacktrace-parser'
 import Client from '../core/client'
-import { Logger } from '../core/types'
+import { Logger, Config } from '../core/types'
 
 export function merge(obj1: any, obj2: any): any {
   const result = {}
@@ -195,4 +195,10 @@ export function instrument(object, name, replacement) {
   }
   object[name] = replacement(original)
   object[name].__hb_original = original
+}
+
+export function endpoint(config: Config, path: string): string {
+  const endpoint = config.endpoint.trim().replace(/\/$/, '')
+  path = path.trim().replace(/(^\/|\/$)/g, '')
+  return `${endpoint}/${path}`;
 }

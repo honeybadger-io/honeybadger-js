@@ -1,8 +1,10 @@
 import https from 'https'
+import http from 'http'
+import { URL } from 'url'
 
 import Client from './core/client'
 import { Config, Notice } from './core/types'
-import { merge, sanitize, runAfterNotifyHandlers } from './core/util'
+import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
 
 class Honeybadger extends Client {
   factory(opts?: Partial<Config>): Honeybadger {
@@ -10,11 +12,10 @@ class Honeybadger extends Client {
   }
 
   protected __send(notice: Notice): boolean {
+    const { protocol } = new URL(this.config.endpoint)
+    const transport = (protocol === "http:" ? http : https)
     const data = JSON.stringify(sanitize(this.__buildPayload(notice), this.config.maxObjectDepth))
     const options = {
-      hostname: 'api.honeybadger.io',
-      port: 443,
-      path: '/v1/notices',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,7 +27,7 @@ class Honeybadger extends Client {
     const handlers = Array.prototype.slice.call(this.__afterNotifyHandlers)
     if (notice.afterNotify) { handlers.unshift(notice.afterNotify) }
 
-    const req = https.request(options, (res) => {
+    const req = transport.request(endpoint(this.config, '/v1/notices'), options, (res) => {
       this.logger.debug(`statusCode: ${res.statusCode}`)
 
       let body = ''

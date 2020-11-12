@@ -10,6 +10,7 @@ export interface Logger {
 
 export interface Config {
   apiKey: string | undefined
+  endpoint: string,
   developmentEnvironments: string[],
   environment: string | undefined
   projectRoot: string | undefined

@@ -3,6 +3,7 @@ import BaseClient from '../../src/core/client'
 import { nullLogger } from './helpers'
 
 import nock from 'nock'
+import { assert } from 'console'
 
 describe('server client', function () {
   let client
@@ -16,6 +17,47 @@ describe('server client', function () {
 
   it('inherits from base client', function () {
     expect(client).toEqual(expect.any(BaseClient))
+  })
+
+  it('reports an error over https by default', function () {
+    client.configure({
+      apiKey: 'testing'
+    })
+
+    const request = nock('https://api.honeybadger.io')
+      .post('/v1/notices')
+      .reply(201, {
+        id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      })
+
+    return new Promise(resolve => {
+      client.afterNotify(function (_err, _notice) {
+        expect(request.isDone()).toBe(true)
+        resolve()
+      })
+      client.notify('testing')
+    })
+  })
+
+  it('reports an error over http when configured', function () {
+    client.configure({
+      apiKey: 'testing',
+      endpoint: 'http://api.honeybadger.io'
+    })
+
+    const request = nock('http://api.honeybadger.io')
+      .post('/v1/notices')
+      .reply(201, {
+        id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      })
+
+    return new Promise(resolve => {
+      client.afterNotify(function (_err, _notice) {
+        expect(request.isDone()).toBe(true)
+        resolve()
+      })
+      client.notify('testing')
+    })
   })
 
   describe('afterNotify', function () {

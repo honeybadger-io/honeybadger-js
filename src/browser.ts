@@ -1,6 +1,6 @@
 import Client from './core/client'
 import { Config, Notice } from './core/types'
-import { merge, sanitize, runAfterNotifyHandlers, objectIsExtensible } from './core/util'
+import { merge, sanitize, runAfterNotifyHandlers, objectIsExtensible, endpoint } from './core/util'
 import { encodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandlerRejection from './browser/integrations/onunhandledrejection'
@@ -93,7 +93,7 @@ class Honeybadger extends Client {
 
     try {
       const x = new XMLHttpRequest()
-      x.open('POST', 'https://api.honeybadger.io/v1/notices/js', this.config.async)
+      x.open('POST', endpoint(this.config, '/v1/notices/js'), this.config.async)
 
       x.setRequestHeader('X-API-Key', this.config.apiKey)
       x.setRequestHeader('Content-Type', 'application/json')
