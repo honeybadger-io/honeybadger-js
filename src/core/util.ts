@@ -31,10 +31,9 @@ export function objectIsExtensible(obj) {
   return Object.isExtensible(obj)
 }
 
-export function makeBacktrace(stack: string): BacktraceFrame[] {
-  if (typeof stack !== 'string') { return [] }
+export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
   try {
-    return stackTraceParser.parse(stack).map(line => {
+    const backtrace = stackTraceParser.parse(stack).map(line => {
       return {
         file: line.file,
         method: line.methodName,
@@ -42,6 +41,8 @@ export function makeBacktrace(stack: string): BacktraceFrame[] {
         column: line.column
       }
     })
+    backtrace.splice(0, shift)
+    return backtrace
   } catch (_err) {
     // TODO: log error
     return []
@@ -201,4 +202,32 @@ export function endpoint(config: Config, path: string): string {
   const endpoint = config.endpoint.trim().replace(/\/$/, '')
   path = path.trim().replace(/(^\/|\/$)/g, '')
   return `${endpoint}/${path}`;
+}
+
+export function generateStackTrace(): string {
+  try {
+    throw new Error('')
+  } catch(e) {
+    if (e.stack) {
+      return e.stack
+    }
+  }
+
+  const maxStackSize = 10
+  const stack = []
+  let curr = arguments.callee
+  while (curr && stack.length < maxStackSize) {
+    if (/function(?:\s+([\w$]+))+\s*\(/.test(curr.toString())) {
+      stack.push(RegExp.$1 || '<anonymous>')
+    } else {
+      stack.push('<anonymous>')
+    }
+    try {
+      curr = curr.caller
+    } catch (e) {
+      break
+    }
+  }
+
+  return stack.join('\n')
 }

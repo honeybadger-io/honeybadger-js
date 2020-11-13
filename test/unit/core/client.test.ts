@@ -308,6 +308,18 @@ describe('client', function () {
 
       expect(client.notify({ message: {} })).toEqual(expect.any(Object))
     })
+
+    it('generates a backtrace when there isn\'t one', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const payload = client.notify('expected message')
+
+      expect(payload.error.message).toEqual('expected message')
+      expect(payload.error.backtrace.length).toBeGreaterThan(0)
+      expect(payload.error.backtrace[0].file).toMatch("client.test.ts")
+    })
   })
 
   describe('beforeNotify', function () {

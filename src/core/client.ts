@@ -1,4 +1,4 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger } from './util'
+import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger, generateStackTrace } from './util'
 import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
 
 const notifier = {
@@ -127,9 +127,15 @@ export default class Client {
       environment: notice.environment || this.config.environment,
       component: notice.component || this.config.component,
       action: notice.action || this.config.action,
-      revision: notice.revision || this.config.revision,
-      backtrace: makeBacktrace(notice.stack)
+      revision: notice.revision || this.config.revision
     })
+
+    let backtraceShift = 0
+    if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
+      notice.stack = generateStackTrace()
+      backtraceShift = 2
+    }
+    notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
 
     if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) { return false }
 
