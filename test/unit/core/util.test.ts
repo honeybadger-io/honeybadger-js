@@ -68,6 +68,10 @@ describe('utils', function () {
         }
       ])
     })
+
+    it('returns and empty array when no stack is undefined', function () {
+      expect(makeBacktrace(undefined)).toEqual([])
+    })
   })
 
   describe('runBeforeNotifyHandlers', function () {
