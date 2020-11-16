@@ -57,7 +57,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "jest": "^26.4.2",
     "nock": "^13.0.5",
-    "rollup": "^1.32.1",
+    "rollup": "^2.33.2",
     "rollup-plugin-uglify": "^6.0.2",
     "shipjs": "0.23.0",
     "sinon": "^9.0.2",
