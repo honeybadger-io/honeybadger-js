@@ -188,14 +188,23 @@ export function makeNotice(thing) {
  * @param {!String} name
  * @param {!Function} replacement
  */
-export function instrument(object, name, replacement) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function instrument(object: Record<string, any>, name: string, replacement: (unknown) => void): void {
   if (!object || !name || !replacement || !(name in object)) { return }
+
   let original = object[name]
   while (original && original.__hb_original) {
     original = original.__hb_original
   }
-  object[name] = replacement(original)
-  object[name].__hb_original = original
+
+  try {
+    object[name] = replacement(original)
+    object[name].__hb_original = original
+  } catch(_e) {
+    // Ignores errors like this one:
+    //   Error: TypeError: Cannot set property onunhandledrejection of [object Object] which has only a getter
+    //   User-Agent: Mozilla/5.0 (Linux; Android 10; SAMSUNG SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/12.1 Chrome/79.0.3945.136 Mobile Safari/537.36
+  }
 }
 
 export function endpoint(config: Config, path: string): string {
