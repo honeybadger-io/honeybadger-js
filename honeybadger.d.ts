@@ -2,8 +2,15 @@
 // Project: https://github.com/honeybadger-io/honeybadger-js
 
 declare class Honeybadger {
-  public factory(config?: Partial<Honeybadger.Config>): Honeybadger
+  public factory(opts?: Partial<Honeybadger.Config>): Honeybadger
   public notify(notice: Error | string | Partial<Honeybadger.Notice>, name?: string | Partial<Honeybadger.Notice>, extra?: string | Partial<Honeybadger.Notice>): Honeybadger.Notice | false
+  public configure(opts: Partial<Honeybadger.Config>): Honeybadger
+  public beforeNotify(func: Honeybadger.BeforeNotifyHandler): Honeybadger
+  public afterNotify(func: Honeybadger.AfterNotifyHandler): Honeybadger
+  public setContext(context: Record<string, unknown>): Honeybadger
+  public resetContext(context?: Record<string, unknown>): Honeybadger
+  public addBreadcrumb(message: string, opts?: Partial<Honeybadger.BreadcrumbRecord>): Honeybadger
+  public wrap(func: (...args: unknown[]) => unknown): (...args: unknown[]) => unknown
 }
 
 declare namespace Honeybadger {
@@ -73,6 +80,13 @@ declare namespace Honeybadger {
     method: string,
     number: number,
     column: number
+  }
+
+  interface BreadcrumbRecord {
+    category: string,
+    message: string,
+    metadata: Record<string, unknown>,
+    timestamp: string
   }
 }
 
