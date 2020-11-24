@@ -420,7 +420,6 @@ describe('client', function () {
 
     it('it assigns notice properties', function () {
       client.beforeNotify(function (notice) {
-        notice.stack = 'expected stack'
         notice.name = 'expected name'
         notice.message = 'expected message'
         notice.url = 'expected url'
