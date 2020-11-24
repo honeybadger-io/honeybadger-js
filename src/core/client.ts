@@ -201,7 +201,6 @@ export default class Client {
         class: notice.name,
         message: notice.message,
         backtrace: notice.backtrace,
-        raw_backtrace: notice.stack,
         fingerprint: notice.fingerprint
       },
       request: {

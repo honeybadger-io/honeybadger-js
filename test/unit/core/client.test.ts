@@ -437,7 +437,6 @@ describe('client', function () {
       const payload = client.notify('notify message')
 
       expect(payload.error.backtrace).toEqual(expect.any(Array))
-      expect(payload.error.raw_backtrace).toEqual('expected stack')
       expect(payload.error.class).toEqual('expected name')
       expect(payload.error.message).toEqual('expected message')
       expect(payload.request.url).toEqual('expected url')
