@@ -8,17 +8,17 @@ export default function (_window = window): Plugin {
   return {
     load: (client: typeof Client) => {
       function breadcrumbsEnabled(type) {
-        if (client.config.breadcrumbsEnabled === true) { return true} 
-        if (type) { return client.config.breadcrumbsEnabled[type] === true} 
+        if (client.config.breadcrumbsEnabled === true) { return true }
+        if (type) { return client.config.breadcrumbsEnabled[type] === true }
         return client.config.breadcrumbsEnabled !== false
       }
 
       // Breadcrumbs: instrument console
       (function () {
-        if (!breadcrumbsEnabled('console')) { return} 
+        if (!breadcrumbsEnabled('console')) { return }
 
         function inspectArray(obj) {
-          if (!Array.isArray(obj)) { return ''} 
+          if (!Array.isArray(obj)) { return '' }
 
           return obj.map(value => {
             try {
@@ -54,7 +54,7 @@ export default function (_window = window): Plugin {
 
       // Breadcrumbs: instrument click events
       (function () {
-        if (!breadcrumbsEnabled('dom')) { return} 
+        if (!breadcrumbsEnabled('dom')) { return }
 
         _window.addEventListener('click', (event) => {
           let message, selector, text
@@ -84,7 +84,7 @@ export default function (_window = window): Plugin {
 
       // Breadcrumbs: instrument XMLHttpRequest
       (function () {
-        if (!breadcrumbsEnabled('network')) { return} 
+        if (!breadcrumbsEnabled('network')) { return }
 
         // -- On xhr.open: capture initial metadata
         instrument(XMLHttpRequest.prototype, 'open', function (original) {
@@ -156,7 +156,7 @@ export default function (_window = window): Plugin {
 
       // Breadcrumbs: instrument fetch
       (function () {
-        if (!breadcrumbsEnabled('network')) { return} 
+        if (!breadcrumbsEnabled('network')) { return }
 
         if (!nativeFetch()) {
           // Polyfills use XHR.
@@ -221,7 +221,7 @@ export default function (_window = window): Plugin {
 
       // Breadcrumbs: instrument navigation
       (function () {
-        if (!breadcrumbsEnabled('navigation')) { return} 
+        if (!breadcrumbsEnabled('navigation')) { return }
 
         // The last known href of the current page
         let lastHref = _window.location.href
