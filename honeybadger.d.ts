@@ -39,11 +39,14 @@ declare namespace Honeybadger {
     maxObjectDepth: number
     ignorePatterns: RegExp[]
     logger: Logger
+    onerror: boolean
+    afterUncaughtException: (err: Error) => void
+    [x: string]: unknown
+
+    // Browser
     async: boolean
     maxErrors: number
-    onerror: boolean
     onunhandledrejection: boolean
-    [x: string]: unknown
   }
 
   interface BeforeNotifyHandler {

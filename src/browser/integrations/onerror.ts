@@ -17,8 +17,6 @@ export function ignoreNextOnError(): void {
 export function onError(_window: any = window): Plugin {
   return {
     load: (client: typeof Client) => {
-      if (typeof client.config.onerror === 'undefined') { client.config.onerror = true }
-
       instrument(_window, 'onerror', function (original) {
         const onerror = function (msg, url, line, col, err) {
           client.logger.debug('window.onerror callback invoked', arguments)

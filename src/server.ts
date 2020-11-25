@@ -5,8 +5,19 @@ import { URL } from 'url'
 import Client from './core/client'
 import { Config, Notice } from './core/types'
 import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
+import uncaughtException from './server/integrations/uncaught_exception'
 
 class Honeybadger extends Client {
+  constructor(opts: Partial<Config> = {}) {
+    super({
+      afterUncaughtException: (err) => {
+        this.logger.error(err.stack || err)
+        process.exit(1)
+      },
+      ...opts,
+    })
+  }
+
   factory(opts?: Partial<Config>): Honeybadger {
     return new Honeybadger(opts)
   }
@@ -60,4 +71,8 @@ class Honeybadger extends Client {
   }
 }
 
-export default new Honeybadger({})
+export default new Honeybadger({
+  __plugins: [
+    uncaughtException()
+  ]
+})

@@ -36,6 +36,8 @@ export default class Client {
       developmentEnvironments: ['dev', 'development', 'test'],
       disabled: false,
       debug: false,
+      onerror: true,
+      afterUncaughtException: () => true,
       __plugins: [],
 
       ...opts,
