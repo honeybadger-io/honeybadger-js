@@ -27,7 +27,7 @@ describe('browser client', function () {
   describe('Singleton', function () {
     it('implements the window.onerror plugin', function () {
       Singleton.configure()
-      expect(Singleton.config.onerror).toEqual(true)
+      expect(Singleton.config.enableUncaught).toEqual(true)
     })
 
     it('implements the breadcrumbs plugin', function () {

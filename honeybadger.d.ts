@@ -39,8 +39,8 @@ declare namespace Honeybadger {
     maxObjectDepth: number
     ignorePatterns: RegExp[]
     logger: Logger
-    onerror: boolean
-    afterUncaughtException: (err: Error) => void
+    enableUncaught: boolean
+    afterUncaught: (err: Error) => void
     [x: string]: unknown
 
     // Browser

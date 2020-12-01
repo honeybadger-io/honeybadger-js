@@ -10,7 +10,7 @@ import uncaughtException from './server/integrations/uncaught_exception'
 class Honeybadger extends Client {
   constructor(opts: Partial<Config> = {}) {
     super({
-      afterUncaughtException: (err) => {
+      afterUncaught: (err) => {
         this.logger.error(err.stack || err)
         process.exit(1)
       },

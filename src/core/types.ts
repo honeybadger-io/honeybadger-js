@@ -25,8 +25,8 @@ export interface Config {
   maxObjectDepth: number
   ignorePatterns: RegExp[]
   logger: Logger
-  onerror: boolean
-  afterUncaughtException: (err: Error) => void
+  enableUncaught: boolean
+  afterUncaught: (err: Error) => void
   __plugins: Plugin[],
   [x: string]: unknown
 }

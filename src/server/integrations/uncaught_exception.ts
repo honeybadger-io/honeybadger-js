@@ -10,11 +10,11 @@ export default function (): Plugin {
         if (client.config.onerror) {
           client.notify(uncaughtError, {
             afterNotify: (_err, _notice) => {
-              client.config.afterUncaughtException(uncaughtError)
+              client.config.afterUncaught(uncaughtError)
             }
           })
         } else {
-          client.config.afterUncaughtException(uncaughtError)
+          client.config.afterUncaught(uncaughtError)
         }
       })
     }

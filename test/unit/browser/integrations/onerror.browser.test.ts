@@ -17,7 +17,7 @@ describe('window.onerror integration', function () {
   it('adds config to client', function () {
     const window = {}
     onError(window).load(client)
-    expect(client.config.onerror).toEqual(true)
+    expect(client.config.enableUncaught).toEqual(true)
   })
 
   it('skips install if window.onerror isn\'t a property', function () {

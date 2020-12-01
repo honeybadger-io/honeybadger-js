@@ -14,6 +14,7 @@ export function ignoreNextOnError(): void {
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function onError(_window: any = window): Plugin {
   return {
     load: (client: typeof Client) => {
@@ -27,7 +28,7 @@ export function onError(_window: any = window): Plugin {
             return
           }
 
-          if (!client.config.onerror) { return }
+          if (!client.config.enableUncaught) { return }
 
           if (line === 0 && /Script error\.?/.test(msg)) {
             // See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes
