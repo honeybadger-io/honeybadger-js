@@ -7,6 +7,7 @@ import { Config, Notice } from './core/types'
 import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
 import { fatallyLogAndExit } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
+import unhandledRejection from './server/integrations/unhandled_rejection'
 
 class Honeybadger extends Client {
   constructor(opts: Partial<Config> = {}) {
@@ -71,6 +72,7 @@ class Honeybadger extends Client {
 
 export default new Honeybadger({
   __plugins: [
-    uncaughtException()
+    uncaughtException(),
+    unhandledRejection()
   ]
 })

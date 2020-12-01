@@ -37,6 +37,7 @@ export default class Client {
       disabled: false,
       debug: false,
       enableUncaught: true,
+      enableUnhandledRejection: true,
       afterUncaught: () => true,
       __plugins: [],
 

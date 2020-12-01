@@ -27,6 +27,7 @@ export interface Config {
   logger: Logger
   enableUncaught: boolean
   afterUncaught: (err: Error) => void
+  enableUnhandledRejection: boolean
   __plugins: Plugin[],
   [x: string]: unknown
 }

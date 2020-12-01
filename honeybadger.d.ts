@@ -41,12 +41,12 @@ declare namespace Honeybadger {
     logger: Logger
     enableUncaught: boolean
     afterUncaught: (err: Error) => void
+    enableUnhandledRejection: boolean
     [x: string]: unknown
 
     // Browser
     async: boolean
     maxErrors: number
-    onunhandledrejection: boolean
   }
 
   interface BeforeNotifyHandler {
