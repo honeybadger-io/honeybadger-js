@@ -7,13 +7,13 @@ let count = 0
 export default function (): Plugin {
   return {
     load: (client: typeof Client) => {
-      if (!client.config.onerror) { return }
+      if (!client.config.enableUncaught) { return }
 
       process.on('uncaughtException', function (uncaughtError) {
         // Prevent recursive errors
         if (count > 1) { fatallyLogAndExit(uncaughtError) }
 
-        if (client.config.onerror) {
+        if (client.config.enableUncaught) {
           client.notify(uncaughtError, {
             afterNotify: (_err, _notice) => {
               count += 1
