@@ -24,7 +24,10 @@ export interface Config {
   maxBreadcrumbs: number
   maxObjectDepth: number
   ignorePatterns: RegExp[]
-  logger: Logger,
+  logger: Logger
+  enableUncaught: boolean
+  afterUncaught: (err: Error) => void
+  enableUnhandledRejection: boolean
   __plugins: Plugin[],
   [x: string]: unknown
 }

@@ -6,14 +6,14 @@ import Client from '../../browser'
 export default function (_window = window): Plugin {
   return {
     load: (client: typeof Client) => {
-      if (typeof client.config.onunhandledrejection === 'undefined') { client.config.onunhandledrejection = true }
+      if (!client.config.enableUnhandledRejection) { return }
 
       instrument(_window, 'onunhandledrejection', function (original) {
         // See https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event
         function onunhandledrejection(promiseRejectionEvent) {
           client.logger.debug('window.onunhandledrejection callback invoked', arguments)
 
-          if (!client.config.onunhandledrejection) { return }
+          if (!client.config.enableUnhandledRejection) { return }
 
           const { reason } = promiseRejectionEvent
 
