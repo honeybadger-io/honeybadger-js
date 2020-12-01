@@ -5,15 +5,13 @@ import { URL } from 'url'
 import Client from './core/client'
 import { Config, Notice } from './core/types'
 import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
+import { fatallyLogAndExit } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
 
 class Honeybadger extends Client {
   constructor(opts: Partial<Config> = {}) {
     super({
-      afterUncaught: (err) => {
-        this.logger.error(err.stack || err)
-        process.exit(1)
-      },
+      afterUncaught: fatallyLogAndExit,
       ...opts,
     })
   }
