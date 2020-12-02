@@ -38,7 +38,8 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
         file: line.file,
         method: line.methodName,
         number: line.lineNumber,
-        column: line.column
+        column: line.column,
+        context: 'unknown'
       }
     })
     backtrace.splice(0, shift)

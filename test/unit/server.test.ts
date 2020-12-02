@@ -60,6 +60,29 @@ describe('server client', function () {
     })
   })
 
+  it('it flags app lines in the backtrace', function () {
+    client.configure({
+      apiKey: 'testing'
+    })
+
+    nock('https://api.honeybadger.io')
+    .post('/v1/notices')
+    .reply(201, {
+      id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+    })
+
+    return new Promise(resolve => {
+      client.notify('testing', {
+        afterNotify: (err, notice) => {
+          expect(err).toBeUndefined()
+          expect(notice.message).toEqual('testing')
+          expect(notice.backtrace[0].context).toEqual('app')
+          resolve()
+        }
+      })
+    })
+  })
+
   describe('afterNotify', function () {
     beforeEach(function () {
       client.configure({
