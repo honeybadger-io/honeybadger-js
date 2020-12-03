@@ -10,9 +10,27 @@ import uncaughtException from './server/integrations/uncaught_exception'
 import unhandledRejection from './server/integrations/unhandled_rejection'
 
 class Honeybadger extends Client {
+  protected __beforeNotifyHandlers = [
+    (notice: Notice) => {
+      notice.backtrace.forEach((line) => {
+        if (line.file) {
+          if (line.file?.match(notice.projectRoot)) {
+            line.context = 'app'
+          } else if (/node_modules/.test(line.file)) {
+            line.context = 'dependency'
+          } else {
+            line.context = 'all'
+          }
+        }
+        return line
+      })
+    }
+  ]
+
   constructor(opts: Partial<Config> = {}) {
     super({
       afterUncaught: fatallyLogAndExit,
+      projectRoot: process.cwd(),
       ...opts,
     })
   }

@@ -82,7 +82,8 @@ declare namespace Honeybadger {
     file: string,
     method: string,
     number: number,
-    column: number
+    column: number,
+    context: string
   }
 
   interface BreadcrumbRecord {
