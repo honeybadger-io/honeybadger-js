@@ -8,6 +8,7 @@ import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
 import { fatallyLogAndExit } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
 import unhandledRejection from './server/integrations/unhandled_rejection'
+import { errorHandler, requestHandler, lambdaHandler } from './server/middleware'
 
 class Honeybadger extends Client {
   protected __beforeNotifyHandlers = [
@@ -34,6 +35,10 @@ class Honeybadger extends Client {
       ...opts,
     })
   }
+
+  errorHandler = errorHandler.bind(this)
+  requestHandler = requestHandler.bind(this)
+  lambdaHandler = lambdaHandler.bind(this)
 
   factory(opts?: Partial<Config>): Honeybadger {
     return new Honeybadger(opts)

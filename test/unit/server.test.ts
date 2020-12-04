@@ -2,8 +2,11 @@ import Singleton from '../../src/server'
 import BaseClient from '../../src/core/client'
 import { nullLogger } from './helpers'
 
+import sinon from 'sinon'
 import nock from 'nock'
-import { assert } from 'console'
+
+import express from 'express'
+import request from 'supertest'
 
 describe('server client', function () {
   let client
@@ -60,7 +63,7 @@ describe('server client', function () {
     })
   })
 
-  it('it flags app lines in the backtrace', function () {
+  it('flags app lines in the backtrace', function () {
     client.configure({
       apiKey: 'testing'
     })
@@ -157,6 +160,195 @@ describe('server client', function () {
             resolve()
           }
         })
+      })
+    })
+  })
+
+  describe('Express Middleware', function () {
+    let client_mock
+    const error = new Error('Badgers!')
+
+    beforeEach(function () {
+      client_mock = sinon.mock(client)
+    })
+
+    // eslint-disable-next-line jest/expect-expect
+    it('is sane', function () {
+      const app = express()
+
+      app.get('/user', function (req, res) {
+        res.status(200).json({ name: 'john' })
+      })
+
+      client_mock.expects('notify').never()
+
+      return request(app)
+        .get('/user')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200)
+    })
+
+    it('reports the error to Honeybadger and calls next error handler', function() {
+      const app = express()
+      const expected = sinon.spy()
+
+      app.use(client.requestHandler)
+
+      app.get('/', function(_req, _res) {
+        throw(error)
+      })
+
+      app.use(client.errorHandler)
+
+      app.use(function(err, _req, _res, next) {
+        expected()
+        next(err)
+      })
+
+      client_mock.expects('notify').once().withArgs(error)
+
+      return request(app)
+        .get('/')
+        .expect(500)
+        .then(() => {
+          client_mock.verify()
+          expect(expected.calledOnce).toBeTruthy()
+        })
+    })
+
+    it('reports async errors to Honeybadger and calls next error handler', function() {
+      const app = express()
+      const expected = sinon.spy()
+
+      app.use(client.requestHandler)
+
+      app.get('/', function(_req, _res) {
+        setTimeout(function asyncThrow() {
+          throw(error)
+        }, 0)
+      })
+
+      app.use(client.errorHandler)
+
+      app.use(function(err, _req, _res, next) {
+        expected()
+        next(err)
+      })
+
+      client_mock.expects('notify').once().withArgs(error)
+
+      return request(app)
+        .get('/')
+        .expect(500)
+        .then(() => {
+          client_mock.verify()
+          expect(expected.calledOnce).toBeTruthy()
+        })
+    })
+  })
+
+  describe('Lambda Handler', function () {
+    describe('with arguments', function() {
+      let handlerFunc
+
+      beforeEach(function() {
+        handlerFunc = sinon.spy()
+        const handler = client.lambdaHandler(handlerFunc)
+        handler(1, 2, 3)
+        return new Promise((resolve => {
+          process.nextTick(function () {
+            resolve()
+          })
+        }))
+      })
+
+      it('calls original handler with arguments', function() {
+        expect(handlerFunc.calledWith(1, 2, 3)).toBeTruthy()
+      })
+    })
+
+    describe('async handlers', function() {
+      // eslint-disable-next-line jest/expect-expect
+      it('reports errors to Honeybadger', function() {
+        nock.cleanAll()
+
+        const api = nock("https://api.honeybadger.io")
+          .post("/v1/notices")
+          .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+        const callback = function(_err) {
+          api.done()
+        }
+
+        const handler = client.lambdaHandler(async function(_event) {
+          throw new Error("Badgers!")
+        })
+
+        return handler({}, {}, callback)
+      })
+
+      // eslint-disable-next-line jest/expect-expect
+      it('reports async errors to Honeybadger', function() {
+        nock.cleanAll()
+
+        const api = nock("https://api.honeybadger.io")
+          .post("/v1/notices")
+          .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+        const callback = function(_err) {
+          api.done()
+        }
+
+        const handler = client.lambdaHandler(async function(_event) {
+          setTimeout(function() {
+            throw new Error("Badgers!")
+          }, 0)
+        })
+
+        return handler({}, {}, callback)
+      })
+    })
+
+    describe('non-async handlers', function() {
+      // eslint-disable-next-line jest/expect-expect
+      it('reports errors to Honeybadger', function() {
+        nock.cleanAll()
+
+        const api = nock("https://api.honeybadger.io")
+          .post("/v1/notices")
+          .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+        const callback = function(_err) {
+          api.done()
+        }
+
+        const handler = client.lambdaHandler(function(_event, _context, _callback) {
+          throw new Error("Badgers!")
+        })
+
+        return handler({}, {}, callback)
+      })
+
+      // eslint-disable-next-line jest/expect-expect
+      it('reports async errors to Honeybadger', function() {
+        nock.cleanAll()
+
+        const api = nock("https://api.honeybadger.io")
+          .post("/v1/notices")
+          .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+        const callback = function(_err) {
+          api.done()
+        }
+
+        const handler = client.lambdaHandler(function(_event, _context, _callback) {
+          setTimeout(function() {
+            throw new Error("Badgers!")
+          }, 0)
+        })
+
+        return handler({}, {}, callback)
       })
     })
   })
