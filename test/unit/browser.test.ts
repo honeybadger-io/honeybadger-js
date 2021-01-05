@@ -55,7 +55,7 @@ describe('browser client', function () {
           expect(err).toBeUndefined()
           expect(notice.message).toEqual('testing')
           expect(notice.id).toBe(id)
-          resolve()
+          resolve(true)
         })
         client.notify('testing')
 
@@ -69,7 +69,7 @@ describe('browser client', function () {
         client.afterNotify(function (err, notice) {
           expect(notice.message).toEqual('testing')
           expect(err.message).toMatch(/403/)
-          resolve()
+          resolve(true)
         })
         client.notify('testing')
 
@@ -86,7 +86,7 @@ describe('browser client', function () {
             expect(err).toBeUndefined()
             expect(notice.message).toEqual('testing')
             expect(notice.id).toBe(id)
-            resolve()
+            resolve(true)
           }
         })
 
@@ -101,7 +101,7 @@ describe('browser client', function () {
           afterNotify: (err, notice) => {
             expect(notice.message).toEqual('testing')
             expect(err.message).toMatch(/403/)
-            resolve()
+            resolve(true)
           }
         })
 
