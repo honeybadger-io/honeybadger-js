@@ -1,6 +1,6 @@
 import sinon from 'sinon'
 import Client from '../../../src/core/client'
-import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, isIgnored, newObject, sanitize, logger } from '../../../src/core/util'
+import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger } from '../../../src/core/util'
 import { nullLogger } from '../helpers'
 
 describe('utils', function () {
@@ -130,42 +130,6 @@ describe('utils', function () {
       ]
       runAfterNotifyHandlers({}, handlers, error)
       expect(error.called).toEqual(true)
-    })
-  })
-
-  describe('isIgnored', function () {
-    it('returns false when patterns are missing', function () {
-      const notice = {
-        message: 'message'
-      }
-      expect(isIgnored(notice, undefined)).toEqual(false)
-    })
-
-    it('returns false when message is missing', function () {
-      const notice = {}
-      expect(isIgnored(notice, [])).toEqual(false)
-    })
-
-    it('returns false when patterns are empty', function () {
-      const patterns = [/ignore/]
-      const notice = {}
-      expect(isIgnored(notice, patterns)).toEqual(false)
-    })
-
-    it('returns true when any pattern matches', function () {
-      const patterns = [/foo/, /ignore/, /bar/]
-      const notice = {
-        message: 'please ignore this error'
-      }
-      expect(isIgnored(notice, patterns)).toEqual(true)
-    })
-
-    it('returns false when patterns don\'t match', function () {
-      const patterns = [/foo/, /ignore/, /bar/]
-      const notice = {
-        message: 'please report this error'
-      }
-      expect(isIgnored(notice, patterns)).toEqual(false)
     })
   })
 

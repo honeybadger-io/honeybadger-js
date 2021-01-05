@@ -67,11 +67,6 @@ export function runAfterNotifyHandlers(notice, handlers, error = undefined) {
   return true
 }
 
-export function isIgnored(notice, patterns) {
-  if (!Array.isArray(patterns)) { return false }
-  return patterns.some((p) => p.test(notice.message))
-}
-
 // Returns a new object with properties from other object.
 export function newObject(obj) {
   if (typeof (obj) !== 'object') { return {} }

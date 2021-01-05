@@ -23,7 +23,6 @@ export interface Config {
   breadcrumbsEnabled: boolean | { dom: boolean, network: boolean, navigation: boolean, console: boolean }
   maxBreadcrumbs: number
   maxObjectDepth: number
-  ignorePatterns: RegExp[]
   logger: Logger
   enableUncaught: boolean
   afterUncaught: (err: Error) => void

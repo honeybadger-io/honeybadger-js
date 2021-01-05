@@ -1,4 +1,4 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger, generateStackTrace, filter } from './util'
+import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter } from './util'
 import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
 
 const notifier = {
@@ -31,7 +31,6 @@ export default class Client {
       breadcrumbsEnabled: true,
       maxBreadcrumbs: 40,
       maxObjectDepth: 8,
-      ignorePatterns: [],
       logger: console,
       developmentEnvironments: ['dev', 'development', 'test'],
       disabled: false,
@@ -142,8 +141,6 @@ export default class Client {
     notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
 
     if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) { return false }
-
-    if (isIgnored(notice, this.config.ignorePatterns)) { return false }
 
     this.addBreadcrumb('Honeybadger Notice', {
       category: 'notice',
