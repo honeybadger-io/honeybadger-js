@@ -36,7 +36,7 @@ describe('server client', function () {
     return new Promise(resolve => {
       client.afterNotify(function (_err, _notice) {
         expect(request.isDone()).toBe(true)
-        resolve()
+        resolve(true)
       })
       client.notify('testing')
     })
@@ -57,7 +57,7 @@ describe('server client', function () {
     return new Promise(resolve => {
       client.afterNotify(function (_err, _notice) {
         expect(request.isDone()).toBe(true)
-        resolve()
+        resolve(true)
       })
       client.notify('testing')
     })
@@ -80,7 +80,7 @@ describe('server client', function () {
           expect(err).toBeUndefined()
           expect(notice.message).toEqual('testing')
           expect(notice.backtrace[0].context).toEqual('app')
-          resolve()
+          resolve(true)
         }
       })
     })
@@ -106,7 +106,7 @@ describe('server client', function () {
           expect(err).toBeUndefined()
           expect(notice.message).toEqual('testing')
           expect(notice.id).toBe(id)
-          resolve()
+          resolve(true)
         })
         client.notify('testing')
       })
@@ -121,7 +121,7 @@ describe('server client', function () {
         client.afterNotify(function (err, notice) {
           expect(notice.message).toEqual('testing')
           expect(err.message).toMatch(/403/)
-          resolve()
+          resolve(true)
         })
         client.notify('testing')
       })
@@ -141,7 +141,7 @@ describe('server client', function () {
             expect(err).toBeUndefined()
             expect(notice.message).toEqual('testing')
             expect(notice.id).toBe(id)
-            resolve()
+            resolve(true)
           }
         })
       })
@@ -157,7 +157,7 @@ describe('server client', function () {
           afterNotify: (err, notice) => {
             expect(notice.message).toEqual('testing')
             expect(err.message).toMatch(/403/)
-            resolve()
+            resolve(true)
           }
         })
       })
@@ -258,7 +258,7 @@ describe('server client', function () {
         handler(1, 2, 3)
         return new Promise((resolve => {
           process.nextTick(function () {
-            resolve()
+            resolve(true)
           })
         }))
       })
