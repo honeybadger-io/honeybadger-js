@@ -42,6 +42,7 @@ declare namespace Honeybadger {
     enableUncaught: boolean
     afterUncaught: (err: Error) => void
     enableUnhandledRejection: boolean
+    filters: string[]
     [x: string]: unknown
 
     // Browser

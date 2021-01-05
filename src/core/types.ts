@@ -28,8 +28,9 @@ export interface Config {
   enableUncaught: boolean
   afterUncaught: (err: Error) => void
   enableUnhandledRejection: boolean
+  filters: string[]
   __plugins: Plugin[],
-  [x: string]: unknown
+  [x: string]: unknown,
 }
 
 export interface BeforeNotifyHandler {

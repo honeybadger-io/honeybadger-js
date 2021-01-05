@@ -1,4 +1,4 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger, generateStackTrace } from './util'
+import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, isIgnored, newObject, logger, generateStackTrace, filter } from './util'
 import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
 
 const notifier = {
@@ -39,6 +39,7 @@ export default class Client {
       enableUncaught: true,
       enableUnhandledRejection: true,
       afterUncaught: () => true,
+      filters: ['creditcard', 'password'],
       __plugins: [],
 
       ...opts,
@@ -211,8 +212,8 @@ export default class Client {
         component: notice.component,
         action: notice.action,
         context: notice.context,
-        cgi_data: notice.cgiData || {},
-        params: notice.params
+        cgi_data: filter(notice.cgiData, this.config.filters) || {},
+        params: filter(notice.params, this.config.filters)
       },
       server: {
         project_root: notice.projectRoot,
