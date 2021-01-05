@@ -11,7 +11,6 @@ Honeybadger.configure({
   revision: 'git SHA/project version',
   component: 'example_comonent',
   action: 'example_action',
-  ignorePatterns: [/known error/i],
   onerror: true,
   onunhandledrejection: true,
   async: true,
