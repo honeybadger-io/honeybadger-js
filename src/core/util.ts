@@ -98,7 +98,7 @@ export function sanitize(obj, maxDepth = 8) {
     // Functions are TMI and Symbols can't convert to strings.
     if (/function|symbol/.test(typeof (obj))) { return false }
 
-    if (obj === null) { return false };
+    if (obj === null) { return false }
 
     // No prototype, likely created with `Object.create(null)`.
     if (typeof obj === 'object' && typeof obj.hasOwnProperty === 'undefined') { return false }
@@ -240,4 +240,62 @@ export function generateStackTrace(): string {
   }
 
   return stack.join('\n')
+}
+
+export function filter(obj: Record<string, unknown>, filters: string[]): Record<string, unknown> {
+  if (!is('Object', obj)) {
+    return
+  }
+
+  if (!is('Array', filters)) {
+    filters = []
+  }
+
+  const seen = []
+  function filter(obj) {
+    let k: string, newObj: Record<string, unknown>
+
+    if (is('Object', obj) || is('Array', obj)) {
+      if (seen.indexOf(obj) !== -1) {
+        return '[CIRCULAR DATA STRUCTURE]'
+      }
+      seen.push(obj)
+    }
+
+    if (is('Object', obj)) {
+      newObj = {}
+      for (k in obj) {
+        if (filterMatch(k, filters)) {
+          newObj[k] = '[FILTERED]'
+        } else {
+          newObj[k] = filter(obj[k])
+        }
+      }
+      return newObj
+    }
+
+    if (is('Array', obj)) {
+      return obj.map(function(v) { return filter(v) })
+    }
+
+    if (is('Function', obj)) { return '[FUNC]' }
+
+    return obj
+  }
+
+  return filter(obj)
+}
+
+function filterMatch(key: string, filters: string[]) {
+  for (let i = 0; i < filters.length; i++) {
+    if (key.indexOf(filters[i]) !== -1) {
+      return true
+    }
+  }
+  return false
+}
+
+function is(type: string, obj: any) {
+  const klass = Object.prototype.toString.call(obj).slice(8, -1)
+  return obj !== undefined && obj !== null && klass === type
 }

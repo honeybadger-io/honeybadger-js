@@ -543,4 +543,32 @@ describe('client', function () {
       expect(payload.breadcrumbs.trail).toEqual([])
     })
   })
+
+  it('has default filters', function () {
+    expect(client.config.filters).toEqual(['creditcard', 'password'])
+  })
+
+  it('filters keys in payload', function () {
+    client.configure({
+      apiKey: 'testing',
+      filters: ['secret']
+    })
+
+    const payload = client.notify('message', {
+      params: {
+        secret: 'secret',
+        other: 'expected'
+      },
+      cgiData: {
+        secret: 'secret',
+        other: 'expected'
+      }
+    })
+
+    expect(payload.request.params.secret).toEqual('[FILTERED]')
+    expect(payload.request.params.other).toEqual('expected')
+
+    expect(payload.request.cgi_data.secret).toEqual('[FILTERED]')
+    expect(payload.request.cgi_data.other).toEqual('expected')
+  })
 })
