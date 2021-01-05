@@ -1,5 +1,5 @@
 import Client from './core/client'
-import { Config, Notice } from './core/types'
+import { Config, Notice, WrappedFunc } from './core/types'
 import { merge, sanitize, runAfterNotifyHandlers, objectIsExtensible, endpoint } from './core/util'
 import { encodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
@@ -11,11 +11,6 @@ import eventListeners from './browser/integrations/event_listeners'
 interface BrowserConfig extends Config {
   async: boolean
   maxErrors: number
-}
-
-interface WrappedFunc {
-  (): (...args: unknown[]) => unknown
-  ___hb: WrappedFunc
 }
 
 class Honeybadger extends Client {

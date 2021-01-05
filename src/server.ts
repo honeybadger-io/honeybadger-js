@@ -3,14 +3,16 @@ import http from 'http'
 import { URL } from 'url'
 
 import Client from './core/client'
-import { Config, Notice } from './core/types'
-import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
+import { Config, Notice, WrappedFunc } from './core/types'
+import { merge, sanitize, runAfterNotifyHandlers, endpoint, objectIsExtensible } from './core/util'
 import { fatallyLogAndExit } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
 import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler, lambdaHandler } from './server/middleware'
 
 class Honeybadger extends Client {
+  private __lastWrapErr = undefined
+
   protected __beforeNotifyHandlers = [
     (notice: Notice) => {
       notice.backtrace.forEach((line) => {
@@ -42,6 +44,44 @@ class Honeybadger extends Client {
 
   factory(opts?: Partial<Config>): Honeybadger {
     return new Honeybadger(opts)
+  }
+
+  wrap(f: (...args: unknown[]) => unknown): WrappedFunc {
+    const func = f as WrappedFunc
+    try {
+      if (typeof func !== 'function') { return func }
+      if (!objectIsExtensible(func)) { return func }
+      if (!func.___hb) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const client = this
+        func.___hb = <WrappedFunc>function () {
+          try {
+            // eslint-disable-next-line prefer-rest-params
+            return func.apply(this, arguments)
+          } catch (err) {
+            if (client.__lastWrapErr === err) { throw (err) }
+            client.__lastWrapErr = err
+            client.addBreadcrumb(
+              err.name,
+              {
+                category: 'error',
+                metadata: {
+                  message: err.message,
+                  name: err.name,
+                  stack: err.stack
+                }
+              }
+            )
+            client.notify(err)
+            throw (err)
+          }
+        }
+      }
+      func.___hb.___hb = func.___hb
+      return func.___hb
+    } catch (_e) {
+      return func
+    }
   }
 
   protected __send(notice: Notice): boolean {

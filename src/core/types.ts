@@ -87,3 +87,8 @@ export interface CGIData {
   HTTP_COOKIE: string | undefined,
   [x: string]: unknown
 }
+
+export interface WrappedFunc {
+  (): (...args: unknown[]) => unknown
+  ___hb: WrappedFunc
+}

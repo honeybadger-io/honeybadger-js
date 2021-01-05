@@ -164,6 +164,55 @@ describe('server client', function () {
     })
   })
 
+  describe('wrap', function () {
+    beforeEach(function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+    })
+
+    it('reports error and re-throws', function () {
+      nock('https://api.honeybadger.io')
+        .post('/v1/notices')
+        .once()
+        .reply(201, {
+          id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+        })
+
+      return new Promise(resolve => {
+        client.afterNotify(function (err, notice) {
+          expect(err).toBeUndefined()
+          expect(notice.message).toEqual('expected')
+          resolve(true)
+        })
+
+        expect(client.wrap(function () {
+          throw new Error('expected')
+        })).toThrow()
+      })
+    })
+
+    it('always returns the original function', function () {
+      const original = client.wrap(function () { return })
+      let func = client.wrap(original)
+
+      func = client.wrap(func)
+      func = client.wrap(func)
+      func = client.wrap(func)
+
+      expect(func).toBe(original)
+    })
+
+    it('calls the original function', function () {
+      const expected = sinon.spy()
+      const func = client.wrap(expected)
+
+      func()
+
+      expect(expected.calledOnce).toBeTruthy()
+    })
+  })
+
   describe('Express Middleware', function () {
     let client_mock
     const error = new Error('Badgers!')
