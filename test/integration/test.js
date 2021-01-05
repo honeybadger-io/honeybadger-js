@@ -101,20 +101,6 @@ describe('browser integration', function () {
       .catch(done);
   });
 
-  it('skips global onerror handler for wrapped errors', function (done) {
-    sandbox
-      .run(function () {
-        Honeybadger.wrap(function () {
-          throw (new Error('expected message'));
-        })();
-      })
-      .then(function (results) {
-        expect(results.notices.length).toEqual(1);
-        done();
-      })
-      .catch(done);
-  });
-
   it('reports multiple errors in the same process', function (done) {
     sandbox
       .run(function () {
@@ -392,34 +378,6 @@ describe('browser integration', function () {
         const errorBreadcrumbs = results.notices[0].__breadcrumbs.filter(function (c) { return c.category === 'error'; })
 
         expect(errorBreadcrumbs.length).toEqual(0);
-        done();
-      })
-      .catch(done);
-  });
-
-  it('sends Honeybadger.wrap breadcrumbs when onerror is disabled', function (done) {
-    sandbox
-      .run(function () {
-        Honeybadger.configure({ onerror: false });
-        results.error = new Error('expected message');
-        Honeybadger.wrap(function () {
-          throw (results.error);
-        })();
-      })
-      .then(function (results) {
-        expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs).toBeArray();
-
-        const errorBreadcrumbs = results.notices[0].__breadcrumbs.filter(function (c) { return c.category === 'error'; })
-
-        expect(errorBreadcrumbs.length).toEqual(1);
-        expect(errorBreadcrumbs[0].message).toEqual('Error');
-        expect(errorBreadcrumbs[0].category).toEqual('error');
-        expect(errorBreadcrumbs[0].metadata).toEqual(jasmine.objectContaining({
-          message: 'expected message',
-          name: 'Error',
-          stack: results.error.stack
-        }));
         done();
       })
       .catch(done);

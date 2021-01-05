@@ -50,10 +50,6 @@ class Honeybadger extends Client {
     return (this.__errorsSent = 0)
   }
 
-  wrap(func: (...args: unknown[]) => unknown): WrappedFunc {
-    return this.__wrap(func, { catch: true })
-  }
-
   factory(opts?: Partial<BrowserConfig>): Honeybadger {
     return new Honeybadger(opts)
   }
