@@ -29,9 +29,9 @@
 
       window.onload = function(){
         console.log("Attaching event");
-        die = Honeybadger.wrap(function(){
+        die = function(){
           throw new Error("This is a test error raised from an addEventListener callback.");
-        });
+        };
         var btn = document.getElementById("btn");
         var listener = function() {
           console.log("Failing in event listener...");
