@@ -1,4 +1,4 @@
-var hb = require('../../honeybadger');
+var hb = require('../../dist/browser/honeybadger');
 hb.configure({
   apiKey: prompt("Enter the API key for your Honeybadger project:"),
   debug: true

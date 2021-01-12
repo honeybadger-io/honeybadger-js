@@ -4,7 +4,7 @@
       console.log(arguments);
     }
   }
-  requirejs(["../../honeybadger"], function(Honeybadger) {
+  requirejs(["../../dist/browser/honeybadger"], function(Honeybadger) {
     Honeybadger.configure({
       apiKey: prompt("Enter the API key for your Honeybadger project:"),
       debug: true
