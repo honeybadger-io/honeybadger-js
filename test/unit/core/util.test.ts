@@ -1,9 +1,19 @@
 import sinon from 'sinon'
 import Client from '../../../src/core/client'
-import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger } from '../../../src/core/util'
+import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter } from '../../../src/core/util'
 import { nullLogger } from '../helpers'
 
 describe('utils', function () {
+  describe('filter', function () {
+    it('filters partial match', function () {
+      expect(filter({secret_key: 'secret'}, ['secret'])).toEqual({ secret_key: '[FILTERED]' })
+    })
+
+    it('ignores case', function () {
+      expect(filter({foo: 'secret', FOO: 'secret'}, ['Foo'])).toEqual({ foo: '[FILTERED]', FOO: '[FILTERED]' })
+    })
+  })
+
   describe('logger', function() {
     it('skips debug logging by default', function () {
       const mockDebug = jest.fn()

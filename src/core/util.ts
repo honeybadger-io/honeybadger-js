@@ -283,7 +283,7 @@ export function filter(obj: Record<string, unknown>, filters: string[]): Record<
 
 function filterMatch(key: string, filters: string[]) {
   for (let i = 0; i < filters.length; i++) {
-    if (key.indexOf(filters[i]) !== -1) {
+    if (key.toLowerCase().indexOf(filters[i].toLowerCase()) !== -1) {
       return true
     }
   }
