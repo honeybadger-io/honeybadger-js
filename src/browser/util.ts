@@ -109,13 +109,23 @@ export function localURLPathname(url) {
   return `${parsed.protocol}://${parsed.host}${parsed.pathname}`
 }
 
+export function decodeCookie(string:string): Record<string, unknown> {
+  const result = {}
+  string.split(/[;,]\s?/).forEach((pair) => {
+    const [key, value] = pair.split('=', 2)
+    result[key] = value
+  })
+
+  return result
+}
+
 export function encodeCookie(object) {
   if (typeof object !== 'object') {
     return undefined
   }
 
   const cookies = []
-  for (var k in object) {
+  for (const k in object) {
     cookies.push(k + '=' + object[k])
   }
 

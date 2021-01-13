@@ -110,4 +110,45 @@ describe('browser client', function () {
       })
     })
   })
+
+  describe('notify', function () {
+    it('excludes cookies by default', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      client.notify('testing')
+
+      expect(requests).toHaveLength(1)
+
+      const payload = JSON.parse(requests[0].requestBody)
+      expect(payload.request.cgi_data.HTTP_COOKIE).toBeUndefined()
+    })
+
+    it('filters cookies string', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      client.notify('testing', {cookies: 'expected=value; password=secret'})
+
+      expect(requests).toHaveLength(1)
+
+      const payload = JSON.parse(requests[0].requestBody)
+      expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
+    })
+
+    it('filters cookies object', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      client.notify('testing', {cookies: {expected: 'value', password: 'secret'}})
+
+      expect(requests).toHaveLength(1)
+
+      const payload = JSON.parse(requests[0].requestBody)
+      expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
+    })
+  })
 })
