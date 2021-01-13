@@ -1,7 +1,7 @@
 import Client from './core/client'
 import { Config, Notice } from './core/types'
-import { merge, sanitize, runAfterNotifyHandlers, objectIsExtensible, endpoint } from './core/util'
-import { encodeCookie, preferCatch } from './browser/util'
+import { merge, sanitize, filter, runAfterNotifyHandlers, objectIsExtensible, endpoint } from './core/util'
+import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandlerRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
@@ -66,10 +66,14 @@ class Honeybadger extends Client {
       cgiData.HTTP_REFERER = document.referrer
     }
 
+    let cookiesObject: Record<string, unknown>
     if (typeof notice.cookies === 'string') {
-      cgiData.HTTP_COOKIE = notice.cookies
-    } else if (typeof notice.cookies === 'object') {
-      cgiData.HTTP_COOKIE = encodeCookie(notice.cookies)
+      cookiesObject = decodeCookie(notice.cookies)
+    } else {
+      cookiesObject = notice.cookies
+    }
+    if (cookiesObject) {
+      cgiData.HTTP_COOKIE = encodeCookie(filter(cookiesObject, this.config.filters))
     }
 
     const payload = super.__buildPayload(notice)
