@@ -294,3 +294,21 @@ function is(type: string, obj: any) {
   const klass = Object.prototype.toString.call(obj).slice(8, -1)
   return obj !== undefined && obj !== null && klass === type
 }
+
+export function filterUrl(url:string, filters: string[]): string {
+  if (!filters) { return url }
+  if (typeof url !== 'string') { return url }
+
+  const [_, query] = url.split(/\?/, 2)
+  if (!query) { return url }
+
+  let result = url
+  query.split(/[&]\s?/).forEach((pair) => {
+    const [key, value] = pair.split('=', 2)
+    if (filterMatch(key, filters)) {
+      result = result.replace(`${key}=${value}`, `${key}=[FILTERED]`)
+    }
+  })
+
+  return result
+}
