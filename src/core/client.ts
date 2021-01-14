@@ -1,4 +1,4 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter } from './util'
+import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter, filterUrl } from './util'
 import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
 
 const notifier = {
@@ -205,7 +205,7 @@ export default class Client {
         fingerprint: notice.fingerprint
       },
       request: {
-        url: notice.url,
+        url: filterUrl(notice.url, this.config.filters),
         component: notice.component,
         action: notice.action,
         context: notice.context,

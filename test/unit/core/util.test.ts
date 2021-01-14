@@ -1,9 +1,33 @@
 import sinon from 'sinon'
 import Client from '../../../src/core/client'
-import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter } from '../../../src/core/util'
+import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
 import { nullLogger } from '../helpers'
 
 describe('utils', function () {
+  describe('filterUrl', function () {
+    it('filters query string', function () {
+      expect(filterUrl('https://www.example.com/?secret=value', ['secret'])).toEqual('https://www.example.com/?secret=[FILTERED]')
+    })
+
+    it('filters query string with empty param', function () {
+      expect(filterUrl('https://www.example.com/?secret=&foo=bar', ['secret'])).toEqual('https://www.example.com/?secret=[FILTERED]&foo=bar')
+    })
+
+    it('returns untouched url with malformed param', function () {
+      expect(filterUrl('https://www.example.com/?secret&foo=bar', ['secret'])).toEqual('https://www.example.com/?secret&foo=bar')
+    })
+
+    it('returns untouched url with filters', function () {
+      expect(filterUrl('https://www.example.com/', ['secret'])).toEqual('https://www.example.com/')
+      expect(filterUrl('https://www.example.com/?foo=bar', ['secret'])).toEqual('https://www.example.com/?foo=bar')
+    })
+
+    it('returns untouched url without filters', function () {
+      expect(filterUrl('https://www.example.com/', [])).toEqual('https://www.example.com/')
+      expect(filterUrl('https://www.example.com/?foo=bar', [])).toEqual('https://www.example.com/?foo=bar')
+    })
+  })
+
   describe('filter', function () {
     it('filters partial match', function () {
       expect(filter({secret_key: 'secret'}, ['secret'])).toEqual({ secret_key: '[FILTERED]' })

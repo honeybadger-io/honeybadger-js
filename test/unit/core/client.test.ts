@@ -571,4 +571,15 @@ describe('client', function () {
     expect(payload.request.cgi_data.secret).toEqual('[FILTERED]')
     expect(payload.request.cgi_data.other).toEqual('expected')
   })
+
+  it('filters URL params', function () {
+    client.configure({
+      apiKey: 'testing',
+      filters: ['secret']
+    })
+
+    const payload = client.notify('testing', {url: 'https://www.example.com/?secret=value&foo=bar'})
+
+    expect(payload.request.url).toEqual('https://www.example.com/?secret=[FILTERED]&foo=bar')
+  })
 })
