@@ -9,7 +9,21 @@ describe('utils', function () {
       expect(filterUrl('https://www.example.com/?secret=value', ['secret'])).toEqual('https://www.example.com/?secret=[FILTERED]')
     })
 
+    it('filters query string with empty param', function () {
+      expect(filterUrl('https://www.example.com/?secret=&foo=bar', ['secret'])).toEqual('https://www.example.com/?secret=[FILTERED]&foo=bar')
+    })
+
+    it('returns untouched url with malformed param', function () {
+      expect(filterUrl('https://www.example.com/?secret&foo=bar', ['secret'])).toEqual('https://www.example.com/?secret&foo=bar')
+    })
+
+    it('returns untouched url with filters', function () {
+      expect(filterUrl('https://www.example.com/', ['secret'])).toEqual('https://www.example.com/')
+      expect(filterUrl('https://www.example.com/?foo=bar', ['secret'])).toEqual('https://www.example.com/?foo=bar')
+    })
+
     it('returns untouched url without filters', function () {
+      expect(filterUrl('https://www.example.com/', [])).toEqual('https://www.example.com/')
       expect(filterUrl('https://www.example.com/?foo=bar', [])).toEqual('https://www.example.com/?foo=bar')
     })
   })
