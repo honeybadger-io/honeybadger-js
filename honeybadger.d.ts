@@ -72,6 +72,7 @@ declare namespace Honeybadger {
     cgiData: Record<string, unknown>,
     params: Record<string, unknown>,
     session: Record<string, unknown>,
+    headers: Record<string, unknown>,
     cookies: Record<string, unknown> | string,
     projectRoot?: string | undefined,
     environment?: string | undefined,

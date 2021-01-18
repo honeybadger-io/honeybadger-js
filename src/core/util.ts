@@ -312,3 +312,14 @@ export function filterUrl(url:string, filters: string[]): string {
 
   return result
 }
+
+export function formatCGIData(vars: Record<string, unknown>, prefix = ''): Record<string, unknown> {
+  const formattedVars = {}
+
+  Object.keys(vars).forEach(function(key) {
+    const formattedKey = prefix + key.replace(/\W/g, '_').toUpperCase()
+    formattedVars[formattedKey] = vars[key]
+  })
+
+  return formattedVars
+}

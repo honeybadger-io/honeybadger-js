@@ -1,4 +1,4 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter, filterUrl } from './util'
+import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter, filterUrl, formatCGIData } from './util'
 import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
 
 const notifier = {
@@ -192,6 +192,12 @@ export default class Client {
   }
 
   protected __buildPayload(notice: Notice): Record<string, Record<string, unknown>> {
+    const headers = filter(notice.headers, this.config.filters) || {}
+    const cgiData = filter({
+      ...notice.cgiData,
+      ...formatCGIData(headers, 'HTTP_')
+    }, this.config.filters)
+
     return {
       notifier: notifier,
       breadcrumbs: {
@@ -209,7 +215,7 @@ export default class Client {
         component: notice.component,
         action: notice.action,
         context: notice.context,
-        cgi_data: filter(notice.cgiData, this.config.filters) || {},
+        cgi_data: cgiData,
         params: filter(notice.params, this.config.filters) || {},
         session: filter(notice.session, this.config.filters) || {}
       },

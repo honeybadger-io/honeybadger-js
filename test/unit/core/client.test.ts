@@ -566,6 +566,10 @@ describe('client', function () {
       session: {
         secret: 'secret',
         other: 'expected'
+      },
+      headers: {
+        secret: 'secret',
+        other: 'expected'
       }
     })
 
@@ -577,6 +581,9 @@ describe('client', function () {
 
     expect(payload.request.session.secret).toEqual('[FILTERED]')
     expect(payload.request.session.other).toEqual('expected')
+
+    expect(payload.request.cgi_data.HTTP_SECRET).toEqual('[FILTERED]')
+    expect(payload.request.cgi_data.HTTP_OTHER).toEqual('expected')
   })
 
   it('filters URL params', function () {
