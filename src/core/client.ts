@@ -210,7 +210,8 @@ export default class Client {
         action: notice.action,
         context: notice.context,
         cgi_data: filter(notice.cgiData, this.config.filters) || {},
-        params: filter(notice.params, this.config.filters)
+        params: filter(notice.params, this.config.filters) || {},
+        session: filter(notice.session, this.config.filters) || {}
       },
       server: {
         project_root: notice.projectRoot,

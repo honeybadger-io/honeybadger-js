@@ -562,6 +562,10 @@ describe('client', function () {
       cgiData: {
         secret: 'secret',
         other: 'expected'
+      },
+      session: {
+        secret: 'secret',
+        other: 'expected'
       }
     })
 
@@ -570,6 +574,9 @@ describe('client', function () {
 
     expect(payload.request.cgi_data.secret).toEqual('[FILTERED]')
     expect(payload.request.cgi_data.other).toEqual('expected')
+
+    expect(payload.request.session.secret).toEqual('[FILTERED]')
+    expect(payload.request.session.other).toEqual('expected')
   })
 
   it('filters URL params', function () {
