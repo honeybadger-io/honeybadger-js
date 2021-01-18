@@ -224,7 +224,8 @@ export default class Client {
         project_root: notice.projectRoot,
         environment_name: notice.environment,
         revision: notice.revision,
-        hostname: this.config.hostname
+        hostname: this.config.hostname,
+        time: new Date().toUTCString()
       }
     }
   }

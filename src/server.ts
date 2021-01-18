@@ -49,7 +49,9 @@ class Honeybadger extends Client {
   protected __send(notice: Notice): boolean {
     const { protocol } = new URL(this.config.endpoint)
     const transport = (protocol === "http:" ? http : https)
+
     const payload = this.__buildPayload(notice)
+    payload.server.pid = process.pid
 
     const handlers = Array.prototype.slice.call(this.__afterNotifyHandlers)
     if (notice.afterNotify) { handlers.unshift(notice.afterNotify) }
