@@ -8,6 +8,7 @@ Honeybadger.configure({
   projectRoot: 'webpack:///./',
   apiKey: 'project api key',
   environment: 'production',
+  hostname: 'badger01',
   revision: 'git SHA/project version',
   component: 'example_comonent',
   action: 'example_action',

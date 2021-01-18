@@ -13,6 +13,7 @@ export interface Config {
   endpoint: string,
   developmentEnvironments: string[],
   environment: string | undefined
+  hostname: string | undefined
   projectRoot: string | undefined
   component: string | undefined
   action: string | undefined

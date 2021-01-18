@@ -23,6 +23,7 @@ export default class Client {
       apiKey: null,
       endpoint: 'https://api.honeybadger.io',
       environment: null,
+      hostname: null,
       projectRoot: null,
       component: null,
       action: null,
@@ -222,7 +223,8 @@ export default class Client {
       server: {
         project_root: notice.projectRoot,
         environment_name: notice.environment,
-        revision: notice.revision
+        revision: notice.revision,
+        hostname: this.config.hostname
       }
     }
   }

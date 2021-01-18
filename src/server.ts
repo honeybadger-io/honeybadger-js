@@ -1,6 +1,7 @@
 import https from 'https'
 import http from 'http'
 import { URL } from 'url'
+import os from 'os'
 
 import Client from './core/client'
 import { Config, Notice } from './core/types'
@@ -32,6 +33,7 @@ class Honeybadger extends Client {
     super({
       afterUncaught: fatallyLogAndExit,
       projectRoot: process.cwd(),
+      hostname: os.hostname(),
       ...opts,
     })
   }

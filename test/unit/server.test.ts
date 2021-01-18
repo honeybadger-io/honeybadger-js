@@ -22,6 +22,10 @@ describe('server client', function () {
     expect(client).toEqual(expect.any(BaseClient))
   })
 
+  it('sets the default hostname', function () {
+    expect(client.config.hostname).toEqual(expect.any(String))
+  })
+
   it('reports an error over https by default', function () {
     client.configure({
       apiKey: 'testing'
