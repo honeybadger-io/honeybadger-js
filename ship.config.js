@@ -17,17 +17,13 @@ module.exports = {
     if (parsedVersion.prerelease.length) { return }
 
     const changelogFile = `${dir}/CHANGELOG.md`
-    fs.readFile(changelogFile, 'utf8', function (err, data) {
-      if (err) {
-        throw(err);
-      }
-      const match = data.match(/## \[Unreleased\](?:\[(.*)\])?/)
-      if (!match) { throw(new Error('Release heading not found in CHANGELOG.md')) }
-      const result = data.replace(match[0], `## [Unreleased][${match[1] || "latest"}]\n\n## [${nextVersion}] - ${getDateString()}`)
-      fs.writeFile(changelogFile, result, 'utf8', function (err) {
-        if (err) { throw(err) }
-      })
-    })
+    const data = fs.readFileSync(changelogFile, 'utf8')
+
+    const match = data.match(/## \[Unreleased\](?:\[(.*)\])?/)
+    if (!match) { throw(new Error('Release heading not found in CHANGELOG.md')) }
+
+    const result = data.replace(match[0], `## [Unreleased][${match[1] || "latest"}]\n\n## [${nextVersion}] - ${getDateString()}`)
+    fs.writeFileSync(changelogFile, result, 'utf8')
 
     function getDateString() {
       const today = new Date()
