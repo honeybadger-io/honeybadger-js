@@ -26,10 +26,9 @@ module.exports = {
       const result = data.replace(match[0], `## [Unreleased][${match[1] || "latest"}]\n\n## [${version}] - ${getDateString()}`)
       fs.writeFile(changelogFile, result, 'utf8', function (err) {
         if (err) { throw(err) }
+        exec(`git add CHANGELOG.md`)
       })
     })
-
-    exec(`git add CHANGELOG.md`)
 
     function getDateString() {
       const today = new Date()
