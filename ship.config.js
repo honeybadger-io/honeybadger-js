@@ -11,9 +11,9 @@ module.exports = {
     const changelog = new Changelog(`${dir}/CHANGELOG.md`)
     return changelog.nextVersion(currentVersion)
   },
-  versionUpdated: ({ version, _releaseType, dir, exec }) => {
+  beforeCommitChanges: ({ nextVersion, _releaseType, _exec, dir }) => {
     // Update CHANGELOG.md heading for latest release
-    const parsedVersion = semver.parse(version)
+    const parsedVersion = semver.parse(nextVersion)
     if (parsedVersion.prerelease.length) { return }
 
     const changelogFile = `${dir}/CHANGELOG.md`
@@ -23,10 +23,9 @@ module.exports = {
       }
       const match = data.match(/## \[Unreleased\](?:\[(.*)\])?/)
       if (!match) { throw(new Error('Release heading not found in CHANGELOG.md')) }
-      const result = data.replace(match[0], `## [Unreleased][${match[1] || "latest"}]\n\n## [${version}] - ${getDateString()}`)
+      const result = data.replace(match[0], `## [Unreleased][${match[1] || "latest"}]\n\n## [${nextVersion}] - ${getDateString()}`)
       fs.writeFile(changelogFile, result, 'utf8', function (err) {
         if (err) { throw(err) }
-        exec(`git add CHANGELOG.md`)
       })
     })
 
