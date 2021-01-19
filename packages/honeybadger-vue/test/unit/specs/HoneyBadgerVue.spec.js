@@ -4,14 +4,14 @@ import TestComponent from '../TestComponent.vue'
 import TestCanvasForProps from '../TestCanvasForProps.vue'
 
 describe('HoneybadgerVue', () => {
-  var requests, xhr
+  let requests, xhr
   let Vue
   let sandbox
 
   function factory (config = {}) {
     return Vue.use(HoneybadgerVue, Object.assign({}, {
       apiKey: 'FFAACCCC00',
-      onerror: false
+      enableUncaught: false
     }, config))
   }
 
@@ -101,7 +101,7 @@ describe('HoneybadgerVue', () => {
     const constructor = factory()
 
     sandbox.spy(constructor.$honeybadger, 'notify')
-    var err = new Error('oops')
+    const err = new Error('oops')
     constructor.config.errorHandler(err, { $root: true, $options: {} }, 'some descriptive context')
     afterNotify(done, function () {
       expect(constructor.$honeybadger.notify.called).toBeTruthy()
