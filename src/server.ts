@@ -16,10 +16,10 @@ class Honeybadger extends Client {
     (notice: Notice) => {
       notice.backtrace.forEach((line) => {
         if (line.file) {
-          if (line.file?.match(notice.projectRoot)) {
-            line.context = 'app'
-          } else if (/node_modules/.test(line.file)) {
+          if (/node_modules/.test(line.file)) {
             line.context = 'dependency'
+          } else if (line.file?.match(notice.projectRoot)) {
+            line.context = 'app'
           } else {
             line.context = 'all'
           }
