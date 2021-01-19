@@ -11,7 +11,7 @@ module.exports = {
     const changelog = new Changelog(`${dir}/CHANGELOG.md`)
     return changelog.nextVersion(currentVersion)
   },
-  versionUpdated: ({ version, _releaseType, dir, _exec }) => {
+  versionUpdated: ({ version, _releaseType, dir, exec }) => {
     // Update CHANGELOG.md heading for latest release
     const parsedVersion = semver.parse(version)
     if (parsedVersion.prerelease.length) { return }
@@ -28,6 +28,8 @@ module.exports = {
         if (err) { throw(err) }
       })
     })
+
+    exec(`git add CHANGELOG.md`)
 
     function getDateString() {
       const today = new Date()
