@@ -98,8 +98,7 @@ describe('utils', function () {
           file: 'foo.js',
           method: 'bar',
           number: 1,
-          column: 2,
-          context: 'unknown'
+          column: 2
         }
       ])
     })
