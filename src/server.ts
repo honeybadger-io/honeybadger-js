@@ -80,18 +80,19 @@ class Honeybadger extends Client {
         res.on('end', () => {
           if (res.statusCode !== 201) {
             runAfterNotifyHandlers(notice, handlers, new Error(`Bad HTTP response: ${res.statusCode}`))
-            this.logger.debug(`Unable to send error report: ${res.statusCode}`, res, notice)
+            this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
             return
           }
+          const uuid = JSON.parse(body).id
           runAfterNotifyHandlers(merge(notice, {
-            id: JSON.parse(body).id
+            id: uuid
           }), handlers)
-          this.logger.debug('Error report sent', notice)
+          this.logger.info('Error report sent.', `id=${uuid}`)
         })
       })
 
       req.on('error', (err) => {
-        this.logger.error('Error: ' + err.message)
+        this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
         runAfterNotifyHandlers(notice, handlers, err)
       })
 
