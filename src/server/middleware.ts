@@ -43,8 +43,10 @@ function lambdaHandler(handler) {
     const hb = this
 
     dom.on('error', function(err) {
-      hb.notify(err, function() {
-        callback(err)
+      hb.notify(err, {
+        afterNotify: function() {
+          callback(err)
+        }
       })
     })
 
@@ -52,8 +54,10 @@ function lambdaHandler(handler) {
       process.nextTick(function() {
         Promise.resolve(handler.apply(this, args))
           .catch(function(err) {
-            hb.notify(err, function() {
-              callback(err)
+            hb.notify(err, {
+              afterNotify: function() {
+                callback(err)
+              }
             })
           })
       })

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased][latest]
 ### Fixed
 - Adjust backtrace display and logging in Node
+- Fix a bug in Node lambdaHandler
 
 ## [3.0.0] - 2021-01-19
 ### Added
