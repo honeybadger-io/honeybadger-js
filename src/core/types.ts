@@ -73,8 +73,7 @@ export interface BacktraceFrame {
   file: string,
   method: string,
   number: number,
-  column: number,
-  context: string
+  column: number
 }
 
 export interface BreadcrumbRecord {

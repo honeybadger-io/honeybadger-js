@@ -16,13 +16,8 @@ class Honeybadger extends Client {
     (notice: Notice) => {
       notice.backtrace.forEach((line) => {
         if (line.file) {
-          if (/node_modules/.test(line.file)) {
-            line.context = 'dependency'
-          } else if (line.file?.match(notice.projectRoot)) {
-            line.context = 'app'
-          } else {
-            line.context = 'all'
-          }
+          line.file = line.file.replace(/.*\/node_modules\/(.+)/, '[NODE_MODULES]/$1')
+          line.file = line.file.replace(notice.projectRoot, '[PROJECT_ROOT]')
         }
         return line
       })

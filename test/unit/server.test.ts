@@ -83,7 +83,7 @@ describe('server client', function () {
         afterNotify: (err, notice) => {
           expect(err).toBeUndefined()
           expect(notice.message).toEqual('testing')
-          expect(notice.backtrace[0].context).toEqual('app')
+          expect(notice.backtrace[0].file).toMatch('[PROJECT_ROOT]')
           resolve(true)
         }
       })
