@@ -2,8 +2,8 @@
 
 Follow these steps to run the example:
 
-1. Install webpack: `npm install -g webpack`
-2. Compile the project: `webpack`
+1. Install webpack: `npm install`
+2. Compile the project: `npm run build`
 3. Visit *index.html* in a browser and check out the development console for log
    messages.
 
