@@ -54,7 +54,7 @@ class Honeybadger extends Client {
     getStats((stats: Record<string, unknown>) => {
       payload.server.stats = stats
 
-      const data = JSON.stringify(sanitize(payload, this.config.maxObjectDepth))
+      const data = Buffer.from(JSON.stringify(sanitize(payload, this.config.maxObjectDepth)), 'utf8')
       const options = {
         method: 'POST',
         headers: {
