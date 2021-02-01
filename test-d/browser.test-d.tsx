@@ -21,6 +21,12 @@ Honeybadger.configure({
 
 Honeybadger.configure({
   breadcrumbsEnabled: {
+    dom: false
+  }
+})
+
+Honeybadger.configure({
+  breadcrumbsEnabled: {
     dom: true,
     network: true,
     navigation: true,
