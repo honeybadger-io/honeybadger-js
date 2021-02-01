@@ -35,7 +35,7 @@ declare namespace Honeybadger {
     disabled: boolean
     debug: boolean
     reportData: boolean
-    breadcrumbsEnabled: boolean | { dom: boolean, network: boolean, navigation: boolean, console: boolean }
+    breadcrumbsEnabled: boolean | Partial<{ dom: boolean, network: boolean, navigation: boolean, console: boolean }>
     maxBreadcrumbs: number
     maxObjectDepth: number
     logger: Logger
