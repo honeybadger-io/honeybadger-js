@@ -59,6 +59,31 @@ To perform a full release:
 If the CDN release fails for some reason (bad AWS credentials, for instance),
 re-run the release manually with `npm run release-cdn`.
 
+### Release Automation
+
+We use [Ship.js](https://github.com/algolia/shipjs) to automate releasing. Our [custom Ship.js config](https://github.com/honeybadger-io/honeybadger-js/blob/master/ship.config.js) determines the next release version based on the unreleased section of our [changelog](https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md) ([Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format).
+
+Ship.js creates a PR once per week when unreleased changes are present. You can also trigger a release PR by saying "@shipjs prepare" in any issue or pull request comment on GitHub.
+
+#### Available Commands
+
+- `npm run release` - Calculates the next version and creates a PR via `shipjs prepare`. This can run locally or in CI
+- `npx shipjs trigger` - Publish to NPM (usually happens in CI, but can also run locally)
+
+#### GitHub Workflows
+
+- [shipjs-manual-prepare](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/shipjs-manual-prepare.yml)
+- [shipjs-schedule-prepare](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/shipjs-schedule-prepare.yml)
+- [shipjs-trigger](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/shipjs-trigger.yml)
+
+#### Related Links
+
+- [Our Ship.js config file](https://github.com/honeybadger-io/honeybadger-js/blob/master/ship.config.js)
+- [Our Changelog file](https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md)
+- [Ship.js on GitHub](https://github.com/algolia/shipjs)
+- [Ship.js docs](https://community.algolia.com/shipjs/guide/)
+- [More about our unique setup](https://www.joshuawood.net/notes/release-automation-with-ship-js-and-keep-a-changelog)
+
 ## License
 
 The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
