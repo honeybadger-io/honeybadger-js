@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][latest]
 
+## [3.0.4] - 2021-02-09
+
 ## [3.0.3] - 2021-02-02
 ### Fixed
 - types: Make sure every breadcrumb prop is optional (#527, @paambaati)
