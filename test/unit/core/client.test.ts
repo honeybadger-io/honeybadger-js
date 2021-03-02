@@ -92,7 +92,7 @@ describe('client', function () {
       expect(client.__context).not.toEqual({})
       expect(client.__breadcrumbs).not.toEqual([])
 
-      client.resetContext()
+      client.clearContext()
 
       expect(client.__context).toEqual({})
       expect(client.__breadcrumbs).toEqual([])
