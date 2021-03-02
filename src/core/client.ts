@@ -90,7 +90,6 @@ export default class Client {
     } else {
       this.__context = {}
     }
-    this.__breadcrumbs = []
     return this
   }
 
