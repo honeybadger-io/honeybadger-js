@@ -250,6 +250,28 @@ describe('server client', function () {
           expect(expected.calledOnce).toBeTruthy()
         })
     })
+
+    it('resets context between requests', function() {
+      const app = express()
+      const expected = sinon.spy()
+
+      app.use(client.requestHandler)
+
+      app.get('/', function(_req, res) {
+        res.send('Hello World!')
+      })
+
+      app.use(client.errorHandler)
+
+      client_mock.expects('clear').once()
+
+      return request(app)
+        .get('/')
+        .expect(200)
+        .then(() => {
+          expect(client_mock.verify()).toBeTruthy()
+        })
+    })
   })
 
   describe('Lambda Handler', function () {

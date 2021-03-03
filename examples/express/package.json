@@ -1,0 +1,13 @@
+{
+  "name": "honeybadger-express-example",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@honeybadger-io/js": "^3.0.4",
+    "express": "^4.17.1"
+  }
+}

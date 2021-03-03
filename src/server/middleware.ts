@@ -16,6 +16,7 @@ function fullUrl(req) {
 }
 
 function requestHandler(req, res, next) {
+  this.clear()
   const dom = domain.create()
   dom.on('error', next)
   dom.run(next)
@@ -45,6 +46,7 @@ function lambdaHandler(handler) {
     dom.on('error', function(err) {
       hb.notify(err, {
         afterNotify: function() {
+          hb.clear()
           callback(err)
         }
       })
@@ -53,9 +55,11 @@ function lambdaHandler(handler) {
     dom.run(function() {
       process.nextTick(function() {
         Promise.resolve(handler.apply(this, args))
+          .then(() => { hb.clear() })
           .catch(function(err) {
             hb.notify(err, {
               afterNotify: function() {
+                hb.clear()
                 callback(err)
               }
             })

@@ -84,11 +84,18 @@ export default class Client {
   }
 
   resetContext(context: Record<string, unknown>): Client {
+    this.logger.warn('Deprecation warning: `Honeybadger.resetContext()` has been deprecated; please use `Honeybadger.clear()` instead.')
     if (typeof context === 'object') {
       this.__context = merge({}, context)
     } else {
       this.__context = {}
     }
+    return this
+  }
+
+  clear(): Client {
+    this.__context = {}
+    this.__breadcrumbs = []
     return this
   }
 
