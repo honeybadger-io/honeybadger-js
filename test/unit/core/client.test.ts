@@ -82,8 +82,8 @@ describe('client', function () {
     })
   })
 
-  describe('clearContext', function () {
-    it('empties the context with no arguments', function () {
+  describe('clear', function () {
+    it('clears the context and breadcrumbs', function () {
       client.addBreadcrumb('expected message')
       client.setContext({
         user_id: '1'
@@ -92,7 +92,7 @@ describe('client', function () {
       expect(client.__context).not.toEqual({})
       expect(client.__breadcrumbs).not.toEqual([])
 
-      client.clearContext()
+      client.clear()
 
       expect(client.__context).toEqual({})
       expect(client.__breadcrumbs).toEqual([])

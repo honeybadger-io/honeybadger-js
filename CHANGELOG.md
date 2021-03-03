@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][latest]
 ### Added
-- Add `Honeybadger.clearContext()` method to clear context and breadcrumbs
+- Add `Honeybadger.clear()` method to clear context and breadcrumbs
 - Deprecate `Honeybadger.resetContext()`
 
 ## [3.0.4] - 2021-03-01

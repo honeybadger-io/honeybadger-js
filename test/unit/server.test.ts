@@ -263,7 +263,7 @@ describe('server client', function () {
 
       app.use(client.errorHandler)
 
-      client_mock.expects('clearContext').once()
+      client_mock.expects('clear').once()
 
       return request(app)
         .get('/')
