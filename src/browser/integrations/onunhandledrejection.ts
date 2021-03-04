@@ -3,7 +3,8 @@ import { instrument } from '../../core/util'
 import { Plugin } from '../../core/types'
 import Client from '../../browser'
 
-export default function (_window = window): Plugin {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function (_window: any = window): Plugin {
   return {
     load: (client: typeof Client) => {
       if (!client.config.enableUnhandledRejection) { return }
@@ -41,7 +42,7 @@ export default function (_window = window): Plugin {
             return
           }
 
-          const message = typeof reason === 'string' ? reason : JSON.stringify(reason)
+          const message = typeof reason === 'string' ? reason : (JSON.stringify(reason) ?? 'Unspecified reason')
           client.notify({
             name: 'window.onunhandledrejection',
             message: `UnhandledPromiseRejectionWarning: ${message}`
