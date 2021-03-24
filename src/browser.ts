@@ -18,6 +18,11 @@ interface WrappedFunc {
   ___hb: WrappedFunc
 }
 
+interface RequestError {
+  err: Error
+  notice: Error
+}
+
 class Honeybadger extends Client {
   private __errorsSent = 0
   private __lastWrapErr = undefined
@@ -82,7 +87,7 @@ class Honeybadger extends Client {
     return payload
   }
 
-  protected __send(notice:Notice): boolean {
+  protected __send(notice:Notice): Promise<void | RequestError> {
     this.__incrementErrorsCount()
 
     const payload = this.__buildPayload(notice)
@@ -112,9 +117,10 @@ class Honeybadger extends Client {
     } catch (err) {
       runAfterNotifyHandlers(notice, handlers, err)
       this.logger.error('Unable to send error report: error while initializing request', err, notice)
+      return Promise.reject({err, notice})
     }
 
-    return true
+    return Promise.resolve()
   }
 
   // wrap always returns the same function so that callbacks can be removed via

@@ -41,7 +41,7 @@ class Honeybadger extends Client {
     return new Honeybadger(opts)
   }
 
-  protected __send(notice: Notice): boolean {
+  protected __send(notice: Notice): Promise<void | Response | Error> {
     const { protocol } = new URL(this.config.endpoint)
     const transport = (protocol === "http:" ? http : https)
 
@@ -51,51 +51,53 @@ class Honeybadger extends Client {
     const handlers = Array.prototype.slice.call(this.__afterNotifyHandlers)
     if (notice.afterNotify) { handlers.unshift(notice.afterNotify) }
 
-    getStats((stats: Record<string, unknown>) => {
-      payload.server.stats = stats
+    return new Promise((resolve, reject) => {
+      getStats((stats: Record<string, unknown>) => {
+        payload.server.stats = stats
 
-      const data = Buffer.from(JSON.stringify(sanitize(payload, this.config.maxObjectDepth)), 'utf8')
-      const options = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': data.length,
-          'X-API-Key': this.config.apiKey
-        }
-      }
-
-      const req = transport.request(endpoint(this.config, '/v1/notices'), options, (res) => {
-        this.logger.debug(`statusCode: ${res.statusCode}`)
-
-        let body = ''
-        res.on('data', (chunk) => {
-          body += chunk
-        })
-
-        res.on('end', () => {
-          if (res.statusCode !== 201) {
-            runAfterNotifyHandlers(notice, handlers, new Error(`Bad HTTP response: ${res.statusCode}`))
-            this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
-            return
+        const data = Buffer.from(JSON.stringify(sanitize(payload, this.config.maxObjectDepth)), 'utf8')
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length,
+            'X-API-Key': this.config.apiKey
           }
-          const uuid = JSON.parse(body).id
-          runAfterNotifyHandlers(merge(notice, {
-            id: uuid
-          }), handlers)
-          this.logger.info('Error report sent.', `id=${uuid}`)
+        }
+
+        const req = transport.request(endpoint(this.config, '/v1/notices'), options, (res) => {
+          this.logger.debug(`statusCode: ${res.statusCode}`)
+
+          let body = ''
+          res.on('data', (chunk) => {
+            body += chunk
+          })
+
+          res.on('end', () => {
+            if (res.statusCode !== 201) {
+              runAfterNotifyHandlers(notice, handlers, new Error(`Bad HTTP response: ${res.statusCode}`))
+              this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
+              return reject(res)
+            }
+            const uuid = JSON.parse(body).id
+            runAfterNotifyHandlers(merge(notice, {
+              id: uuid
+            }), handlers)
+            this.logger.info('Error report sent.', `id=${uuid}`)
+          })
         })
-      })
 
-      req.on('error', (err) => {
-        this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
-        runAfterNotifyHandlers(notice, handlers, err)
-      })
+        req.on('error', (err) => {
+          this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
+          runAfterNotifyHandlers(notice, handlers, err)
+          return reject(err)
+        })
 
-      req.write(data)
-      req.end()
+        req.write(data)
+        req.end()
+        return resolve()
+      })
     })
-
-    return true
   }
 }
 
