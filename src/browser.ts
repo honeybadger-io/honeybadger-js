@@ -18,8 +18,9 @@ interface WrappedFunc {
   ___hb: WrappedFunc
 }
 
-interface RequestError {
-  err: Error
+interface AjaxError {
+  err?: Error
+  response: Response
   notice: Error
 }
 
@@ -87,7 +88,7 @@ class Honeybadger extends Client {
     return payload
   }
 
-  protected __send(notice:Notice): Promise<void | RequestError> {
+  protected __send(notice:Notice): Promise<void | AjaxError> {
     this.__incrementErrorsCount()
 
     const payload = this.__buildPayload(notice)
@@ -107,7 +108,7 @@ class Honeybadger extends Client {
         if (x.status !== 201) {
           runAfterNotifyHandlers(notice, handlers, new Error(`Bad HTTP response: ${x.status}`))
           this.logger.debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice)
-          return
+          return Promise.reject({notice, response: x})
         }
         runAfterNotifyHandlers(merge(notice, {
           id: JSON.parse(x.response).id
