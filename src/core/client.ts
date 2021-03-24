@@ -101,18 +101,21 @@ export default class Client {
 
   notify(notice: Partial<Notice>, name = undefined, extra = undefined): Record<string, unknown> | false | unknown {
     if (!this.config.apiKey) {
-      this.logger.warn('Unable to send error report: no API key has been configured')
-      return false
+      const msg = 'Unable to send error report: no API key has been configured'
+      this.logger.warn(msg)
+      return Promise.reject(msg)
     }
 
     if (this.config.disabled) {
-      this.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
-      return false
+      const msg = 'Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)'
+      this.logger.warn(msg)
+      return Promise.reject(msg)
     }
 
     if (!this.__reportData()) {
-      this.logger.debug('Dropping notice: honeybadger.js is in development mode')
-      return false
+      const msg = 'Dropping notice: honeybadger.js is in development mode'
+      this.logger.debug(msg)
+      return Promise.reject(msg)
     }
 
     notice = makeNotice(notice)
@@ -129,7 +132,7 @@ export default class Client {
       notice = mergeNotice(notice, extra)
     }
 
-    if (objectIsEmpty(notice)) { return false }
+    if (objectIsEmpty(notice)) { return Promise.reject("'notice' is an empty object. Nothing to send") }
 
     notice = merge(notice, {
       name: notice.name || 'Error',
@@ -148,7 +151,7 @@ export default class Client {
     }
     notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
 
-    if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) { return false }
+    if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) { Promise.reject("Something went wrong with running beforeNotifyHandlers") }
 
     this.addBreadcrumb('Honeybadger Notice', {
       category: 'notice',
