@@ -7,6 +7,18 @@ const notifier = {
   version: '__VERSION__'
 }
 
+// Split at commas
+const TAG_SEPARATOR = /,/
+
+// Removes any non-word characters
+const TAG_SANITIZER = /[^\w]/g
+
+// Checks for blank strings
+const STRING_EMPTY = ''
+
+// Checks for non-blank characters
+const NOT_BLANK = /\S/
+
 export default class Client {
   private __pluginsExecuted = false
 
@@ -36,6 +48,7 @@ export default class Client {
       developmentEnvironments: ['dev', 'development', 'test'],
       disabled: false,
       debug: false,
+      tags: null,
       enableUncaught: true,
       enableUnhandledRejection: true,
       afterUncaught: () => true,
@@ -131,6 +144,14 @@ export default class Client {
 
     if (objectIsEmpty(notice)) { return false }
 
+    const noticeTags = this.__constructTags(notice.tags)
+    const contextTags = this.__constructTags(this.__context["tags"])
+    const configTags = this.__constructTags(this.config.tags)
+
+    // Turning into a Set will remove duplicates
+    const tags = noticeTags.concat(contextTags).concat(configTags)
+    const uniqueTags = tags.filter((item, index) => tags.indexOf(item) === index)
+
     notice = merge(notice, {
       name: notice.name || 'Error',
       context: merge(this.__context, notice.context),
@@ -138,7 +159,8 @@ export default class Client {
       environment: notice.environment || this.config.environment,
       component: notice.component || this.config.component,
       action: notice.action || this.config.action,
-      revision: notice.revision || this.config.revision
+      revision: notice.revision || this.config.revision,
+      tags: uniqueTags
     })
 
     let backtraceShift = 0
@@ -216,7 +238,8 @@ export default class Client {
         class: notice.name,
         message: notice.message,
         backtrace: notice.backtrace,
-        fingerprint: notice.fingerprint
+        fingerprint: notice.fingerprint,
+        tags: notice.tags
       },
       request: {
         url: filterUrl(notice.url, this.config.filters),
@@ -235,5 +258,15 @@ export default class Client {
         time: new Date().toUTCString()
       }
     }
+  }
+
+  protected __constructTags(tags: unknown): Array<string> {
+    if (!tags) {
+      return []
+    }
+
+    return tags.toString().split(TAG_SEPARATOR).map((tag: string) => {
+      return tag.replace(TAG_SANITIZER, STRING_EMPTY)
+    }).filter((tag) => NOT_BLANK.test(tag))
   }
 }
