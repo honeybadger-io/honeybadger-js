@@ -10,11 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add tagging to errors with 3 possible API's
 
-```bash
-Honeybadger.configure({tags: string | string[] | undefined})
-Honeybadger.configure().setContext({tags: string | string[] | undefined})
-Honeybadger.configure().notify('error', {tags: string | string[] | undefined})
-```
+    ```bash
+    Honeybadger.configure({tags: string | string[] | undefined})
+    Honeybadger.configure().setContext({tags: string | string[] | undefined})
+    Honeybadger.configure().notify('error', {tags: string | string[] | undefined})
+    ```
 
 ## [3.1.0] - 2021-03-04
 ### Fixed
