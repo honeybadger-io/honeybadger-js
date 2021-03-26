@@ -47,6 +47,7 @@ declare namespace Honeybadger {
     enableUncaught: boolean
     afterUncaught: (err: Error) => void
     enableUnhandledRejection: boolean
+    tags: string | string[] | unknown
     filters: string[]
     [x: string]: unknown
 
@@ -84,6 +85,7 @@ declare namespace Honeybadger {
     environment?: string | undefined,
     revision?: string | undefined,
     afterNotify?: AfterNotifyHandler
+    tags: string | string[]
   }
 
   interface BacktraceFrame {

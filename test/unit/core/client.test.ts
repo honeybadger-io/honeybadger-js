@@ -613,4 +613,65 @@ describe('client', function () {
 
     expect(payload.request.url).toEqual('https://www.example.com/?secret=[FILTERED]&foo=bar')
   })
+
+
+  it('normalizes comma separated tags', function() {
+    client.configure({
+      apiKey: 'testing'
+    })
+
+    const payload = client.notify('testing', {tags: '  tag1, &%&@<$^tag2,tag3 , tag4,,tag5,'})
+    expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4', 'tag5'])
+  })
+
+  it('normalizes arrays of tags', function() {
+    client.configure({
+      apiKey: 'testing'
+    })
+
+    const payload = client.notify('testing', {tags: ['  tag1,', ',tag2 * /^&:', 'tag3 ', 'tag4', '<script> tag5 </script>']})
+    expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4', 'scripttag5script'])
+  })
+
+  it('sends configured tags to errors', function() {
+    client.configure({
+      apiKey: 'testing',
+      tags: ['tag1']
+    })
+
+    const payload = client.notify('testing')
+    expect(payload.error.tags).toEqual(['tag1'])
+  })
+
+  it('sends context tags to errors', function() {
+    client.configure({
+      apiKey: 'testing',
+    })
+
+    client.setContext({tags: 'tag1, tag2'})
+    const payload = client.notify('testing')
+    expect(payload.error.tags).toEqual(['tag1', 'tag2'])
+  })
+
+  it('sends config errors, context errors, and notice errors', function() {
+    client.configure({
+      apiKey: 'testing',
+      tags: ['tag4']
+    })
+
+    client.setContext({tags: 'tag3'})
+
+    const payload = client.notify('testing', {tags: ['tag1, tag2']})
+    expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
+  })
+
+  it("should not send duplicate tags", function() {
+    client.configure({
+      apiKey: 'testing',
+      tags: ['tag1']
+    })
+
+    const payload = client.notify('testing', {tags: ['tag1']})
+    expect(payload.error.tags).toEqual(['tag1'])
+  })
 })
