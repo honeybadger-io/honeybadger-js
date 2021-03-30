@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][latest]
+### Fixed
+- Update Node API endpoint to enable source map processing for server-side errors.
+
 ### Added
 - Add tagging to errors with 3 possible API's
     ```bash

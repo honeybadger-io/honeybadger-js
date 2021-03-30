@@ -32,7 +32,7 @@ describe('server client', function () {
     })
 
     const request = nock('https://api.honeybadger.io')
-      .post('/v1/notices')
+      .post('/v1/notices/js')
       .reply(201, {
         id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
       })
@@ -53,7 +53,7 @@ describe('server client', function () {
     })
 
     const request = nock('http://api.honeybadger.io')
-      .post('/v1/notices')
+      .post('/v1/notices/js')
       .reply(201, {
         id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
       })
@@ -73,7 +73,7 @@ describe('server client', function () {
     })
 
     nock('https://api.honeybadger.io')
-    .post('/v1/notices')
+    .post('/v1/notices/js')
     .reply(201, {
       id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
     })
@@ -100,7 +100,7 @@ describe('server client', function () {
     it('is called without an error when the request succeeds', function () {
       const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
       nock('https://api.honeybadger.io')
-        .post('/v1/notices')
+        .post('/v1/notices/js')
         .reply(201, {
           id: id
         })
@@ -118,7 +118,7 @@ describe('server client', function () {
 
     it('is called with an error when the request fails', function () {
       nock('https://api.honeybadger.io')
-        .post('/v1/notices')
+        .post('/v1/notices/js')
         .reply(403)
 
       return new Promise(resolve => {
@@ -134,7 +134,7 @@ describe('server client', function () {
     it('is called without an error when passed as an option and the request succeeds', function () {
       const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
       nock('https://api.honeybadger.io')
-        .post('/v1/notices')
+        .post('/v1/notices/js')
         .reply(201, {
           id: id
         })
@@ -153,7 +153,7 @@ describe('server client', function () {
 
     it('is called with an error when passed as an option and the request fails', function () {
       nock('https://api.honeybadger.io')
-        .post('/v1/notices')
+        .post('/v1/notices/js')
         .reply(403)
 
       return new Promise(resolve => {
@@ -300,7 +300,7 @@ describe('server client', function () {
         nock.cleanAll()
 
         const api = nock("https://api.honeybadger.io")
-          .post("/v1/notices")
+          .post("/v1/notices/js")
           .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
         const callback = function(_err) {
@@ -319,7 +319,7 @@ describe('server client', function () {
         nock.cleanAll()
 
         const api = nock("https://api.honeybadger.io")
-          .post("/v1/notices")
+          .post("/v1/notices/js")
           .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
         const callback = function(_err) {
@@ -342,7 +342,7 @@ describe('server client', function () {
         nock.cleanAll()
 
         const api = nock("https://api.honeybadger.io")
-          .post("/v1/notices")
+          .post("/v1/notices/js")
           .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
         const callback = function(_err) {
@@ -361,7 +361,7 @@ describe('server client', function () {
         nock.cleanAll()
 
         const api = nock("https://api.honeybadger.io")
-          .post("/v1/notices")
+          .post("/v1/notices/js")
           .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
         const callback = function(_err) {

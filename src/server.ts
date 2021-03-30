@@ -64,7 +64,7 @@ class Honeybadger extends Client {
         }
       }
 
-      const req = transport.request(endpoint(this.config, '/v1/notices'), options, (res) => {
+      const req = transport.request(endpoint(this.config, '/v1/notices/js'), options, (res) => {
         this.logger.debug(`statusCode: ${res.statusCode}`)
 
         let body = ''
