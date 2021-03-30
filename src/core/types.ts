@@ -65,6 +65,7 @@ export interface Notice {
   projectRoot?: string | undefined,
   environment?: string | undefined,
   revision?: string | undefined,
+  tags: string | string[]
   __breadcrumbs: BreadcrumbRecord[],
   afterNotify?: AfterNotifyHandler
 }

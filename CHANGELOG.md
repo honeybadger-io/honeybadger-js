@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Update Node API endpoint to enable source map processing for server-side errors.
 
+### Added
+- Add tagging to errors with 3 possible API's
+    ```bash
+    Honeybadger.configure({tags: string | string[] | undefined})
+    Honeybadger.setContext({tags: string | string[] | undefined})
+    Honeybadger.notify('error', {tags: string | string[] | undefined})
+    ```
+
 ## [3.1.0] - 2021-03-04
 ### Fixed
 - Add default reason for unhandled promises (previously reason was "undefined") (#546)
