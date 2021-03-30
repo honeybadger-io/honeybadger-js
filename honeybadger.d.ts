@@ -10,7 +10,6 @@ declare class Honeybadger {
   public setContext(context: Record<string, unknown>): Honeybadger
   public resetContext(context?: Record<string, unknown>): Honeybadger
   public addBreadcrumb(message: string, opts?: Partial<Honeybadger.BreadcrumbRecord>): Honeybadger
-  public wrap(func: (...args: unknown[]) => unknown): (...args: unknown[]) => unknown
 
   // Server middleware
   public requestHandler(req, res, next): void

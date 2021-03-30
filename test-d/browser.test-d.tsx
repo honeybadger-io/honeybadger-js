@@ -95,8 +95,4 @@ Honeybadger.notify('Example message', {
   afterNotify: (err, notice) => console.log(err || notice.id)
 })
 
-Honeybadger.wrap(function(){
-  throw "oops";
-})()
-
 Honeybadger.factory()
