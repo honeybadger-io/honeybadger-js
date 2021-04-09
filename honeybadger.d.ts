@@ -1,5 +1,6 @@
 // Type definitions for honeybadger.js
 // Project: https://github.com/honeybadger-io/honeybadger-js
+import { NextFunction, Request, Response } from 'express'
 
 declare class Honeybadger {
   public factory(opts?: Partial<Honeybadger.Config>): Honeybadger
@@ -12,9 +13,9 @@ declare class Honeybadger {
   public addBreadcrumb(message: string, opts?: Partial<Honeybadger.BreadcrumbRecord>): Honeybadger
 
   // Server middleware
-  public requestHandler(req, res, next): void
-  public errorHandler(err, req, _res, next): unknown
-  public lambdaHandler(handler): (event, context, callback) => void
+  public requestHandler(req: Request, res: Response, next: NextFunction): void
+  public errorHandler(err: any, req: Request, _res: Response, next: NextFunction): unknown
+  public lambdaHandler(handler: any): (event: any, context: any, callback: any) => void
 }
 
 declare namespace Honeybadger {
