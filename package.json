@@ -55,7 +55,7 @@
     "eslint": "^7.24.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jest": "^24.3.5",
-    "eslint-plugin-promise": "^4.3.1",
+    "eslint-plugin-promise": "^5.1.0",
     "express": "^4.17.1",
     "jest": "^26.4.2",
     "nock": "^13.0.11",
