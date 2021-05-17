@@ -33,9 +33,6 @@ module.exports = {
       return `${yyyy}-${mm}-${dd}`
     }
   },
-  shouldPrepare: ({ commitNumbersPerType }) => {
-    return Object.keys(commitNumbersPerType).length > 0
-  },
   afterPublish: ({ exec }) => {
     exec(`./scripts/release-cdn.sh`)
   }
