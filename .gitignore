@@ -3,3 +3,4 @@ node_modules/
 dist/
 local.log
 browserstack.err
+.idea/

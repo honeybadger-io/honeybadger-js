@@ -30,9 +30,9 @@
   },
   "scripts": {
     "prepare": "npm run build",
-    "test": "concurrently 'npm run test:browser' 'npm run test:server'",
-    "test:browser": "jest --env=jsdom --testPathPattern='test\\/unit\\/.*(?<![\\.\\/]server)\\.test\\.(js|ts)'",
-    "test:server": "jest --env=node --testPathPattern='test\\/unit\\/.*(?<![\\.\\/]browser)\\.test\\.(js|ts)'",
+    "test": "concurrently \"npm:test:browser\" \"npm:test:server\"",
+    "test:browser": "jest --env=jsdom --testPathPattern=\"test/unit/.*(?<![\\./]server)\\.test\\.(js|ts)\"",
+    "test:server": "jest --env=node --testPathPattern=\"test/unit/.*(?<![\\./]browser)\\.test\\.(js|ts)\"",
     "test:integration": "npm run build && test/integration/node_modules/karma/bin/karma start test/integration/karma.conf.js",
     "test:integration:browserstack": "npm run test:integration",
     "test:integration:headless": "HEADLESS=1 npm run test:integration",
