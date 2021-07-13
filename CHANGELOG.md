@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][latest]
 
+## [3.2.2] - 2021-07-13
+
 ## [3.2.1] - 2021-05-17
 ### Fixed
 - TypeScript: Use express types for middleware (#564)
