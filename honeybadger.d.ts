@@ -3,6 +3,7 @@
 import { NextFunction, Request, Response } from 'express'
 
 declare class Honeybadger {
+  public getVersion(): string
   public factory(opts?: Partial<Honeybadger.Config>): Honeybadger
   public notify(notice: Error | string | Partial<Honeybadger.Notice>, name?: string | Partial<Honeybadger.Notice>, extra?: string | Partial<Honeybadger.Notice>): Honeybadger.Notice | false
   public configure(opts: Partial<Honeybadger.Config>): Honeybadger
@@ -10,6 +11,7 @@ declare class Honeybadger {
   public afterNotify(func: Honeybadger.AfterNotifyHandler): Honeybadger
   public setContext(context: Record<string, unknown>): Honeybadger
   public resetContext(context?: Record<string, unknown>): Honeybadger
+  public clear(): Honeybadger
   public addBreadcrumb(message: string, opts?: Partial<Honeybadger.BreadcrumbRecord>): Honeybadger
 
   // Server middleware
