@@ -95,4 +95,9 @@ Honeybadger.notify('Example message', {
   afterNotify: (err, notice) => console.log(err || notice.id)
 })
 
-Honeybadger.factory()
+const client = Honeybadger.factory()
+client.setContext({a: 2}).notify({ message: 'test' })
+client.resetContext()
+client.addBreadcrumb("testing")
+client.notify(new Error('test'))
+client.clear()
