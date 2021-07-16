@@ -27,9 +27,20 @@ See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
 ## Development
 
 1. Run `npm install`.
-2. To run the test suite by itself, use `npm test`.
-3. To run the tests across all supported platforms, set up a [BrowserStack](https://www.browserstack.com/)
+2. To run unit tests for both browser and server builds: `npm test`. Or separately: `npm run test:browser`, `npm run test:server`.
+3. To run integration tests across all supported platforms, set up a [BrowserStack](https://www.browserstack.com/)
 account and use `BROWSERSTACK_USERNAME=your_username BROWSERSTACK_ACCESS_KEY=your-access-key npm run test:integration`.
+4. To test the TypeScript type definitions: `npm run tsd`.
+   
+### Bundling and types
+This project is _isomorphic_, meaning it's a single library which contains both browser and server builds. It's written in TypeScript, and transpiled and bundled with Rollup. Our Rollup config generates three main files:
+1. The server build, which transpiles `src/server.ts` and its dependencies into `dist/server/honeybadger.js`.
+2. The browser build, which transpiles `src/browser.ts` and its dependencies into `dist/browser/honeybadger.js`.
+3. The minified browser build, which transpiles `src/browser.ts` and its dependencies into `dist/browser/honeybadger.min.js` (+ source maps).
+
+In addition, the TypeScript type declaration for each build is generated into its `types/` directory (ie `dist/browser/types/browser.d.ts` and `dist/server/types/server.d.ts`).
+
+However, since the package is isomorphic, TypeScript users will likely be writing `import * as Honeybadger from '@honeybadger-io/js'` or `import Honeybadger = require('@honeybadger-io/js')` in their IDE. Our `package.json` has ` main` and `browser` fields that determine which build they get, but [there can only be a single type declaration file](https://github.com/Microsoft/TypeScript/issues/29128). So we use an extra file in the project root, `honeybadger.d.ts`, that combines the types from both builds.
 
 ## Releasing
 
