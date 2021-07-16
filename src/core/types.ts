@@ -9,15 +9,15 @@ export interface Logger {
 }
 
 export interface Config {
-  apiKey: string | undefined
+  apiKey?: string,
   endpoint: string,
   developmentEnvironments: string[],
-  environment: string | undefined
-  hostname: string | undefined
-  projectRoot: string | undefined
-  component: string | undefined
-  action: string | undefined
-  revision: string | undefined
+  environment?: string
+  hostname?: string
+  projectRoot?: string
+  component?: string
+  action?: string
+  revision?: string
   disabled: boolean
   debug: boolean
   reportData: boolean
