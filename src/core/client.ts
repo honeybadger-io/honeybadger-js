@@ -1,5 +1,7 @@
 import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter, filterUrl, formatCGIData } from './util'
-import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable } from './types'
+import {
+  Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
+} from './types'
 
 const notifier = {
   name: 'honeybadger-js',
@@ -20,11 +22,16 @@ const STRING_EMPTY = ''
 const NOT_BLANK = /\S/
 
 export default class Client {
+  /** @internal */
   private __pluginsExecuted = false
 
-  protected __context = {}
-  protected __breadcrumbs = []
+  /** @internal */
+  protected __context: Record<string, unknown> = {}
+  /** @internal */
+  protected __breadcrumbs: BreadcrumbRecord[] = []
+  /** @internal */
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
+  /** @internal */
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
 
   config: Config
@@ -196,9 +203,9 @@ export default class Client {
     const timestamp = new Date().toISOString()
 
     this.__breadcrumbs.push({
-      category: category,
+      category: category as string,
       message: message,
-      metadata: metadata,
+      metadata: metadata as Record<string, unknown>,
       timestamp: timestamp
     })
 
@@ -210,17 +217,20 @@ export default class Client {
     return this
   }
 
-  private __reportData(): boolean {
+  /** @internal */
+  protected __reportData(): boolean {
     if (this.config.reportData !== null) {
       return this.config.reportData
     }
     return !(this.config.environment && this.config.developmentEnvironments.includes(this.config.environment))
   }
 
+  /** @internal */
   protected __send(_notice: Partial<Notice>): boolean {
     throw (new Error('Must implement send in subclass'))
   }
 
+  /** @internal */
   protected __buildPayload(notice: Notice): Record<string, Record<string, unknown>> {
     const headers = filter(notice.headers, this.config.filters) || {}
     const cgiData = filter({
@@ -260,6 +270,7 @@ export default class Client {
     }
   }
 
+  /** @internal */
   protected __constructTags(tags: unknown): Array<string> {
     if (!tags) {
       return []

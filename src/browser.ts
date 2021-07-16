@@ -19,11 +19,14 @@ interface WrappedFunc {
 }
 
 class Honeybadger extends Client {
+  /** @internal */
   private __errorsSent = 0
+  /** @internal */
   private __lastWrapErr = undefined
 
   config: BrowserConfig
 
+  /** @internal */
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
     (notice: Notice) => {
       if (this.__exceedsMaxErrors()) {
@@ -58,6 +61,7 @@ class Honeybadger extends Client {
     return new Honeybadger(opts)
   }
 
+  /** @internal */
   protected __buildPayload(notice:Notice): Record<string, Record<string, unknown>> {
     const cgiData = {
       HTTP_USER_AGENT: undefined,
@@ -86,6 +90,7 @@ class Honeybadger extends Client {
     return payload
   }
 
+  /** @internal */
   protected __send(notice) {
     this.__incrementErrorsCount()
 
@@ -121,8 +126,11 @@ class Honeybadger extends Client {
     return true
   }
 
-  // wrap always returns the same function so that callbacks can be removed via
-  // removeEventListener.
+  /**
+   * wrap always returns the same function so that callbacks can be removed via
+   * removeEventListener.
+   * @internal
+   */
   __wrap(f:unknown, opts:Record<string, unknown> = {}):WrappedFunc {
     const func = f as WrappedFunc
     if (!opts) { opts = {} }
@@ -175,10 +183,12 @@ class Honeybadger extends Client {
     }
   }
 
+  /** @internal */
   private __incrementErrorsCount(): number {
     return this.__errorsSent++
   }
 
+  /** @internal */
   private __exceedsMaxErrors(): boolean {
     return this.config.maxErrors && this.__errorsSent >= this.config.maxErrors
   }

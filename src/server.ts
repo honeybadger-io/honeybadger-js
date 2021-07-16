@@ -12,6 +12,7 @@ import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler, lambdaHandler } from './server/middleware'
 
 class Honeybadger extends Client {
+  /** @internal */
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
     (notice: Notice) => {
       notice.backtrace.forEach((line) => {
@@ -44,6 +45,7 @@ class Honeybadger extends Client {
     return new Honeybadger(opts)
   }
 
+  /** @internal */
   protected __send(notice) {
     const { protocol } = new URL(this.config.endpoint)
     const transport = (protocol === "http:" ? http : https)
