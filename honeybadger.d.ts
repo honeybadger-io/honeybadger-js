@@ -10,7 +10,7 @@ import {
     Notice as BaseNotice,
     BacktraceFrame as BaseBacktraceFrame,
     BreadcrumbRecord as BaseBreadcrumbRecord,
-} from './src/core/types'
+} from './dist/server/types/core/types'
 
 declare namespace Honeybadger {
     type Logger = BaseLogger
@@ -29,4 +29,4 @@ declare namespace Honeybadger {
 }
 
 declare const singleton: typeof Server & typeof Browser
-export default singleton
+export = singleton

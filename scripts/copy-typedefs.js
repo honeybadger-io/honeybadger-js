@@ -3,7 +3,13 @@
 /* eslint-disable */
 
 const fs = require('fs');
-fs.copyFileSync('honeybadger.d.ts', 'dist/browser/honeybadger.d.ts');
-fs.copyFileSync('honeybadger.d.ts', 'dist/server/honeybadger.d.ts');
+fs.writeFileSync(
+    'dist/browser/honeybadger.d.ts',
+    fs.readFileSync('dist/browser/types/browser.d.ts', 'utf8').replace(/'\.\//g, `'./types/`)
+);
+fs.writeFileSync(
+    'dist/server/honeybadger.d.ts',
+    fs.readFileSync('dist/server/types/server.d.ts', 'utf8').replace(/'\.\//g, `'./types/`)
+);
 
 console.info("Copied declaration files");

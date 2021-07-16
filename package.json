@@ -41,6 +41,7 @@
     "release": "shipjs prepare"
   },
   "dependencies": {
+    "@types/express": "^4.17.13",
     "stacktrace-parser": "^0.1.10"
   },
   "devDependencies": {

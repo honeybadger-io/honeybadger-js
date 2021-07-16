@@ -5,8 +5,10 @@ import { NextFunction, Request, Response } from 'express'
 function fullUrl(req: Request): string {
   const connection = req.connection
   const address = connection && connection.address()
+  // @ts-ignore The old @types/node incorrectly defines `address` as string|Address
   const port = address ? address.port : undefined
 
+  // @ts-ignore
   return url.format({
     protocol: req.protocol,
     hostname: req.hostname,
@@ -27,6 +29,7 @@ function errorHandler(err: any, req: Request, _res: Response, next: NextFunction
   this.notify(err, {
     url:     fullUrl(req),
     params:  req.body,    // http://expressjs.com/en/api.html#req.body
+    // @ts-ignore
     session: req.session, // https://github.com/expressjs/session#reqsession
     headers: req.headers, // https://nodejs.org/api/http.html#http_message_headers
     cgiData: {
