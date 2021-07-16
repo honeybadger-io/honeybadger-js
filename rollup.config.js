@@ -7,6 +7,7 @@ import pkg from './package.json'
 // These plugins are used for all builds
 const sharedPlugins = [
   replace({
+    preventAssignment: false,
     exclude: 'node_modules/**',
     __VERSION__: pkg.version
   }),
@@ -16,13 +17,25 @@ const sharedPlugins = [
 // These plugins are used for UMD builds
 const umdPlugins = [
   ...sharedPlugins,
-  typescript()
+  typescript({
+    tsconfig: './tsconfig.json',
+    exclude: [
+      "./src/server.ts",
+      "./src/server/**"
+    ]
+  })
 ]
 
 // These plugins are used for Node builds
 const nodePlugins = [
   ...sharedPlugins,
-  typescript()
+  typescript({
+    tsconfig: './tsconfig.json',
+    exclude: [
+      "./src/browser.ts",
+      "./src/browser/**"
+    ]
+  })
 ]
 
 export default [
