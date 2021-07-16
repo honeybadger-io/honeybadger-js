@@ -1,15 +1,17 @@
 import * as stackTraceParser from 'stacktrace-parser'
 import Client from '../core/client'
-import { Logger, Config, BacktraceFrame } from '../core/types'
+import {
+  Logger, Config, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler
+} from './types'
 
-export function merge(obj1: any, obj2: any): any {
-  const result = {}
+export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 &T2 {
+  const result = {} as Record<keyof T1 | keyof T2, unknown>
   for (const k in obj1) { result[k] = obj1[k] }
   for (const k in obj2) { result[k] = obj2[k] }
-  return result
+  return result as T1 & T2
 }
 
-export function mergeNotice(notice1: any, notice2: any): any {
+export function mergeNotice(notice1: Partial<Notice>, notice2: Partial<Notice>): Partial<Notice> {
   const result = merge(notice1, notice2)
   if (notice1.context && notice2.context) {
     result.context = merge(notice1.context, notice2.context)
@@ -17,7 +19,7 @@ export function mergeNotice(notice1: any, notice2: any): any {
   return result
 }
 
-export function objectIsEmpty(obj) {
+export function objectIsEmpty(obj): boolean {
   for (const k in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, k)) {
       return false
@@ -26,7 +28,7 @@ export function objectIsEmpty(obj) {
   return true
 }
 
-export function objectIsExtensible(obj) {
+export function objectIsExtensible(obj): boolean {
   if (typeof Object.isExtensible !== 'function') { return true }
   return Object.isExtensible(obj)
 }
@@ -49,7 +51,7 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
   }
 }
 
-export function runBeforeNotifyHandlers(notice, handlers) {
+export function runBeforeNotifyHandlers(notice, handlers: BeforeNotifyHandler[]): boolean {
   for (let i = 0, len = handlers.length; i < len; i++) {
     const handler = handlers[i]
     if (handler(notice) === false) {
@@ -59,7 +61,7 @@ export function runBeforeNotifyHandlers(notice, handlers) {
   return true
 }
 
-export function runAfterNotifyHandlers(notice, handlers, error = undefined) {
+export function runAfterNotifyHandlers(notice, handlers: AfterNotifyHandler[], error = undefined): boolean {
   for (let i = 0, len = handlers.length; i < len; i++) {
     handlers[i](error, notice)
   }
@@ -67,9 +69,9 @@ export function runAfterNotifyHandlers(notice, handlers, error = undefined) {
 }
 
 // Returns a new object with properties from other object.
-export function newObject(obj) {
-  if (typeof (obj) !== 'object') { return {} }
-  const result = {}
+export function newObject<T>(obj: T): T|Record<string, unknown> {
+  if (typeof (obj) !== 'object' || obj === null) { return {} }
+  const result = {} as T
   for (const k in obj) { result[k] = obj[k] }
   return result
 }
@@ -157,16 +159,15 @@ export function logger(client: Client): Logger {
 /**
  * Converts any object into a notice object (which at minimum has the same
  * properties as Error, but supports additional Honeybadger properties.)
- * @param {!Object} notice
  */
-export function makeNotice(thing) {
+export function makeNotice(thing: Noticeable): Partial<Notice> {
   let notice
 
   if (!thing) {
     notice = {}
   } else if (Object.prototype.toString.call(thing) === '[object Error]') {
-    const e = thing
-    notice = merge(thing, { name: e.name, message: e.message, stack: e.stack })
+    const e = thing as Error
+    notice = merge(thing as Record<string, unknown>, { name: e.name, message: e.message, stack: e.stack })
   } else if (typeof thing === 'object') {
     notice = newObject(thing)
   } else {
@@ -280,7 +281,7 @@ export function filter(obj: Record<string, unknown>, filters: string[]): Record<
   return filter(obj)
 }
 
-function filterMatch(key: string, filters: string[]) {
+function filterMatch(key: string, filters: string[]): boolean {
   for (let i = 0; i < filters.length; i++) {
     if (key.toLowerCase().indexOf(filters[i].toLowerCase()) !== -1) {
       return true
@@ -289,7 +290,7 @@ function filterMatch(key: string, filters: string[]) {
   return false
 }
 
-function is(type: string, obj: any) {
+function is(type: string, obj: unknown): boolean {
   const klass = Object.prototype.toString.call(obj).slice(8, -1)
   return obj !== undefined && obj !== null && klass === type
 }
@@ -298,7 +299,7 @@ export function filterUrl(url:string, filters: string[]): string {
   if (!filters) { return url }
   if (typeof url !== 'string') { return url }
 
-  const [_, query] = url.split(/\?/, 2)
+  const query = url.split(/\?/, 2)[1]
   if (!query) { return url }
 
   let result = url

@@ -1,7 +1,7 @@
 import os from 'os'
 import fs from 'fs'
 
-export function fatallyLogAndExit(err: Error): void {
+export function fatallyLogAndExit(err: Error): never {
   console.error('[Honeybadger] Exiting process due to uncaught exception')
   console.error(err.stack || err)
   process.exit(1)

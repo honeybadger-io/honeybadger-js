@@ -12,7 +12,8 @@ export function nullLogger (): Logger {
 }
 
 export class TestClient extends BaseClient {
-  protected __send (notice: Notice): unknown {
+  // @ts-ignore
+  protected __send(notice) {
     return this.__buildPayload(notice)
   }
 }

@@ -1,7 +1,8 @@
 import url from 'url'
 import domain from 'domain'
+import { NextFunction, Request, Response } from 'express'
 
-function fullUrl(req) {
+function fullUrl(req: Request): string {
   const connection = req.connection
   const address = connection && connection.address()
   const port = address ? address.port : undefined
@@ -15,14 +16,14 @@ function fullUrl(req) {
   })
 }
 
-function requestHandler(req, res, next) {
+function requestHandler(req: Request, res: Response, next: NextFunction): void {
   this.clear()
   const dom = domain.create()
   dom.on('error', next)
   dom.run(next)
 }
 
-function errorHandler(err, req, _res, next) {
+function errorHandler(err: any, req: Request, _res: Response, next: NextFunction): unknown {
   this.notify(err, {
     url:     fullUrl(req),
     params:  req.body,    // http://expressjs.com/en/api.html#req.body
@@ -35,7 +36,9 @@ function errorHandler(err, req, _res, next) {
   return next(err)
 }
 
-function lambdaHandler(handler) {
+type LambdaHandler = (event: unknown, context: unknown, callback: unknown) => void|Promise<unknown>
+
+function lambdaHandler(handler: LambdaHandler): LambdaHandler {
   return function lambdaHandler(event, context, callback) {
     // eslint-disable-next-line prefer-rest-params
     const args = arguments

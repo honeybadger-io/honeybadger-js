@@ -1,9 +1,9 @@
 import Client from './core/client'
-import { Config, Notice } from './core/types'
+import { Config, Notice, BeforeNotifyHandler } from './core/types'
 import { merge, sanitize, filter, runAfterNotifyHandlers, objectIsExtensible, endpoint } from './core/util'
 import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
-import onUnhandlerRejection from './browser/integrations/onunhandledrejection'
+import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
@@ -24,7 +24,7 @@ class Honeybadger extends Client {
 
   config: BrowserConfig
 
-  protected __beforeNotifyHandlers = [
+  protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
     (notice: Notice) => {
       if (this.__exceedsMaxErrors()) {
         this.logger.debug('Dropping notice: max errors exceeded', notice)
@@ -44,6 +44,10 @@ class Honeybadger extends Client {
       projectRoot: window.location.protocol + '//' + window.location.host,
       ...opts
     })
+  }
+
+  configure(opts: Partial<BrowserConfig> = {}) {
+    return super.configure(opts)
   }
 
   resetMaxErrors(): number {
@@ -77,12 +81,12 @@ class Honeybadger extends Client {
     }
 
     const payload = super.__buildPayload(notice)
-    payload.request.cgi_data = merge(cgiData, payload.request.cgi_data)
+    payload.request.cgi_data = merge(cgiData, payload.request.cgi_data as Record<string, unknown>)
 
     return payload
   }
 
-  protected __send(notice:Notice): boolean {
+  protected __send(notice) {
     this.__incrementErrorsCount()
 
     const payload = this.__buildPayload(notice)
@@ -119,7 +123,6 @@ class Honeybadger extends Client {
 
   // wrap always returns the same function so that callbacks can be removed via
   // removeEventListener.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   __wrap(f:unknown, opts:Record<string, unknown> = {}):WrappedFunc {
     const func = f as WrappedFunc
     if (!opts) { opts = {} }
@@ -184,7 +187,7 @@ class Honeybadger extends Client {
 export default new Honeybadger({
   __plugins: [
     onError(),
-    onUnhandlerRejection(),
+    onUnhandledRejection(),
     timers(),
     eventListeners(),
     breadcrumbs()

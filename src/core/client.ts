@@ -1,5 +1,5 @@
 import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter, filterUrl, formatCGIData } from './util'
-import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice } from './types'
+import { Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable } from './types'
 
 const notifier = {
   name: 'honeybadger-js',
@@ -24,8 +24,8 @@ export default class Client {
 
   protected __context = {}
   protected __breadcrumbs = []
-  protected __beforeNotifyHandlers = []
-  protected __afterNotifyHandlers = []
+  protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
+  protected __afterNotifyHandlers: AfterNotifyHandler[] = []
 
   config: Config
   logger: Logger
@@ -96,9 +96,9 @@ export default class Client {
     return this
   }
 
-  resetContext(context: Record<string, unknown>): Client {
+  resetContext(context?: Record<string, unknown>): Client {
     this.logger.warn('Deprecation warning: `Honeybadger.resetContext()` has been deprecated; please use `Honeybadger.clear()` instead.')
-    if (typeof context === 'object') {
+    if (typeof context === 'object' && context !== null) {
       this.__context = merge({}, context)
     } else {
       this.__context = {}
@@ -112,7 +112,7 @@ export default class Client {
     return this
   }
 
-  notify(notice: Partial<Notice>, name = undefined, extra = undefined): Record<string, unknown> | false | unknown {
+  notify(notice: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Record<string, unknown> | false | unknown {
     if (!this.config.apiKey) {
       this.logger.warn('Unable to send error report: no API key has been configured')
       return false
@@ -136,9 +136,9 @@ export default class Client {
     }
 
     if (name) {
-      notice = mergeNotice(notice, name)
+      notice = mergeNotice(notice, name as Partial<Notice>)
     }
-    if (typeof extra === 'object') {
+    if (typeof extra === 'object' && extra !== null) {
       notice = mergeNotice(notice, extra)
     }
 
@@ -186,7 +186,7 @@ export default class Client {
     return this.__send(notice)
   }
 
-  addBreadcrumb(message: string, opts: Record<string, unknown>): Client {
+  addBreadcrumb(message: string, opts?: Record<string, unknown>): Client {
     if (!this.config.breadcrumbsEnabled) { return }
 
     opts = opts || {}
@@ -217,7 +217,7 @@ export default class Client {
     return !(this.config.environment && this.config.developmentEnvironments.includes(this.config.environment))
   }
 
-  protected __send(_notice: Partial<Notice>): unknown {
+  protected __send(_notice: Partial<Notice>): boolean {
     throw (new Error('Must implement send in subclass'))
   }
 
