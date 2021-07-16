@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Honeybadger from '../honeybadger'
+import Honeybadger from '../dist/browser/honeybadger'
 
 Honeybadger.configure({
   debug: false,
