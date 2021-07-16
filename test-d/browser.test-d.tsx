@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Honeybadger from '../dist/browser/honeybadger'
+import Honeybadger from '../dist/browser/types/browser'
 
 Honeybadger.configure({
   debug: false,
@@ -12,8 +12,6 @@ Honeybadger.configure({
   revision: 'git SHA/project version',
   component: 'example_comonent',
   action: 'example_action',
-  onerror: true,
-  onunhandledrejection: true,
   async: true,
   maxErrors: 20,
   breadcrumbsEnabled: true

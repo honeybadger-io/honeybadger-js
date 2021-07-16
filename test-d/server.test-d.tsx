@@ -1,5 +1,22 @@
-import Honeybadger from '../dist/server/honeybadger'
+import Honeybadger from '../dist/server/types/server'
 
+Honeybadger.configure({
+    debug: false,
+    disabled: true,
+    endpoint: 'https://api.honeybadger.io',
+    projectRoot: 'webpack:///./',
+    apiKey: 'project api key',
+    environment: 'production',
+    hostname: 'badger01',
+    revision: 'git SHA/project version',
+    component: 'example_comonent',
+    action: 'example_action',
+    breadcrumbsEnabled: true
+})
+
+Honeybadger.resetContext({
+    user_id: 123
+})
 Honeybadger.notify('test')
 Honeybadger.notify(new Error('test'))
 Honeybadger.notify({ message: 'test' })
