@@ -5,10 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][latest]
-### Modified
-- Internal: Fixed TypeScript types, added null checks, automated type declaration files
 ### Fixed
 - TypeScript: Add missing methods typedefs (#611)
+- Internal: Fixed TypeScript types, added null checks, automated type declaration files
 
 ## [3.2.1] - 2021-05-17
 ### Fixed
