@@ -4,7 +4,7 @@ import { URL } from 'url'
 import os from 'os'
 
 import Client from './core/client'
-import { Config, Notice } from './core/types'
+import { Config, Notice, BeforeNotifyHandler } from './core/types'
 import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
 import { fatallyLogAndExit, getStats } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
@@ -12,7 +12,8 @@ import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler, lambdaHandler } from './server/middleware'
 
 class Honeybadger extends Client {
-  protected __beforeNotifyHandlers = [
+  /** @internal */
+  protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
     (notice: Notice) => {
       notice.backtrace.forEach((line) => {
         if (line.file) {
@@ -24,6 +25,10 @@ class Honeybadger extends Client {
     }
   ]
 
+  public errorHandler: typeof errorHandler;
+  public requestHandler: typeof requestHandler;
+  public lambdaHandler: typeof lambdaHandler;
+
   constructor(opts: Partial<Config> = {}) {
     super({
       afterUncaught: fatallyLogAndExit,
@@ -31,17 +36,17 @@ class Honeybadger extends Client {
       hostname: os.hostname(),
       ...opts,
     })
+    this.errorHandler = errorHandler.bind(this)
+    this.requestHandler = requestHandler.bind(this)
+    this.lambdaHandler = lambdaHandler.bind(this)
   }
-
-  errorHandler = errorHandler.bind(this)
-  requestHandler = requestHandler.bind(this)
-  lambdaHandler = lambdaHandler.bind(this)
 
   factory(opts?: Partial<Config>): Honeybadger {
     return new Honeybadger(opts)
   }
 
-  protected __send(notice: Notice): boolean {
+  /** @internal */
+  protected __send(notice) {
     const { protocol } = new URL(this.config.endpoint)
     const transport = (protocol === "http:" ? http : https)
 

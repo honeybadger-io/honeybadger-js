@@ -12,8 +12,6 @@ Honeybadger.configure({
   revision: 'git SHA/project version',
   component: 'example_comonent',
   action: 'example_action',
-  onerror: true,
-  onunhandledrejection: true,
   async: true,
   maxErrors: 20,
   breadcrumbsEnabled: true

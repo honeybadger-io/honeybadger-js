@@ -9,19 +9,19 @@ export interface Logger {
 }
 
 export interface Config {
-  apiKey: string | undefined
+  apiKey?: string,
   endpoint: string,
   developmentEnvironments: string[],
-  environment: string | undefined
-  hostname: string | undefined
-  projectRoot: string | undefined
-  component: string | undefined
-  action: string | undefined
-  revision: string | undefined
+  environment?: string
+  hostname?: string
+  projectRoot?: string
+  component?: string
+  action?: string
+  revision?: string
   disabled: boolean
   debug: boolean
   reportData: boolean
-  breadcrumbsEnabled: boolean | Partial<{ dom: boolean, network: boolean, navigation: boolean, console: boolean }>
+  breadcrumbsEnabled: boolean | { dom?: boolean, network?: boolean, navigation?: boolean, console?: boolean}
   maxBreadcrumbs: number
   maxObjectDepth: number
   logger: Logger
@@ -30,7 +30,7 @@ export interface Config {
   enableUnhandledRejection: boolean
   filters: string[]
   __plugins: Plugin[],
-  [x: string]: unknown,
+  tags: any,
 }
 
 export interface BeforeNotifyHandler {
@@ -69,6 +69,8 @@ export interface Notice {
   __breadcrumbs: BreadcrumbRecord[],
   afterNotify?: AfterNotifyHandler
 }
+
+export type Noticeable = string | Error | Partial<Notice>
 
 export interface BacktraceFrame {
   file: string,

@@ -1,9 +1,9 @@
 import Client from './core/client'
-import { Config, Notice } from './core/types'
+import { Config, Notice, BeforeNotifyHandler } from './core/types'
 import { merge, sanitize, filter, runAfterNotifyHandlers, objectIsExtensible, endpoint } from './core/util'
 import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
-import onUnhandlerRejection from './browser/integrations/onunhandledrejection'
+import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
@@ -19,12 +19,15 @@ interface WrappedFunc {
 }
 
 class Honeybadger extends Client {
+  /** @internal */
   private __errorsSent = 0
+  /** @internal */
   private __lastWrapErr = undefined
 
   config: BrowserConfig
 
-  protected __beforeNotifyHandlers = [
+  /** @internal */
+  protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
     (notice: Notice) => {
       if (this.__exceedsMaxErrors()) {
         this.logger.debug('Dropping notice: max errors exceeded', notice)
@@ -46,6 +49,10 @@ class Honeybadger extends Client {
     })
   }
 
+  configure(opts: Partial<BrowserConfig> = {}) {
+    return super.configure(opts)
+  }
+
   resetMaxErrors(): number {
     return (this.__errorsSent = 0)
   }
@@ -54,6 +61,7 @@ class Honeybadger extends Client {
     return new Honeybadger(opts)
   }
 
+  /** @internal */
   protected __buildPayload(notice:Notice): Record<string, Record<string, unknown>> {
     const cgiData = {
       HTTP_USER_AGENT: undefined,
@@ -77,12 +85,13 @@ class Honeybadger extends Client {
     }
 
     const payload = super.__buildPayload(notice)
-    payload.request.cgi_data = merge(cgiData, payload.request.cgi_data)
+    payload.request.cgi_data = merge(cgiData, payload.request.cgi_data as Record<string, unknown>)
 
     return payload
   }
 
-  protected __send(notice:Notice): boolean {
+  /** @internal */
+  protected __send(notice) {
     this.__incrementErrorsCount()
 
     const payload = this.__buildPayload(notice)
@@ -117,9 +126,11 @@ class Honeybadger extends Client {
     return true
   }
 
-  // wrap always returns the same function so that callbacks can be removed via
-  // removeEventListener.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /**
+   * wrap always returns the same function so that callbacks can be removed via
+   * removeEventListener.
+   * @internal
+   */
   __wrap(f:unknown, opts:Record<string, unknown> = {}):WrappedFunc {
     const func = f as WrappedFunc
     if (!opts) { opts = {} }
@@ -172,10 +183,12 @@ class Honeybadger extends Client {
     }
   }
 
+  /** @internal */
   private __incrementErrorsCount(): number {
     return this.__errorsSent++
   }
 
+  /** @internal */
   private __exceedsMaxErrors(): boolean {
     return this.config.maxErrors && this.__errorsSent >= this.config.maxErrors
   }
@@ -184,7 +197,7 @@ class Honeybadger extends Client {
 export default new Honeybadger({
   __plugins: [
     onError(),
-    onUnhandlerRejection(),
+    onUnhandledRejection(),
     timers(),
     eventListeners(),
     breadcrumbs()

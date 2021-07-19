@@ -37,10 +37,11 @@
     "test:integration:browserstack": "npm run test:integration",
     "test:integration:headless": "HEADLESS=1 npm run test:integration",
     "tsd": "npm run build && tsd",
-    "build": "rollup -c && cp honeybadger.d.ts dist/server && cp honeybadger.d.ts dist/browser",
+    "build": "rollup -c && node ./scripts/copy-typedefs.js",
     "release": "shipjs prepare"
   },
   "dependencies": {
+    "@types/express": "^4.17.13",
     "stacktrace-parser": "^0.1.10"
   },
   "devDependencies": {
@@ -74,5 +75,10 @@
     "dist",
     "honeybadger.d.ts"
   ],
+  "tsd": {
+    "compilerOptions": {
+      "strict": false
+    }
+  },
   "types": "./honeybadger.d.ts"
 }

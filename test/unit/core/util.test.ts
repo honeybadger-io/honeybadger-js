@@ -71,8 +71,8 @@ describe('utils', function () {
   })
 
   describe('mergeNotice', function () {
-    it('combines two objects', function () {
-      expect(mergeNotice({ foo: 'foo' }, { bar: 'bar' })).toEqual({ foo: 'foo', bar: 'bar' })
+    it('combines two notice objects', function () {
+      expect(mergeNotice({ name: 'foo' }, { message: 'bar' })).toEqual({ name: 'foo', message: 'bar' })
     })
 
     it('combines context properties', function () {

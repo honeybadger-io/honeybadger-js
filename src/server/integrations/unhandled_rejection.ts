@@ -1,5 +1,4 @@
 import { Plugin } from '../../core/types'
-import { fatallyLogAndExit } from '../../server/util'
 import Client from '../../server'
 
 export default function (): Plugin {

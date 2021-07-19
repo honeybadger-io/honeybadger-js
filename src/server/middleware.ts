@@ -1,11 +1,14 @@
 import url from 'url'
 import domain from 'domain'
+import { NextFunction, Request, Response } from 'express'
 
-function fullUrl(req) {
+function fullUrl(req: Request): string {
   const connection = req.connection
   const address = connection && connection.address()
+  // @ts-ignore The old @types/node incorrectly defines `address` as string|Address
   const port = address ? address.port : undefined
 
+  // @ts-ignore
   return url.format({
     protocol: req.protocol,
     hostname: req.hostname,
@@ -15,17 +18,18 @@ function fullUrl(req) {
   })
 }
 
-function requestHandler(req, res, next) {
+function requestHandler(req: Request, res: Response, next: NextFunction): void {
   this.clear()
   const dom = domain.create()
   dom.on('error', next)
   dom.run(next)
 }
 
-function errorHandler(err, req, _res, next) {
+function errorHandler(err: any, req: Request, _res: Response, next: NextFunction): unknown {
   this.notify(err, {
     url:     fullUrl(req),
     params:  req.body,    // http://expressjs.com/en/api.html#req.body
+    // @ts-ignore
     session: req.session, // https://github.com/expressjs/session#reqsession
     headers: req.headers, // https://nodejs.org/api/http.html#http_message_headers
     cgiData: {
@@ -35,7 +39,9 @@ function errorHandler(err, req, _res, next) {
   return next(err)
 }
 
-function lambdaHandler(handler) {
+type LambdaHandler = (event: unknown, context: unknown, callback: unknown) => void|Promise<unknown>
+
+function lambdaHandler(handler: LambdaHandler): LambdaHandler {
   return function lambdaHandler(event, context, callback) {
     // eslint-disable-next-line prefer-rest-params
     const args = arguments
