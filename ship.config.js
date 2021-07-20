@@ -5,6 +5,23 @@ const semver = require('semver')
 // eslint-disable-next-line no-undef
 module.exports = {
   updateChangelog: false,
+  shouldPrepare: ({ commits }) => {
+    if (commits === '') {
+      return false;
+    }
+
+    const data = fs.readFileSync(`CHANGELOG.md`, 'utf8')
+
+    const match = data.match(
+        /## \[Unreleased\]\[.+?\]\s+###\s+(?:Fixed|Added|Modified|Removed|Changed|Deprecated|Security)\s+-/
+    )
+    if (!match) {
+      console.log('No unreleased changes');
+      return false;
+    }
+
+    return true;
+  },
   formatCommitMessage: ({ version, _releaseType, _baseBranch }) => `Release v${version}`,
   formatPullRequestTitle: ({ version, _releaseType }) => `Release v${version}`,
   getNextVersion: ({ _revisionRange, _commitTitles, _commitBodies, currentVersion, dir }) => {
