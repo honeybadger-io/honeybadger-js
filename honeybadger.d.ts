@@ -3,5 +3,6 @@
 import Server from './dist/server/types/server'
 import Browser from './dist/browser/types/browser'
 
-declare const Honeybadger: typeof Server & typeof Browser
-export = Honeybadger
+type Honeybadger = typeof Server & typeof Browser;
+declare const Honeybadger: Honeybadger;
+export = Honeybadger;
