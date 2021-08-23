@@ -21,6 +21,14 @@ Honeybadger.notify('test')
 Honeybadger.notify(new Error('test'))
 Honeybadger.notify({ message: 'test' })
 
+Honeybadger.notify("Example message", {
+  details: {
+    "Section Name": {
+      "Key": "Value"
+    }
+  }
+})
+
 const client = Honeybadger.factory()
 client.setContext({a: 2}).notify({ message: 'test' })
 client.resetContext()

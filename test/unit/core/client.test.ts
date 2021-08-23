@@ -337,6 +337,22 @@ describe('client', function () {
       expect(payload.error.backtrace.length).toBeGreaterThan(0)
       expect(payload.error.backtrace[0].file).toMatch("client.test.ts")
     })
+
+    it('sends details', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const details = {
+        "Expected Section Name": {
+          "Expected Key": "Expected Value"
+        }
+      }
+
+      const payload = client.notify("testing", { details: details })
+
+      expect(payload.details).toEqual(details)
+    })
   })
 
   describe('beforeNotify', function () {
