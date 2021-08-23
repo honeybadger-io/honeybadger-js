@@ -61,7 +61,6 @@ const webpackConfig = {
 const { environment } = require('@rails/webpacker')
 const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
 
-// See Heroku notes in README https://github.com/honeybadger-io/honeybadger-rails-webpacker-example
 // Assumes Heroku / 12-factor application style ENV variables
 // named GIT_COMMIT, HONEYBADGER_API_KEY, ASSETS_URL
 const revision = process.env.GIT_COMMIT || 'master'
@@ -78,9 +77,6 @@ environment.plugins.append(
 
 module.exports = environment
 ```
-
-See example Rails 5 application
-https://github.com/honeybadger-io/honeybadger-rails-webpacker-example
 
 ## Changelog
 
