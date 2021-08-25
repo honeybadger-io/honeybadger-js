@@ -266,7 +266,8 @@ export default class Client {
         revision: notice.revision,
         hostname: this.config.hostname,
         time: new Date().toUTCString()
-      }
+      },
+      details: notice.details || {}
     }
   }
 
