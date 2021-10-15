@@ -91,7 +91,7 @@ class Honeybadger extends Client {
   }
 
   /** @internal */
-  protected __send(notice) {
+  protected __send(notice): Promise<boolean> {
     this.__incrementErrorsCount()
 
     const payload = this.__buildPayload(notice)
@@ -123,7 +123,8 @@ class Honeybadger extends Client {
       this.logger.error('Unable to send error report: error while initializing request', err, notice)
     }
 
-    return true
+    // should we wait for the request to finish before resolving this promise?
+    return Promise.resolve(true)
   }
 
   /**

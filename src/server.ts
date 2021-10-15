@@ -6,7 +6,11 @@ import os from 'os'
 import Client from './core/client'
 import { Config, Notice, BeforeNotifyHandler } from './core/types'
 import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
-import { fatallyLogAndExit, getStats } from './server/util'
+import {
+  fatallyLogAndExit,
+  getStats,
+  getSourceFile
+} from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
 import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler, lambdaHandler } from './server/middleware'
@@ -36,6 +40,7 @@ class Honeybadger extends Client {
       hostname: os.hostname(),
       ...opts,
     })
+    this.__getSourceFileHandler = getSourceFile.bind(this)
     this.errorHandler = errorHandler.bind(this)
     this.requestHandler = requestHandler.bind(this)
     this.lambdaHandler = lambdaHandler.bind(this)
@@ -46,15 +51,17 @@ class Honeybadger extends Client {
   }
 
   /** @internal */
-  protected __send(notice) {
-    const { protocol } = new URL(this.config.endpoint)
+  protected __send(notice): Promise<boolean> {
+    const {protocol} = new URL(this.config.endpoint)
     const transport = (protocol === "http:" ? http : https)
 
     const payload = this.__buildPayload(notice)
     payload.server.pid = process.pid
 
     const handlers = Array.prototype.slice.call(this.__afterNotifyHandlers)
-    if (notice.afterNotify) { handlers.unshift(notice.afterNotify) }
+    if (notice.afterNotify) {
+      handlers.unshift(notice.afterNotify)
+    }
 
     getStats((stats: Record<string, unknown>) => {
       payload.server.stats = stats
@@ -100,7 +107,8 @@ class Honeybadger extends Client {
       req.end()
     })
 
-    return true
+    // should we wait for the request to finish before resolving this promise?
+    return Promise.resolve(true)
   }
 }
 

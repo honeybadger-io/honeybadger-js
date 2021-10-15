@@ -1,4 +1,17 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter, filterUrl, formatCGIData } from './util'
+import {
+  merge,
+  mergeNotice,
+  objectIsEmpty,
+  makeNotice,
+  makeBacktrace,
+  runBeforeNotifyHandlers,
+  newObject,
+  logger,
+  generateStackTrace,
+  filter,
+  filterUrl,
+  formatCGIData
+} from './util'
 import {
   Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
 } from './types'
@@ -33,6 +46,9 @@ export default class Client {
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
   /** @internal */
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
+
+  /** @internal */
+  protected __getSourceFileHandler: (path: string) => Promise<string>
 
   config: Config
   logger: Logger
@@ -75,7 +91,7 @@ export default class Client {
     return notifier.version
   }
 
-  configure(opts:Partial<Config> = {}): Client {
+  configure(opts: Partial<Config> = {}): Client {
     for (const k in opts) {
       this.config[k] = opts[k]
     }
@@ -119,27 +135,27 @@ export default class Client {
     return this
   }
 
-  notify(notice: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Record<string, unknown> | false | unknown {
+  notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Promise<boolean> {
     if (this.config.disabled) {
       this.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
-      return false
+      return Promise.resolve(false)
     }
 
     if (!this.__reportData()) {
       this.logger.debug('Dropping notice: honeybadger.js is in development mode')
-      return false
+      return Promise.resolve(false)
     }
 
     if (!this.config.apiKey) {
       this.logger.warn('Unable to send error report: no API key has been configured')
-      return false
+      return Promise.resolve(false)
     }
 
-    notice = makeNotice(notice)
+    let notice = makeNotice(noticeable)
 
     if (name && !(typeof name === 'object')) {
       const n = String(name)
-      name = { name: n }
+      name = {name: n}
     }
 
     if (name) {
@@ -149,7 +165,9 @@ export default class Client {
       notice = mergeNotice(notice, extra)
     }
 
-    if (objectIsEmpty(notice)) { return false }
+    if (objectIsEmpty(notice)) {
+      return Promise.resolve(false)
+    }
 
     const noticeTags = this.__constructTags(notice.tags)
     const contextTags = this.__constructTags(this.__context["tags"])
@@ -175,26 +193,37 @@ export default class Client {
       notice.stack = generateStackTrace()
       backtraceShift = 2
     }
-    notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
 
-    if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) { return false }
+    makeBacktrace(notice.stack, backtraceShift, this.__getSourceFileHandler)
+      .then(backtrace => {
+        notice.backtrace = backtrace
 
-    this.addBreadcrumb('Honeybadger Notice', {
-      category: 'notice',
-      metadata: {
-        message: notice.message,
-        name: notice.name,
-        stack: notice.stack
-      }
-    })
+        if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) {
+          return Promise.resolve(false)
+        }
 
-    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
+        this.addBreadcrumb('Honeybadger Notice', {
+          category: 'notice',
+          metadata: {
+            message: notice.message,
+            name: notice.name,
+            stack: notice.stack
+          }
+        })
 
-    return this.__send(notice)
+        notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
+
+        return this.__send(notice)
+      })
+      .catch(err => {
+        // todo
+      })
   }
 
   addBreadcrumb(message: string, opts?: Record<string, unknown>): Client {
-    if (!this.config.breadcrumbsEnabled) { return }
+    if (!this.config.breadcrumbsEnabled) {
+      return
+    }
 
     opts = opts || {}
 
@@ -226,7 +255,7 @@ export default class Client {
   }
 
   /** @internal */
-  protected __send(_notice: Partial<Notice>): boolean {
+  protected __send(_notice: Partial<Notice>): Promise<boolean> {
     throw (new Error('Must implement send in subclass'))
   }
 

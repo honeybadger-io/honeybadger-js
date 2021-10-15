@@ -1,6 +1,7 @@
 import sinon from 'sinon'
 import Client from '../../../src/core/client'
-import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
+import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
+// @ts-ignore
 import { nullLogger } from '../helpers'
 
 describe('utils', function () {
@@ -87,24 +88,6 @@ describe('utils', function () {
 
     it('returns false when not empty', function () {
       expect(objectIsEmpty({ foo: 'bar' })).toEqual(false)
-    })
-  })
-
-  describe('makeBacktrace', function () {
-    it('returns a parsed stacktrace in Honeybadger format', function () {
-      const stack = 'Error: Something unexpected has occurred.\n\tat bar (foo.js:1:2)'
-      expect(makeBacktrace(stack)).toEqual([
-        {
-          file: 'foo.js',
-          method: 'bar',
-          number: 1,
-          column: 2
-        }
-      ])
-    })
-
-    it('returns and empty array when no stack is undefined', function () {
-      expect(makeBacktrace(undefined)).toEqual([])
     })
   })
 

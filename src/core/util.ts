@@ -4,10 +4,14 @@ import {
   Logger, Config, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler
 } from './types'
 
-export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 &T2 {
+export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
   const result = {} as Record<keyof T1 | keyof T2, unknown>
-  for (const k in obj1) { result[k] = obj1[k] }
-  for (const k in obj2) { result[k] = obj2[k] }
+  for (const k in obj1) {
+    result[k] = obj1[k]
+  }
+  for (const k in obj2) {
+    result[k] = obj2[k]
+  }
   return result as T1 & T2
 }
 
@@ -29,25 +33,46 @@ export function objectIsEmpty(obj): boolean {
 }
 
 export function objectIsExtensible(obj): boolean {
-  if (typeof Object.isExtensible !== 'function') { return true }
+  if (typeof Object.isExtensible !== 'function') {
+    return true
+  }
   return Object.isExtensible(obj)
 }
 
-export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
+export function makeBacktrace(stack: string, shift = 0, getSourceFileHandler: (path: string) => Promise<string>): Promise<BacktraceFrame[]> {
   try {
-    const backtrace = stackTraceParser.parse(stack).map(line => {
-      return {
-        file: line.file,
-        method: line.methodName,
-        number: line.lineNumber,
-        column: line.column
-      }
-    })
+    const backtrace: BacktraceFrame[] = stackTraceParser
+      .parse(stack)
+      .map(line => {
+        return {
+          file: line.file,
+          method: line.methodName,
+          number: line.lineNumber,
+          column: line.column
+        }
+      })
     backtrace.splice(0, shift)
-    return backtrace
+
+    if (!backtrace.length) {
+      return Promise.resolve(backtrace)
+    }
+
+    // get source code only for first backtrace
+    const firstTrace = backtrace[0]
+    return getSourceFileHandler(firstTrace.file)
+      .then(data => {
+        if (data) {
+          firstTrace.source = getSourceCode(data, firstTrace)
+        }
+        return backtrace
+      })
+      .catch(err => {
+        // todo
+        return backtrace
+      })
   } catch (_err) {
     // TODO: log error
-    return []
+    return Promise.resolve([])
   }
 }
 
@@ -69,17 +94,24 @@ export function runAfterNotifyHandlers(notice, handlers: AfterNotifyHandler[], e
 }
 
 // Returns a new object with properties from other object.
-export function newObject<T>(obj: T): T|Record<string, unknown> {
-  if (typeof (obj) !== 'object' || obj === null) { return {} }
+export function newObject<T>(obj: T): T | Record<string, unknown> {
+  if (typeof (obj) !== 'object' || obj === null) {
+    return {}
+  }
   const result = {} as T
-  for (const k in obj) { result[k] = obj[k] }
+  for (const k in obj) {
+    result[k] = obj[k]
+  }
   return result
 }
 
 export function sanitize(obj, maxDepth = 8) {
   const seenObjects = []
+
   function seen(obj) {
-    if (!obj || typeof (obj) !== 'object') { return false }
+    if (!obj || typeof (obj) !== 'object') {
+      return false
+    }
     for (let i = 0; i < seenObjects.length; i++) {
       const value = seenObjects[i]
       if (value === obj) {
@@ -92,12 +124,18 @@ export function sanitize(obj, maxDepth = 8) {
 
   function canSerialize(obj) {
     // Functions are TMI and Symbols can't convert to strings.
-    if (/function|symbol/.test(typeof (obj))) { return false }
+    if (/function|symbol/.test(typeof (obj))) {
+      return false
+    }
 
-    if (obj === null) { return false }
+    if (obj === null) {
+      return false
+    }
 
     // No prototype, likely created with `Object.create(null)`.
-    if (typeof obj === 'object' && typeof obj.hasOwnProperty === 'undefined') { return false }
+    if (typeof obj === 'object' && typeof obj.hasOwnProperty === 'undefined') {
+      return false
+    }
 
     return true
   }
@@ -108,7 +146,9 @@ export function sanitize(obj, maxDepth = 8) {
     }
 
     // Inspect invalid types
-    if (!canSerialize(obj)) { return Object.prototype.toString.call(obj) }
+    if (!canSerialize(obj)) {
+      return Object.prototype.toString.call(obj)
+    }
 
     // Halt circular references
     if (seen(obj)) {
@@ -142,7 +182,9 @@ export function sanitize(obj, maxDepth = 8) {
 export function logger(client: Client): Logger {
   const log = (method: string) => {
     return function (...args: unknown[]) {
-      if (method === 'debug' && !client.config.debug) { return }
+      if (method === 'debug' && !client.config.debug) {
+        return
+      }
       args.unshift('[Honeybadger]')
       client.config.logger[method](...args)
     }
@@ -167,12 +209,12 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
     notice = {}
   } else if (Object.prototype.toString.call(thing) === '[object Error]') {
     const e = thing as Error
-    notice = merge(thing as Record<string, unknown>, { name: e.name, message: e.message, stack: e.stack })
+    notice = merge(thing as Record<string, unknown>, {name: e.name, message: e.message, stack: e.stack})
   } else if (typeof thing === 'object') {
     notice = newObject(thing)
   } else {
     const m = String(thing)
-    notice = { message: m }
+    notice = {message: m}
   }
 
   return notice
@@ -186,7 +228,9 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function instrument(object: Record<string, any>, name: string, replacement: (unknown) => void): void {
-  if (!object || !name || !replacement || !(name in object)) { return }
+  if (!object || !name || !replacement || !(name in object)) {
+    return
+  }
 
   let original = object[name]
   while (original && original.__hb_original) {
@@ -196,7 +240,7 @@ export function instrument(object: Record<string, any>, name: string, replacemen
   try {
     object[name] = replacement(original)
     object[name].__hb_original = original
-  } catch(_e) {
+  } catch (_e) {
     // Ignores errors like this one:
     //   Error: TypeError: Cannot set property onunhandledrejection of [object Object] which has only a getter
     //   User-Agent: Mozilla/5.0 (Linux; Android 10; SAMSUNG SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/12.1 Chrome/79.0.3945.136 Mobile Safari/537.36
@@ -212,7 +256,7 @@ export function endpoint(config: Config, path: string): string {
 export function generateStackTrace(): string {
   try {
     throw new Error('')
-  } catch(e) {
+  } catch (e) {
     if (e.stack) {
       return e.stack
     }
@@ -247,6 +291,7 @@ export function filter(obj: Record<string, unknown>, filters: string[]): Record<
   }
 
   const seen = []
+
   function filter(obj) {
     let k: string, newObj: Record<string, unknown>
 
@@ -270,10 +315,14 @@ export function filter(obj: Record<string, unknown>, filters: string[]): Record<
     }
 
     if (is('Array', obj)) {
-      return obj.map(function(v) { return filter(v) })
+      return obj.map(function (v) {
+        return filter(v)
+      })
     }
 
-    if (is('Function', obj)) { return '[FUNC]' }
+    if (is('Function', obj)) {
+      return '[FUNC]'
+    }
 
     return obj
   }
@@ -295,12 +344,18 @@ function is(type: string, obj: unknown): boolean {
   return obj !== undefined && obj !== null && klass === type
 }
 
-export function filterUrl(url:string, filters: string[]): string {
-  if (!filters) { return url }
-  if (typeof url !== 'string') { return url }
+export function filterUrl(url: string, filters: string[]): string {
+  if (!filters) {
+    return url
+  }
+  if (typeof url !== 'string') {
+    return url
+  }
 
   const query = url.split(/\?/, 2)[1]
-  if (!query) { return url }
+  if (!query) {
+    return url
+  }
 
   let result = url
   query.split(/[&]\s?/).forEach((pair) => {
@@ -316,10 +371,26 @@ export function filterUrl(url:string, filters: string[]): string {
 export function formatCGIData(vars: Record<string, unknown>, prefix = ''): Record<string, unknown> {
   const formattedVars = {}
 
-  Object.keys(vars).forEach(function(key) {
+  Object.keys(vars).forEach(function (key) {
     const formattedKey = prefix + key.replace(/\W/g, '_').toUpperCase()
     formattedVars[formattedKey] = vars[key]
   })
 
   return formattedVars
+}
+
+function getSourceCode(fileData: string, stack: BacktraceFrame, sourceRadius = 2): Record<string, string> {
+  const lines = fileData.split('\n')
+  // add one empty line because array index starts from 0, but error line number is counted from 1
+  lines.unshift('')
+  const start = stack.number - sourceRadius
+  const end = stack.number + sourceRadius
+  const result = {}
+  for (let i = start; i <= end; i++) {
+    const line = lines[i]
+    if (typeof line === 'string') {
+      result[i] = line
+    }
+  }
+  return result
 }
