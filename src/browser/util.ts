@@ -137,7 +137,7 @@ export function encodeCookie(object) {
  *
  * @param url
  */
-function getSourceFile(url: string): Promise<string> {
+export function getSourceFile(url: string): Promise<string> {
   return new Promise<string>(resolve => {
     const oReq = new XMLHttpRequest();
     oReq.onload = () => {

@@ -194,7 +194,7 @@ export default class Client {
       backtraceShift = 2
     }
 
-    makeBacktrace(notice.stack, backtraceShift, this.__getSourceFileHandler)
+    return makeBacktrace(notice.stack, backtraceShift, this.__getSourceFileHandler)
       .then(backtrace => {
         notice.backtrace = backtrace
 
@@ -217,6 +217,7 @@ export default class Client {
       })
       .catch(err => {
         // todo
+        return false
       })
   }
 

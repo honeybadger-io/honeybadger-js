@@ -40,8 +40,9 @@ export function objectIsExtensible(obj): boolean {
 }
 
 export function makeBacktrace(stack: string, shift = 0, getSourceFileHandler: (path: string) => Promise<string>): Promise<BacktraceFrame[]> {
+  let backtrace: BacktraceFrame[]
   try {
-    const backtrace: BacktraceFrame[] = stackTraceParser
+    backtrace = stackTraceParser
       .parse(stack)
       .map(line => {
         return {
@@ -56,10 +57,14 @@ export function makeBacktrace(stack: string, shift = 0, getSourceFileHandler: (p
     if (!backtrace.length) {
       return Promise.resolve(backtrace)
     }
+  } catch (_err) {
+    // TODO: log error
+    return Promise.resolve([])
+  }
 
     // get source code only for first backtrace
     const firstTrace = backtrace[0]
-    return getSourceFileHandler(firstTrace.file)
+    return (getSourceFileHandler ? getSourceFileHandler(firstTrace.file) : Promise.resolve(null))
       .then(data => {
         if (data) {
           firstTrace.source = getSourceCode(data, firstTrace)
@@ -70,10 +75,6 @@ export function makeBacktrace(stack: string, shift = 0, getSourceFileHandler: (p
         // todo
         return backtrace
       })
-  } catch (_err) {
-    // TODO: log error
-    return Promise.resolve([])
-  }
 }
 
 export function runBeforeNotifyHandlers(notice, handlers: BeforeNotifyHandler[]): boolean {

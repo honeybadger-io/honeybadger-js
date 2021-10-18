@@ -10,6 +10,9 @@ describe('browser client', function () {
       logger: nullLogger()
     })
 
+    // no need to test this in here
+    client.__getSourceFileHandler = null
+
     // Stub HTTP requests.
     request = undefined
     requests = []
@@ -48,76 +51,78 @@ describe('browser client', function () {
       })
     })
 
-    it('is called without an error when the request succeeds', function () {
-      return new Promise(resolve => {
-        const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
-        client.afterNotify(function (err, notice) {
+    it('is called without an error when the request succeeds', function (done) {
+      const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+
+      client.afterNotify(function (err, notice) {
+        expect(err).toBeUndefined()
+        expect(notice.message).toEqual('testing')
+        expect(notice.id).toBe(id)
+        done()
+      })
+
+      client.notify('testing')
+        .then(()=> {
+          expect(requests).toHaveLength(1)
+          request.respond(201, {}, JSON.stringify({ id }))
+        })
+        .catch(done)
+    })
+
+    it('is called with an error when the request fails', function (done) {
+      client.afterNotify(function (err, notice) {
+        expect(notice.message).toEqual('testing')
+        expect(err.message).toMatch(/403/)
+        done()
+      })
+      client.notify('testing')
+        .then(() => {
+          expect(requests).toHaveLength(1)
+          request.respond(403, {}, '')
+        })
+        .catch(done)
+    })
+
+    it('is called without an error when passed as an option and the request succeeds', function (done) {
+      const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      client.notify('testing', {
+        afterNotify: (err, notice) => {
           expect(err).toBeUndefined()
           expect(notice.message).toEqual('testing')
           expect(notice.id).toBe(id)
-          resolve(true)
-        })
-        client.notify('testing')
-
-        expect(requests).toHaveLength(1)
-        request.respond(201, {}, JSON.stringify({ id }))
+          done()
+        }
       })
+        .then(() => {
+          expect(requests).toHaveLength(1)
+          request.respond(201, {}, JSON.stringify({ id }))
+        })
+        .catch(done)
     })
 
-    it('is called with an error when the request fails', function () {
-      return new Promise(resolve => {
-        client.afterNotify(function (err, notice) {
+    it('is called with an error when passed as an option and the request fails', function (done) {
+      client.notify('testing', {
+        afterNotify: (err, notice) => {
           expect(notice.message).toEqual('testing')
           expect(err.message).toMatch(/403/)
-          resolve(true)
-        })
-        client.notify('testing')
-
-        expect(requests).toHaveLength(1)
-        request.respond(403, {}, '')
+          done()
+        }
       })
-    })
-
-    it('is called without an error when passed as an option and the request succeeds', function () {
-      return new Promise(resolve => {
-        const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
-        client.notify('testing', {
-          afterNotify: (err, notice) => {
-            expect(err).toBeUndefined()
-            expect(notice.message).toEqual('testing')
-            expect(notice.id).toBe(id)
-            resolve(true)
-          }
+        .then(() => {
+          expect(requests).toHaveLength(1)
+          request.respond(403, {}, '')
         })
-
-        expect(requests).toHaveLength(1)
-        request.respond(201, {}, JSON.stringify({ id }))
-      })
-    })
-
-    it('is called with an error when passed as an option and the request fails', function () {
-      return new Promise(resolve => {
-        client.notify('testing', {
-          afterNotify: (err, notice) => {
-            expect(notice.message).toEqual('testing')
-            expect(err.message).toMatch(/403/)
-            resolve(true)
-          }
-        })
-
-        expect(requests).toHaveLength(1)
-        request.respond(403, {}, '')
-      })
+        .catch(done)
     })
   })
 
   describe('notify', function () {
-    it('excludes cookies by default', function () {
+    it('excludes cookies by default', async function () {
       client.configure({
         apiKey: 'testing'
       })
 
-      client.notify('testing')
+      await client.notify('testing')
 
       expect(requests).toHaveLength(1)
 
@@ -125,12 +130,12 @@ describe('browser client', function () {
       expect(payload.request.cgi_data.HTTP_COOKIE).toBeUndefined()
     })
 
-    it('filters cookies string', function () {
+    it('filters cookies string', async function () {
       client.configure({
         apiKey: 'testing'
       })
 
-      client.notify('testing', {cookies: 'expected=value; password=secret'})
+      await client.notify('testing', {cookies: 'expected=value; password=secret'})
 
       expect(requests).toHaveLength(1)
 
@@ -138,12 +143,12 @@ describe('browser client', function () {
       expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
     })
 
-    it('filters cookies object', function () {
+    it('filters cookies object', async function () {
       client.configure({
         apiKey: 'testing'
       })
 
-      client.notify('testing', {cookies: {expected: 'value', password: 'secret'}})
+      await client.notify('testing', {cookies: {expected: 'value', password: 'secret'}})
 
       expect(requests).toHaveLength(1)
 
