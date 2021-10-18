@@ -1,5 +1,6 @@
-import sinon from 'sinon'
+import {useFakeXMLHttpRequest} from 'sinon'
 import Singleton from '../../src/browser'
+// @ts-ignore
 import { nullLogger } from './helpers'
 
 describe('browser client', function () {
@@ -16,7 +17,7 @@ describe('browser client', function () {
     // Stub HTTP requests.
     request = undefined
     requests = []
-    xhr = sinon.useFakeXMLHttpRequest()
+    xhr = useFakeXMLHttpRequest()
     xhr.onCreate = function (xhr) {
       request = xhr
       return requests.push(xhr)
@@ -51,68 +52,77 @@ describe('browser client', function () {
       })
     })
 
-    it('is called without an error when the request succeeds', function (done) {
+    it('is called without an error when the request succeeds', function () {
       const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
 
-      client.afterNotify(function (err, notice) {
-        expect(err).toBeUndefined()
-        expect(notice.message).toEqual('testing')
-        expect(notice.id).toBe(id)
-        done()
-      })
-
-      client.notify('testing')
-        .then(()=> {
+      return new Promise<void>((resolve, reject) => {
+        client.afterNotify(function (err, notice) {
           expect(requests).toHaveLength(1)
-          request.respond(201, {}, JSON.stringify({ id }))
-        })
-        .catch(done)
-    })
-
-    it('is called with an error when the request fails', function (done) {
-      client.afterNotify(function (err, notice) {
-        expect(notice.message).toEqual('testing')
-        expect(err.message).toMatch(/403/)
-        done()
-      })
-      client.notify('testing')
-        .then(() => {
-          expect(requests).toHaveLength(1)
-          request.respond(403, {}, '')
-        })
-        .catch(done)
-    })
-
-    it('is called without an error when passed as an option and the request succeeds', function (done) {
-      const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
-      client.notify('testing', {
-        afterNotify: (err, notice) => {
           expect(err).toBeUndefined()
           expect(notice.message).toEqual('testing')
           expect(notice.id).toBe(id)
-          done()
-        }
-      })
-        .then(() => {
-          expect(requests).toHaveLength(1)
-          request.respond(201, {}, JSON.stringify({ id }))
+          resolve()
         })
-        .catch(done)
+
+        client.notify('testing')
+          .then(()=> {
+            request.respond(201, {}, JSON.stringify({ id }))
+          })
+          .catch(reject)
+      })
+
     })
 
-    it('is called with an error when passed as an option and the request fails', function (done) {
-      client.notify('testing', {
-        afterNotify: (err, notice) => {
+    it('is called with an error when the request fails', function () {
+      return new Promise<void>((resolve, reject) => {
+        client.afterNotify(function (err, notice) {
+          expect(requests).toHaveLength(1)
           expect(notice.message).toEqual('testing')
           expect(err.message).toMatch(/403/)
-          done()
-        }
-      })
-        .then(() => {
-          expect(requests).toHaveLength(1)
-          request.respond(403, {}, '')
+          resolve()
         })
-        .catch(done)
+        client.notify('testing')
+          .then(() => {
+            request.respond(403, {}, '')
+          })
+          .catch(reject)
+      })
+    })
+
+    it('is called without an error when passed as an option and the request succeeds', function () {
+      return new Promise<void>((resolve, reject) => {
+        const afterNotify = (err, notice) => {
+          expect(requests).toHaveLength(1)
+          expect(err).toBeUndefined()
+          expect(notice.message).toEqual('testing')
+          expect(notice.id).toBe(id)
+          resolve()
+        }
+        const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+        client.notify('testing', { afterNotify })
+          .then(() => {
+            request.respond(201, {}, JSON.stringify({ id }))
+          })
+          .catch(reject)
+      })
+
+    })
+
+    it('is called with an error when passed as an option and the request fails', function () {
+      return new Promise<void>((resolve, reject) => {
+        const afterNotify = (err,notice) => {
+          expect(requests).toHaveLength(1)
+          expect(notice.message).toEqual('testing')
+          expect(err.message).toMatch(/403/)
+          resolve()
+        }
+
+        client.notify('testing', { afterNotify })
+          .then(() => {
+            request.respond(403, {}, '')
+          })
+          .catch(reject)
+      })
     })
   })
 

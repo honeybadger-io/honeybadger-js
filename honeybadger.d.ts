@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 // Type definitions for honeybadger.js
 // Project: https://github.com/honeybadger-io/honeybadger-js
 import Server from './dist/server/types/server'

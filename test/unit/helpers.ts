@@ -1,5 +1,5 @@
 import BaseClient from '../../src/core/client'
-import { Logger, Notice } from '../../src/core/types'
+import { Logger } from '../../src/core/types'
 
 export function nullLogger (): Logger {
   return {

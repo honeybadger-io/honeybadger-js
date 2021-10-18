@@ -1,4 +1,4 @@
-import sinon from 'sinon'
+import {fake} from 'sinon'
 import Client from '../../../src/core/client'
 import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
 // @ts-ignore
@@ -109,7 +109,7 @@ describe('utils', function () {
     })
 
     it('passes the notice to handlers', function () {
-      const notice = sinon.fake()
+      const notice = fake()
       const handlers = [
         (notice) => { notice.call() }
       ]
@@ -131,7 +131,7 @@ describe('utils', function () {
 
   describe('runAfterNotifyHandlers', function () {
     it('passes the notice to handlers', function () {
-      const notice = sinon.fake()
+      const notice = fake()
       const handlers = [
         (_error, notice) => { notice.call() }
       ]
@@ -140,7 +140,7 @@ describe('utils', function () {
     })
 
     it('passes the error to handlers', function () {
-      const error = sinon.fake()
+      const error = fake()
       const handlers = [
         (error, _notice) => { error.call() }
       ]
@@ -182,6 +182,7 @@ describe('utils', function () {
     it('drops function values', function () {
       expect(
         sanitize(
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
           { foo: function () { }, bar: 'baz' }
         )
       ).toEqual(
@@ -228,7 +229,6 @@ describe('utils', function () {
       )
     })
 
-    // eslint-disable-next-line mocha/no-setup-in-describe
     if (typeof Object.create === 'function') {
       it('handles objects without prototypes as values', function () {
         const obj = Object.create(null)

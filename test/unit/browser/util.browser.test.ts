@@ -14,7 +14,7 @@ describe('utils/browser', function () {
 
     it('returns a blank string when not an element', function () {
       expect(
-        stringNameOfElement({})
+        stringNameOfElement({} as HTMLElement)
       ).toEqual(
         ''
       )

@@ -215,8 +215,8 @@ export default class Client {
 
         return this.__send(notice)
       })
-      .catch(err => {
-        // todo
+      .catch(_err => {
+        // TODO: log error
         return false
       })
   }

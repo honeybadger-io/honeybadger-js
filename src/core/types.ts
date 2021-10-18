@@ -30,7 +30,7 @@ export interface Config {
   enableUnhandledRejection: boolean
   filters: string[]
   __plugins: Plugin[],
-  tags: any,
+  tags: unknown,
 }
 
 export interface BeforeNotifyHandler {

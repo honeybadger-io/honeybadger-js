@@ -71,8 +71,8 @@ export function makeBacktrace(stack: string, shift = 0, getSourceFileHandler: (p
         }
         return backtrace
       })
-      .catch(err => {
-        // todo
+      .catch(_err => {
+        // TODO: log error
         return backtrace
       })
 }
@@ -141,7 +141,7 @@ export function sanitize(obj, maxDepth = 8) {
     return true
   }
 
-  function serialize(obj: any, depth = 0) {
+  function serialize(obj: unknown, depth = 0) {
     if (depth >= maxDepth) {
       return '[DEPTH]'
     }

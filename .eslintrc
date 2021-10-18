@@ -10,6 +10,7 @@
   ],
   "parser": "@typescript-eslint/parser",
   "rules": {
+    "@typescript-eslint/ban-ts-comment": 0,
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
@@ -18,10 +19,18 @@
     ]
   },
   "ignorePatterns": [
-    "test/integration/"
+    "test/integration/",
+    "dist",
+    "examples"
   ],
   "plugins": [
     "@typescript-eslint",
     "jest"
-  ]
+  ],
+  "env":
+  {
+    "browser": true,
+    "node": true,
+    "es6": true
+  }
 }

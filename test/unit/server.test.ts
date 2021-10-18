@@ -1,8 +1,9 @@
 import Singleton from '../../src/server'
 import BaseClient from '../../src/core/client'
+// @ts-ignore
 import { nullLogger } from './helpers'
 
-import sinon from 'sinon'
+import {mock, spy} from 'sinon'
 import nock from 'nock'
 
 import express from 'express'
@@ -173,7 +174,7 @@ describe('server client', function () {
     const error = new Error('Badgers!')
 
     beforeEach(function () {
-      client_mock = sinon.mock(client)
+      client_mock = mock(client)
     })
 
     // eslint-disable-next-line jest/expect-expect
@@ -195,7 +196,7 @@ describe('server client', function () {
 
     it('reports the error to Honeybadger and calls next error handler', function() {
       const app = express()
-      const expected = sinon.spy()
+      const expected = spy()
 
       app.use(client.requestHandler)
 
@@ -223,7 +224,7 @@ describe('server client', function () {
 
     it('reports async errors to Honeybadger and calls next error handler', function() {
       const app = express()
-      const expected = sinon.spy()
+      const expected = spy()
 
       app.use(client.requestHandler)
 
@@ -253,7 +254,6 @@ describe('server client', function () {
 
     it('resets context between requests', function() {
       const app = express()
-      const expected = sinon.spy()
 
       app.use(client.requestHandler)
 
@@ -279,7 +279,7 @@ describe('server client', function () {
       let handlerFunc
 
       beforeEach(function() {
-        handlerFunc = sinon.spy()
+        handlerFunc = spy()
         const handler = client.lambdaHandler(handlerFunc)
         handler(1, 2, 3)
         return new Promise((resolve => {

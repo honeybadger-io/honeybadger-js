@@ -1,3 +1,4 @@
+// @ts-ignore
 import { nullLogger, TestClient } from '../helpers'
 
 class MyError extends Error {
@@ -388,7 +389,7 @@ describe('client', function () {
       await expect(client.notify('testing')).resolves.toEqual(expect.any(Object))
     })
 
-    it('it is called with default notice properties', async function () {
+    it('is called with default notice properties', async function () {
       let notice
       client.beforeNotify(function (n) {
         notice = n
@@ -414,7 +415,7 @@ describe('client', function () {
       expect(notice.revision).toEqual('config revision')
     })
 
-    it('it is called with overridden notice properties', async function () {
+    it('is called with overridden notice properties', async function () {
       let notice
       client.beforeNotify(function (n) {
         notice = n
@@ -451,7 +452,7 @@ describe('client', function () {
       expect(notice.other).toEqual('expected other')
     })
 
-    it('it assigns notice properties', async function () {
+    it('assigns notice properties', async function () {
       client.beforeNotify(function (notice) {
         notice.name = 'expected name'
         notice.message = 'expected message'
