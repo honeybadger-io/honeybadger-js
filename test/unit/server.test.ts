@@ -295,6 +295,28 @@ describe('server client', function () {
     })
 
     describe('async handlers', function() {
+
+      beforeEach(() => {
+        client.configure({
+          apiKey: 'testgin'
+        })
+      })
+
+      it('calls handler if notify exits on preconditions', function (done) {
+        client.configure({
+          apiKey: null
+        })
+
+        const handler = client.lambdaHandler(async function(_event) {
+          throw new Error("Badgers!")
+        })
+
+        handler({}, {}, (err) => {
+          expect(err).toBeDefined()
+          done()
+        })
+      })
+
       // eslint-disable-next-line jest/expect-expect
       it('reports errors to Honeybadger', function() {
         nock.cleanAll()
