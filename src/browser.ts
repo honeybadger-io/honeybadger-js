@@ -47,7 +47,7 @@ class Honeybadger extends Client {
       projectRoot: window.location.protocol + '//' + window.location.host,
       ...opts
     })
-    this.__getSourceFileHandler = getSourceFile;
+    this.__getSourceFileHandler = getSourceFile.bind(this);
   }
 
   configure(opts: Partial<BrowserConfig> = {}) {

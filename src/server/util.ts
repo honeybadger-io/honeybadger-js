@@ -56,12 +56,11 @@ export function getStats(cb: (stats: Record<string, unknown>) => void): void {
 /**
  * Get source file if possible, used to build `notice.backtrace.source`
  *
- * @param path
+ * @param path to source code
+ * @param cb callback with fileContent
  */
-export function getSourceFile(path: string): Promise<string> {
-  return new Promise(resolve => {
-    fs.readFile(path, 'utf-8', (err, data) => {
-      return resolve(err ? null : data)
-    })
+export function getSourceFile(path: string, cb: (fileContent: string) => void): void {
+  fs.readFile(path, 'utf-8', (err, data) => {
+    cb(err ? null : data)
   })
 }

@@ -10,7 +10,7 @@ import {
   generateStackTrace,
   filter,
   filterUrl,
-  formatCGIData
+  formatCGIData, clone, addSourceToBacktrace
 } from './util'
 import {
   Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
@@ -48,7 +48,7 @@ export default class Client {
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
 
   /** @internal */
-  protected __getSourceFileHandler: (path: string) => Promise<string>
+  protected __getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void
 
   config: Config
   logger: Logger
@@ -77,6 +77,7 @@ export default class Client {
       afterUncaught: () => true,
       filters: ['creditcard', 'password'],
       __plugins: [],
+      ignorePatterns: [],
 
       ...opts,
     }
@@ -135,22 +136,59 @@ export default class Client {
     return this
   }
 
-  notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Promise<boolean> {
+  notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
     if (this.config.disabled) {
       this.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
-      return Promise.resolve(false)
+      return false
     }
 
     if (!this.__reportData()) {
       this.logger.debug('Dropping notice: honeybadger.js is in development mode')
-      return Promise.resolve(false)
+      return false
     }
 
     if (!this.config.apiKey) {
       this.logger.warn('Unable to send error report: no API key has been configured')
-      return Promise.resolve(false)
+      return false
     }
 
+    const notice = this.makeNotice(noticeable, name, extra)
+    if (!notice) {
+      return false
+    }
+
+    // todo: investigate
+    // need to clone backtrace because it may be modified in the beforeNotifyHandlers
+    // we need the original backtrace in order to add backtrace.source as a later step
+    const cloned = clone(notice.backtrace)
+
+    if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) {
+      return false
+    }
+
+    this.addBreadcrumb('Honeybadger Notice', {
+      category: 'notice',
+      metadata: {
+        message: notice.message,
+        name: notice.name,
+        stack: notice.stack
+      }
+    })
+
+    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
+
+    addSourceToBacktrace(cloned, this.__getSourceFileHandler, backtrace => {
+      backtrace.forEach((trace, index) => {
+        notice.backtrace[index].source = trace.source
+      })
+
+      this.__send(notice)
+    })
+
+    return true
+  }
+
+  protected makeNotice(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Notice {
     let notice = makeNotice(noticeable)
 
     if (name && !(typeof name === 'object')) {
@@ -166,7 +204,7 @@ export default class Client {
     }
 
     if (objectIsEmpty(notice)) {
-      return Promise.resolve(false)
+      return null
     }
 
     const noticeTags = this.__constructTags(notice.tags)
@@ -194,31 +232,9 @@ export default class Client {
       backtraceShift = 2
     }
 
-    return makeBacktrace(notice.stack, backtraceShift, this.__getSourceFileHandler)
-      .then(backtrace => {
-        notice.backtrace = backtrace
+    notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
 
-        if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) {
-          return Promise.resolve(false)
-        }
-
-        this.addBreadcrumb('Honeybadger Notice', {
-          category: 'notice',
-          metadata: {
-            message: notice.message,
-            name: notice.name,
-            stack: notice.stack
-          }
-        })
-
-        notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
-
-        return this.__send(notice)
-      })
-      .catch(_err => {
-        // TODO: log error
-        return false
-      })
+    return notice as Notice
   }
 
   addBreadcrumb(message: string, opts?: Record<string, unknown>): Client {
@@ -256,7 +272,7 @@ export default class Client {
   }
 
   /** @internal */
-  protected __send(_notice: Partial<Notice>): Promise<boolean> {
+  protected __send(_notice: Partial<Notice>): void {
     throw (new Error('Must implement send in subclass'))
   }
 

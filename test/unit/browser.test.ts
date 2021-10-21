@@ -55,9 +55,8 @@ describe('browser client', function () {
     it('is called without an error when the request succeeds', function () {
       const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
 
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((resolve) => {
         client.afterNotify(function (err, notice) {
-          expect(requests).toHaveLength(1)
           expect(err).toBeUndefined()
           expect(notice.message).toEqual('testing')
           expect(notice.id).toBe(id)
@@ -65,34 +64,30 @@ describe('browser client', function () {
         })
 
         client.notify('testing')
-          .then(()=> {
-            request.respond(201, {}, JSON.stringify({ id }))
-          })
-          .catch(reject)
+
+        expect(requests).toHaveLength(1)
+        request.respond(201, {}, JSON.stringify({ id }))
       })
 
     })
 
     it('is called with an error when the request fails', function () {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((resolve) => {
         client.afterNotify(function (err, notice) {
-          expect(requests).toHaveLength(1)
           expect(notice.message).toEqual('testing')
           expect(err.message).toMatch(/403/)
           resolve()
         })
         client.notify('testing')
-          .then(() => {
-            request.respond(403, {}, '')
-          })
-          .catch(reject)
+
+        expect(requests).toHaveLength(1)
+        request.respond(403, {}, '')
       })
     })
 
     it('is called without an error when passed as an option and the request succeeds', function () {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((resolve) => {
         const afterNotify = (err, notice) => {
-          expect(requests).toHaveLength(1)
           expect(err).toBeUndefined()
           expect(notice.message).toEqual('testing')
           expect(notice.id).toBe(id)
@@ -100,39 +95,37 @@ describe('browser client', function () {
         }
         const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
         client.notify('testing', { afterNotify })
-          .then(() => {
-            request.respond(201, {}, JSON.stringify({ id }))
-          })
-          .catch(reject)
+
+        expect(requests).toHaveLength(1)
+        request.respond(201, {}, JSON.stringify({ id }))
       })
 
     })
 
     it('is called with an error when passed as an option and the request fails', function () {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((resolve) => {
         const afterNotify = (err,notice) => {
-          expect(requests).toHaveLength(1)
+
           expect(notice.message).toEqual('testing')
           expect(err.message).toMatch(/403/)
           resolve()
         }
 
         client.notify('testing', { afterNotify })
-          .then(() => {
-            request.respond(403, {}, '')
-          })
-          .catch(reject)
+
+        expect(requests).toHaveLength(1)
+        request.respond(403, {}, '')
       })
     })
   })
 
   describe('notify', function () {
-    it('excludes cookies by default', async function () {
+    it('excludes cookies by default', function () {
       client.configure({
         apiKey: 'testing'
       })
 
-      await client.notify('testing')
+      client.notify('testing')
 
       expect(requests).toHaveLength(1)
 
@@ -140,12 +133,12 @@ describe('browser client', function () {
       expect(payload.request.cgi_data.HTTP_COOKIE).toBeUndefined()
     })
 
-    it('filters cookies string', async function () {
+    it('filters cookies string', function () {
       client.configure({
         apiKey: 'testing'
       })
 
-      await client.notify('testing', {cookies: 'expected=value; password=secret'})
+      client.notify('testing', {cookies: 'expected=value; password=secret'})
 
       expect(requests).toHaveLength(1)
 
@@ -153,12 +146,12 @@ describe('browser client', function () {
       expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
     })
 
-    it('filters cookies object', async function () {
+    it('filters cookies object', function () {
       client.configure({
         apiKey: 'testing'
       })
 
-      await client.notify('testing', {cookies: {expected: 'value', password: 'secret'}})
+      client.notify('testing', {cookies: {expected: 'value', password: 'secret'}})
 
       expect(requests).toHaveLength(1)
 

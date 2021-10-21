@@ -3,6 +3,7 @@ import Client from '../core/client'
 import {
   Logger, Config, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler
 } from './types'
+import {back} from "nock";
 
 export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
   const result = {} as Record<keyof T1 | keyof T2, unknown>
@@ -39,10 +40,9 @@ export function objectIsExtensible(obj): boolean {
   return Object.isExtensible(obj)
 }
 
-export function makeBacktrace(stack: string, shift = 0, getSourceFileHandler: (path: string) => Promise<string>): Promise<BacktraceFrame[]> {
-  let backtrace: BacktraceFrame[]
+export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
   try {
-    backtrace = stackTraceParser
+    const backtrace = stackTraceParser
       .parse(stack)
       .map(line => {
         return {
@@ -53,28 +53,32 @@ export function makeBacktrace(stack: string, shift = 0, getSourceFileHandler: (p
         }
       })
     backtrace.splice(0, shift)
-
-    if (!backtrace.length) {
-      return Promise.resolve(backtrace)
-    }
+    return backtrace
   } catch (_err) {
     // TODO: log error
-    return Promise.resolve([])
+    return []
+  }
+}
+
+export function addSourceToBacktrace(backtrace: BacktraceFrame[],
+                                     getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void,
+                                     cb: (backtrace: BacktraceFrame[]) => void): void {
+  if (!getSourceFileHandler || !backtrace || !backtrace.length) {
+    cb(backtrace)
+    return
   }
 
-    // get source code only for first backtrace
-    const firstTrace = backtrace[0]
-    return (getSourceFileHandler ? getSourceFileHandler(firstTrace.file) : Promise.resolve(null))
-      .then(data => {
-        if (data) {
-          firstTrace.source = getSourceCode(data, firstTrace)
-        }
-        return backtrace
-      })
-      .catch(_err => {
-        // TODO: log error
-        return backtrace
-      })
+  const backtracesLength = backtrace.length
+  const attachSourceToBacktrace = (trace: BacktraceFrame, index: number) => {
+    getSourceFileHandler(trace.file, (fileContent => {
+      trace.source = getSourceCode(fileContent, trace)
+      if (index == backtracesLength - 1) {
+        cb(backtrace)
+      }
+    }))
+  }
+
+  backtrace.forEach((trace, index) => attachSourceToBacktrace(trace, index))
 }
 
 export function runBeforeNotifyHandlers(notice, handlers: BeforeNotifyHandler[]): boolean {
@@ -380,7 +384,14 @@ export function formatCGIData(vars: Record<string, unknown>, prefix = ''): Recor
   return formattedVars
 }
 
+export function clone<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj))
+}
+
 function getSourceCode(fileData: string, stack: BacktraceFrame, sourceRadius = 2): Record<string, string> {
+  if (!fileData) {
+    return null
+  }
   const lines = fileData.split('\n')
   // add one empty line because array index starts from 0, but error line number is counted from 1
   lines.unshift('')

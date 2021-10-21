@@ -135,17 +135,16 @@ export function encodeCookie(object) {
 /**
  * Get source file if possible, used to build `notice.backtrace.source`
  *
- * @param url
+ * @param url to source code
+ * @param cb callback with file content
  */
-export function getSourceFile(url: string): Promise<string> {
-  return new Promise<string>(resolve => {
-    const oReq = new XMLHttpRequest();
-    oReq.onload = () => {
-      resolve(oReq.status === 200 ? oReq.responseText : null)
-    }
-    oReq.open("GET", url);
-    oReq.send();
-  })
+export function getSourceFile(url: string, cb: (fileContent: string) => void): void {
+  const oReq = new XMLHttpRequest();
+  oReq.onload = () => {
+    cb(oReq.status === 200 ? oReq.responseText : null)
+  }
+  oReq.open("GET", url);
+  oReq.send();
 }
 
 // Helpers

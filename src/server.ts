@@ -51,7 +51,7 @@ class Honeybadger extends Client {
   }
 
   /** @internal */
-  protected __send(notice): Promise<boolean> {
+  protected __send(notice): boolean {
     const {protocol} = new URL(this.config.endpoint)
     const transport = (protocol === "http:" ? http : https)
 
@@ -107,8 +107,7 @@ class Honeybadger extends Client {
       req.end()
     })
 
-    // should we wait for the request to finish before resolving this promise?
-    return Promise.resolve(true)
+    return true
   }
 }
 

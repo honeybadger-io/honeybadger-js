@@ -31,6 +31,7 @@ export interface Config {
   filters: string[]
   __plugins: Plugin[],
   tags: unknown,
+  ignorePatterns: RegExp[]
 }
 
 export interface BeforeNotifyHandler {
@@ -68,7 +69,8 @@ export interface Notice {
   tags: string | string[],
   details: Record<string, Record<string, unknown>>,
   __breadcrumbs: BreadcrumbRecord[],
-  afterNotify?: AfterNotifyHandler
+  afterNotify?: AfterNotifyHandler,
+  [key: string]: unknown
 }
 
 export type Noticeable = string | Error | Partial<Notice>
