@@ -296,12 +296,6 @@ describe('server client', function () {
 
     describe('async handlers', function() {
 
-      beforeEach(() => {
-        client.configure({
-          apiKey: 'testgin'
-        })
-      })
-
       it('calls handler if notify exits on preconditions', function (done) {
         client.configure({
           apiKey: null
@@ -318,7 +312,11 @@ describe('server client', function () {
       })
 
       // eslint-disable-next-line jest/expect-expect
-      it('reports errors to Honeybadger', function() {
+      it('reports errors to Honeybadger', function(done) {
+        client.configure({
+          apiKey: 'testing'
+        })
+
         nock.cleanAll()
 
         const api = nock("https://api.honeybadger.io")
@@ -327,17 +325,22 @@ describe('server client', function () {
 
         const callback = function(_err) {
           api.done()
+          done()
         }
 
         const handler = client.lambdaHandler(async function(_event) {
           throw new Error("Badgers!")
         })
 
-        return handler({}, {}, callback)
+        handler({}, {}, callback)
       })
 
       // eslint-disable-next-line jest/expect-expect
-      it('reports async errors to Honeybadger', function() {
+      it('reports async errors to Honeybadger', function(done) {
+        client.configure({
+          apiKey: 'testing'
+        })
+
         nock.cleanAll()
 
         const api = nock("https://api.honeybadger.io")
@@ -346,6 +349,7 @@ describe('server client', function () {
 
         const callback = function(_err) {
           api.done()
+          done()
         }
 
         const handler = client.lambdaHandler(async function(_event) {
@@ -354,40 +358,72 @@ describe('server client', function () {
           }, 0)
         })
 
-        return handler({}, {}, callback)
+        handler({}, {}, callback)
       })
     })
 
     describe('non-async handlers', function() {
+
+      it('calls handler if notify exits on preconditions', function (done) {
+        client.configure({
+          apiKey: null
+        })
+
+        const handler = client.lambdaHandler(function(_event, _context, _callback) {
+          throw new Error("Badgers!")
+        })
+
+        handler({}, {}, (err) => {
+          expect(err).toBeDefined()
+
+          //revert the client to use a key
+          client.configure({
+            apiKey: 'testing'
+          })
+
+          done()
+        })
+      })
+
       // eslint-disable-next-line jest/expect-expect
-      it('reports errors to Honeybadger', function() {
+      it('reports errors to Honeybadger', function(done) {
+        client.configure({
+          apiKey: 'testing'
+        })
+
         nock.cleanAll()
 
         const api = nock("https://api.honeybadger.io")
-          .post("/v1/notices/js")
-          .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+            .post("/v1/notices/js")
+            .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
         const callback = function(_err) {
           api.done()
+          done()
         }
 
         const handler = client.lambdaHandler(function(_event, _context, _callback) {
           throw new Error("Badgers!")
         })
 
-        return handler({}, {}, callback)
+        handler({}, {}, callback)
       })
 
       // eslint-disable-next-line jest/expect-expect
-      it('reports async errors to Honeybadger', function() {
+      it('reports async errors to Honeybadger', function(done) {
+        client.configure({
+          apiKey: 'testing'
+        })
+
         nock.cleanAll()
 
         const api = nock("https://api.honeybadger.io")
-          .post("/v1/notices/js")
-          .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+            .post("/v1/notices/js")
+            .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
         const callback = function(_err) {
           api.done()
+          done()
         }
 
         const handler = client.lambdaHandler(function(_event, _context, _callback) {
@@ -396,8 +432,9 @@ describe('server client', function () {
           }, 0)
         })
 
-        return handler({}, {}, callback)
+        handler({}, {}, callback)
       })
+
     })
   })
 })
