@@ -31,7 +31,6 @@ export interface Config {
   filters: string[]
   __plugins: Plugin[],
   tags: unknown,
-  ignorePatterns: RegExp[]
 }
 
 export interface BeforeNotifyHandler {

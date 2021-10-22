@@ -77,7 +77,6 @@ export default class Client {
       afterUncaught: () => true,
       filters: ['creditcard', 'password'],
       __plugins: [],
-      ignorePatterns: [],
 
       ...opts,
     }
