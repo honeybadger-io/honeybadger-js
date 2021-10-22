@@ -51,7 +51,7 @@ class Honeybadger extends Client {
   }
 
   /** @internal */
-  protected __send(notice): boolean {
+  protected __send(notice): void {
     const {protocol} = new URL(this.config.endpoint)
     const transport = (protocol === "http:" ? http : https)
 
@@ -106,8 +106,6 @@ class Honeybadger extends Client {
       req.write(data)
       req.end()
     })
-
-    return true
   }
 }
 

@@ -3,7 +3,6 @@ import Client from '../core/client'
 import {
   Logger, Config, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler
 } from './types'
-import {back} from "nock";
 
 export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
   const result = {} as Record<keyof T1 | keyof T2, unknown>
