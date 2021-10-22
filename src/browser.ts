@@ -1,7 +1,7 @@
 import Client from './core/client'
 import { Config, Notice, BeforeNotifyHandler } from './core/types'
 import { merge, sanitize, filter, runAfterNotifyHandlers, objectIsExtensible, endpoint } from './core/util'
-import { encodeCookie, decodeCookie, preferCatch, getSourceFile } from './browser/util'
+import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
@@ -47,7 +47,6 @@ class Honeybadger extends Client {
       projectRoot: window.location.protocol + '//' + window.location.host,
       ...opts
     })
-    this.__getSourceFileHandler = getSourceFile.bind(this);
   }
 
   configure(opts: Partial<BrowserConfig> = {}) {

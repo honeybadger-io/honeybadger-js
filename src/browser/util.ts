@@ -132,21 +132,6 @@ export function encodeCookie(object) {
   return cookies.join(';')
 }
 
-/**
- * Get source file if possible, used to build `notice.backtrace.source`
- *
- * @param url to source code
- * @param cb callback with file content
- */
-export function getSourceFile(url: string, cb: (fileContent: string) => void): void {
-  const oReq = new XMLHttpRequest();
-  oReq.onload = () => {
-    cb(oReq.status === 200 ? oReq.responseText : null)
-  }
-  oReq.open("GET", url);
-  oReq.send();
-}
-
 // Helpers
 
 function getSiblings(element) {

@@ -10,7 +10,7 @@ import {
   generateStackTrace,
   filter,
   filterUrl,
-  formatCGIData, clone, addSourceToBacktrace
+  formatCGIData, clone, getSourceForBacktrace
 } from './util'
 import {
   Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
@@ -177,9 +177,9 @@ export default class Client {
 
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
 
-    addSourceToBacktrace(cloned, this.__getSourceFileHandler, backtrace => {
-      backtrace.forEach((trace, index) => {
-        notice.backtrace[index].source = trace.source
+    getSourceForBacktrace(cloned, this.__getSourceFileHandler, sourcePerTrace => {
+      sourcePerTrace.forEach((source, index) => {
+        notice.backtrace[index].source = source
       })
 
       this.__send(notice)

@@ -60,20 +60,21 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
   }
 }
 
-export function addSourceToBacktrace(backtrace: BacktraceFrame[],
-                                     getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void,
-                                     cb: (backtrace: BacktraceFrame[]) => void): void {
+export function getSourceForBacktrace(backtrace: BacktraceFrame[],
+                                      getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void,
+                                      cb: (sourcePerTrace: Record<string, string>[]) => void): void {
   if (!getSourceFileHandler || !backtrace || !backtrace.length) {
-    cb(backtrace)
+    cb([])
     return
   }
 
+  const result: Record<string, string>[] = []
   const backtracesLength = backtrace.length
   const attachSourceToBacktrace = (trace: BacktraceFrame, index: number) => {
     getSourceFileHandler(trace.file, (fileContent => {
-      trace.source = getSourceCode(fileContent, trace)
+      result[index] = getSourceCode(fileContent, trace)
       if (index == backtracesLength - 1) {
-        cb(backtrace)
+        cb(result)
       }
     }))
   }
