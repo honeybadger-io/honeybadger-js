@@ -50,27 +50,25 @@ function lambdaHandler(handler: LambdaHandler): LambdaHandler {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const hb = this
 
-    dom.on('error', function(err) {
-      hb.notify(err, {
+    const hbHandler = function (err?: Error) {
+      const willNotify = hb.notify(err, {
         afterNotify: function() {
           hb.clear()
           callback(err)
         }
       })
-    })
+      if (!willNotify) {
+        callback(err)
+      }
+    }
+
+    dom.on('error', hbHandler)
 
     dom.run(function() {
       process.nextTick(function() {
         Promise.resolve(handler.apply(this, args))
           .then(() => { hb.clear() })
-          .catch(function(err) {
-            hb.notify(err, {
-              afterNotify: function() {
-                hb.clear()
-                callback(err)
-              }
-            })
-          })
+          .catch(hbHandler)
       })
     })
   }.bind(this)
