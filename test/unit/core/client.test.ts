@@ -194,15 +194,6 @@ describe('client', function () {
       expect(client.notify({})).toEqual(false)
     })
 
-    it('does not send notice when message is ignored', function () {
-      client.configure({
-        api_key: 'testing',
-        ignorePatterns: [/ignore/i]
-      })
-
-      expect(client.notify('you should ignore me')).toEqual(false)
-    })
-
     it('accepts options as first argument', function () {
       client.configure({
         apiKey: 'testing'
@@ -306,24 +297,6 @@ describe('client', function () {
       const payload = client.notify(err, { context: { bar: 'bar' } })
 
       expect(payload.request.context).toEqual({ foo: 'foo', bar: 'bar' })
-    })
-
-    it('sends the notice with arguments when using ignore patterns and error is null', function () {
-      client.configure({
-        apiKey: 'testing',
-        ignorePatterns: [/ignore/i]
-      })
-
-      expect(client.notify(null, 'custom class name')).toEqual(expect.any(Object))
-    })
-
-    it('sends the notice when using ignore patterns and message does not respond to match', function () {
-      client.configure({
-        apiKey: 'testing',
-        ignorePatterns: [/care/i]
-      })
-
-      expect(client.notify({ message: {} })).toEqual(expect.any(Object))
     })
 
     it('generates a backtrace when there isn\'t one', function () {
