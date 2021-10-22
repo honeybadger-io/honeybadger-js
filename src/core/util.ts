@@ -69,17 +69,19 @@ export function getSourceForBacktrace(backtrace: BacktraceFrame[],
   }
 
   const result: Record<string, string>[] = []
-  const backtracesLength = backtrace.length
-  const attachSourceToBacktrace = (trace: BacktraceFrame, index: number) => {
+  const backtraceClone = backtrace.slice()
+  const getSourceFromFile = (index = 0) => {
+    if (!backtraceClone.length) {
+      return cb(result)
+    }
+
+    const trace = backtraceClone.splice(0)[0]
     getSourceFileHandler(trace.file, (fileContent => {
       result[index] = getSourceCode(fileContent, trace)
-      if (index == backtracesLength - 1) {
-        cb(result)
-      }
+      getSourceFromFile(index + 1)
     }))
   }
-
-  backtrace.forEach((trace, index) => attachSourceToBacktrace(trace, index))
+  getSourceFromFile()
 }
 
 export function runBeforeNotifyHandlers(notice, handlers: BeforeNotifyHandler[]): boolean {

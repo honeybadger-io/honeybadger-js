@@ -296,7 +296,7 @@ describe('server client', function () {
 
     describe('async handlers', function() {
 
-      it('calls handler if notify exits on preconditions', function (done) {
+      it('calls handler if notify exits on preconditions', function () {
         client.configure({
           apiKey: null
         })
@@ -305,14 +305,16 @@ describe('server client', function () {
           throw new Error("Badgers!")
         })
 
-        handler({}, {}, (err) => {
-          expect(err).toBeDefined()
-          done()
+        return new Promise<void>(resolve => {
+          handler({}, {}, (err) => {
+            expect(err).toBeDefined()
+            resolve()
+          })
         })
       })
 
       // eslint-disable-next-line jest/expect-expect
-      it('reports errors to Honeybadger', function(done) {
+      it('reports errors to Honeybadger', function() {
         client.configure({
           apiKey: 'testing'
         })
@@ -323,48 +325,52 @@ describe('server client', function () {
           .post("/v1/notices/js")
           .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
-        const callback = function(_err) {
-          api.done()
-          done()
-        }
+        return new Promise<void>(resolve => {
+          const callback = function(_err) {
+            api.done()
+            resolve()
+          }
 
-        const handler = client.lambdaHandler(async function(_event) {
-          throw new Error("Badgers!")
-        })
-
-        handler({}, {}, callback)
-      })
-
-      // eslint-disable-next-line jest/expect-expect
-      it('reports async errors to Honeybadger', function(done) {
-        client.configure({
-          apiKey: 'testing'
-        })
-
-        nock.cleanAll()
-
-        const api = nock("https://api.honeybadger.io")
-          .post("/v1/notices/js")
-          .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
-
-        const callback = function(_err) {
-          api.done()
-          done()
-        }
-
-        const handler = client.lambdaHandler(async function(_event) {
-          setTimeout(function() {
+          const handler = client.lambdaHandler(async function(_event) {
             throw new Error("Badgers!")
-          }, 0)
+          })
+
+          handler({}, {}, callback)
+        })
+      })
+
+      // eslint-disable-next-line jest/expect-expect
+      it('reports async errors to Honeybadger', function() {
+        client.configure({
+          apiKey: 'testing'
         })
 
-        handler({}, {}, callback)
+        nock.cleanAll()
+
+        const api = nock("https://api.honeybadger.io")
+          .post("/v1/notices/js")
+          .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+        return new Promise<void>(resolve => {
+          const callback = function(_err) {
+            api.done()
+            resolve()
+          }
+
+          const handler = client.lambdaHandler(async function(_event) {
+            setTimeout(function() {
+              throw new Error("Badgers!")
+            }, 0)
+          })
+
+          handler({}, {}, callback)
+        })
       })
     })
 
     describe('non-async handlers', function() {
 
-      it('calls handler if notify exits on preconditions', function (done) {
+      it('calls handler if notify exits on preconditions', function () {
         client.configure({
           apiKey: null
         })
@@ -373,20 +379,48 @@ describe('server client', function () {
           throw new Error("Badgers!")
         })
 
-        handler({}, {}, (err) => {
-          expect(err).toBeDefined()
+        return new Promise<void>(resolve => {
+          handler({}, {}, (err) => {
+            expect(err).toBeDefined()
 
-          //revert the client to use a key
-          client.configure({
-            apiKey: 'testing'
+            //revert the client to use a key
+            client.configure({
+              apiKey: 'testing'
+            })
+
+            resolve()
+          })
+        })
+      })
+
+      // eslint-disable-next-line jest/expect-expect
+      it('reports errors to Honeybadger', function() {
+        client.configure({
+          apiKey: 'testing'
+        })
+
+        nock.cleanAll()
+
+        const api = nock("https://api.honeybadger.io")
+            .post("/v1/notices/js")
+            .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+        return new Promise<void>(resolve => {
+          const callback = function(_err) {
+            api.done()
+            resolve()
+          }
+
+          const handler = client.lambdaHandler(function(_event, _context, _callback) {
+            throw new Error("Badgers!")
           })
 
-          done()
+          handler({}, {}, callback)
         })
       })
 
       // eslint-disable-next-line jest/expect-expect
-      it('reports errors to Honeybadger', function(done) {
+      it('reports async errors to Honeybadger', function() {
         client.configure({
           apiKey: 'testing'
         })
@@ -397,42 +431,20 @@ describe('server client', function () {
             .post("/v1/notices/js")
             .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
-        const callback = function(_err) {
-          api.done()
-          done()
-        }
+        return new Promise<void>(resolve => {
+          const callback = function(_err) {
+            api.done()
+            resolve()
+          }
 
-        const handler = client.lambdaHandler(function(_event, _context, _callback) {
-          throw new Error("Badgers!")
+          const handler = client.lambdaHandler(function(_event, _context, _callback) {
+            setTimeout(function() {
+              throw new Error("Badgers!")
+            }, 0)
+          })
+
+          handler({}, {}, callback)
         })
-
-        handler({}, {}, callback)
-      })
-
-      // eslint-disable-next-line jest/expect-expect
-      it('reports async errors to Honeybadger', function(done) {
-        client.configure({
-          apiKey: 'testing'
-        })
-
-        nock.cleanAll()
-
-        const api = nock("https://api.honeybadger.io")
-            .post("/v1/notices/js")
-            .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
-
-        const callback = function(_err) {
-          api.done()
-          done()
-        }
-
-        const handler = client.lambdaHandler(function(_event, _context, _callback) {
-          setTimeout(function() {
-            throw new Error("Badgers!")
-          }, 0)
-        })
-
-        handler({}, {}, callback)
       })
 
     })

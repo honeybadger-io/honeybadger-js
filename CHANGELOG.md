@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Call lambda handler callback if notify preconditions fail (#648)
 
+### Added
+- Nodejs: Include source snippet in backtraces when available (#624) 
+
 ## [3.2.5] - 2021-09-22
 ### Fixed
 - Check for api key only if enabled (#637)
