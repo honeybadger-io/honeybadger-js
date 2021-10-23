@@ -10,7 +10,8 @@ import {
   generateStackTrace,
   filter,
   filterUrl,
-  formatCGIData, clone, getSourceForBacktrace
+  formatCGIData,
+  getSourceForBacktrace
 } from './util'
 import {
   Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
@@ -156,10 +157,9 @@ export default class Client {
       return false
     }
 
-    // todo: investigate
-    // need to clone backtrace because it may be modified in the beforeNotifyHandlers
-    // we need the original backtrace in order to add backtrace.source as a later step
-    const cloned = clone(notice.backtrace)
+    // we need to have the source file data before the beforeNotifyHandlers,
+    // in case they modify them
+    const sourceCodeData = notice.backtrace.slice()
 
     if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) {
       return false
@@ -176,7 +176,7 @@ export default class Client {
 
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
 
-    getSourceForBacktrace(cloned, this.__getSourceFileHandler, sourcePerTrace => {
+    getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler, sourcePerTrace => {
       sourcePerTrace.forEach((source, index) => {
         notice.backtrace[index].source = source
       })

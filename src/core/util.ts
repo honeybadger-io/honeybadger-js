@@ -68,15 +68,14 @@ export function getSourceForBacktrace(backtrace: BacktraceFrame[],
   }
 
   const result: Record<string, string>[] = []
-  const backtraceClone = backtrace.slice()
   const getSourceFromFile = (index = 0) => {
-    if (!backtraceClone.length) {
+    if (!backtrace.length) {
       return cb(result)
     }
 
-    const trace = backtraceClone.splice(0)[0]
+    const trace = backtrace.splice(0)[index]
     getSourceFileHandler(trace.file, (fileContent => {
-      result[index] = getSourceCode(fileContent, trace)
+      result[index] = getSourceCodeSnippet(fileContent, trace.number)
       getSourceFromFile(index + 1)
     }))
   }
@@ -390,15 +389,15 @@ export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj))
 }
 
-function getSourceCode(fileData: string, stack: BacktraceFrame, sourceRadius = 2): Record<string, string> {
+function getSourceCodeSnippet(fileData: string, lineNumber: number, sourceRadius = 2): Record<string, string> {
   if (!fileData) {
     return null
   }
   const lines = fileData.split('\n')
   // add one empty line because array index starts from 0, but error line number is counted from 1
   lines.unshift('')
-  const start = stack.number - sourceRadius
-  const end = stack.number + sourceRadius
+  const start = lineNumber - sourceRadius
+  const end = lineNumber + sourceRadius
   const result = {}
   for (let i = start; i <= end; i++) {
     const line = lines[i]
