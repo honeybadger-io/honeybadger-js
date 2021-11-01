@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.2.6] - 2021-10-26
 ### Fixed
 - Call lambda handler callback if notify preconditions fail (#648)
+- Call lambda handler callback with result if user-defined handler is async (#648) 
 
 ## [3.2.5] - 2021-09-22
 ### Fixed
