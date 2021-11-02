@@ -44,6 +44,13 @@ type LambdaHandler = (event: unknown, context: unknown, callback: unknown) => vo
 
 function lambdaHandler(handler: LambdaHandler): LambdaHandler {
   return function lambdaHandler(event, context, callback) {
+
+    // in the case of an async handler, the length of the handler will be less than 3 (no callback function).
+    // if this is the case, we have to explicitly call the callback function from the function we are returning.
+    // we don't have to do that if the handler has third callback function parameter,
+    // because it will be called directly from inside the handler.
+    const shouldInvokeCallbackExplicitly = handler.length < 3
+
     // eslint-disable-next-line prefer-rest-params
     const args = arguments
     const dom = domain.create()
@@ -67,7 +74,12 @@ function lambdaHandler(handler: LambdaHandler): LambdaHandler {
     dom.run(function() {
       process.nextTick(function() {
         Promise.resolve(handler.apply(this, args))
-          .then(() => { hb.clear() })
+          .then((res?) => {
+            hb.clear()
+            if (shouldInvokeCallbackExplicitly) {
+              callback(null, res)
+            }
+          })
           .catch(hbHandler)
       })
     })
