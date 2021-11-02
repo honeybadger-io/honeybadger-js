@@ -3,7 +3,6 @@ import BaseClient from '../../src/core/client'
 // @ts-ignore
 import { nullLogger } from './helpers'
 
-import {mock, spy} from 'sinon'
 import nock from 'nock'
 
 describe('server client', function () {

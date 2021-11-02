@@ -1,9 +1,10 @@
 import express from "express";
 import nock from "nock";
-import sinon from 'sinon'
+import {mock, spy} from 'sinon'
 import request from 'supertest'
 import { promisify } from 'util'
 import Singleton from "../../../src/server";
+// @ts-ignore
 import {nullLogger} from "../helpers";
 
 describe('Express Middleware', function () {
@@ -16,7 +17,7 @@ describe('Express Middleware', function () {
             logger: nullLogger(),
             environment: null
         })
-        client_mock = sinon.mock(client)
+        client_mock = mock(client)
     })
 
     // eslint-disable-next-line jest/expect-expect
@@ -38,7 +39,7 @@ describe('Express Middleware', function () {
 
     it('reports the error to Honeybadger and calls next error handler', function() {
         const app = express()
-        const expected = sinon.spy()
+        const expected = spy()
 
         app.use(client.requestHandler)
 
@@ -66,7 +67,7 @@ describe('Express Middleware', function () {
 
     it('reports async errors to Honeybadger and calls next error handler', function() {
         const app = express()
-        const expected = sinon.spy()
+        const expected = spy()
 
         app.use(client.requestHandler)
 
@@ -96,7 +97,6 @@ describe('Express Middleware', function () {
 
     it('resets context between requests', function() {
         const app = express()
-        const expected = sinon.spy()
 
         app.use(client.requestHandler)
 
@@ -133,7 +133,7 @@ describe('Lambda Handler', function () {
 
         beforeEach(function() {
             callback = () => { /**/ }
-            handlerFunc = sinon.spy()
+            handlerFunc = spy()
             const handler = client.lambdaHandler(handlerFunc)
             handler(1, 2, callback)
             return new Promise((resolve => {
@@ -154,6 +154,7 @@ describe('Lambda Handler', function () {
     describe('async handlers', function() {
 
         it('calls handler with promisify', async function () {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const handler = client.lambdaHandler(async (event: any, _context: any) => {
                 if(event.fail) {
                     throw new Error('this is an error');
@@ -165,6 +166,7 @@ describe('Lambda Handler', function () {
             });
 
             const wrappedHandler = promisify(handler);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const a: any = await wrappedHandler({
                 fail: 0
             }, {});
@@ -172,7 +174,7 @@ describe('Lambda Handler', function () {
             expect(a.body).toBe('something');
         })
 
-        it('calls handler with asynchronous response if no error is thrown', function (done) {
+        it('calls handler with asynchronous response if no error is thrown', function () {
             client.configure({
                 apiKey: 'testing'
             })
@@ -181,15 +183,17 @@ describe('Lambda Handler', function () {
                 return Promise.resolve({message:'works!'})
             })
 
-            handler({}, {}, (err, res) => {
-                expect(err).toBeFalsy()
-                expect(res).toBeDefined()
-                expect(res.message).toEqual('works!')
-                done()
+            return new Promise<void>(resolve => {
+                handler({}, {}, (err, res) => {
+                    expect(err).toBeFalsy()
+                    expect(res).toBeDefined()
+                    expect(res.message).toEqual('works!')
+                    resolve()
+                })
             })
         })
 
-        it('calls handler with synchronous response if no error is thrown', function (done) {
+        it('calls handler with synchronous response if no error is thrown', function () {
             client.configure({
                 apiKey: 'testing'
             })
@@ -198,15 +202,17 @@ describe('Lambda Handler', function () {
                 return {message:'works!'}
             })
 
-            handler({}, {}, (err, res) => {
-                expect(err).toBeFalsy()
-                expect(res).toBeDefined()
-                expect(res.message).toEqual('works!')
-                done()
+            return new Promise<void>(resolve => {
+                handler({}, {}, (err, res) => {
+                    expect(err).toBeFalsy()
+                    expect(res).toBeDefined()
+                    expect(res.message).toEqual('works!')
+                    resolve()
+                })
             })
         })
 
-        it('calls handler if notify exits on preconditions', function (done) {
+        it('calls handler if notify exits on preconditions', function () {
             client.configure({
                 apiKey: null
             })
@@ -215,13 +221,16 @@ describe('Lambda Handler', function () {
                 throw new Error("Badgers!")
             })
 
-            handler({}, {}, (err) => {
-                expect(err).toBeDefined()
-                done()
+            return new Promise<void>(resolve => {
+                handler({}, {}, (err) => {
+                    expect(err).toBeDefined()
+                    resolve()
+                })
             })
         })
 
-        it('reports errors to Honeybadger', function(done) {
+        // eslint-disable-next-line jest/expect-expect
+        it('reports errors to Honeybadger', function() {
             client.configure({
                 apiKey: 'testing'
             })
@@ -231,21 +240,22 @@ describe('Lambda Handler', function () {
             const api = nock("https://api.honeybadger.io")
                 .post("/v1/notices/js")
                 .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
-
-            const callback = function(_err) {
-                api.done()
-                done()
-            }
 
             const handler = client.lambdaHandler(async function(_event) {
                 throw new Error("Badgers!")
             })
 
-            handler({}, {}, callback)
+            return new Promise<void>(resolve => {
+                const callback = function(_err) {
+                    api.done()
+                    resolve()
+                }
+                handler({}, {}, callback)
+            })
         })
 
         // eslint-disable-next-line jest/expect-expect
-        it('reports async errors to Honeybadger', function(done) {
+        it('reports async errors to Honeybadger', function() {
             client.configure({
                 apiKey: 'testing'
             })
@@ -256,10 +266,6 @@ describe('Lambda Handler', function () {
                 .post("/v1/notices/js")
                 .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
-            const callback = function(_err) {
-                api.done()
-                done()
-            }
 
             const handler = client.lambdaHandler(async function(_event) {
                 setTimeout(function() {
@@ -267,13 +273,20 @@ describe('Lambda Handler', function () {
                 }, 0)
             })
 
-            handler({}, {}, callback)
+            return new Promise<void>(resolve => {
+                const callback = function(_err) {
+                    api.done()
+                    resolve()
+                }
+                handler({}, {}, callback)
+            })
         })
     })
 
     describe('non-async handlers', function() {
 
-        it('calls handler with promisify', function (done) {
+        it('calls handler with promisify', function () {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const handler = client.lambdaHandler((event: any, _context: any, callback: any) => {
                 if(event.fail) {
                     throw new Error('this is an error');
@@ -286,18 +299,16 @@ describe('Lambda Handler', function () {
             });
 
             const wrappedHandler = promisify(handler)
-            wrappedHandler({ fail: 0 }, {})
+            return wrappedHandler({ fail: 0 }, {})
                 .then(a => {
                     // eslint-disable-next-line jest/no-conditional-expect
                     expect(a.statusCode).toBe(1);
                     // eslint-disable-next-line jest/no-conditional-expect
                     expect(a.body).toBe('something');
-                    done()
                 })
-                .catch(done)
         })
 
-        it('calls handler if no error is thrown', function (done) {
+        it('calls handler if no error is thrown', function () {
             client.configure({
                 apiKey: 'testing'
             })
@@ -306,15 +317,17 @@ describe('Lambda Handler', function () {
                 callback(null, { message: 'works!' })
             })
 
-            handler({}, {}, (err, res) => {
-                expect(err).toBeFalsy()
-                expect(res).toBeDefined()
-                expect(res.message).toEqual('works!')
-                done()
+            return new Promise<void>(resolve => {
+                handler({}, {}, (err, res) => {
+                    expect(err).toBeFalsy()
+                    expect(res).toBeDefined()
+                    expect(res.message).toEqual('works!')
+                    resolve()
+                })
             })
         })
 
-        it('calls handler if notify exits on preconditions', function (done) {
+        it('calls handler if notify exits on preconditions', function () {
             client.configure({
                 apiKey: null
             })
@@ -323,20 +336,48 @@ describe('Lambda Handler', function () {
                 throw new Error("Badgers!")
             })
 
-            handler({}, {}, (err) => {
-                expect(err).toBeDefined()
+            return new Promise<void>(resolve => {
+                handler({}, {}, (err) => {
+                    expect(err).toBeDefined()
 
-                //revert the client to use a key
-                client.configure({
-                    apiKey: 'testing'
+                    //revert the client to use a key
+                    client.configure({
+                        apiKey: 'testing'
+                    })
+
+                    resolve()
+                })
+            })
+        })
+
+        // eslint-disable-next-line jest/expect-expect
+        it('reports errors to Honeybadger', function() {
+            client.configure({
+                apiKey: 'testing'
+            })
+
+            nock.cleanAll()
+
+            const api = nock("https://api.honeybadger.io")
+                .post("/v1/notices/js")
+                .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+            return new Promise<void>(resolve => {
+                const callback = function(_err) {
+                    api.done()
+                    resolve()
+                }
+
+                const handler = client.lambdaHandler(function(_event, _context, _callback) {
+                    throw new Error("Badgers!")
                 })
 
-                done()
+                handler({}, {}, callback)
             })
         })
 
         // eslint-disable-next-line jest/expect-expect
-        it('reports errors to Honeybadger', function(done) {
+        it('reports async errors to Honeybadger', function() {
             client.configure({
                 apiKey: 'testing'
             })
@@ -347,42 +388,20 @@ describe('Lambda Handler', function () {
                 .post("/v1/notices/js")
                 .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
-            const callback = function(_err) {
-                api.done()
-                done()
-            }
+            return new Promise<void>(resolve => {
+                const callback = function(_err) {
+                    api.done()
+                    resolve()
+                }
 
-            const handler = client.lambdaHandler(function(_event, _context, _callback) {
-                throw new Error("Badgers!")
+                const handler = client.lambdaHandler(function(_event, _context, _callback) {
+                    setTimeout(function() {
+                        throw new Error("Badgers!")
+                    }, 0)
+                })
+
+                handler({}, {}, callback)
             })
-
-            handler({}, {}, callback)
-        })
-
-        // eslint-disable-next-line jest/expect-expect
-        it('reports async errors to Honeybadger', function(done) {
-            client.configure({
-                apiKey: 'testing'
-            })
-
-            nock.cleanAll()
-
-            const api = nock("https://api.honeybadger.io")
-                .post("/v1/notices/js")
-                .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
-
-            const callback = function(_err) {
-                api.done()
-                done()
-            }
-
-            const handler = client.lambdaHandler(function(_event, _context, _callback) {
-                setTimeout(function() {
-                    throw new Error("Badgers!")
-                }, 0)
-            })
-
-            handler({}, {}, callback)
         })
 
     })
