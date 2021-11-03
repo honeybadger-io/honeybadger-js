@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][latest]
+### Added
+- Nodejs: Include source snippet in backtraces when available (#624) 
 
 ## [3.2.7] - 2021-11-01
 ### Fixed
@@ -13,9 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.2.6] - 2021-10-26
 ### Fixed
 - Call lambda handler callback if notify preconditions fail (#648)
-
-### Added
-- Nodejs: Include source snippet in backtraces when available (#624) 
 
 ## [3.2.5] - 2021-09-22
 ### Fixed
