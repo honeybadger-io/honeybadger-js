@@ -1,4 +1,6 @@
+// @ts-ignore
 import { nullLogger, TestClient } from '../helpers'
+import { Notice } from '../../../src/core/types'
 
 class MyError extends Error {
   context = null
@@ -13,7 +15,7 @@ class MyError extends Error {
 }
 
 describe('client', function () {
-  let client
+  let client: TestClient
 
   beforeEach(function () {
     client = new TestClient({
@@ -45,7 +47,7 @@ describe('client', function () {
   })
 
   it('has a context object', function () {
-    expect(client.__context).toEqual({})
+    expect(client.getContext()).toEqual({})
   })
 
   describe('setContext', function () {
@@ -56,8 +58,8 @@ describe('client', function () {
         foo: 'bar'
       })
 
-      expect(client.__context.user_id).toEqual('1')
-      expect(client.__context.foo).toEqual('bar')
+      expect(client.getContext().user_id).toEqual('1')
+      expect(client.getContext().foo).toEqual('bar')
     })
 
     it('is chainable', function () {
@@ -67,16 +69,16 @@ describe('client', function () {
     })
 
     it('does not accept non-objects', function () {
-      client.setContext('foo')
-      expect(client.__context).toEqual({})
+      client.setContext(<never>'foo')
+      expect(client.getContext()).toEqual({})
     })
 
     it('keeps previous context when called with non-object', function () {
       client.setContext({
         foo: 'bar'
-      }).setContext(false)
+      }).setContext(<never>false)
 
-      expect(client.__context).toEqual({
+      expect(client.getContext()).toEqual({
         foo: 'bar'
       })
     })
@@ -89,13 +91,13 @@ describe('client', function () {
         user_id: '1'
       })
 
-      expect(client.__context).not.toEqual({})
-      expect(client.__breadcrumbs).not.toEqual([])
+      expect(client.getContext()).not.toEqual({})
+      expect(client.getBreadcrumbs()).not.toEqual([])
 
       client.clear()
 
-      expect(client.__context).toEqual({})
-      expect(client.__breadcrumbs).toEqual([])
+      expect(client.getContext()).toEqual({})
+      expect(client.getBreadcrumbs()).toEqual([])
     })
   })
 
@@ -105,7 +107,7 @@ describe('client', function () {
         user_id: '1'
       }).resetContext()
 
-      expect(client.__context).toEqual({})
+      expect(client.getContext()).toEqual({})
     })
 
     it('replaces the context with arguments', function () {
@@ -115,7 +117,7 @@ describe('client', function () {
         foo: 'bar'
       })
 
-      expect(client.__context).toEqual({
+      expect(client.getContext()).toEqual({
         foo: 'bar'
       })
     })
@@ -123,9 +125,9 @@ describe('client', function () {
     it('empties the context with non-object argument', function () {
       client.setContext({
         foo: 'bar'
-      }).resetContext('foo')
+      }).resetContext(<never>'foo')
 
-      expect(client.__context).toEqual({})
+      expect(client.getContext()).toEqual({})
     })
 
     it('is chainable', function () {
@@ -143,7 +145,7 @@ describe('client', function () {
         apiKey: 'testing'
       })
 
-      expect(client.notify(new Error('test'))).toEqual(expect.any(Object))
+      expect(client.notify(new Error('test'))).toEqual(true)
     })
 
     it('doesn\'t send the notice when not configured', function () {
@@ -180,7 +182,7 @@ describe('client', function () {
         environment: 'development',
         reportData: true
       })
-      expect(client.notify(new Error('test'))).toEqual(expect.any(Object))
+      expect(client.notify(new Error('test'))).toEqual(true)
     })
 
     it('does not send notice without arguments', function () {
@@ -188,7 +190,8 @@ describe('client', function () {
         apiKey: 'testing'
       })
 
-      expect(client.notify()).toEqual(false)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((<any>client).notify()).toEqual(false)
       expect(client.notify(null)).toEqual(false)
       expect(client.notify(null, {})).toEqual(false)
       expect(client.notify({})).toEqual(false)
@@ -198,7 +201,7 @@ describe('client', function () {
       client.configure({
         apiKey: 'testing'
       })
-      const payload = client.notify({
+      const payload = client.getPayload({
         message: 'expected message'
       })
       expect(payload.error.message).toEqual('expected message')
@@ -209,7 +212,7 @@ describe('client', function () {
         apiKey: 'testing'
       })
 
-      const payload = client.notify(new Error('expected message'), 'expected name')
+      const payload = client.getPayload(new Error('expected message'), 'expected name')
 
       expect(payload.error.message).toEqual('expected message')
       expect(payload.error.class).toEqual('expected name')
@@ -220,7 +223,7 @@ describe('client', function () {
         apiKey: 'testing'
       })
 
-      const payload = client.notify(new Error('original message'), {
+      const payload = client.getPayload(new Error('original message'), {
         message: 'expected message'
       })
 
@@ -232,7 +235,7 @@ describe('client', function () {
         apiKey: 'testing'
       })
 
-      const payload = client.notify(new Error('original message'), 'expected name', {
+      const payload = client.getPayload(new Error('original message'), 'expected name', {
         message: 'expected message'
       })
 
@@ -246,13 +249,13 @@ describe('client', function () {
         apiKey: 'testing'
       })
 
-      const payload = client.notify('testing', {
+      const payload = client.getPayload('testing', {
         params: {
           foo: 'bar'
         }
       })
 
-      expect(payload.request.params.foo).toEqual('bar')
+      expect((payload.request.params as Record<string,string>).foo ).toEqual('bar')
     })
 
     it('reads default properties from error objects', function () {
@@ -264,7 +267,7 @@ describe('client', function () {
       try {
         throw new Error('Test message')
       } catch (e) {
-        payload = client.notify(e)
+        payload = client.getPayload(e)
       }
 
       expect(payload.error.class).toEqual('Error')
@@ -279,7 +282,7 @@ describe('client', function () {
 
       const err = new MyError('Testing')
       err.component = 'expected component'
-      const payload = client.notify(err)
+      const payload = client.getPayload(err)
 
       expect(payload.request.component).toEqual('expected component')
     })
@@ -294,7 +297,7 @@ describe('client', function () {
         foo: 'foo'
       }
 
-      const payload = client.notify(err, { context: { bar: 'bar' } })
+      const payload = client.getPayload(err, { context: { bar: 'bar' } })
 
       expect(payload.request.context).toEqual({ foo: 'foo', bar: 'bar' })
     })
@@ -304,11 +307,11 @@ describe('client', function () {
         apiKey: 'testing'
       })
 
-      const payload = client.notify('expected message')
+      const payload = client.getPayload('expected message')
 
       expect(payload.error.message).toEqual('expected message')
-      expect(payload.error.backtrace.length).toBeGreaterThan(0)
-      expect(payload.error.backtrace[0].file).toMatch("client.test.ts")
+      expect((payload.error.backtrace as Array<Record<string, unknown>>).length).toBeGreaterThan(0)
+      expect(payload.error.backtrace[0].file).toMatch("helpers.ts")
     })
 
     it('sends details', function () {
@@ -322,7 +325,7 @@ describe('client', function () {
         }
       }
 
-      const payload = client.notify("testing", { details: details })
+      const payload = client.getPayload("testing", { details: details })
 
       expect(payload.details).toEqual(details)
     })
@@ -351,17 +354,16 @@ describe('client', function () {
       client.beforeNotify(function () {
         return true
       })
-      expect(client.notify('testing')).toEqual(expect.any(Object))
+      expect(client.notify('testing')).toEqual(true)
     })
 
     it('delivers notice when beforeNotify has no return', function () {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       client.beforeNotify(function () {})
-      client.notify('testing')
-      expect(client.notify('testing')).toEqual(expect.any(Object))
+      expect(client.notify('testing')).toEqual(true)
     })
 
-    it('it is called with default notice properties', function () {
+    it('is called with default notice properties', function () {
       let notice
       client.beforeNotify(function (n) {
         notice = n
@@ -387,7 +389,7 @@ describe('client', function () {
       expect(notice.revision).toEqual('config revision')
     })
 
-    it('it is called with overridden notice properties', function () {
+    it('is called with overridden notice properties', function () {
       let notice
       client.beforeNotify(function (n) {
         notice = n
@@ -424,8 +426,10 @@ describe('client', function () {
       expect(notice.other).toEqual('expected other')
     })
 
-    it('it assigns notice properties', function () {
-      client.beforeNotify(function (notice) {
+    it('assigns notice properties', function () {
+      let notice: Notice;
+      client.beforeNotify(function (n) {
+        notice = n
         notice.name = 'expected name'
         notice.message = 'expected message'
         notice.url = 'expected url'
@@ -439,7 +443,8 @@ describe('client', function () {
         notice.revision = 'expected revision'
       })
 
-      const payload = client.notify('notify message')
+      client.notify('notify message')
+      const payload = client.getPayload(notice)
 
       expect(payload.error.backtrace).toEqual(expect.any(Array))
       expect(payload.error.class).toEqual('expected name')
@@ -458,15 +463,15 @@ describe('client', function () {
 
   describe('addBreadcrumb', function () {
     it('has default breadcrumbs', function () {
-      expect(client.__breadcrumbs).toEqual([])
+      expect(client.getBreadcrumbs()).toEqual([])
     })
 
     it('adds a breadcrumb with defaults', function () {
       client.addBreadcrumb('expected message')
 
-      expect(client.__breadcrumbs.length).toEqual(1)
+      expect(client.getBreadcrumbs().length).toEqual(1)
 
-      const crumb = client.__breadcrumbs[0]
+      const crumb = client.getBreadcrumbs()[0]
 
       expect(crumb.message).toEqual('expected message')
       expect(crumb.category).toEqual('custom')
@@ -479,8 +484,8 @@ describe('client', function () {
         category: 'test'
       })
 
-      expect(client.__breadcrumbs.length).toEqual(1)
-      expect(client.__breadcrumbs[0].category).toEqual('test')
+      expect(client.getBreadcrumbs().length).toEqual(1)
+      expect(client.getBreadcrumbs()[0].category).toEqual('test')
     })
 
     it('overrides the default metadata', function () {
@@ -490,8 +495,8 @@ describe('client', function () {
         }
       })
 
-      expect(client.__breadcrumbs.length).toEqual(1)
-      expect(client.__breadcrumbs[0].metadata).toEqual({
+      expect(client.getBreadcrumbs().length).toEqual(1)
+      expect(client.getBreadcrumbs()[0].metadata).toEqual({
         key: 'expected value'
       })
     })
@@ -507,9 +512,9 @@ describe('client', function () {
         metadata: metadata
       })
 
-      expect(client.__breadcrumbs.length).toEqual(2)
-      expect(client.__breadcrumbs[0].metadata).toEqual(client.__breadcrumbs[1].metadata)
-      expect(client.__breadcrumbs[0].metadata).not.toBe(client.__breadcrumbs[1].metadata)
+      expect(client.getBreadcrumbs().length).toEqual(2)
+      expect(client.getBreadcrumbs()[0].metadata).toEqual(client.getBreadcrumbs()[1].metadata)
+      expect(client.getBreadcrumbs()[0].metadata).not.toBe(client.getBreadcrumbs()[1].metadata)
     })
 
     it('maintains the size of the breadcrumbs queue', function () {
@@ -517,10 +522,10 @@ describe('client', function () {
         client.addBreadcrumb('expected message ' + i)
       }
 
-      expect(client.__breadcrumbs.length).toEqual(40)
+      expect(client.getBreadcrumbs().length).toEqual(40)
 
-      expect(client.__breadcrumbs[0].message).toEqual('expected message 6')
-      expect(client.__breadcrumbs[39].message).toEqual('expected message 45')
+      expect(client.getBreadcrumbs()[0].message).toEqual('expected message 6')
+      expect(client.getBreadcrumbs()[39].message).toEqual('expected message 45')
     })
 
     it('sends breadcrumbs by default', function () {
@@ -529,10 +534,10 @@ describe('client', function () {
       })
 
       client.addBreadcrumb('expected message')
-      const payload = client.notify('message')
+      const payload = client.getPayload('message')
 
       expect(payload.breadcrumbs.enabled).toEqual(true)
-      expect(payload.breadcrumbs.trail.length).toEqual(2)
+      expect((payload.breadcrumbs.trail as Array<Record<string, unknown>>).length).toEqual(2)
       expect(payload.breadcrumbs.trail[0].message).toEqual('expected message')
     })
 
@@ -543,7 +548,7 @@ describe('client', function () {
       })
 
       client.addBreadcrumb('message')
-      const payload = client.notify('message')
+      const payload = client.getPayload('message')
 
       expect(payload.breadcrumbs.enabled).toEqual(false)
       expect(payload.breadcrumbs.trail).toEqual([])
@@ -560,7 +565,7 @@ describe('client', function () {
       filters: ['secret']
     })
 
-    const payload = client.notify('message', {
+    const payload = client.getPayload('message', {
       params: {
         secret: 'secret',
         other: 'expected'
@@ -579,17 +584,20 @@ describe('client', function () {
       }
     })
 
-    expect(payload.request.params.secret).toEqual('[FILTERED]')
-    expect(payload.request.params.other).toEqual('expected')
+    const reqParams = payload.request.params as Record<string, string>
+    expect(reqParams.secret).toEqual('[FILTERED]')
+    expect(reqParams.other).toEqual('expected')
 
-    expect(payload.request.cgi_data.secret).toEqual('[FILTERED]')
-    expect(payload.request.cgi_data.other).toEqual('expected')
+    const cgiData = payload.request.cgi_data as Record<string, string>
+    expect(cgiData.secret).toEqual('[FILTERED]')
+    expect(cgiData.other).toEqual('expected')
 
-    expect(payload.request.session.secret).toEqual('[FILTERED]')
-    expect(payload.request.session.other).toEqual('expected')
+    const session = payload.request.session as Record<string, string>
+    expect(session.secret).toEqual('[FILTERED]')
+    expect(session.other).toEqual('expected')
 
-    expect(payload.request.cgi_data.HTTP_SECRET).toEqual('[FILTERED]')
-    expect(payload.request.cgi_data.HTTP_OTHER).toEqual('expected')
+    expect(cgiData.HTTP_SECRET).toEqual('[FILTERED]')
+    expect(cgiData.HTTP_OTHER).toEqual('expected')
   })
 
   it('filters URL params', function () {
@@ -598,7 +606,7 @@ describe('client', function () {
       filters: ['secret']
     })
 
-    const payload = client.notify('testing', {url: 'https://www.example.com/?secret=value&foo=bar'})
+    const payload = client.getPayload('testing', {url: 'https://www.example.com/?secret=value&foo=bar'})
 
     expect(payload.request.url).toEqual('https://www.example.com/?secret=[FILTERED]&foo=bar')
   })
@@ -609,7 +617,7 @@ describe('client', function () {
       apiKey: 'testing'
     })
 
-    const payload = client.notify('testing', {tags: '  tag1, &%&@<$^tag2,tag3 , tag4,,tag5,'})
+    const payload = client.getPayload('testing', {tags: '  tag1, &%&@<$^tag2,tag3 , tag4,,tag5,'})
     expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4', 'tag5'])
   })
 
@@ -618,7 +626,7 @@ describe('client', function () {
       apiKey: 'testing'
     })
 
-    const payload = client.notify('testing', {tags: ['  tag1,', ',tag2 * /^&:', 'tag3 ', 'tag4', '<script> tag5 </script>']})
+    const payload = client.getPayload('testing', {tags: ['  tag1,', ',tag2 * /^&:', 'tag3 ', 'tag4', '<script> tag5 </script>']})
     expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4', 'scripttag5script'])
   })
 
@@ -628,7 +636,7 @@ describe('client', function () {
       tags: ['tag1']
     })
 
-    const payload = client.notify('testing')
+    const payload = client.getPayload('testing')
     expect(payload.error.tags).toEqual(['tag1'])
   })
 
@@ -638,7 +646,7 @@ describe('client', function () {
     })
 
     client.setContext({tags: 'tag1, tag2'})
-    const payload = client.notify('testing')
+    const payload = client.getPayload('testing')
     expect(payload.error.tags).toEqual(['tag1', 'tag2'])
   })
 
@@ -650,7 +658,7 @@ describe('client', function () {
 
     client.setContext({tags: 'tag3'})
 
-    const payload = client.notify('testing', {tags: ['tag1, tag2']})
+    const payload = client.getPayload('testing', {tags: ['tag1, tag2']})
     expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
   })
 
@@ -660,7 +668,7 @@ describe('client', function () {
       tags: ['tag1']
     })
 
-    const payload = client.notify('testing', {tags: ['tag1']})
+    const payload = client.getPayload('testing', {tags: ['tag1']})
     expect(payload.error.tags).toEqual(['tag1'])
   })
 })

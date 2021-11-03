@@ -28,7 +28,7 @@ export function getStats(cb: (stats: Record<string, unknown>) => void): void {
 
     // The first four lines, in order, are Total, Free, Buffers, Cached.
     // @TODO: Figure out if there's a way to only read these lines
-    const data = memData.split('\n').slice(0,4)
+    const data = memData.split('\n').slice(0, 4)
 
     const results = data.map(function (i: string) {
       return parseInt(/\s+(\d+)\skB/i.exec(i)[1], 10) / 1024.0
@@ -51,4 +51,16 @@ export function getStats(cb: (stats: Record<string, unknown>) => void): void {
     }
     return cb(stats)
   }
+}
+
+/**
+ * Get source file if possible, used to build `notice.backtrace.source`
+ *
+ * @param path to source code
+ * @param cb callback with fileContent
+ */
+export function getSourceFile(path: string, cb: (fileContent: string) => void): void {
+  fs.readFile(path, 'utf-8', (err, data) => {
+    cb(err ? null : data)
+  })
 }

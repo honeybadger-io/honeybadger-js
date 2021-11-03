@@ -59,7 +59,7 @@ export default function (_window = window): Plugin {
         _window.addEventListener('click', (event) => {
           let message, selector, text
           try {
-            message = stringNameOfElement(event.target)
+            message = stringNameOfElement(event.target as HTMLElement)
             selector = stringSelectorOfElement(event.target)
             text = stringTextOfElement(event.target)
           } catch (e) {
@@ -69,7 +69,7 @@ export default function (_window = window): Plugin {
           }
 
           // There's nothing to display
-          if (message.length === 0) { return} 
+          if (message.length === 0) { return}
 
           client.addBreadcrumb(message, {
             category: 'ui.click',

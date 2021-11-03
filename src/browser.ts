@@ -91,7 +91,7 @@ class Honeybadger extends Client {
   }
 
   /** @internal */
-  protected __send(notice) {
+  protected __send(notice): void {
     this.__incrementErrorsCount()
 
     const payload = this.__buildPayload(notice)
@@ -122,8 +122,6 @@ class Honeybadger extends Client {
       runAfterNotifyHandlers(notice, handlers, err)
       this.logger.error('Unable to send error report: error while initializing request', err, notice)
     }
-
-    return true
   }
 
   /**

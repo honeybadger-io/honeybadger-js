@@ -1,6 +1,7 @@
 import url from 'url'
 import domain from 'domain'
 import { NextFunction, Request, Response } from 'express'
+import { Noticeable } from '../core/types';
 
 function fullUrl(req: Request): string {
   const connection = req.connection
@@ -25,7 +26,7 @@ function requestHandler(req: Request, res: Response, next: NextFunction): void {
   dom.run(next)
 }
 
-function errorHandler(err: any, req: Request, _res: Response, next: NextFunction): unknown {
+function errorHandler(err: Noticeable, req: Request, _res: Response, next: NextFunction): unknown {
   this.notify(err, {
     url:     fullUrl(req),
     params:  req.body,    // http://expressjs.com/en/api.html#req.body

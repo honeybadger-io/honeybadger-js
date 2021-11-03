@@ -1,4 +1,18 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter, filterUrl, formatCGIData } from './util'
+import {
+  merge,
+  mergeNotice,
+  objectIsEmpty,
+  makeNotice,
+  makeBacktrace,
+  runBeforeNotifyHandlers,
+  newObject,
+  logger,
+  generateStackTrace,
+  filter,
+  filterUrl,
+  formatCGIData,
+  getSourceForBacktrace
+} from './util'
 import {
   Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
 } from './types'
@@ -33,6 +47,9 @@ export default class Client {
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
   /** @internal */
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
+
+  /** @internal */
+  protected __getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void
 
   config: Config
   logger: Logger
@@ -75,7 +92,7 @@ export default class Client {
     return notifier.version
   }
 
-  configure(opts:Partial<Config> = {}): Client {
+  configure(opts: Partial<Config> = {}): Client {
     for (const k in opts) {
       this.config[k] = opts[k]
     }
@@ -119,7 +136,7 @@ export default class Client {
     return this
   }
 
-  notify(notice: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Record<string, unknown> | false | unknown {
+  notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
     if (this.config.disabled) {
       this.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
       return false
@@ -135,11 +152,47 @@ export default class Client {
       return false
     }
 
-    notice = makeNotice(notice)
+    const notice = this.makeNotice(noticeable, name, extra)
+    if (!notice) {
+      return false
+    }
+
+    // we need to have the source file data before the beforeNotifyHandlers,
+    // in case they modify them
+    const sourceCodeData = notice.backtrace.slice()
+
+    if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) {
+      return false
+    }
+
+    this.addBreadcrumb('Honeybadger Notice', {
+      category: 'notice',
+      metadata: {
+        message: notice.message,
+        name: notice.name,
+        stack: notice.stack
+      }
+    })
+
+    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
+
+    getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler, sourcePerTrace => {
+      sourcePerTrace.forEach((source, index) => {
+        notice.backtrace[index].source = source
+      })
+
+      this.__send(notice)
+    })
+
+    return true
+  }
+
+  protected makeNotice(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Notice {
+    let notice = makeNotice(noticeable)
 
     if (name && !(typeof name === 'object')) {
       const n = String(name)
-      name = { name: n }
+      name = {name: n}
     }
 
     if (name) {
@@ -149,7 +202,9 @@ export default class Client {
       notice = mergeNotice(notice, extra)
     }
 
-    if (objectIsEmpty(notice)) { return false }
+    if (objectIsEmpty(notice)) {
+      return null
+    }
 
     const noticeTags = this.__constructTags(notice.tags)
     const contextTags = this.__constructTags(this.__context["tags"])
@@ -175,26 +230,16 @@ export default class Client {
       notice.stack = generateStackTrace()
       backtraceShift = 2
     }
+
     notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
 
-    if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) { return false }
-
-    this.addBreadcrumb('Honeybadger Notice', {
-      category: 'notice',
-      metadata: {
-        message: notice.message,
-        name: notice.name,
-        stack: notice.stack
-      }
-    })
-
-    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
-
-    return this.__send(notice)
+    return notice as Notice
   }
 
   addBreadcrumb(message: string, opts?: Record<string, unknown>): Client {
-    if (!this.config.breadcrumbsEnabled) { return }
+    if (!this.config.breadcrumbsEnabled) {
+      return
+    }
 
     opts = opts || {}
 
@@ -226,7 +271,7 @@ export default class Client {
   }
 
   /** @internal */
-  protected __send(_notice: Partial<Notice>): boolean {
+  protected __send(_notice: Partial<Notice>): void {
     throw (new Error('Must implement send in subclass'))
   }
 

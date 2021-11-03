@@ -30,7 +30,7 @@ export interface Config {
   enableUnhandledRejection: boolean
   filters: string[]
   __plugins: Plugin[],
-  tags: any,
+  tags: unknown,
 }
 
 export interface BeforeNotifyHandler {
@@ -68,7 +68,8 @@ export interface Notice {
   tags: string | string[],
   details: Record<string, Record<string, unknown>>,
   __breadcrumbs: BreadcrumbRecord[],
-  afterNotify?: AfterNotifyHandler
+  afterNotify?: AfterNotifyHandler,
+  [key: string]: unknown
 }
 
 export type Noticeable = string | Error | Partial<Notice>
@@ -77,7 +78,8 @@ export interface BacktraceFrame {
   file: string,
   method: string,
   number: number,
-  column: number
+  column: number,
+  source?: Record<string, string>
 }
 
 export interface BreadcrumbRecord {

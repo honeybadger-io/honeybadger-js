@@ -37,6 +37,7 @@
     "test:integration:browserstack": "npm run test:integration",
     "test:integration:headless": "HEADLESS=1 npm run test:integration",
     "tsd": "npm run build && tsd",
+    "lint": "npx eslint .",
     "build": "rollup -c && node ./scripts/copy-typedefs.js",
     "release": "shipjs prepare"
   },

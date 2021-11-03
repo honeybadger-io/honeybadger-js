@@ -3,7 +3,7 @@
  * @param {!HTMLElement} element
  * @return {string}
  */
-export function stringNameOfElement(element: any): string {
+export function stringNameOfElement(element: HTMLElement): string {
   if (!element || !element.tagName) { return '' }
 
   let name = element.tagName.toLowerCase()

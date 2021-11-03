@@ -1,5 +1,6 @@
 import Singleton from '../../src/server'
 import BaseClient from '../../src/core/client'
+// @ts-ignore
 import { nullLogger } from './helpers'
 
 import nock from 'nock'

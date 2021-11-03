@@ -1,6 +1,7 @@
-import sinon from 'sinon'
+import {fake} from 'sinon'
 import Client from '../../../src/core/client'
-import { merge, mergeNotice, objectIsEmpty, makeBacktrace, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
+import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
+// @ts-ignore
 import { nullLogger } from '../helpers'
 
 describe('utils', function () {
@@ -90,24 +91,6 @@ describe('utils', function () {
     })
   })
 
-  describe('makeBacktrace', function () {
-    it('returns a parsed stacktrace in Honeybadger format', function () {
-      const stack = 'Error: Something unexpected has occurred.\n\tat bar (foo.js:1:2)'
-      expect(makeBacktrace(stack)).toEqual([
-        {
-          file: 'foo.js',
-          method: 'bar',
-          number: 1,
-          column: 2
-        }
-      ])
-    })
-
-    it('returns and empty array when no stack is undefined', function () {
-      expect(makeBacktrace(undefined)).toEqual([])
-    })
-  })
-
   describe('runBeforeNotifyHandlers', function () {
     it('returns false when any handler returns false', function () {
       const handlers = [
@@ -126,7 +109,7 @@ describe('utils', function () {
     })
 
     it('passes the notice to handlers', function () {
-      const notice = sinon.fake()
+      const notice = fake()
       const handlers = [
         (notice) => { notice.call() }
       ]
@@ -148,7 +131,7 @@ describe('utils', function () {
 
   describe('runAfterNotifyHandlers', function () {
     it('passes the notice to handlers', function () {
-      const notice = sinon.fake()
+      const notice = fake()
       const handlers = [
         (_error, notice) => { notice.call() }
       ]
@@ -157,7 +140,7 @@ describe('utils', function () {
     })
 
     it('passes the error to handlers', function () {
-      const error = sinon.fake()
+      const error = fake()
       const handlers = [
         (error, _notice) => { error.call() }
       ]
@@ -199,6 +182,7 @@ describe('utils', function () {
     it('drops function values', function () {
       expect(
         sanitize(
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
           { foo: function () { }, bar: 'baz' }
         )
       ).toEqual(
@@ -245,7 +229,6 @@ describe('utils', function () {
       )
     })
 
-    // eslint-disable-next-line mocha/no-setup-in-describe
     if (typeof Object.create === 'function') {
       it('handles objects without prototypes as values', function () {
         const obj = Object.create(null)
