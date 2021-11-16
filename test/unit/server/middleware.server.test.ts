@@ -6,6 +6,7 @@ import { promisify } from 'util'
 import Singleton from "../../../src/server";
 // @ts-ignore
 import {nullLogger} from "../helpers";
+import {Notice} from '../../../src/core/types';
 
 describe('Express Middleware', function () {
     let client
@@ -392,6 +393,42 @@ describe('Lambda Handler', function () {
                 const callback = function(_err) {
                     api.done()
                     resolve()
+                }
+
+                const handler = client.lambdaHandler(function(_event, _context, _callback) {
+                    setTimeout(function() {
+                        throw new Error("Badgers!")
+                    }, 0)
+                })
+
+                handler({}, {}, callback)
+            })
+        })
+
+        it('calls beforeNotifyHandler', function () {
+            client.configure({
+                apiKey: 'testing',
+            })
+
+            nock.cleanAll()
+
+            const api = nock("https://api.honeybadger.io")
+                .post("/v1/notices/js")
+                .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+            return new Promise<void>(resolve => {
+
+                client.beforeNotify(function (notice: Notice) {
+                    notice.context = Object.assign(notice.context, { foo: 'bar' })
+                })
+
+                client.afterNotify(function (err: Error | undefined, notice: Notice) {
+                    expect(notice.context).toEqual({ foo: 'bar' })
+                    resolve()
+                })
+
+                const callback = function(_err) {
+                    api.done()
                 }
 
                 const handler = client.lambdaHandler(function(_event, _context, _callback) {

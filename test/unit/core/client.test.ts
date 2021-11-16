@@ -461,6 +461,25 @@ describe('client', function () {
     })
   })
 
+  describe('afterNotify', function () {
+    beforeEach(function () {
+      client.configure({
+        apiKey: undefined,
+      })
+    })
+
+    it('is called with error if apiKey is not set', function () {
+      return new Promise<void>(resolve => {
+        client.afterNotify((err) => {
+          expect(err.message).toEqual('Unable to send error report: no API key has been configured')
+          resolve()
+        })
+
+        client.notify('should not report')
+      })
+    })
+  })
+
   describe('addBreadcrumb', function () {
     it('has default breadcrumbs', function () {
       expect(client.getBreadcrumbs()).toEqual([])

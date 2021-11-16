@@ -11,7 +11,8 @@ import {
   filter,
   filterUrl,
   formatCGIData,
-  getSourceForBacktrace
+  getSourceForBacktrace,
+  runAfterNotifyHandlers
 } from './util'
 import {
   Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
@@ -137,23 +138,31 @@ export default class Client {
   }
 
   notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
+
+    const notice = this.makeNotice(noticeable, name, extra)
+    if (!notice) {
+      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error('Could not make Notice'))
+      return false
+    }
+
     if (this.config.disabled) {
-      this.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
+      const msg = 'Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)'
+      this.logger.warn(msg)
+      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(msg))
       return false
     }
 
     if (!this.__reportData()) {
-      this.logger.debug('Dropping notice: honeybadger.js is in development mode')
+      const msg = 'Dropping notice: honeybadger.js is in development mode'
+      this.logger.debug(msg)
+      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(msg))
       return false
     }
 
     if (!this.config.apiKey) {
-      this.logger.warn('Unable to send error report: no API key has been configured')
-      return false
-    }
-
-    const notice = this.makeNotice(noticeable, name, extra)
-    if (!notice) {
+      const msg = 'Unable to send error report: no API key has been configured'
+      this.logger.warn(msg)
+      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(msg))
       return false
     }
 
@@ -162,6 +171,7 @@ export default class Client {
     const sourceCodeData = notice.backtrace.slice()
 
     if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) {
+      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error('Will not send error report. beforeNotify handlers returned false'))
       return false
     }
 
