@@ -462,18 +462,75 @@ describe('client', function () {
   })
 
   describe('afterNotify', function () {
-    beforeEach(function () {
+    it('is called with error if apiKey is not set', function () {
       client.configure({
         apiKey: undefined,
       })
-    })
 
-    it('is called with error if apiKey is not set', function () {
       return new Promise<void>(resolve => {
         client.afterNotify((err) => {
           expect(err.message).toEqual('Unable to send error report: no API key has been configured')
           resolve()
         })
+
+        client.notify('should not report')
+      })
+    })
+    
+    it('is called with error if beforeNotify handlers return false', function () {
+      client.configure({
+        apiKey: 'abc123',
+      })
+
+      return new Promise<void>(resolve => {
+        client.beforeNotify(() => false)
+        client.afterNotify((err) => {
+          expect(err.message).toEqual('Will not send error report. beforeNotify handlers returned false')
+          resolve()
+        })
+
+        client.notify('should not report')
+      })
+    })
+
+    it('is called when set in the notice object', function () {
+      client.configure({
+        apiKey: 'abc123',
+      })
+
+      return new Promise<void>(resolve => {
+        client.beforeNotify((notice) => {
+          notice.afterNotify = (err) => {
+            expect(err).toBeUndefined()
+            resolve()
+          }
+        })
+
+        client.notify('should report')
+      })
+    })
+
+    it('calls all afterNotify handlers if preconditions fail', function () {
+      client.configure({
+        apiKey: 'abc123'
+      })
+
+      return new Promise<void>(resolve => {
+        let total = 0;
+        const expected = 2;
+        const handlerCalled = (err?: Error) => {
+          expect(err.message).toEqual('Will not send error report. beforeNotify handlers returned false')
+          total++;
+          if (total === expected) {
+            resolve()
+          }
+        }
+
+        client.beforeNotify((notice) => {
+          notice.afterNotify = handlerCalled
+        })
+        client.beforeNotify(() => false)
+        client.afterNotify(handlerCalled)
 
         client.notify('should not report')
       })

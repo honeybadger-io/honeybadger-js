@@ -1,5 +1,6 @@
 import BaseClient from '../../src/core/client'
 import {Logger, Notice, Noticeable} from '../../src/core/types'
+import { runAfterNotifyHandlers } from "../../src/core/util";
 
 export function nullLogger (): Logger {
   return {
@@ -42,5 +43,6 @@ export class TestClient extends BaseClient {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   protected __send(notice) {
+    runAfterNotifyHandlers(notice, this.__afterNotifyHandlers)
   }
 }

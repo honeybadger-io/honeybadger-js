@@ -405,7 +405,7 @@ describe('Lambda Handler', function () {
             })
         })
 
-        it('calls beforeNotifyHandler', function () {
+        it('calls beforeNotify and afterNotify handlers', function () {
             client.configure({
                 apiKey: 'testing',
             })
@@ -440,6 +440,5 @@ describe('Lambda Handler', function () {
                 handler({}, {}, callback)
             })
         })
-
     })
 })
