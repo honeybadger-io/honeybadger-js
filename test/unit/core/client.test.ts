@@ -544,18 +544,22 @@ describe('client', function () {
       })
 
       return new Promise<void>(resolve => {
-        let total = 0;
-        const expected = 3;
-        const handlerCalled = () => {
-          total++;
-          if (total === expected) {
+        let totalBeforeNotify = 0;
+        const expectedBeforeNotify = 2;
+        const beforeNotifyHandler = () => {
+          totalBeforeNotify++;
+        }
+
+        const afterNotifyHandler = (err: Error) => {
+          expect(err.message).toEqual('Unable to send error report: no API key has been configured')
+          if (totalBeforeNotify === expectedBeforeNotify) {
             resolve()
           }
         }
 
-        client.beforeNotify(handlerCalled)
-        client.beforeNotify(handlerCalled)
-        client.afterNotify(handlerCalled)
+        client.beforeNotify(beforeNotifyHandler)
+        client.beforeNotify(beforeNotifyHandler)
+        client.afterNotify(afterNotifyHandler)
 
         client.notify('should not report')
       })
