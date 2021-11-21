@@ -485,7 +485,7 @@ describe('client', function () {
       return new Promise<void>(resolve => {
         client.beforeNotify(() => false)
         client.afterNotify((err) => {
-          expect(err.message).toEqual('Will not send error report. beforeNotify handlers returned false')
+          expect(err.message).toEqual('Will not send error report, beforeNotify handlers returned false')
           resolve()
         })
 
@@ -519,7 +519,7 @@ describe('client', function () {
         let total = 0;
         const expected = 2;
         const handlerCalled = (err?: Error) => {
-          expect(err.message).toEqual('Will not send error report. beforeNotify handlers returned false')
+          expect(err.message).toEqual('Will not send error report, beforeNotify handlers returned false')
           total++;
           if (total === expected) {
             resolve()
@@ -530,6 +530,31 @@ describe('client', function () {
           notice.afterNotify = handlerCalled
         })
         client.beforeNotify(() => false)
+        client.afterNotify(handlerCalled)
+
+        client.notify('should not report')
+      })
+    })
+  })
+
+  describe('beforeNotify & afterNotify', function () {
+    it('should call before and after notify handlers even if preconditions fail', function () {
+      client.configure({
+        apiKey: undefined
+      })
+
+      return new Promise<void>(resolve => {
+        let total = 0;
+        const expected = 3;
+        const handlerCalled = () => {
+          total++;
+          if (total === expected) {
+            resolve()
+          }
+        }
+
+        client.beforeNotify(handlerCalled)
+        client.beforeNotify(handlerCalled)
         client.afterNotify(handlerCalled)
 
         client.notify('should not report')

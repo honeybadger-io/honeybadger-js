@@ -139,39 +139,41 @@ export default class Client {
 
   notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
 
+    let preConditionError: Error = null
     const notice = this.makeNotice(noticeable, name, extra)
     if (!notice) {
-      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error('Could not make Notice'))
-      return false
+      preConditionError = new Error('Could not make Notice')
     }
 
-    if (this.config.disabled) {
+    if (!preConditionError && this.config.disabled) {
       const msg = 'Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)'
       this.logger.warn(msg)
-      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(msg))
-      return false
+      preConditionError = new Error(msg)
     }
 
-    if (!this.__reportData()) {
+    if (!preConditionError && !this.__reportData()) {
       const msg = 'Dropping notice: honeybadger.js is in development mode'
       this.logger.debug(msg)
-      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(msg))
-      return false
+      preConditionError = new Error(msg)
     }
 
-    if (!this.config.apiKey) {
+    if (!preConditionError && !this.config.apiKey) {
       const msg = 'Unable to send error report: no API key has been configured'
       this.logger.warn(msg)
-      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(msg))
-      return false
+      preConditionError = new Error(msg)
     }
 
     // we need to have the source file data before the beforeNotifyHandlers,
     // in case they modify them
-    const sourceCodeData = notice.backtrace.slice()
+    const sourceCodeData = notice ? notice.backtrace.slice() : null
 
-    if (!runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)) {
-      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error('Will not send error report. beforeNotify handlers returned false'))
+    const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
+    if (!preConditionError && !beforeNotifyResult) {
+      preConditionError = new Error('Will not send error report, beforeNotify handlers returned false')
+    }
+
+    if (preConditionError) {
+      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, preConditionError)
       return false
     }
 
@@ -197,7 +199,7 @@ export default class Client {
     return true
   }
 
-  protected makeNotice(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Notice {
+  protected makeNotice(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Notice | null {
     let notice = makeNotice(noticeable)
 
     if (name && !(typeof name === 'object')) {
