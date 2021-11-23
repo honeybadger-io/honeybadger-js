@@ -137,23 +137,23 @@ export default class Client {
   }
 
   notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
+    const notice = this.makeNotice(noticeable, name, extra)
+    if (!notice) {
+      return false
+    }
+
     if (this.config.disabled) {
-      this.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)')
+      this.logger.warn('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)', notice)
       return false
     }
 
     if (!this.__reportData()) {
-      this.logger.debug('Dropping notice: honeybadger.js is in development mode')
+      this.logger.warn('Dropping notice: honeybadger.js is in development mode', notice)
       return false
     }
 
     if (!this.config.apiKey) {
-      this.logger.warn('Unable to send error report: no API key has been configured')
-      return false
-    }
-
-    const notice = this.makeNotice(noticeable, name, extra)
-    if (!notice) {
+      this.logger.warn('Unable to send error report: no API key has been configured', notice)
       return false
     }
 
