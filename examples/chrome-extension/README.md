@@ -5,9 +5,10 @@ Follow these steps to run the example:
 
 ## Setup
 
-1. Install the extension locally by navigating to `chrome://extensions` from your Chrome browser.
-2. Enable `Developer Mode` by clicking the toggle switch next to <strong>Developer mode</strong>.
-3. Click the <strong>Load unpacked</strong> button and select the extension directory (`honeybadger-js/examples/chrome-extension`).
+1. Download Honeybadger's browser client to `vendor/honeybadger.min.js`. You can do that by executing `sh setup.sh` inside `examples/chrome-extension` or by manually downloading from `js.honeybadger.io/v3.0/honeybadger.min.js`.  
+2. Install the extension locally by navigating to `chrome://extensions` from your Chrome browser.
+3. Enable `Developer Mode` by clicking the toggle switch next to <strong>Developer mode</strong>.
+4. Click the <strong>Load unpacked</strong> button and select the extension directory (`honeybadger-js/examples/chrome-extension`).
 
 The example comes with two pages, the main extension page (`popup.html`) and an options page (`option.html`).
 The main page is shown by left clicking on the extension. To see the options page, right click on the extension and then click on <strong>Options</strong>.
