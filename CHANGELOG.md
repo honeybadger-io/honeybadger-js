@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][latest]
 ### Added
-- Nodejs: Include source snippet in backtraces when available (#624) 
+- Nodejs: Include source snippet in backtraces when available (#624)
 
 ## [3.2.7] - 2021-11-01
 ### Fixed
