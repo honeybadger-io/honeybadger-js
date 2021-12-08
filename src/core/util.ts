@@ -82,17 +82,22 @@ export function getSourceForBacktrace(backtrace: BacktraceFrame[],
   getSourceFromFile()
 }
 
-export function runBeforeNotifyHandlers(notice, handlers: BeforeNotifyHandler[]): boolean {
+export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeNotifyHandler[]): boolean {
+  let result = true
   for (let i = 0, len = handlers.length; i < len; i++) {
     const handler = handlers[i]
     if (handler(notice) === false) {
-      return false
+      result = false
     }
   }
-  return true
+  return result
 }
 
-export function runAfterNotifyHandlers(notice, handlers: AfterNotifyHandler[], error = undefined): boolean {
+export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNotifyHandler[], error?: Error): boolean {
+  if (notice && notice.afterNotify) {
+    handlers.unshift(notice.afterNotify)
+  }
+
   for (let i = 0, len = handlers.length; i < len; i++) {
     handlers[i](error, notice)
   }

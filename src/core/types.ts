@@ -34,12 +34,12 @@ export interface Config {
 }
 
 export interface BeforeNotifyHandler {
-  (notice: Notice): boolean | void
+  (notice?: Notice): boolean | void
 }
 
 export interface AfterNotifyHandler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (error: any, notice: Notice): boolean | void
+  (error: any, notice?: Notice): boolean | void
 }
 
 export interface Plugin {

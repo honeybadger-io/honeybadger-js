@@ -95,8 +95,6 @@ class Honeybadger extends Client {
     this.__incrementErrorsCount()
 
     const payload = this.__buildPayload(notice)
-    const handlers = Array.prototype.slice.call(this.__afterNotifyHandlers)
-    if (notice.afterNotify) { handlers.unshift(notice.afterNotify) }
 
     try {
       const x = new XMLHttpRequest()
@@ -109,17 +107,17 @@ class Honeybadger extends Client {
       x.send(JSON.stringify(sanitize(payload, this.config.maxObjectDepth)))
       x.onload = () => {
         if (x.status !== 201) {
-          runAfterNotifyHandlers(notice, handlers, new Error(`Bad HTTP response: ${x.status}`))
+          runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${x.status}`))
           this.logger.debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice)
           return
         }
         runAfterNotifyHandlers(merge(notice, {
           id: JSON.parse(x.response).id
-        }), handlers)
+        }), this.__afterNotifyHandlers)
         this.logger.debug('Error report sent', notice)
       }
     } catch (err) {
-      runAfterNotifyHandlers(notice, handlers, err)
+      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
       this.logger.error('Unable to send error report: error while initializing request', err, notice)
     }
   }

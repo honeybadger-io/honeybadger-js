@@ -58,11 +58,6 @@ class Honeybadger extends Client {
     const payload = this.__buildPayload(notice)
     payload.server.pid = process.pid
 
-    const handlers = Array.prototype.slice.call(this.__afterNotifyHandlers)
-    if (notice.afterNotify) {
-      handlers.unshift(notice.afterNotify)
-    }
-
     getStats((stats: Record<string, unknown>) => {
       payload.server.stats = stats
 
@@ -86,21 +81,21 @@ class Honeybadger extends Client {
 
         res.on('end', () => {
           if (res.statusCode !== 201) {
-            runAfterNotifyHandlers(notice, handlers, new Error(`Bad HTTP response: ${res.statusCode}`))
+            runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${res.statusCode}`))
             this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
             return
           }
           const uuid = JSON.parse(body).id
           runAfterNotifyHandlers(merge(notice, {
             id: uuid
-          }), handlers)
+          }), this.__afterNotifyHandlers)
           this.logger.info('Error report sent.', `id=${uuid}`)
         })
       })
 
       req.on('error', (err) => {
         this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
-        runAfterNotifyHandlers(notice, handlers, err)
+        runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
       })
 
       req.write(data)

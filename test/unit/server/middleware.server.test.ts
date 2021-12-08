@@ -6,6 +6,7 @@ import { promisify } from 'util'
 import Singleton from "../../../src/server";
 // @ts-ignore
 import {nullLogger} from "../helpers";
+import {Notice} from '../../../src/core/types';
 
 describe('Express Middleware', function () {
     let client
@@ -266,11 +267,12 @@ describe('Lambda Handler', function () {
                 .post("/v1/notices/js")
                 .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
-
             const handler = client.lambdaHandler(async function(_event) {
-                setTimeout(function() {
-                    throw new Error("Badgers!")
-                }, 0)
+                return new Promise((resolve, reject) => {
+                    setTimeout(function() {
+                        reject(new Error("Badgers!"))
+                    }, 0)
+                })
             })
 
             return new Promise<void>(resolve => {
@@ -278,6 +280,67 @@ describe('Lambda Handler', function () {
                     api.done()
                     resolve()
                 }
+                handler({}, {}, callback)
+            })
+        })
+
+        it('calls callback only once if notice is sent', function () {
+            client.configure({
+                apiKey: 'testing',
+            })
+
+            nock.cleanAll()
+
+            const api = nock("https://api.honeybadger.io")
+                .post("/v1/notices/js")
+                .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+            return new Promise<void>((resolve) => {
+                let callCount = 0;
+                const callback = function(_err) {
+                    callCount++
+                    setTimeout(() => {
+                        expect(callCount).toEqual(1)
+                        api.done()
+                        resolve()
+                    }, 500)
+                }
+
+                const handler = client.lambdaHandler(async function(_event) {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(function() {
+                            reject(new Error("Badgers!"))
+                        }, 0)
+                    })
+                })
+
+                handler({}, {}, callback)
+            })
+        })
+
+        it('calls callback only once if preconditions fail', function () {
+            client.configure({
+                apiKey: undefined,
+            })
+
+            return new Promise<void>((resolve) => {
+                let callCount = 0;
+                const callback = function(_err) {
+                    callCount++
+                    setTimeout(() => {
+                        expect(callCount).toEqual(1)
+                        resolve()
+                    }, 500)
+                }
+
+                const handler = client.lambdaHandler(async function(_event) {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(function() {
+                            reject(new Error("Badgers!"))
+                        }, 0)
+                    })
+                })
+
                 handler({}, {}, callback)
             })
         })
@@ -404,5 +467,97 @@ describe('Lambda Handler', function () {
             })
         })
 
+        it('calls beforeNotify and afterNotify handlers', function () {
+            client.configure({
+                apiKey: 'testing',
+            })
+
+            nock.cleanAll()
+
+            const api = nock("https://api.honeybadger.io")
+                .post("/v1/notices/js")
+                .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+            return new Promise<void>(resolve => {
+
+                client.beforeNotify(function (notice: Notice) {
+                    notice.context = Object.assign(notice.context, { foo: 'bar' })
+                })
+
+                client.afterNotify(function (err: Error | undefined, notice: Notice) {
+                    expect(notice.context).toEqual({ foo: 'bar' })
+                    resolve()
+                })
+
+                const callback = function(_err) {
+                    api.done()
+                }
+
+                const handler = client.lambdaHandler(function(_event, _context, _callback) {
+                    setTimeout(function() {
+                        throw new Error("Badgers!")
+                    }, 0)
+                })
+
+                handler({}, {}, callback)
+            })
+        })
+
+        it('calls callback only once if notice is sent', function () {
+            client.configure({
+                apiKey: 'testing',
+            })
+
+            nock.cleanAll()
+
+            const api = nock("https://api.honeybadger.io")
+                .post("/v1/notices/js")
+                .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+            return new Promise<void>((resolve) => {
+                let callCount = 0;
+                const callback = function(_err) {
+                    callCount++
+                    setTimeout(() => {
+                        expect(callCount).toEqual(1)
+                        api.done()
+                        resolve()
+                    }, 500)
+                }
+
+                const handler = client.lambdaHandler(function(_event, _context, _callback) {
+                    setTimeout(function() {
+                        throw new Error("Badgers!")
+                    }, 0)
+                })
+
+                handler({}, {}, callback)
+            })
+        })
+
+        it('calls callback only once if preconditions fail', function () {
+            client.configure({
+                apiKey: undefined,
+            })
+
+            return new Promise<void>((resolve) => {
+                let callCount = 0;
+                const callback = function(_err) {
+                    callCount++
+                    setTimeout(() => {
+                        expect(callCount).toEqual(1)
+                        resolve()
+                    }, 500)
+                }
+
+                const handler = client.lambdaHandler(function(_event, _context, _callback) {
+                    setTimeout(function() {
+                        throw new Error("Badgers!")
+                    }, 0)
+                })
+
+                handler({}, {}, callback)
+            })
+        })
     })
 })

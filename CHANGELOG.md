@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Nodejs: Include source snippet in backtraces when available (#624)
 
+### Changed
+- Call afterNotify handlers with error if notify preconditions fail (#654)
+- Call beforeNotify handlers even if preconditions fail (#654)
+
 ## [3.2.7] - 2021-11-01
 ### Fixed
 - Call lambda handler callback with result if user-defined handler is async (#648) 

@@ -7,10 +7,10 @@ class MyError extends Error {
   component = null
 
   sayHello() {
-    return "hello " + this.message;
+    return "hello " + this.message
   }
   constructor(m: string) {
-    super(m);
+    super(m)
   }
 }
 
@@ -343,7 +343,7 @@ describe('client', function () {
       })
     })
 
-    it('does not deliver notice when  beforeNotify callback returns false', function () {
+    it('does not deliver notice when beforeNotify callback returns false', function () {
       client.beforeNotify(function () {
         return false
       })
@@ -427,7 +427,7 @@ describe('client', function () {
     })
 
     it('assigns notice properties', function () {
-      let notice: Notice;
+      let notice: Notice
       client.beforeNotify(function (n) {
         notice = n
         notice.name = 'expected name'
@@ -458,6 +458,140 @@ describe('client', function () {
       expect(payload.request.context).toEqual({ expected_context_key: 'expected value' })
       expect(payload.request.params).toEqual({ expected_params_key: 'expected value' })
       expect(payload.server.revision).toEqual('expected revision')
+    })
+
+    it('calls all beforeNotify handlers even if one returns false', function () {
+      client.configure({
+        apiKey: undefined
+      })
+
+      return new Promise<void>(resolve => {
+        const expected = 4
+        let total = 0
+        client.beforeNotify(() => {
+          total++
+          return false
+        })
+        client.beforeNotify(() => {
+          total++
+          return true
+        })
+        client.beforeNotify(() => {
+          total++
+          return false
+        })
+        client.beforeNotify(() => {
+          total++
+          expect(total).toEqual(expected)
+          resolve()
+        })
+
+        client.notify('should not report')
+      })
+    })
+  })
+
+  describe('afterNotify', function () {
+    it('is called with error if apiKey is not set', function () {
+      client.configure({
+        apiKey: undefined,
+      })
+
+      return new Promise<void>(resolve => {
+        client.afterNotify((err) => {
+          expect(err.message).toEqual('Unable to send error report: no API key has been configured')
+          resolve()
+        })
+
+        client.notify('should not report')
+      })
+    })
+    
+    it('is called with error if beforeNotify handlers return false', function () {
+      client.configure({
+        apiKey: 'abc123',
+      })
+
+      return new Promise<void>(resolve => {
+        client.beforeNotify(() => false)
+        client.afterNotify((err) => {
+          expect(err.message).toEqual('Will not send error report, beforeNotify handlers returned false')
+          resolve()
+        })
+
+        client.notify('should not report')
+      })
+    })
+
+    it('is called when set in the notice object', function () {
+      client.configure({
+        apiKey: 'abc123',
+      })
+
+      return new Promise<void>(resolve => {
+        client.beforeNotify((notice) => {
+          notice.afterNotify = (err) => {
+            expect(err).toBeUndefined()
+            resolve()
+          }
+        })
+
+        client.notify('should report')
+      })
+    })
+
+    it('calls all afterNotify handlers if preconditions fail', function () {
+      client.configure({
+        apiKey: 'abc123'
+      })
+
+      return new Promise<void>(resolve => {
+        let total = 0
+        const expected = 2
+        const handlerCalled = (err?: Error) => {
+          expect(err.message).toEqual('Will not send error report, beforeNotify handlers returned false')
+          total++
+          if (total === expected) {
+            resolve()
+          }
+        }
+
+        client.beforeNotify((notice) => {
+          notice.afterNotify = handlerCalled
+        })
+        client.beforeNotify(() => false)
+        client.afterNotify(handlerCalled)
+
+        client.notify('should not report')
+      })
+    })
+  })
+
+  describe('beforeNotify & afterNotify', function () {
+    it('should call before and after notify handlers even if preconditions fail', function () {
+      client.configure({
+        apiKey: undefined
+      })
+
+      return new Promise<void>(resolve => {
+        let totalBeforeNotify = 0
+        const expectedBeforeNotify = 2
+        const beforeNotifyHandler = () => {
+          totalBeforeNotify++
+        }
+
+        const afterNotifyHandler = (err: Error) => {
+          expect(err.message).toEqual('Unable to send error report: no API key has been configured')
+          expect(totalBeforeNotify).toEqual(expectedBeforeNotify)
+          resolve()
+        }
+
+        client.beforeNotify(beforeNotifyHandler)
+        client.beforeNotify(beforeNotifyHandler)
+        client.afterNotify(afterNotifyHandler)
+
+        client.notify('should not report')
+      })
     })
   })
 
