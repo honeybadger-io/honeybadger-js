@@ -194,7 +194,10 @@ export function logger(client: Client): Logger {
   const log = (method: string) => {
     return function (...args: unknown[]) {
       if (method === 'debug' && !client.config.debug) {
-        return
+        if (!client.config.debug) { return }
+        // Log at default level so that you don't need to also enable verbose
+        // logging in Chrome.
+        method = 'log'
       }
       args.unshift('[Honeybadger]')
       client.config.logger[method](...args)

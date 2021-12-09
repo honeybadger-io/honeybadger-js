@@ -82,6 +82,7 @@ export default class Client {
 
       ...opts,
     }
+
     this.logger = logger(this)
   }
 
@@ -96,6 +97,10 @@ export default class Client {
   configure(opts: Partial<Config> = {}): Client {
     for (const k in opts) {
       this.config[k] = opts[k]
+    }
+    if (this.config.disabled) {
+      this.logger.log('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting.')
+      this.config.reportData = false
     }
     if (!this.__pluginsExecuted) {
       this.__pluginsExecuted = true
@@ -138,38 +143,32 @@ export default class Client {
   }
 
   notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
-
     let preConditionError: Error = null
     const notice = this.makeNotice(noticeable, name, extra)
     if (!notice) {
-      preConditionError = new Error('Could not make Notice')
+      this.logger.debug('could not make notice')
+      preConditionError = new Error('could not make notice')
     }
 
-    if (!preConditionError && this.config.disabled) {
-      const msg = 'Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting. (Dropping notice: honeybadger.js is disabled)'
-      this.logger.warn(msg)
-      preConditionError = new Error(msg)
+    if (!preConditionError && this.config.reportData === false) {
+      this.logger.debug('skipping notice: honeybadger.js is disabled', notice)
+      preConditionError = new Error('honeybadger.js is disabled')
     }
 
-    if (!preConditionError && !this.__reportData()) {
-      const msg = 'Dropping notice: honeybadger.js is in development mode'
-      this.logger.debug(msg)
-      preConditionError = new Error(msg)
+    if (!preConditionError && this.__developmentMode()) {
+      this.logger.log('honeybadger.js is in development mode; the following error report will be sent in production.', notice)
+      preConditionError = new Error('honeybadger.js is in development mode')
     }
 
     if (!preConditionError && !this.config.apiKey) {
-      const msg = 'Unable to send error report: no API key has been configured'
-      this.logger.warn(msg)
-      preConditionError = new Error(msg)
+      this.logger.warn('could not send error report: no API key has been configured')
+      preConditionError = new Error('missing API key')
     }
-
-    // we need to have the source file data before the beforeNotifyHandlers,
-    // in case they modify them
-    const sourceCodeData = notice ? notice.backtrace.slice() : null
 
     const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
     if (!preConditionError && !beforeNotifyResult) {
-      preConditionError = new Error('Will not send error report, beforeNotify handlers returned false')
+      this.logger.debug('skipping notice: beforeNotify handlers returned false')
+      preConditionError = new Error('beforeNotify handlers returned false')
     }
 
     if (preConditionError) {
@@ -187,6 +186,10 @@ export default class Client {
     })
 
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
+
+    // we need to have the source file data before the beforeNotifyHandlers,
+    // in case they modify them
+    const sourceCodeData = notice ? notice.backtrace.slice() : null
 
     getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler, sourcePerTrace => {
       sourcePerTrace.forEach((source, index) => {
@@ -275,11 +278,9 @@ export default class Client {
   }
 
   /** @internal */
-  protected __reportData(): boolean {
-    if (this.config.reportData !== null) {
-      return this.config.reportData
-    }
-    return !(this.config.environment && this.config.developmentEnvironments.includes(this.config.environment))
+  protected __developmentMode(): boolean {
+    if (this.config.reportData === true) { return false }
+    return (this.config.environment && this.config.developmentEnvironments.includes(this.config.environment))
   }
 
   /** @internal */
