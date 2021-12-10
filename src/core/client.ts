@@ -160,13 +160,13 @@ export default class Client {
     }
 
     if (!preConditionError && !this.config.apiKey) {
-      this.logger.warn('could not send error report: no API key has been configured')
+      this.logger.warn('could not send error report: no API key has been configured', notice)
       preConditionError = new Error('missing API key')
     }
 
     const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
     if (!preConditionError && !beforeNotifyResult) {
-      this.logger.debug('skipping notice: beforeNotify handlers returned false')
+      this.logger.debug('skipping notice: beforeNotify handlers returned false', notice)
       preConditionError = new Error('beforeNotify handlers returned false')
     }
 
