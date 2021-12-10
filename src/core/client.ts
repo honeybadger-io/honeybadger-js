@@ -82,7 +82,6 @@ export default class Client {
 
       ...opts,
     }
-
     this.logger = logger(this)
   }
 
