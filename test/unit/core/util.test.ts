@@ -51,10 +51,10 @@ describe('utils', function () {
       expect(mockDebug.mock.calls.length).toBe(0)
     })
 
-    it('logs debug to console when enabled', function () {
+    it('logs to console when debug logging is enabled', function () {
       const mockDebug = jest.fn()
       const console = nullLogger()
-      console.debug = mockDebug
+      console.log = mockDebug
       const client = new Client({ logger: console, debug: true })
 
       logger(client).debug('expected')
