@@ -13,7 +13,8 @@ import {
 } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
 import unhandledRejection from './server/integrations/unhandled_rejection'
-import { errorHandler, requestHandler, lambdaHandler } from './server/middleware'
+import { errorHandler, requestHandler } from './server/middleware'
+import { lambdaHandler } from './server/aws_lambda'
 
 class Honeybadger extends Client {
   /** @internal */
