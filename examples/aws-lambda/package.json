@@ -1,0 +1,16 @@
+{
+  "name": "aws-lambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "dependencies": {
+    "@honeybadger-io/js": "git+https://github.com/honeybadger-io/honeybadger-js.git#aws_lambda_async_#677",
+    "serverless-plugin-include-dependencies": "^5.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
