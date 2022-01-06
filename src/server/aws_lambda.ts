@@ -45,8 +45,10 @@ export function lambdaHandler(handler: APIGatewayProxyHandler): AsyncHandler {
             return await asyncHandler(event, context)
         }
         catch (err) {
+            console.log('hb:lambdaHandler notify')
             hb.notify(err, {
                 afterNotify: function () {
+                    console.log('hb:lambdaHandler afterNotify')
                     hb.clear()
                 }
             })
