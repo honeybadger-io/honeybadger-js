@@ -1,6 +1,5 @@
 service: aws-lambda
 app: honeybadger-io
-# org: hiteqsoftware
 frameworkVersion: '2'
 
 plugins:
