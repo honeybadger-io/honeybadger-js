@@ -22,6 +22,6 @@ Follow these steps to setup and run the example:
 ## Report an error
 
 To report an error:
-1. Run `serverless invoke --function syncError --data { "body": { "report": "yes" } }`.
-2. Alternatively, if you want to play around without deploying every change you can use `serverless invoke local --function syncError --data { "body": { "report": "yes" } }`.
+1. Run `serverless invoke --function syncError --data '{ "body": { "report": "yes" } }'`.
+2. Alternatively, if you want to play around without deploying every change you can use `serverless invoke local --function syncError --data '{ "body": { "report": "yes" } }'`.
 6. Check your Honeybadger.js dashboard. The error should show up after a few seconds. 
