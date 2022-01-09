@@ -1,7 +1,6 @@
 import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyCallback, Context } from 'aws-lambda'
-import * as process from "process";
 
 type SyncHandler = (
     event: APIGatewayProxyEvent,
