@@ -46,14 +46,16 @@ export function lambdaHandler(handler: APIGatewayProxyHandler): AsyncHandler {
             return await asyncHandler(event, context)
         }
         catch (err) {
-            hb.logger.error('caught error. will report.')
-            hb.notify(err, {
-                afterNotify: function () {
-                    hb.logger.error('hb:lambdaHandler afterNotify')
-                    hb.clear()
-                }
+            return new Promise((_, reject) => {
+                hb.logger.error('caught error. will report.')
+                hb.notify(err, {
+                    afterNotify: function () {
+                        hb.logger.error('hb:lambdaHandler afterNotify')
+                        hb.clear()
+                        reject(err)
+                    }
+                })
             })
-            throw err;
         }
     }
 }
