@@ -138,6 +138,7 @@ export default class Client {
   }
 
   notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
+    this.logger.info('notify cp1')
 
     let preConditionError: Error = null
     const notice = this.makeNotice(noticeable, name, extra)
@@ -189,6 +190,7 @@ export default class Client {
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
 
     getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler, sourcePerTrace => {
+      this.logger.info('notify cp2')
       sourcePerTrace.forEach((source, index) => {
         notice.backtrace[index].source = source
       })
