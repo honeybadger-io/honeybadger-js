@@ -1,3 +1,4 @@
+import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyCallback, Context } from 'aws-lambda'
 
@@ -38,13 +39,16 @@ function getAsyncHandler(handler: APIGatewayProxyHandler): AsyncHandler {
 
 export function lambdaHandler(handler: APIGatewayProxyHandler): AsyncHandler {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const hb = this
+    const hb: Honeybadger = this
     const asyncHandler = getAsyncHandler(handler)
     return async (event, context) => {
         try {
             return await asyncHandler(event, context)
         }
         catch (err) {
+            hb.logger.error('caught error. will not report.')
+            throw err;
+            /*
             console.log('hb:lambdaHandler notify')
             hb.notify(err, {
                 afterNotify: function () {
@@ -53,6 +57,7 @@ export function lambdaHandler(handler: APIGatewayProxyHandler): AsyncHandler {
                     throw err;
                 }
             })
+             */
         }
     }
 }
