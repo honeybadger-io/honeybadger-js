@@ -53,8 +53,6 @@ class Honeybadger extends Client {
 
   /** @internal */
   protected __send(notice): void {
-    this.logger.info('__send cp1')
-
     const {protocol} = new URL(this.config.endpoint)
     const transport = (protocol === "http:" ? http : https)
 
@@ -62,8 +60,6 @@ class Honeybadger extends Client {
     payload.server.pid = process.pid
 
     getStats((stats: Record<string, unknown>) => {
-      this.logger.info('__send cp2')
-
       payload.server.stats = stats
 
       const data = Buffer.from(JSON.stringify(sanitize(payload, this.config.maxObjectDepth)), 'utf8')
@@ -77,7 +73,6 @@ class Honeybadger extends Client {
       }
 
       const req = transport.request(endpoint(this.config, '/v1/notices/js'), options, (res) => {
-        this.logger.info('__send cp3')
         this.logger.debug(`statusCode: ${res.statusCode}`)
 
         let body = ''
