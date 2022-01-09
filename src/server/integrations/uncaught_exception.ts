@@ -1,15 +1,27 @@
 import { Plugin } from '../../core/types'
-import { fatallyLogAndExit } from '../../server/util'
+import { fatallyLogAndExit } from '../util'
 import Client from '../../server'
+import { removeAwsDefaultUncaughtExceptionListener } from '../aws_lambda'
 
 let count = 0
+
+function removeAwsLambdaListener() {
+  const isLambda = !!process.env.LAMBDA_TASK_ROOT
+  if (!isLambda) {
+    return
+  }
+
+  removeAwsDefaultUncaughtExceptionListener()
+}
 
 export default function (): Plugin {
   return {
     load: (client: typeof Client) => {
       if (!client.config.enableUncaught) { return }
 
-      process.on('uncaughtException', function (uncaughtError) {
+      removeAwsLambdaListener()
+
+      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener(uncaughtError) {
         // Prevent recursive errors
         if (count > 1) { fatallyLogAndExit(uncaughtError) }
 

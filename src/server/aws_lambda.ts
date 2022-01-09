@@ -1,6 +1,7 @@
 import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyCallback, Context } from 'aws-lambda'
+import * as process from "process";
 
 type SyncHandler = (
     event: APIGatewayProxyEvent,
@@ -58,4 +59,24 @@ export function lambdaHandler(handler: APIGatewayProxyHandler): AsyncHandler {
             })
         }
     }
+}
+
+let listenerRemoved = false
+/**
+ * Removes AWS Lambda default listener that
+ * exits the process before letting us report to honeybadger.
+ */
+export function removeAwsDefaultUncaughtExceptionListener() {
+    if (listenerRemoved) {
+        return
+    }
+
+    listenerRemoved = true
+    const listeners = process.listeners('uncaughtException')
+    if (listeners.length === 0) {
+        return
+    }
+
+    // We assume it's the first listener
+    process.removeListener('uncaughtException', listeners[0])
 }
