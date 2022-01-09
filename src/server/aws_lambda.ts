@@ -51,9 +51,9 @@ export function lambdaHandler(handler: APIGatewayProxyHandler): AsyncHandler {
                 afterNotify: function () {
                     hb.logger.error('hb:lambdaHandler afterNotify')
                     hb.clear()
-                    throw err;
                 }
             })
+            throw err;
         }
     }
 }
