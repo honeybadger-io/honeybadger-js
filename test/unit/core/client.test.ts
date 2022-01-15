@@ -331,6 +331,70 @@ describe('client', function () {
     })
   })
 
+  describe('notifyAsync', function () {
+    beforeEach(() => {
+      client.configure({
+        apiKey: 'testing'
+      })
+    })
+
+    it('resolves when configured', async () => {
+      await client.notifyAsync(new Error('test'))
+    })
+
+    it('calls afterNotify in noticeable', async () => {
+      let called = false
+      const afterNotify = () => {
+        called = true
+      }
+
+      await client.notifyAsync({
+        message: 'test',
+        afterNotify
+      })
+
+      expect(called).toBeTruthy()
+    })
+
+    it('calls afterNotify in name', async () => {
+      let called = false
+      const afterNotify = () => {
+        called = true
+      }
+
+      await client.notifyAsync(new Error('test'), { afterNotify })
+
+      expect(called).toBeTruthy()
+    })
+
+    it('calls afterNotify in extra', async () => {
+      let called = false
+      const afterNotify = () => {
+        called = true
+      }
+
+      await client.notifyAsync(new Error('test'), 'an error', { afterNotify })
+
+      expect(called).toBeTruthy()
+    })
+
+    it('rejects with error if not configured correctly', async () => {
+      client.configure({
+        apiKey: null
+      })
+      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow(new Error('Unable to send error report: no API key has been configured'))
+    })
+
+    it('rejects on pre-condition error', async () => {
+      client.configure({
+        apiKey: 'testing',
+        reportData: false
+      })
+
+      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow(new Error('Dropping notice: honeybadger.js is in development mode'))
+    })
+  })
+
   describe('beforeNotify', function () {
     beforeEach(function () {
       client.configure({
