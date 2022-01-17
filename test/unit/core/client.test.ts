@@ -342,6 +342,17 @@ describe('client', function () {
       await client.notifyAsync(new Error('test'))
     })
 
+    it('calls afterNotify from client.afterNotify', async () => {
+      let called = false
+      client.afterNotify((_err) => {
+        called = true
+      })
+
+      await client.notifyAsync('test test')
+
+      expect(called).toBeTruthy()
+    })
+
     it('calls afterNotify in noticeable', async () => {
       let called = false
       const afterNotify = () => {
