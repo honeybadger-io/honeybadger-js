@@ -206,39 +206,12 @@ export default class Client {
    */
   notifyAsync(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Promise<void> {
     return new Promise((resolve, reject) => {
-      const applyAfterNotify = (partialNotice: Partial<Notice>) => {
-        const originalAfterNotify = partialNotice.afterNotify
-        partialNotice.afterNotify = (err?: Error) => {
-          originalAfterNotify?.call(this, err)
-          if (err) {
-            return reject(err)
-          }
-          resolve()
+      this.afterNotify(err => {
+        if (err) {
+          return reject(err)
         }
-      }
-
-      // We have to respect any afterNotify hooks that come from the arguments
-      let objectToOverride: Partial<Notice>
-      if ((noticeable as Partial<Notice>).afterNotify) {
-        objectToOverride = noticeable as Partial<Notice>
-      }
-      else if (name && (name as Partial<Notice>).afterNotify) {
-        objectToOverride = name as Partial<Notice>
-      }
-      else if (extra && extra.afterNotify) {
-        objectToOverride = extra
-      }
-      else if (name && typeof name === 'object') {
-        objectToOverride = name
-      }
-      else if (extra) {
-        objectToOverride = extra
-      }
-      else {
-        objectToOverride = name = {}
-      }
-
-      applyAfterNotify(objectToOverride)
+        resolve()
+      })
       this.notify(noticeable, name, extra)
     })
   }
