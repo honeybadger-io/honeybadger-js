@@ -13,7 +13,7 @@ module.exports = {
     const data = fs.readFileSync(`CHANGELOG.md`, 'utf8')
 
     const match = data.match(
-        /## \[Unreleased\]\[.+?\]\s+###\s+(?:Fixed|Added|Modified|Removed|Changed|Deprecated|Security)\s+-/
+      /## \[Unreleased\]\[.+?\]\s+###\s+(?:Fixed|Added|Modified|Removed|Changed|Deprecated|Security)\s+-/
     )
     if (!match) {
       console.log('No unreleased changes');

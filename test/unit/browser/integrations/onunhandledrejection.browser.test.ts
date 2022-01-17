@@ -1,4 +1,5 @@
 import onUnhandledRejection from '../../../../src/browser/integrations/onunhandledrejection'
+// @ts-ignore
 import { nullLogger, TestClient } from '../../helpers'
 
 describe('window.onunhandledrejection integration', function () {

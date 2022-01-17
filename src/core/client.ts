@@ -15,7 +15,7 @@ import {
   runAfterNotifyHandlers
 } from './util'
 import {
-  Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
+  Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable, BacktraceFrame
 } from './types'
 
 const notifier = {
@@ -50,7 +50,7 @@ export default class Client {
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
 
   /** @internal */
-  protected __getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void
+  protected __getSourceFileHandler: (path: string) => Promise<string>
 
   config: Config
   logger: Logger
@@ -165,7 +165,7 @@ export default class Client {
 
     // we need to have the source file data before the beforeNotifyHandlers,
     // in case they modify them
-    const sourceCodeData = notice ? notice.backtrace.slice() : null
+    const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => newObject(trace) as BacktraceFrame) : null
 
     const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
     if (!preConditionError && !beforeNotifyResult) {
@@ -188,13 +188,14 @@ export default class Client {
 
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
 
-    getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler, sourcePerTrace => {
-      sourcePerTrace.forEach((source, index) => {
-        notice.backtrace[index].source = source
-      })
+    getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler)
+      .then(sourcePerTrace => {
+        sourcePerTrace.forEach((source, index) => {
+          notice.backtrace[index].source = source
+        })
 
-      this.__send(notice)
-    })
+        this.__send(notice)
+      })
 
     return true
   }

@@ -67,7 +67,7 @@ function lambdaHandler(handler: LambdaHandler): LambdaHandler {
 
     const hbHandler = function (err?: Error) {
       if (domainErrorHandlerAlreadyCalled) {
-         return
+        return
       }
       domainErrorHandlerAlreadyCalled = true
       hb.notify(err, {

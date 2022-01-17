@@ -1,4 +1,5 @@
 import { onError } from '../../../../src/browser/integrations/onerror'
+// @ts-ignore
 import { nullLogger, TestClient } from '../../helpers'
 
 describe('window.onerror integration', function () {

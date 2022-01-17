@@ -59,27 +59,23 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
   }
 }
 
-export function getSourceForBacktrace(backtrace: BacktraceFrame[],
-                                      getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void,
-                                      cb: (sourcePerTrace: Record<string, string>[]) => void): void {
-  if (!getSourceFileHandler || !backtrace || !backtrace.length) {
-    cb([])
-    return
-  }
+export async function getSourceForBacktrace(backtrace: BacktraceFrame[],
+  getSourceFileHandler: (path: string) => Promise<string>): Promise<Record<string, string>[]> {
 
   const result: Record<string, string>[] = []
-  const getSourceFromFile = (index = 0) => {
-    if (!backtrace.length) {
-      return cb(result)
-    }
-
-    const trace = backtrace.splice(0)[index]
-    getSourceFileHandler(trace.file, (fileContent => {
-      result[index] = getSourceCodeSnippet(fileContent, trace.number)
-      getSourceFromFile(index + 1)
-    }))
+  if (!getSourceFileHandler || !backtrace || !backtrace.length) {
+    return result
   }
-  getSourceFromFile()
+
+  let index = 0
+  while (backtrace.length) {
+    const trace = backtrace.splice(0)[index]
+
+    const fileContent = await getSourceFileHandler(trace.file)
+    result[index] = getSourceCodeSnippet(fileContent, trace.number)
+    index++
+  }
+  return result
 }
 
 export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeNotifyHandler[]): boolean {

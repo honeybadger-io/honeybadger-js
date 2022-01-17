@@ -6,7 +6,7 @@ import { nullLogger } from './helpers'
 import nock from 'nock'
 
 describe('server client', function () {
-  let client
+  let client: typeof Singleton
 
   beforeEach(function () {
     client = Singleton.factory({
@@ -70,10 +70,10 @@ describe('server client', function () {
     })
 
     nock('https://api.honeybadger.io')
-    .post('/v1/notices/js')
-    .reply(201, {
-      id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
-    })
+      .post('/v1/notices/js')
+      .reply(201, {
+        id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      })
 
     return new Promise(resolve => {
       client.notify('testing', {
