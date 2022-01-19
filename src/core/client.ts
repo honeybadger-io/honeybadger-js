@@ -145,12 +145,12 @@ export default class Client {
     let preConditionError: Error = null
     const notice = this.makeNotice(noticeable, name, extra)
     if (!notice) {
-      this.logger.debug('could not make notice')
-      preConditionError = new Error('could not make notice')
+      this.logger.debug('failed to build error report')
+      preConditionError = new Error('failed to build error report')
     }
 
     if (!preConditionError && this.config.reportData === false) {
-      this.logger.debug('skipping notice: honeybadger.js is disabled', notice)
+      this.logger.debug('skipping error report: honeybadger.js is disabled', notice)
       preConditionError = new Error('honeybadger.js is disabled')
     }
 
@@ -166,7 +166,7 @@ export default class Client {
 
     const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
     if (!preConditionError && !beforeNotifyResult) {
-      this.logger.debug('skipping notice: beforeNotify handlers returned false', notice)
+      this.logger.debug('skipping error report: beforeNotify handlers returned false', notice)
       preConditionError = new Error('beforeNotify handlers returned false')
     }
 
