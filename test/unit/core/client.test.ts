@@ -415,7 +415,7 @@ describe('client', function () {
       client.configure({
         apiKey: null
       })
-      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow(new Error('Unable to send error report: no API key has been configured'))
+      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow(new Error('missing API key'))
     })
 
     it('rejects on pre-condition error', async () => {
@@ -424,7 +424,7 @@ describe('client', function () {
         reportData: false
       })
 
-      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow(new Error('Dropping notice: honeybadger.js is in development mode'))
+      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow(new Error('honeybadger.js is disabled'))
     })
   })
 
