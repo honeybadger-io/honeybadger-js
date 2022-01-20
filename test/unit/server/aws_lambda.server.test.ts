@@ -6,6 +6,7 @@ import { spy } from 'sinon'
 import { Notice } from "../../../src/core/types";
 // eslint-disable-next-line import/no-unresolved
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
+import { AsyncHandler, SyncHandler } from '../../../src/server/aws_lambda'
 
 const mockAwsEvent = (obj: Partial<APIGatewayProxyEvent> = {}) => {
     return Object.assign({}, obj) as APIGatewayProxyEvent;
@@ -32,11 +33,11 @@ describe('Lambda Handler', function () {
     describe('with arguments', function() {
         const awsEvent = mockAwsEvent({ body: '1' })
         const awsContext = mockAwsContext({ awsRequestId: '2' })
-        let handlerFunc
+        let handlerFunc;
 
         beforeEach(function() {
             handlerFunc = spy()
-            const handler = client.lambdaHandler(handlerFunc)
+            const handler = client.lambdaHandler(handlerFunc) as AsyncHandler
             return handler(awsEvent, awsContext)
                 .then(() => {
                     return new Promise((resolve => {
@@ -63,7 +64,7 @@ describe('Lambda Handler', function () {
 
             const handler = client.lambdaHandler(async function(_event, _context) {
                 return Promise.resolve(mockAwsResult({body:'works!'}))
-            })
+            }) as AsyncHandler
 
             const res = await handler(mockAwsEvent(), mockAwsContext())
             expect(res).toBeDefined()
@@ -77,7 +78,7 @@ describe('Lambda Handler', function () {
 
             const handler = client.lambdaHandler(async function(_event, _context) {
                 return mockAwsResult({body:'works!'})
-            })
+            }) as AsyncHandler
 
             const res = await handler(mockAwsEvent(), mockAwsContext())
             expect(res).toBeDefined()
@@ -91,7 +92,7 @@ describe('Lambda Handler', function () {
 
             const handler = client.lambdaHandler(async function(_event) {
                 throw new Error("Badgers!")
-            })
+            }) as AsyncHandler
 
             return expect(handler(mockAwsEvent(), mockAwsContext())).rejects.toEqual(new Error("Badgers!"))
         })
@@ -109,7 +110,7 @@ describe('Lambda Handler', function () {
 
             const handler = client.lambdaHandler(async function(_event) {
                 throw new Error("Badgers!")
-            })
+            }) as AsyncHandler
 
             try {
                 await handler(mockAwsEvent(), mockAwsContext())
@@ -145,7 +146,7 @@ describe('Lambda Handler', function () {
                         reject(new Error("Badgers!"))
                     }, 0)
                 })
-            })
+            }) as AsyncHandler
 
             try {
                 await handler(mockAwsEvent(), mockAwsContext())
@@ -172,29 +173,38 @@ describe('Lambda Handler', function () {
             })
         })
 
-        it('calls handler if no error is thrown', async function () {
-            const handler = client.lambdaHandler(function(_event, _context, callback) {
-                callback(null, mockAwsResult({ body: 'works!' }))
-            })
+        it('calls handler if no error is thrown', function () {
+            return new Promise((done) => {
+                const handler = client.lambdaHandler(function(_event, _context, callback) {
+                    callback(null, mockAwsResult({ body: 'works!' }))
+                }) as SyncHandler
 
-            const res = await handler(mockAwsEvent(), mockAwsContext())
-            expect(res).toBeDefined()
-            expect(res.body).toEqual('works!')
+                handler(mockAwsEvent(), mockAwsContext(), (err, res) => {
+                    expect(res).toBeDefined()
+                    expect(res.body).toEqual('works!')
+                    done(err)
+                })
+            })
         })
 
         it('calls handler if notify exits on preconditions', function () {
-            client.configure({
-                apiKey: null
-            })
+            return new Promise((done) => {
+                client.configure({
+                    apiKey: null
+                })
 
-            const handler = client.lambdaHandler(function(_event, _context, _callback) {
-                throw new Error("Badgers!")
-            })
+                const handler = client.lambdaHandler(function(_event, _context, _callback) {
+                    throw new Error("Badgers!")
+                }) as SyncHandler
 
-            return expect(handler(mockAwsEvent(), mockAwsContext())).rejects.toEqual(new Error("Badgers!"))
+                handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
+                    expect(err).toEqual(new Error("Badgers!"))
+                    done(null)
+                })
+            })
         })
 
-        it('reports errors to Honeybadger', async function() {
+        it('reports errors to Honeybadger', function() {
             nock.cleanAll()
 
             const api = nock("https://api.honeybadger.io")
@@ -203,25 +213,20 @@ describe('Lambda Handler', function () {
 
             const handler = client.lambdaHandler(function(_event, _context, _callback) {
                 throw new Error("Badgers!")
-            })
+            }) as SyncHandler
 
-            try {
-                await handler(mockAwsEvent(), mockAwsContext())
-            }
-            catch (e) {
-                // eslint-disable-next-line jest/no-conditional-expect
-                expect(e).toEqual(new Error("Badgers!"))
-            }
-
-            return new Promise<void>(resolve => {
-                setTimeout(() => {
-                    api.done()
-                    resolve()
-                }, 50)
+            return new Promise(done => {
+                handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
+                    expect(err).toEqual(new Error("Badgers!"))
+                    setTimeout(() => {
+                        api.done()
+                        done(null)
+                    }, 50)
+                })
             })
         })
 
-        it('reports async errors to Honeybadger', async function() {
+        it('reports async errors to Honeybadger', function() {
             nock.cleanAll()
 
             const api = nock("https://api.honeybadger.io")
@@ -232,25 +237,20 @@ describe('Lambda Handler', function () {
                 setTimeout(function() {
                     callback(new Error("Badgers!"))
                 }, 0)
-            })
+            }) as SyncHandler
 
-            try {
-                await handler(mockAwsEvent(), mockAwsContext())
-            }
-            catch (e) {
-                // eslint-disable-next-line jest/no-conditional-expect
-                expect(e).toEqual(new Error("Badgers!"))
-            }
-
-            return new Promise<void>(resolve => {
-                setTimeout(() => {
-                    api.done()
-                    resolve()
-                }, 50)
+            return new Promise(done => {
+                handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
+                    expect(err).toEqual(new Error("Badgers!"))
+                    setTimeout(() => {
+                        api.done()
+                        done(null)
+                    }, 50)
+                })
             })
         })
 
-        it('calls beforeNotify and afterNotify handlers', async function () {
+        it('calls beforeNotify and afterNotify handlers', function () {
             nock.cleanAll()
 
             const api = nock("https://api.honeybadger.io")
@@ -261,7 +261,7 @@ describe('Lambda Handler', function () {
                 setTimeout(function() {
                     callback(new Error("Badgers!"))
                 }, 0)
-            })
+            }) as SyncHandler
 
             client.beforeNotify(function (notice: Notice) {
                 notice.context = Object.assign(notice.context, { foo: 'bar' })
@@ -273,20 +273,15 @@ describe('Lambda Handler', function () {
                 afterNotifyCalled = true;
             })
 
-            try {
-                await handler(mockAwsEvent(), mockAwsContext())
-            }
-            catch (e) {
-                // eslint-disable-next-line jest/no-conditional-expect
-                expect(e).toEqual(new Error("Badgers!"))
-            }
-
-            return new Promise<void>(resolve => {
-                setTimeout(() => {
-                    api.done()
-                    expect(afterNotifyCalled).toBeTruthy()
-                    resolve()
-                }, 50)
+            return new Promise(done => {
+                handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
+                    expect(err).toEqual(new Error("Badgers!"))
+                    setTimeout(() => {
+                        api.done()
+                        expect(afterNotifyCalled).toBeTruthy()
+                        done(null)
+                    }, 50)
+                })
             })
         })
     })

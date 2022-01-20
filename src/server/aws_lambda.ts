@@ -2,7 +2,7 @@ import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyCallback, Context } from 'aws-lambda'
 
-type SyncHandler = (
+export type SyncHandler = (
     event: APIGatewayProxyEvent,
     context: Context,
     callback: APIGatewayProxyCallback,
@@ -13,37 +13,14 @@ export type AsyncHandler = (
     context: Context,
 ) => Promise<APIGatewayProxyResult>;
 
-/**
- * async (event) => async handler
- * async (event, context) => async handler
- * (event, context, callback) => sync handler
- * @param handler
- */
-function getAsyncHandler(handler: APIGatewayProxyHandler): AsyncHandler {
-    if (handler.length > 2) {
-        return ((event, context) => {
-                return new Promise((resolve, reject) => {
-                    (handler as SyncHandler)(event, context, (error, result) => {
-                        if (error === null || error === undefined) {
-                            resolve(result)
-                        } else {
-                            reject(error)
-                        }
-                    })
-                })
-        }) as AsyncHandler
-    }
-
-    return (handler as AsyncHandler)
+function isHandlerSync(handler: APIGatewayProxyHandler): boolean {
+    return handler.length > 2
 }
 
-export function lambdaHandler(handler: APIGatewayProxyHandler): AsyncHandler {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const hb: Honeybadger = this
-    const asyncHandler = getAsyncHandler(handler)
+function asyncHandler(handler: APIGatewayProxyHandler, hb: Honeybadger): AsyncHandler {
     return async (event, context) => {
         try {
-            return await asyncHandler(event, context)
+            return await (handler as AsyncHandler)(event, context)
         }
         catch (err) {
             return new Promise((_, reject) => {
@@ -56,6 +33,41 @@ export function lambdaHandler(handler: APIGatewayProxyHandler): AsyncHandler {
             })
         }
     }
+}
+
+function syncHandler(handler: APIGatewayProxyHandler, hb: Honeybadger): SyncHandler {
+    return (event, context, cb) => {
+        const hbHandler = (err: Error | string | null) => {
+            hb.notify(err, {
+                afterNotify: function () {
+                    hb.clear()
+                    cb(err)
+                }
+            })
+        }
+
+        try {
+            handler(event, context, (error, result) => {
+                if (error) {
+                    return hbHandler(error)
+                }
+
+                cb(null, result)
+            });
+        } catch (err) {
+            hbHandler(err)
+        }
+    }
+}
+
+export function lambdaHandler(handler: APIGatewayProxyHandler): any {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const hb: Honeybadger = this
+    if (isHandlerSync(handler)) {
+        return syncHandler(handler, hb)
+    }
+
+    return asyncHandler(handler, hb)
 }
 
 let listenerRemoved = false
