@@ -164,4 +164,32 @@ describe('server client', function () {
       })
     })
   })
+
+  describe('notifyAsync', function () {
+    beforeEach(() => {
+      client.configure({
+        apiKey: 'testing'
+      })
+    })
+
+    it('resolves after the http request is done', async () => {
+      const request = nock('https://api.honeybadger.io')
+          .post('/v1/notices/js')
+          .reply(201, {
+            id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+          })
+
+      await client.notifyAsync('testing')
+      expect(request.isDone()).toBe(true)
+    })
+
+    it('rejects on http error', async () => {
+      const request = nock('https://api.honeybadger.io')
+          .post('/v1/notices/js')
+          .reply(400)
+
+      await expect(client.notifyAsync('testing')).rejects.toThrow(/Bad HTTP response/)
+      expect(request.isDone()).toBe(true)
+    })
+  })
 })

@@ -331,6 +331,103 @@ describe('client', function () {
     })
   })
 
+  describe('notifyAsync', function () {
+    beforeEach(() => {
+      client.configure({
+        apiKey: 'testing'
+      })
+    })
+
+    it('resolves when configured', async () => {
+      await client.notifyAsync(new Error('test'))
+    })
+
+    it('calls afterNotify from client.afterNotify', async () => {
+      let called = false
+      client.afterNotify((_err) => {
+        called = true
+      })
+
+      await client.notifyAsync('test test')
+
+      expect(called).toBeTruthy()
+    })
+
+    it('calls afterNotify in noticeable', async () => {
+      let called = false
+      const afterNotify = () => {
+        called = true
+      }
+
+      await client.notifyAsync({
+        message: 'test',
+        afterNotify
+      })
+
+      expect(called).toBeTruthy()
+    })
+
+    it('calls afterNotify in name', async () => {
+      let called = false
+      const afterNotify = () => {
+        called = true
+      }
+
+      await client.notifyAsync(new Error('test'), { afterNotify })
+
+      expect(called).toBeTruthy()
+    })
+
+    it('calls afterNotify in extra', async () => {
+      let called = false
+      const afterNotify = () => {
+        called = true
+      }
+
+      await client.notifyAsync(new Error('test'), 'an error', { afterNotify })
+
+      expect(called).toBeTruthy()
+    })
+
+    it('calls afterNotify and then resolves promise', async () => {
+      // the afterNotify hook that resolves the promise is called first
+      // however, the loop continues to call all handlers before it gives back
+      // control to the event loop
+      // which means: all afterNotify hooks will be called and then the promise will resolve
+      const called: boolean[] = [];
+      function register(i: number) {
+        called[i] = false
+        client.afterNotify(() => {
+          called[i] = true
+        })
+      }
+
+      for (let i =0; i < 100; i++) {
+        register(i)
+      }
+
+      await client.notifyAsync(new Error('test'))
+
+      expect(called.every(val => val === true)).toBeTruthy()
+    })
+
+    it('rejects with error if not configured correctly', async () => {
+      client.configure({
+        apiKey: null
+      })
+      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow(new Error('Unable to send error report: no API key has been configured'))
+    })
+
+    it('rejects on pre-condition error', async () => {
+      client.configure({
+        apiKey: 'testing',
+        reportData: false
+      })
+
+      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow(new Error('Dropping notice: honeybadger.js is in development mode'))
+    })
+  })
+
   describe('beforeNotify', function () {
     beforeEach(function () {
       client.configure({
