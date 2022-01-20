@@ -596,14 +596,14 @@ describe('client', function () {
 
       return new Promise<void>(resolve => {
         client.afterNotify((err) => {
-          expect(err.message).toEqual('Unable to send error report: no API key has been configured')
+          expect(err.message).toEqual('missing API key')
           resolve()
         })
 
         client.notify('should not report')
       })
     })
-    
+
     it('is called with error if beforeNotify handlers return false', function () {
       client.configure({
         apiKey: 'abc123',
@@ -612,7 +612,7 @@ describe('client', function () {
       return new Promise<void>(resolve => {
         client.beforeNotify(() => false)
         client.afterNotify((err) => {
-          expect(err.message).toEqual('Will not send error report, beforeNotify handlers returned false')
+          expect(err.message).toEqual('beforeNotify handlers returned false')
           resolve()
         })
 
@@ -646,7 +646,7 @@ describe('client', function () {
         let total = 0
         const expected = 2
         const handlerCalled = (err?: Error) => {
-          expect(err.message).toEqual('Will not send error report, beforeNotify handlers returned false')
+          expect(err.message).toEqual('beforeNotify handlers returned false')
           total++
           if (total === expected) {
             resolve()
@@ -678,7 +678,7 @@ describe('client', function () {
         }
 
         const afterNotifyHandler = (err: Error) => {
-          expect(err.message).toEqual('Unable to send error report: no API key has been configured')
+          expect(err.message).toEqual('missing API key')
           expect(totalBeforeNotify).toEqual(expectedBeforeNotify)
           resolve()
         }
