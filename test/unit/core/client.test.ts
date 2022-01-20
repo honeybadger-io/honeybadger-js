@@ -389,6 +389,28 @@ describe('client', function () {
       expect(called).toBeTruthy()
     })
 
+    it('calls afterNotify and then resolves promise', async () => {
+      // the afterNotify hook that resolves the promise is called first
+      // however, the loop continues to call all handlers before it gives back
+      // control to the event loop
+      // which means: all afterNotify hooks will be called and then the promise will resolve
+      const called: boolean[] = [];
+      function register(i: number) {
+        called[i] = false
+        client.afterNotify(() => {
+          called[i] = true
+        })
+      }
+
+      for (let i =0; i < 100; i++) {
+        register(i)
+      }
+
+      await client.notifyAsync(new Error('test'))
+
+      expect(called.every(val => val === true)).toBeTruthy()
+    })
+
     it('rejects with error if not configured correctly', async () => {
       client.configure({
         apiKey: null
