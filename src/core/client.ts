@@ -71,7 +71,6 @@ export default class Client {
       maxObjectDepth: 8,
       logger: console,
       developmentEnvironments: ['dev', 'development', 'test'],
-      disabled: false,
       debug: false,
       tags: null,
       enableUncaught: true,
@@ -96,10 +95,6 @@ export default class Client {
   configure(opts: Partial<Config> = {}): Client {
     for (const k in opts) {
       this.config[k] = opts[k]
-    }
-    if (this.config.disabled) {
-      this.logger.log('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting.')
-      this.config.reportData = false
     }
     if (!this.__pluginsExecuted) {
       this.__pluginsExecuted = true

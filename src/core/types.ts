@@ -18,7 +18,6 @@ export interface Config {
   component?: string
   action?: string
   revision?: string
-  disabled: boolean
   debug: boolean
   reportData: boolean
   breadcrumbsEnabled: boolean | { dom?: boolean, network?: boolean, navigation?: boolean, console?: boolean}
