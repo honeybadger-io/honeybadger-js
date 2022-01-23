@@ -1,14 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
 import { Handler, Callback, Context } from 'aws-lambda'
 
-export type SyncHandler<TEvent = unknown, TResult = unknown> = (
+export type SyncHandler<TEvent = any, TResult = any> = (
     event: TEvent,
     context: Context,
     callback: Callback<TResult>,
 ) => void;
 
-export type AsyncHandler<TEvent = unknown, TResult = unknown> = (
+export type AsyncHandler<TEvent = any, TResult = any> = (
     event: TEvent,
     context: Context,
 ) => Promise<TResult>;
@@ -17,7 +18,7 @@ function isHandlerSync(handler: Handler): handler is SyncHandler {
     return handler.length > 2
 }
 
-function asyncHandler<TEvent = unknown, TResult = unknown>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
+function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
     return async (event, context) => {
         try {
             return await handler(event, context)
@@ -35,7 +36,7 @@ function asyncHandler<TEvent = unknown, TResult = unknown>(handler: AsyncHandler
     }
 }
 
-function syncHandler<TEvent = unknown, TResult = unknown>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
+function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
     return (event, context, cb) => {
         const hbHandler = (err: Error | string | null) => {
             hb.notify(err, {
@@ -60,7 +61,7 @@ function syncHandler<TEvent = unknown, TResult = unknown>(handler: SyncHandler<T
     }
 }
 
-export function lambdaHandler<TEvent = unknown, TResult = unknown>(handler: Handler<TEvent, TResult>): Handler<TEvent, TResult> {
+export function lambdaHandler<TEvent = any, TResult = any>(handler: Handler<TEvent, TResult>): Handler<TEvent, TResult> {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const hb: Honeybadger = this
     if (isHandlerSync(handler)) {
