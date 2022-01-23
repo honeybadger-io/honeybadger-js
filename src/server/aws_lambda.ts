@@ -1,26 +1,26 @@
 import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
-import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyCallback, Context } from 'aws-lambda'
+import { Handler, Callback, Context } from 'aws-lambda'
 
-export type SyncHandler = (
-    event: APIGatewayProxyEvent,
+export type SyncHandler<TEvent = unknown, TResult = unknown> = (
+    event: TEvent,
     context: Context,
-    callback: APIGatewayProxyCallback,
+    callback: Callback<TResult>,
 ) => void;
 
-export type AsyncHandler = (
-    event: APIGatewayProxyEvent,
+export type AsyncHandler<TEvent = unknown, TResult = unknown> = (
+    event: TEvent,
     context: Context,
-) => Promise<APIGatewayProxyResult>;
+) => Promise<TResult>;
 
-function isHandlerSync(handler: APIGatewayProxyHandler): boolean {
+function isHandlerSync(handler: Handler): handler is SyncHandler {
     return handler.length > 2
 }
 
-function asyncHandler(handler: APIGatewayProxyHandler, hb: Honeybadger): AsyncHandler {
+function asyncHandler<TEvent = unknown, TResult = unknown>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
     return async (event, context) => {
         try {
-            return await (handler as AsyncHandler)(event, context)
+            return await handler(event, context)
         }
         catch (err) {
             return new Promise((_, reject) => {
@@ -35,7 +35,7 @@ function asyncHandler(handler: APIGatewayProxyHandler, hb: Honeybadger): AsyncHa
     }
 }
 
-function syncHandler(handler: APIGatewayProxyHandler, hb: Honeybadger): SyncHandler {
+function syncHandler<TEvent = unknown, TResult = unknown>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
     return (event, context, cb) => {
         const hbHandler = (err: Error | string | null) => {
             hb.notify(err, {
@@ -60,7 +60,7 @@ function syncHandler(handler: APIGatewayProxyHandler, hb: Honeybadger): SyncHand
     }
 }
 
-export function lambdaHandler(handler: APIGatewayProxyHandler): any {
+export function lambdaHandler<TEvent = unknown, TResult = unknown>(handler: Handler<TEvent, TResult>): Handler<TEvent, TResult> {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const hb: Honeybadger = this
     if (isHandlerSync(handler)) {

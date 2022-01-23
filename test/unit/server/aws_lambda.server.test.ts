@@ -64,7 +64,7 @@ describe('Lambda Handler', function () {
 
             const handler = client.lambdaHandler(async function(_event, _context) {
                 return Promise.resolve(mockAwsResult({body:'works!'}))
-            }) as AsyncHandler
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
             const res = await handler(mockAwsEvent(), mockAwsContext())
             expect(res).toBeDefined()
@@ -78,7 +78,7 @@ describe('Lambda Handler', function () {
 
             const handler = client.lambdaHandler(async function(_event, _context) {
                 return mockAwsResult({body:'works!'})
-            }) as AsyncHandler
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
             const res = await handler(mockAwsEvent(), mockAwsContext())
             expect(res).toBeDefined()
@@ -90,9 +90,10 @@ describe('Lambda Handler', function () {
                 apiKey: null
             })
 
-            const handler = client.lambdaHandler(async function(_event) {
+            // @ts-expect-error
+            const handler = client.lambdaHandler(async function(_event, _context) {
                 throw new Error("Badgers!")
-            }) as AsyncHandler
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
             return expect(handler(mockAwsEvent(), mockAwsContext())).rejects.toEqual(new Error("Badgers!"))
         })
@@ -108,9 +109,10 @@ describe('Lambda Handler', function () {
                 .post("/v1/notices/js")
                 .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
+            // @ts-expect-error
             const handler = client.lambdaHandler(async function(_event) {
                 throw new Error("Badgers!")
-            }) as AsyncHandler
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
             try {
                 await handler(mockAwsEvent(), mockAwsContext())
@@ -177,7 +179,7 @@ describe('Lambda Handler', function () {
             return new Promise((done) => {
                 const handler = client.lambdaHandler(function(_event, _context, callback) {
                     callback(null, mockAwsResult({ body: 'works!' }))
-                }) as SyncHandler
+                }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
                 handler(mockAwsEvent(), mockAwsContext(), (err, res) => {
                     expect(res).toBeDefined()
@@ -195,7 +197,7 @@ describe('Lambda Handler', function () {
 
                 const handler = client.lambdaHandler(function(_event, _context, _callback) {
                     throw new Error("Badgers!")
-                }) as SyncHandler
+                }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
                 handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
                     expect(err).toEqual(new Error("Badgers!"))
@@ -213,7 +215,7 @@ describe('Lambda Handler', function () {
 
             const handler = client.lambdaHandler(function(_event, _context, _callback) {
                 throw new Error("Badgers!")
-            }) as SyncHandler
+            }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
             return new Promise(done => {
                 handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
@@ -237,7 +239,7 @@ describe('Lambda Handler', function () {
                 setTimeout(function() {
                     callback(new Error("Badgers!"))
                 }, 0)
-            }) as SyncHandler
+            }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
             return new Promise(done => {
                 handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
@@ -261,7 +263,7 @@ describe('Lambda Handler', function () {
                 setTimeout(function() {
                     callback(new Error("Badgers!"))
                 }, 0)
-            }) as SyncHandler
+            }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
             client.beforeNotify(function (notice: Notice) {
                 notice.context = Object.assign(notice.context, { foo: 'bar' })
