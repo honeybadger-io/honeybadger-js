@@ -4,7 +4,7 @@
   "description": "",
   "main": "handler.js",
   "dependencies": {
-    "@honeybadger-io/js": "git+https://github.com/honeybadger-io/honeybadger-js.git#aws_lambda_async_#677",
+    "@honeybadger-io/js": "^3.2.8",
     "serverless-plugin-include-dependencies": "^5.0.0"
   },
   "devDependencies": {},
