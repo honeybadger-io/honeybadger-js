@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Call afterNotify handlers with error if notify preconditions fail (#654)
 - Call beforeNotify handlers even if preconditions fail (#654)
-- `Honeybadger.lambdaHandler`: return async handler instead of callback based (#677)
+- `Honeybadger.lambdaHandler`: return async or callback based handler based on input handler (#677)
 
 ## [3.2.7] - 2021-11-01
 ### Fixed
