@@ -28,8 +28,6 @@ export function onError(_window: any = window): Plugin {
             return
           }
 
-          if (!client.config.enableUncaught) { return }
-
           if (line === 0 && /Script error\.?/.test(msg)) {
             // See https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror#Notes
             client.logger.info('Ignoring cross-domain script error: enable CORS to track these types of errors', arguments)
@@ -56,7 +54,9 @@ export function onError(_window: any = window): Plugin {
             }
           )
 
-          client.notify(notice)
+          if (client.config.enableUncaught) {
+            client.notify(notice)
+          }
         }
 
         return function (msg, url, line, col, err) {
