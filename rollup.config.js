@@ -1,7 +1,6 @@
 import typescript from '@rollup/plugin-typescript'
 import replace from '@rollup/plugin-replace'
 import resolve from '@rollup/plugin-node-resolve'
-import inject from '@rollup/plugin-inject';
 import { uglify } from 'rollup-plugin-uglify'
 import pkg from './package.json'
 
@@ -17,9 +16,6 @@ const sharedPlugins = [
 
 // These plugins are used for UMD builds
 const umdPlugins = [
-  inject({
-    Promise: ['es6-promise', 'Promise']
-  }),
   ...sharedPlugins,
   typescript({
     tsconfig: './tsconfig.json',
