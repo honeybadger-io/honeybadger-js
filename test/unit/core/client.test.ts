@@ -26,10 +26,10 @@ describe('client', function () {
 
   describe('setPluginsExecuted', function() {
     it('sets the value', function() {
-      client.setPluginsExecuted(true)
+      client.setPluginsExecuted = true
       expect(client.getPluginsExecuted()).toEqual(true)
 
-      client.setPluginsExecuted(false)
+      client.setPluginsExecuted = false
       expect(client.getPluginsExecuted()).toEqual(false)
     })
   })

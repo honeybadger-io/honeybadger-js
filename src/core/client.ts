@@ -102,7 +102,7 @@ export default class Client {
       this.config.reportData = false
     }
     if (!this.getPluginsExecuted()) {
-      this.setPluginsExecuted(true)
+      this.setPluginsExecuted = true
       this.config.__plugins.forEach((plugin) => plugin.load(this))
     }
     return this
@@ -125,9 +125,8 @@ export default class Client {
     return this
   }
 
-  setPluginsExecuted(pluginsExecuted: boolean): Client {
+  set setPluginsExecuted(pluginsExecuted: boolean) {
     this.__pluginsExecuted = pluginsExecuted
-    return this
   }
 
   getPluginsExecuted(): boolean {
