@@ -101,8 +101,8 @@ export default class Client {
       this.logger.log('Deprecation warning: instead of `disabled: true`, use `reportData: false` to explicitly disable Honeybadger reporting.')
       this.config.reportData = false
     }
-    if (!this.__pluginsExecuted) {
-      this.__pluginsExecuted = true
+    if (!this.getPluginsExecuted()) {
+      this.setPluginsExecuted(true)
       this.config.__plugins.forEach((plugin) => plugin.load(this))
     }
     return this
@@ -123,6 +123,15 @@ export default class Client {
       this.__context = merge(this.__context, context)
     }
     return this
+  }
+
+  setPluginsExecuted(pluginsExecuted: boolean): Client {
+    this.__pluginsExecuted = pluginsExecuted
+    return this
+  }
+
+  getPluginsExecuted(): boolean {
+    return this.__pluginsExecuted
   }
 
   resetContext(context?: Record<string, unknown>): Client {

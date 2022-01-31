@@ -24,6 +24,16 @@ describe('client', function () {
     })
   })
 
+  describe('setPluginsExecuted', function() {
+    it('sets the value', function() {
+      client.setPluginsExecuted(true)
+      expect(client.getPluginsExecuted()).toEqual(true)
+
+      client.setPluginsExecuted(false)
+      expect(client.getPluginsExecuted()).toEqual(false)
+    })
+  })
+
   describe('getVersion', function () {
     it('returns the current version', function () {
       expect(client.getVersion()).toEqual('__VERSION__')
