@@ -5,9 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][latest]
-### Changed
-- Remove deprecated `disabled` config option (#671)
-
 ### Added
 - Nodejs: Include source snippet in backtraces when available (#624)
 - `notifyAsync`: Async version of `notify` that returns a promise (#327)
@@ -16,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Call afterNotify handlers with error if notify preconditions fail (#654)
 - Call beforeNotify handlers even if preconditions fail (#654)
 - `Honeybadger.lambdaHandler`: return async or callback based handler based on input handler (#677)
+- Remove deprecated `disabled` config option (#671)
 
 ## [3.2.7] - 2021-11-01
 ### Fixed
