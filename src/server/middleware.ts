@@ -19,14 +19,14 @@ function fullUrl(req: Request): string {
   })
 }
 
-function requestHandler(req: Request, res: Response, next: NextFunction): void {
+export function requestHandler(req: Request, res: Response, next: NextFunction): void {
   this.clear()
   const dom = domain.create()
   dom.on('error', next)
   dom.run(next)
 }
 
-function errorHandler(err: Noticeable, req: Request, _res: Response, next: NextFunction): unknown {
+export function errorHandler(err: Noticeable, req: Request, _res: Response, next: NextFunction): unknown {
   this.notify(err, {
     url:     fullUrl(req),
     params:  req.body,    // http://expressjs.com/en/api.html#req.body
@@ -38,65 +38,4 @@ function errorHandler(err: Noticeable, req: Request, _res: Response, next: NextF
     }
   })
   return next(err)
-}
-
-type LambdaHandler = (event: unknown, context: unknown, callback: unknown) => void|Promise<unknown>
-
-function lambdaHandler(handler: LambdaHandler): LambdaHandler {
-  return function lambdaHandler(event, context, callback) {
-
-    /**
-     * in the case of an async handler, the length of the handler will be less than 3 (no callback function).
-     * if this is the case, we have to explicitly call the callback function from the function we are returning.
-     * we don't have to do that if the handler has third callback function parameter,
-     * because it will be called directly from inside the handler.
-     */
-    const shouldInvokeCallbackExplicitly = handler.length < 3
-
-    /**
-     * this flag prevents an infinite loop in case of an error thrown
-     * inside the domain error handler {@link hbHandler}
-     */
-    let domainErrorHandlerAlreadyCalled = false;
-
-    // eslint-disable-next-line prefer-rest-params
-    const args = arguments
-    const dom = domain.create()
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const hb = this
-
-    const hbHandler = function (err?: Error) {
-      if (domainErrorHandlerAlreadyCalled) {
-         return
-      }
-      domainErrorHandlerAlreadyCalled = true
-      hb.notify(err, {
-        afterNotify: function() {
-          hb.clear()
-          callback(err)
-        }
-      })
-    }
-
-    dom.on('error', hbHandler)
-
-    dom.run(function() {
-      process.nextTick(function() {
-        Promise.resolve(handler.apply(this, args))
-          .then((res?) => {
-            hb.clear()
-            if (shouldInvokeCallbackExplicitly) {
-              callback(null, res)
-            }
-          })
-          .catch(hbHandler)
-      })
-    })
-  }.bind(this)
-}
-
-export {
-  errorHandler,
-  requestHandler,
-  lambdaHandler
 }
