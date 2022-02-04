@@ -331,7 +331,7 @@ describe('client', function () {
     })
 
     it('resolves when configured', async () => {
-      await client.notifyAsync(new Error('test'))
+      await expect(client.notifyAsync(new Error('test'))).resolves.not.toThrow();
     })
 
     it('calls afterNotify from client.afterNotify', async () => {

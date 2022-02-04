@@ -2,7 +2,7 @@ import Honeybadger from '../dist/server/honeybadger'
 
 Honeybadger.configure({
   debug: false,
-    reportData: false,
+  reportData: false,
   endpoint: 'https://api.honeybadger.io',
   projectRoot: 'webpack:///./',
   apiKey: 'project api key',

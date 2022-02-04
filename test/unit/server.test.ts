@@ -174,10 +174,10 @@ describe('server client', function () {
 
     it('resolves after the http request is done', async () => {
       const request = nock('https://api.honeybadger.io')
-          .post('/v1/notices/js')
-          .reply(201, {
-            id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
-          })
+        .post('/v1/notices/js')
+        .reply(201, {
+          id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+        })
 
       await client.notifyAsync('testing')
       expect(request.isDone()).toBe(true)
@@ -185,8 +185,8 @@ describe('server client', function () {
 
     it('rejects on http error', async () => {
       const request = nock('https://api.honeybadger.io')
-          .post('/v1/notices/js')
-          .reply(400)
+        .post('/v1/notices/js')
+        .reply(400)
 
       await expect(client.notifyAsync('testing')).rejects.toThrow(/Bad HTTP response/)
       expect(request.isDone()).toBe(true)
