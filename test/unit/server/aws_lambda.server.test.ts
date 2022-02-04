@@ -91,7 +91,7 @@ describe('Lambda Handler', function () {
         apiKey: null
       })
 
-      const handler = client.lambdaHandler(async function(_event, _context) {
+      const handler = client.lambdaHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(async function(_event, _context) {
         throw new Error("Badgers!")
       }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
@@ -109,7 +109,7 @@ describe('Lambda Handler', function () {
         .post("/v1/notices/js")
         .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 
-      const handler = client.lambdaHandler(async function(_event) {
+      const handler = client.lambdaHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(async function(_event) {
         throw new Error("Badgers!")
       }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
