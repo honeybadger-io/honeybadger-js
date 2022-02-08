@@ -137,14 +137,7 @@ class Honeybadger extends Client {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const client = this
         func.___hb = <WrappedFunc>function () {
-          const onErrorEnabled = client.config.enableUncaught
-          // Catch if:
-          //   1. We explicitly want to catch (i.e. if the error could be
-          //      caught before reaching window.onerror)
-          //   2. The browser provides less information via the window.onerror
-          //      handler
-          //   3. The window.onerror handler is unavailable
-          if (opts.catch || preferCatch || !onErrorEnabled) {
+          if (preferCatch) {
             try {
               // eslint-disable-next-line prefer-rest-params
               return func.apply(this, arguments)
@@ -163,7 +156,9 @@ class Honeybadger extends Client {
                   }
                 }
               )
-              client.notify(err)
+              if (client.config.enableUncaught) {
+                client.notify(err)
+              }
               throw (err)
             }
           } else {
