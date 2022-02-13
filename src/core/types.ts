@@ -30,6 +30,7 @@ export interface Config {
   filters: string[]
   __plugins: Plugin[],
   tags: unknown,
+  store?: HoneybadgerStore,
 }
 
 export interface BeforeNotifyHandler {
@@ -93,4 +94,12 @@ export interface CGIData {
   HTTP_REFERER: string | undefined,
   HTTP_COOKIE: string | undefined,
   [x: string]: unknown
+}
+
+export interface HoneybadgerStore {
+  setContext(context: Record<string, unknown>): void;
+  getContext(): Record<string, unknown>;
+  setBreadcrumbs(breadcrumbs: BreadcrumbRecord[]): void;
+  getBreadcrumbs(): BreadcrumbRecord[];
+  clear(): void;
 }

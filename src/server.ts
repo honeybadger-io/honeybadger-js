@@ -109,5 +109,5 @@ export default new Honeybadger({
   __plugins: [
     uncaughtException(),
     unhandledRejection()
-  ]
+  ],
 })

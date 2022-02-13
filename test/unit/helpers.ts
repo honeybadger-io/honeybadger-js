@@ -15,11 +15,11 @@ export function nullLogger (): Logger {
 export class TestClient extends BaseClient {
 
   public getContext() {
-    return this.__context
+    return this.__store.getContext()
   }
 
   public getBreadcrumbs() {
-    return this.__breadcrumbs
+    return this.__store.getBreadcrumbs()
   }
 
   public getPayload(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined) {
@@ -35,7 +35,7 @@ export class TestClient extends BaseClient {
       }
     })
 
-    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
+    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__store.getBreadcrumbs().slice() : []
 
     // called in (server|browser).__send()
     return this.__buildPayload(notice)

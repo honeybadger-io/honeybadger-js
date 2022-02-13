@@ -22,6 +22,7 @@ describe('client', function () {
       logger: nullLogger(),
       environment: null
     })
+    client.configure()
   })
 
   describe('getVersion', function () {
