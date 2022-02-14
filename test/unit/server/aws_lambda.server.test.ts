@@ -435,7 +435,7 @@ describe('Lambda Handler', function () {
                     setTimeout(() => {
                         api.done()
                         resolve()
-                    }, 500)
+                    }, 50)
                 }
 
                 handler1(mockAwsEvent(), mockAwsContext(), (error, _result) => {

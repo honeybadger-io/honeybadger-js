@@ -97,9 +97,5 @@ export interface CGIData {
 }
 
 export interface HoneybadgerStore {
-  setContext(context: Record<string, unknown>): void;
-  getContext(): Record<string, unknown>;
-  setBreadcrumbs(breadcrumbs: BreadcrumbRecord[]): void;
-  getBreadcrumbs(): BreadcrumbRecord[];
-  clear(): void;
+  getStore(): { context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] };
 }

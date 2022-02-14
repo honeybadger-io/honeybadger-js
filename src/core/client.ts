@@ -112,26 +112,30 @@ export default class Client {
 
   setContext(context: Record<string, unknown>): Client {
     if (typeof context === 'object') {
-      const current = this.__store.getContext()
-      this.__store.setContext(merge(current, context))
+      const store = this.__store.getStore()
+      store.context = merge(store.context, context)
     }
     return this
   }
 
   resetContext(context?: Record<string, unknown>): Client {
     this.logger.warn('Deprecation warning: `Honeybadger.resetContext()` has been deprecated; please use `Honeybadger.clear()` instead.')
+    const store = this.__store.getStore()
+
     if (typeof context === 'object' && context !== null) {
-      this.__store.setContext(context)
+      store.context = context
     }
     else {
-      this.__store.setContext({})
+      store.context = {}
     }
 
     return this
   }
 
   clear(): Client {
-    this.__store.clear();
+    const store = this.__store.getStore()
+    store.context = {}
+    store.breadcrumbs = []
 
     return this
   }
@@ -179,7 +183,7 @@ export default class Client {
       }
     })
 
-    const breadcrumbs = this.__store.getBreadcrumbs()
+    const breadcrumbs = this.__store.getStore().breadcrumbs
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs.slice() : []
 
     // we need to have the source file data before the beforeNotifyHandlers,
@@ -261,7 +265,7 @@ export default class Client {
       return null
     }
 
-    const context = this.__store.getContext()
+    const context = this.__store.getStore().context
     const noticeTags = this.__constructTags(notice.tags)
     const contextTags = this.__constructTags(context["tags"])
     const configTags = this.__constructTags(this.config.tags)
@@ -303,7 +307,8 @@ export default class Client {
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 
-    let breadcrumbs = this.__store.getBreadcrumbs()
+    const store = this.__store.getStore()
+    let breadcrumbs = store.breadcrumbs
     breadcrumbs.push({
       category: category as string,
       message: message,
@@ -315,7 +320,7 @@ export default class Client {
     if (breadcrumbs.length > limit) {
       breadcrumbs = breadcrumbs.slice(breadcrumbs.length - limit)
     }
-    this.__store.setBreadcrumbs(breadcrumbs)
+    store.breadcrumbs = breadcrumbs
 
     return this
   }

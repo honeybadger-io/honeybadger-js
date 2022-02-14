@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Honeybadger from '../core/client'
-import { AsyncLocalStorage } from 'async_hooks'
 // eslint-disable-next-line import/no-unresolved
 import { Handler, Callback, Context } from 'aws-lambda'
-import { BreadcrumbRecord } from "../core/types";
 import { AsyncStore } from "./async-store";
 
 export type SyncHandler<TEvent = any, TResult = any> = (
@@ -32,10 +30,9 @@ function reportToHoneybadger(hb: Honeybadger, err: Error | string | null, callba
 
 function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
     return (event, context) => {
-        const asyncStorage = new AsyncLocalStorage<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>()
-        hb.configure({store: new AsyncStore(asyncStorage)})
+        hb.configure({store: AsyncStore})
         return new Promise<TResult>((resolve, reject) => {
-            asyncStorage.run({context: {}, breadcrumbs: []}, () => {
+            AsyncStore.run({context: {}, breadcrumbs: []}, () => {
                 try {
                     handler(event, context)
                         .then(resolve)
@@ -50,9 +47,8 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
 
 function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
     return (event, context, cb) => {
-        const asyncStorage = new AsyncLocalStorage<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>()
-        hb.configure({store: new AsyncStore(asyncStorage)})
-        asyncStorage.run({context: {}, breadcrumbs: []}, () => {
+        hb.configure({store: AsyncStore})
+        AsyncStore.run({context: {}, breadcrumbs: []}, () => {
             try {
                 handler(event, context, (error, result) => {
                     if (error) {
