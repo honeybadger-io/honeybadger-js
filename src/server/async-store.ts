@@ -1,4 +1,4 @@
 import { AsyncLocalStorage } from 'async_hooks'
-import { BreadcrumbRecord, HoneybadgerStore } from "../core/types"
+import { BreadcrumbRecord } from "../core/types"
 
-export const AsyncStore: HoneybadgerStore = new AsyncLocalStorage<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>()
+export const AsyncStore = new AsyncLocalStorage<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>()
