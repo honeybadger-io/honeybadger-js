@@ -287,5 +287,16 @@ describe('utils', function () {
         ).toEqual({})
       })
     }
+
+    it('handles other errors', function () {
+      const obj = []
+      // This will cause the map operation to blow up
+      obj.map = () => { throw(new Error("expected error")) }
+      expect(
+        sanitize({ obj: obj })
+      ).toEqual(
+        { obj: `[ERROR] Error: expected error` }
+      )
+    })
   })
 })
