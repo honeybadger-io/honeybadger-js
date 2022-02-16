@@ -168,7 +168,7 @@ export function sanitize(obj, maxDepth = 8) {
 
     // Serialize inside arrays
     if (Array.isArray(obj)) {
-      return obj.map(o => serialize(o, depth + 1))
+      return obj.map(o => safeSerialize(o, depth + 1))
     }
 
     // Serialize inside objects
@@ -177,7 +177,7 @@ export function sanitize(obj, maxDepth = 8) {
       for (const k in obj) {
         const v = obj[k]
         if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
-          ret[k] = serialize(v, depth + 1)
+          ret[k] = safeSerialize(v, depth + 1)
         }
       }
       return ret
@@ -187,7 +187,15 @@ export function sanitize(obj, maxDepth = 8) {
     return obj
   }
 
-  return serialize(obj)
+  function safeSerialize(obj: unknown, depth = 0) {
+    try {
+      return serialize(obj, depth)
+    } catch(e) {
+      return `[ERROR] ${e}`
+    }
+  }
+
+  return safeSerialize(obj)
 }
 
 export function logger(client: Client): Logger {

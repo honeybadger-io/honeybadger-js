@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove deprecated `disabled` config option (#671)
 - Apply `enableUncaught` setting to timers and event listeners (#690)
 
+## [3.2.8] - 2022-02-15
+### Fixed
+- Catch unknown errors in data sanitizer
+
 ## [3.2.7] - 2021-11-01
 ### Fixed
 - Call lambda handler callback with result if user-defined handler is async (#648) 
