@@ -24,10 +24,10 @@ const notifier = {
   version: '__VERSION__'
 }
 
-// Split at commas
+// Split at commas and spaces
 const TAG_SEPARATOR = /,|\s/
 
-// Removes any non-word characters
+// Removes extra whitespace from individual tags
 const TAG_SANITIZER = /\s/g
 
 // Checks for blank strings
@@ -246,7 +246,7 @@ export default class Client {
 
     if (name && !(typeof name === 'object')) {
       const n = String(name)
-      name = {name: n}
+      name = { name: n }
     }
 
     if (name) {
