@@ -25,10 +25,10 @@ const notifier = {
 }
 
 // Split at commas
-const TAG_SEPARATOR = /,/
+const TAG_SEPARATOR = /,|\s/
 
 // Removes any non-word characters
-const TAG_SANITIZER = /[^\w]/g
+const TAG_SANITIZER = /\s/g
 
 // Checks for blank strings
 const STRING_EMPTY = ''
