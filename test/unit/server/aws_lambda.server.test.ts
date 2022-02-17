@@ -129,7 +129,6 @@ describe('Lambda Handler', function () {
             })
         })
 
-        // eslint-disable-next-line jest/expect-expect
         it('reports async errors to Honeybadger', async function () {
             client.configure({
                 apiKey: 'testing'
@@ -164,7 +163,7 @@ describe('Lambda Handler', function () {
             })
         })
 
-        it('isolates context only to a single lambdaHandler', async () => {
+        it('reports two errors for two failing lambdaHandlers with separate context', async () => {
             client.configure({
                 apiKey: 'testing'
             })
@@ -215,7 +214,7 @@ describe('Lambda Handler', function () {
             })
         });
 
-        it('isolates breadcrumbs only to a single lambdaHandler', async () => {
+        it('reports two errors for two failing lambdaHandlers with separate breadcrumbs', async () => {
             client.configure({
                 apiKey: 'testing'
             })
@@ -261,6 +260,50 @@ describe('Lambda Handler', function () {
                 }, 50)
             })
         })
+
+        it('reports error for one failing lambdaHandler (two in total) with separate context', async () => {
+            client.configure({
+                apiKey: 'testing'
+            })
+
+            nock.cleanAll()
+
+            const api = nock("https://api.honeybadger.io")
+                .post("/v1/notices/js")
+                .times(1)
+                .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+            client.afterNotify((err, notice) => {
+                expect(err).toBeUndefined()
+                expect(notice.message).toEqual('Badgers 2!')
+                // eslint-disable-next-line jest/no-conditional-expect
+                expect(notice.context.handler).toEqual(2)
+                // eslint-disable-next-line jest/no-conditional-expect
+                expect(notice.context.valueOnlyPresentInOneHandler).toBeUndefined()
+            })
+
+            // @ts-expect-error
+            const handler1 = client.lambdaHandler(async function (_event) {
+                client.setContext({handler: 1, valueOnlyPresentInOneHandler: 'badgers 1'})
+                return 'done!';
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+
+            // @ts-expect-error
+            const handler2 = client.lambdaHandler(async function (_event) {
+                client.setContext({handler: 2})
+                throw new Error("Badgers 2!")
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+
+            await expect(handler1(mockAwsEvent(), mockAwsContext())).resolves.not.toThrow()
+            await expect(handler2(mockAwsEvent(), mockAwsContext())).rejects.toEqual(new Error("Badgers 2!"))
+
+            return new Promise<void>(resolve => {
+                setTimeout(() => {
+                    api.done()
+                    resolve()
+                }, 50)
+            })
+        });
     })
 
     describe('non-async handlers', function () {
@@ -383,7 +426,7 @@ describe('Lambda Handler', function () {
             })
         })
 
-        it('isolates context only to a single lambdaHandler', function () {
+        it('reports two errors for two failing lambdaHandlers with separate context', function () {
             client.configure({
                 apiKey: 'testing'
             })
@@ -451,7 +494,7 @@ describe('Lambda Handler', function () {
             })
         });
 
-        it('isolates breadcrumbs only to a single lambdaHandler', function () {
+        it('reports two errors for two failing lambdaHandlers with separate breadcrumbs', function () {
             client.configure({
                 apiKey: 'testing'
             })
@@ -514,5 +557,63 @@ describe('Lambda Handler', function () {
                 })
             })
         })
+
+        it('reports error for one failing lambdaHandler (two in total) with separate context', function () {
+            client.configure({
+                apiKey: 'testing'
+            })
+
+            nock.cleanAll()
+
+            const api = nock("https://api.honeybadger.io")
+                .post("/v1/notices/js")
+                .times(1)
+                .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+
+            client.afterNotify((err, notice) => {
+                expect(err).toBeUndefined()
+                expect(notice.message).toEqual('Badgers 2!')
+                expect(notice.context.handler).toEqual(2)
+                expect(notice.context.valueOnlyPresentInOneHandler).toBeUndefined()
+            })
+
+            const handler1 = client.lambdaHandler(function (_event, _context, callback) {
+                client.setContext({handler: 1, valueOnlyPresentInOneHandler: 'badgers 1'})
+                setTimeout(function () {
+                    callback(null, 'done!')
+                }, 0)
+            }) as SyncHandler<APIGatewayProxyEvent, string>
+
+            const handler2 = client.lambdaHandler(function (_event, _context, callback) {
+                client.setContext({handler: 2})
+                setTimeout(function () {
+                    callback(new Error("Badgers 2!"))
+                }, 0)
+            }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+
+            return new Promise<void>((resolve) => {
+                let reports = 0
+                const done = () => {
+                    reports++
+                    if (reports !== 2) {
+                        return
+                    }
+                    setTimeout(() => {
+                        api.done()
+                        resolve()
+                    }, 50)
+                }
+
+                handler1(mockAwsEvent(), mockAwsContext(), (error, _result) => {
+                    expect(error).toBeNull()
+                    done()
+                })
+                handler2(mockAwsEvent(), mockAwsContext(), (error, _result) => {
+                    expect(error).toBeDefined()
+                    expect((error as Error).message).toEqual('Badgers 2!')
+                    done()
+                })
+            })
+        });
     })
 })
