@@ -2,7 +2,7 @@
 import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
 import { Handler, Callback, Context } from 'aws-lambda'
-import { AsyncStore } from "./async-store";
+import { AsyncStore } from "./async_store";
 
 export type SyncHandler<TEvent = any, TResult = any> = (
     event: TEvent,
