@@ -29,6 +29,11 @@ const initNock = (expectedTimes = 1): nock.Scope => {
         .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 }
 
+const getNodeJsVersion = () => {
+    const version = process.version.split('.')[0]
+    return +version
+}
+
 describe('Lambda Handler', function () {
     let client: typeof Singleton;
 
@@ -161,6 +166,10 @@ describe('Lambda Handler', function () {
         })
 
         describe('AsyncStore', function () {
+            if (getNodeJsVersion() < 12) {
+                return
+            }
+
             /**
              * In this section, we are trying to simulate
              * the scenario where lambdaHandlers are being executed simultaneously
@@ -492,6 +501,10 @@ describe('Lambda Handler', function () {
         })
 
         describe('AsyncStore', function () {
+            if (getNodeJsVersion() < 12) {
+                return
+            }
+
             it('reports two errors for two failing lambdaHandlers with separate context', function () {
                 client.configure({
                     apiKey: 'testing'
