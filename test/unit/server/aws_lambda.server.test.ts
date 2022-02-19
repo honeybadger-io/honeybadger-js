@@ -34,6 +34,8 @@ const getNodeJsVersion = () => {
     return +version
 }
 
+const describeIf = getNodeJsVersion() < 12 ? describe.skip : describe;
+
 describe('Lambda Handler', function () {
     let client: typeof Singleton;
 
@@ -165,11 +167,7 @@ describe('Lambda Handler', function () {
             })
         })
 
-        describe('AsyncStore', function () {
-            if (getNodeJsVersion() < 12) {
-                return
-            }
-
+        describeIf('AsyncStore', function () {
             /**
              * In this section, we are trying to simulate
              * the scenario where lambdaHandlers are being executed simultaneously
@@ -500,11 +498,7 @@ describe('Lambda Handler', function () {
             })
         })
 
-        describe('AsyncStore', function () {
-            if (getNodeJsVersion() < 12) {
-                return
-            }
-
+        describeIf('AsyncStore', function () {
             it('reports two errors for two failing lambdaHandlers with separate context', function () {
                 client.configure({
                     apiKey: 'testing'
