@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - AsyncLocalStorage for AWS Lambda Handler (#688)
 
+### Changed
+- Name wrapped Lambda handlers for better stack traces (#700)
+
 ## [4.0.0-beta.0] - 2022-02-08
 ### Added
 - Nodejs: Include source snippet in backtraces when available (#624)
@@ -19,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Honeybadger.lambdaHandler`: return async or callback based handler based on input handler (#677)
 - Remove deprecated `disabled` config option (#671)
 - Apply `enableUncaught` setting to timers and event listeners (#690)
+
+## [3.2.8] - 2022-02-15
+### Fixed
+- Catch unknown errors in data sanitizer
 
 ## [3.2.7] - 2021-11-01
 ### Fixed
