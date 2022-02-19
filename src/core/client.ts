@@ -15,7 +15,15 @@ import {
   runAfterNotifyHandlers
 } from './util'
 import {
-  Config, Logger, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable, HoneybadgerStore, BacktraceFrame
+  Config,
+  Logger,
+  BeforeNotifyHandler,
+  AfterNotifyHandler,
+  Notice,
+  Noticeable,
+  HoneybadgerStore,
+  BacktraceFrame,
+  BreadcrumbRecord
 } from './types'
 import { DefaultStore } from "./store";
 
@@ -40,7 +48,7 @@ const NOT_BLANK = /\S/
 export default class Client {
   private __pluginsExecuted = false
 
-  protected __store: HoneybadgerStore = null;
+  protected __store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }> = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
   protected __getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void
@@ -95,7 +103,7 @@ export default class Client {
       this.config.__plugins.forEach((plugin) => plugin.load(this))
     }
 
-    this.__store = opts.store || new DefaultStore()
+    this.__store = opts.store || new DefaultStore({ context: {}, breadcrumbs: [] })
 
     return this
   }

@@ -31,7 +31,7 @@ export interface Config {
   filters: string[]
   __plugins: Plugin[],
   tags: unknown,
-  store?: HoneybadgerStore,
+  store?: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>,
 }
 
 export interface BeforeNotifyHandler {
@@ -97,4 +97,4 @@ export interface CGIData {
   [x: string]: unknown
 }
 
-export type HoneybadgerStore = Pick<AsyncLocalStorage<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>, 'getStore'>
+export type HoneybadgerStore<T> = Pick<AsyncLocalStorage<T>, 'getStore' | 'run'>

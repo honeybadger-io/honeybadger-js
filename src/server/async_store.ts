@@ -1,4 +1,15 @@
-import { AsyncLocalStorage } from 'async_hooks'
-import { BreadcrumbRecord } from "../core/types"
+import { BreadcrumbRecord, HoneybadgerStore } from "../core/types"
 
-export const AsyncStore = new AsyncLocalStorage<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>()
+let Store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[]; }>
+try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { AsyncLocalStorage } = require('async_hooks')
+    Store = new AsyncLocalStorage()
+}
+catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { DefaultStore } = require('../core/store')
+    Store = new DefaultStore()
+}
+
+export const AsyncStore = Store

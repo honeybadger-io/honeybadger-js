@@ -1,16 +1,18 @@
-import { BreadcrumbRecord, HoneybadgerStore } from "./types";
+import { HoneybadgerStore } from "./types";
 
-export class DefaultStore implements HoneybadgerStore {
-    private store: { context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[]; }
+export class DefaultStore<T> implements HoneybadgerStore<T> {
+    private store: T
 
-    constructor() {
-        this.store = {
-            context: {},
-            breadcrumbs: []
-        }
+    constructor(store: T) {
+        this.store = store;
     }
 
-    getStore(): { context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] } {
+    getStore(): T {
         return this.store
+    }
+
+    run(store: T, callback: (...args: never[]) => void, args: never): void {
+        this.store = store
+        callback(args)
     }
 }
