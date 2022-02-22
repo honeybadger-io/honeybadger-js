@@ -19,7 +19,7 @@ function isHandlerSync(handler: Handler): handler is SyncHandler {
 }
 
 function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
-    return async (event, context) => {
+    return async function wrappedLambdaHandler(event, context) {
         try {
             return await handler(event, context)
         }
@@ -37,7 +37,7 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
 }
 
 function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
-    return (event, context, cb) => {
+    return function wrappedLambdaHandler(event, context, cb) {
         const hbHandler = (err: Error | string | null) => {
             hb.notify(err, {
                 afterNotify: function () {

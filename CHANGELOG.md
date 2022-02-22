@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow special characters in tags. Also support space-delimited tags:
   "one two three" and "one, two, three" are equivalent
 
+### Changed
+- Name wrapped Lambda handlers for better stack traces (#700)
+
 ## [4.0.0-beta.0] - 2022-02-08
 ### Added
 - Nodejs: Include source snippet in backtraces when available (#624)
