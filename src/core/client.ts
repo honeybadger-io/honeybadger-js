@@ -25,13 +25,7 @@ const notifier = {
 }
 
 // Split at commas and spaces
-const TAG_SEPARATOR = /,|\s/
-
-// Removes extra whitespace from individual tags
-const TAG_SANITIZER = /\s/g
-
-// Checks for blank strings
-const STRING_EMPTY = ''
+const TAG_SEPARATOR = /,|\s+/
 
 // Checks for non-blank characters
 const NOT_BLANK = /\S/
@@ -374,8 +368,6 @@ export default class Client {
       return []
     }
 
-    return tags.toString().split(TAG_SEPARATOR).map((tag: string) => {
-      return tag.replace(TAG_SANITIZER, STRING_EMPTY)
-    }).filter((tag) => NOT_BLANK.test(tag))
+    return tags.toString().split(TAG_SEPARATOR).filter((tag) => NOT_BLANK.test(tag))
   }
 }
