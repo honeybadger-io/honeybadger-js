@@ -24,14 +24,8 @@ const notifier = {
   version: '__VERSION__'
 }
 
-// Split at commas
-const TAG_SEPARATOR = /,/
-
-// Removes any non-word characters
-const TAG_SANITIZER = /[^\w]/g
-
-// Checks for blank strings
-const STRING_EMPTY = ''
+// Split at commas and spaces
+const TAG_SEPARATOR = /,|\s+/
 
 // Checks for non-blank characters
 const NOT_BLANK = /\S/
@@ -246,7 +240,7 @@ export default class Client {
 
     if (name && !(typeof name === 'object')) {
       const n = String(name)
-      name = {name: n}
+      name = { name: n }
     }
 
     if (name) {
@@ -374,8 +368,6 @@ export default class Client {
       return []
     }
 
-    return tags.toString().split(TAG_SEPARATOR).map((tag: string) => {
-      return tag.replace(TAG_SANITIZER, STRING_EMPTY)
-    }).filter((tag) => NOT_BLANK.test(tag))
+    return tags.toString().split(TAG_SEPARATOR).filter((tag) => NOT_BLANK.test(tag))
   }
 }
