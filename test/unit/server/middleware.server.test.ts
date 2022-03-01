@@ -15,6 +15,7 @@ describe('Express Middleware', function () {
             logger: nullLogger(),
             environment: null
         })
+        client.configure()
         client_mock = mock(client)
     })
 

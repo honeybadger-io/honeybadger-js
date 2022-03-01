@@ -2,6 +2,7 @@
 import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
 import { Handler, Callback, Context } from 'aws-lambda'
+import { AsyncStore } from "./async_store";
 
 export type SyncHandler<TEvent = any, TResult = any> = (
     event: TEvent,
@@ -18,46 +19,48 @@ function isHandlerSync(handler: Handler): handler is SyncHandler {
     return handler.length > 2
 }
 
+function reportToHoneybadger(hb: Honeybadger, err: Error | string | null, callback: (err: Error | string | null) => void) {
+    hb.notify(err, {
+        afterNotify: function () {
+            hb.clear()
+            callback(err)
+        }
+    })
+}
+
 function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
-    return async function wrappedLambdaHandler(event, context) {
-        try {
-            return await handler(event, context)
-        }
-        catch (err) {
-            return new Promise((_, reject) => {
-                hb.notify(err, {
-                    afterNotify: function () {
-                        hb.clear()
-                        reject(err)
-                    }
-                })
+    return function wrappedLambdaHandler(event, context) {
+        hb.configure({store: AsyncStore})
+        return new Promise<TResult>((resolve, reject) => {
+            AsyncStore.run({context: {}, breadcrumbs: []}, () => {
+                try {
+                    handler(event, context)
+                        .then(resolve)
+                        .catch(err => reportToHoneybadger(hb, err, reject))
+                } catch (err) {
+                    reportToHoneybadger(hb, err, reject)
+                }
             })
-        }
+        })
     }
 }
 
 function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
     return function wrappedLambdaHandler(event, context, cb) {
-        const hbHandler = (err: Error | string | null) => {
-            hb.notify(err, {
-                afterNotify: function () {
-                    hb.clear()
-                    cb(err)
-                }
-            })
-        }
+        hb.configure({store: AsyncStore})
+        AsyncStore.run({context: {}, breadcrumbs: []}, () => {
+            try {
+                handler(event, context, (error, result) => {
+                    if (error) {
+                        return reportToHoneybadger(hb, error, cb)
+                    }
 
-        try {
-            handler(event, context, (error, result) => {
-                if (error) {
-                    return hbHandler(error)
-                }
-
-                cb(null, result)
-            });
-        } catch (err) {
-            hbHandler(err)
-        }
+                    cb(null, result)
+                });
+            } catch (err) {
+                reportToHoneybadger(hb, err, cb)
+            }
+        })
     }
 }
 
@@ -72,6 +75,7 @@ export function lambdaHandler<TEvent = any, TResult = any>(handler: Handler<TEve
 }
 
 let listenerRemoved = false
+
 /**
  * Removes AWS Lambda default listener that
  * exits the process before letting us report to honeybadger.

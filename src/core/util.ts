@@ -95,7 +95,7 @@ export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeN
 
 export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNotifyHandler[], error?: Error): boolean {
   if (notice && notice.afterNotify) {
-    handlers.unshift(notice.afterNotify)
+    notice.afterNotify(error, notice)
   }
 
   for (let i = 0, len = handlers.length; i < len; i++) {
