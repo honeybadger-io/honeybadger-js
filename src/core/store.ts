@@ -1,6 +1,6 @@
 import { HoneybadgerStore } from "./types";
 
-export class DefaultStore<T> implements HoneybadgerStore<T> {
+export class GlobalStore<T> implements HoneybadgerStore<T> {
     private store: T
 
     constructor(store: T) {

@@ -8,8 +8,8 @@ try {
 }
 catch (e) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { DefaultStore } = require('../core/store')
-    Store = new DefaultStore()
+    const { GlobalStore } = require('../core/store')
+    Store = new GlobalStore()
 }
 
 export const AsyncStore = Store

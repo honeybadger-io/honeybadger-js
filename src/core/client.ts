@@ -25,7 +25,7 @@ import {
   BacktraceFrame,
   BreadcrumbRecord
 } from './types'
-import { DefaultStore } from "./store";
+import { GlobalStore } from "./store";
 
 const notifier = {
   name: 'honeybadger-js',
@@ -77,9 +77,9 @@ export default class Client {
       ...opts,
     }
 
-    // First, we go with the default (shared) store.
+    // First, we go with the global (shared) store.
     // Webserver middleware can then switch to the AsyncStore for async context tracking.
-    this.__store = new DefaultStore({ context: {}, breadcrumbs: [] })
+    this.__store = new GlobalStore({ context: {}, breadcrumbs: [] })
     this.logger = logger(this)
   }
 
