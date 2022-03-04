@@ -77,6 +77,9 @@ export default class Client {
       ...opts,
     }
 
+    // First, we go with the default (shared) store.
+    // Webserver middleware can then switch to the AsyncStore for async context tracking.
+    this.__store = new DefaultStore({ context: {}, breadcrumbs: [] })
     this.logger = logger(this)
   }
 
@@ -97,9 +100,12 @@ export default class Client {
       this.config.__plugins.forEach((plugin) => plugin.load(this))
     }
 
-    this.__store = opts.store || new DefaultStore({ context: {}, breadcrumbs: [] })
-
     return this
+  }
+
+  /** @internal */
+  __setStore(store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>) {
+    this.__store = store
   }
 
   beforeNotify(handler: BeforeNotifyHandler): Client {
@@ -185,7 +191,7 @@ export default class Client {
       }
     })
 
-    const breadcrumbs = this.__store.getStore().breadcrumbs
+    const breadcrumbs = this.__getStoreOrDefaultValues().breadcrumbs
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs.slice() : []
 
     // we need to have the source file data before the beforeNotifyHandlers,
@@ -267,7 +273,7 @@ export default class Client {
       return null
     }
 
-    const context = this.__store.getStore().context
+    const context = this.__getStoreOrDefaultValues().context
     const noticeTags = this.__constructTags(notice.tags)
     const contextTags = this.__constructTags(context["tags"])
     const configTags = this.__constructTags(this.config.tags)
@@ -382,5 +388,17 @@ export default class Client {
     }
 
     return tags.toString().split(TAG_SEPARATOR).filter((tag) => NOT_BLANK.test(tag))
+  }
+
+  /**
+   * For ALS, the store may be uninitialized (if .run()` has not been called).
+   * This provides an easy way to read the existing stored values or fall back to defaults.
+   * Returns *a copy* of the store.
+   * @internal
+   */
+  protected __getStoreOrDefaultValues(): {context: Record<string, unknown>, breadcrumbs: BreadcrumbRecord[]} {
+    const existingStore = this.__store.getStore();
+    const store = existingStore || {};
+    return Object.assign({}, {context: {}, breadcrumbs: []}, store);
   }
 }

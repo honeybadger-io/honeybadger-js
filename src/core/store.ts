@@ -11,8 +11,9 @@ export class DefaultStore<T> implements HoneybadgerStore<T> {
         return this.store
     }
 
-    run(store: T, callback: (...args: never[]) => void, args: never): void {
-        this.store = store
-        callback(args)
+    // eslint-disable @typescript-eslint/no-explicit-any
+    run<R, TArgs extends any[]>(store: T, callback: (...args: TArgs) => R, ...args: TArgs): R {
+        this.store = store;
+        return callback(...args);
     }
 }
