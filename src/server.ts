@@ -107,31 +107,24 @@ class Honeybadger extends Client {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public run<R>(handler: (...args: never[]) => R, onError: (arg: any) => never): R|void {
+  public run<R>(handler: (...args: never[]) => R, onError?: (...args: any[]) => any): R|void {
+    const storeObject = this.__getStoreOrDefaultObject();
     this.__setStore(AsyncStore)
-    const existingStore = this.__getStoreOrDefaultValues();
 
-    return this.__store.run(existingStore, () => {
-      if (onError) {
-        // ALS is fine for context-tracking, but `domain` allows us to catch errors
-        // thrown asynchronously (timers, event emitters)
-        // We can't use unhandledRejection/uncaughtException listeners; they're global and shared across all requests
-        // But the `onError` handler might be request-specific.
-        // But this doesn't solve all issues.
-        // `domain` has its own problems: https://nodejs.org/en/docs/guides/domain-postmortem/, https://nodejs.org/api/domain.html#domain
-        const dom = domain.create();
-        dom.on('error', onError);
-        dom.run(() => {
-          try {
-            handler()
-          } catch (e) {
-            onError(e)
-          }
-        });
-      } else {
-        return handler();
-      }
-    });
+    if (onError) {
+      // ALS is fine for context-tracking, but `domain` allows us to catch errors
+      // thrown asynchronously (timers, event emitters)
+      // We can't use unhandledRejection/uncaughtException listeners; they're global and shared across all requests
+      // But the `onError` handler might be request-specific.
+      // Note that this doesn't still handle all cases. `domain` has its own problems:
+      // See https://github.com/honeybadger-io/honeybadger-js/pull/711
+      const dom = domain.create();
+      const onErrorWithContext = (err) => this.__store.run(storeObject, () => onError(err));
+      dom.on('error', onErrorWithContext);
+      handler = dom.bind(handler);
+    }
+
+    return this.__store.run(storeObject, handler);
   }
 }
 

@@ -206,40 +206,19 @@ describe('server client', function () {
       }
     })
 
-    it('captures synchronous errors with the right context', async () => {
-      client.run(() => client.setContext({a: true}), errorHandler)
-      client.run(() => {
-        client.setContext({b: true})
-        throw new Error("Oh no")
-      }, errorHandler)
-
-      expect(err.message).toStrictEqual("Oh no");
-      expect(context).toStrictEqual({b: true});
-    });
-
-    it('captures Promise rejections with the right context', async () => {
-      client.run(() => client.setContext({a: true}), errorHandler)
-      client.run(() => {
-        client.setContext({b: true})
-        Promise.reject(new Error("Oh no"))
-      }, errorHandler)
-
-      expect(err.message).toStrictEqual("Oh no");
-      expect(context).toStrictEqual({b: true});
-    });
-
+    // eslint-disable-next-line
     it('captures errors in timers with the right context', (done) => {
       client.run(() => client.setContext({a: true}), errorHandler)
       client.run(() => {
         client.setContext({b: true})
-        setTimeout(() => { throw new Error("Oh no") }, 100)
+        setTimeout(() => { throw new Error("Oh no") }, 10)
       }, errorHandler)
 
       setTimeout(() => {
         expect(err.message).toStrictEqual("Oh no");
         expect(context).toStrictEqual({b: true});
         done();
-      }, 0);
+      }, 20);
     });
   })
 })

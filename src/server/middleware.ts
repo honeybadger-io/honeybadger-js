@@ -19,7 +19,7 @@ function fullUrl(req: Request): string {
 }
 
 export function requestHandler(req: Request, res: Response, next: NextFunction): void {
-    this.run(next, next)
+  this.run(next, next)
 }
 
 export function errorHandler(err: Noticeable, req: Request, _res: Response, next: NextFunction): unknown {
