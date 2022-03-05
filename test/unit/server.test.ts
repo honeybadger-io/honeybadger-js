@@ -194,20 +194,20 @@ describe('server client', function () {
   })
 
   describe('run', function () {
-    let context, err, errorHandler;
-
     beforeEach(() => {
       client.configure({
         apiKey: 'testing'
       })
-      errorHandler = (e) => {
-        err = e;
-        context = client.__store.getStore().context;
-      }
     })
 
     // eslint-disable-next-line
     it('captures errors in timers with the right context', (done) => {
+      let context, err;
+      const errorHandler = (e) => {
+        err = e;
+        context = client.__store.getStore().context;
+      }
+
       client.run(() => client.setContext({a: true}), errorHandler)
       client.run(() => {
         client.setContext({b: true})
