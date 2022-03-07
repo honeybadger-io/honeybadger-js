@@ -295,6 +295,22 @@ describe('client', function () {
       expect(payload.request.context).toEqual({ foo: 'foo', bar: 'bar' })
     })
 
+    it('properly handles Error-prototype objects', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const error = {};
+      Object.setPrototypeOf(error, new TypeError("Some error message"))
+
+      expect(client.notify(error)).toEqual(true)
+      const payload = client.getPayload(error)
+      expect(payload.error.class).toEqual('TypeError')
+      expect(payload.error.message).toEqual('Some error message')
+      // @ts-ignore
+      expect(payload.error.backtrace.length).toBeGreaterThan(0)
+    })
+
     it('generates a backtrace when there isn\'t one', function () {
       client.configure({
         apiKey: 'testing'
