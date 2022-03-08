@@ -115,7 +115,7 @@ class Honeybadger extends Client {
         runAfterNotifyHandlers(merge(notice, {
           id: uuid
         }), this.__afterNotifyHandlers)
-        this.logger.debug(`Success ⚡ https://app.honeybadger.io/notice/${uuid}`)
+        this.logger.debug(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
       }
     } catch (err) {
       runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
