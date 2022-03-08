@@ -143,6 +143,8 @@ export default class Client {
   }
 
   notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
+    this.logger.info("Reporting error")
+
     let preConditionError: Error = null
     const notice = this.makeNotice(noticeable, name, extra)
     if (!notice) {
