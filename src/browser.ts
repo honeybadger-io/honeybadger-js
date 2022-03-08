@@ -111,10 +111,11 @@ class Honeybadger extends Client {
           this.logger.debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice)
           return
         }
+        const uuid = JSON.parse(x.response).id
         runAfterNotifyHandlers(merge(notice, {
-          id: JSON.parse(x.response).id
+          id: uuid
         }), this.__afterNotifyHandlers)
-        this.logger.debug('Error report sent', notice)
+        this.logger.debug(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
       }
     } catch (err) {
       runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
