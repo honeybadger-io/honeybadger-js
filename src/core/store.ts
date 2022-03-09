@@ -11,8 +11,7 @@ export class GlobalStore<T> implements HoneybadgerStore<T> {
         return this.store
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    run<R, TArgs extends any[]>(store: T, callback: (...args: TArgs) => R, ...args: TArgs): R {
+    run<R, TArgs extends never[]>(store: T, callback: (...args: TArgs) => R, ...args: TArgs): R {
         this.store = store;
         return callback(...args);
     }

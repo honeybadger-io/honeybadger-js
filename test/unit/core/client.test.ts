@@ -348,7 +348,11 @@ describe('client', function () {
     })
 
     it('resolves when configured', async () => {
-      await client.notifyAsync(new Error('test'))
+      let called = false
+      await client.notifyAsync(new Error('test')).then(() => {
+        called = true
+      })
+      expect(called).toBeTruthy()
     })
 
     it('calls afterNotify from client.afterNotify', async () => {

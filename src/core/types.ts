@@ -31,7 +31,6 @@ export interface Config {
   filters: string[]
   __plugins: Plugin[],
   tags: unknown,
-  store?: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>,
 }
 
 export interface BeforeNotifyHandler {
