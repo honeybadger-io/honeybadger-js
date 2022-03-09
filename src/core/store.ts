@@ -1,6 +1,6 @@
 import { HoneybadgerStore } from "./types";
 
-export class DefaultStore<T> implements HoneybadgerStore<T> {
+export class GlobalStore<T> implements HoneybadgerStore<T> {
     private store: T
 
     constructor(store: T) {
@@ -11,8 +11,8 @@ export class DefaultStore<T> implements HoneybadgerStore<T> {
         return this.store
     }
 
-    run(store: T, callback: (...args: never[]) => void, args: never): void {
-        this.store = store
-        callback(args)
+    run<R, TArgs extends never[]>(store: T, callback: (...args: TArgs) => R, ...args: TArgs): R {
+        this.store = store;
+        return callback(...args);
     }
 }

@@ -1,4 +1,4 @@
-import { Plugin } from '../../core/types'
+import { Plugin, Noticeable } from '../../core/types'
 import Client from '../../server'
 
 export default function (): Plugin {
@@ -8,7 +8,7 @@ export default function (): Plugin {
 
       process.on('unhandledRejection', function (reason, _promise) {
         if (!client.config.enableUnhandledRejection) { return }
-        client.notify(reason, {component: 'unhandledRejection'})
+        client.notify(reason as Noticeable, {component: 'unhandledRejection'})
       })
     }
   }

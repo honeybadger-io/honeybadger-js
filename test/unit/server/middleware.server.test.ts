@@ -94,24 +94,31 @@ describe('Express Middleware', function () {
             })
     })
 
-    it('resets context between requests', function() {
+    it('does not leak context between requests', function() {
         const app = express()
 
         app.use(client.requestHandler)
 
-        app.get('/', function(_req, res) {
-            res.send('Hello World!')
-        })
+        app.get("/:reqId", (req, res) => {
+            const initialContext = client.__store.getStore().context;
+            client.setContext({ reqId: req.params.reqId });
+            setTimeout(() => {
+                res.json({
+                    initial: initialContext,
+                    final: client.__store.getStore().context
+                });
+            }, 1000);
+        });
 
         app.use(client.errorHandler)
 
-        client_mock.expects('clear').once()
-
-        return request(app)
-            .get('/')
-            .expect(200)
-            .then(() => {
-                expect(client_mock.verify()).toBeTruthy()
-            })
+        return Promise.all([1, 2].map((i) => {
+            return request(app).get(`/${i}`)
+                .expect(200)
+                .then((response) => {
+                    const expectedContexts = {initial: {}, final: {reqId: `${i}`}}
+                    expect(response.body).toStrictEqual(expectedContexts)
+                })
+        }));
     })
 })

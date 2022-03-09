@@ -28,7 +28,7 @@ describe('makeBacktrace', function () {
     })
   })
 
-  it('returns and empty array when no stack is undefined', function () {
+  it('returns an empty array when no stack is undefined', function () {
     const backtrace = makeBacktrace(undefined, 0)
     expect(backtrace).toEqual([])
   })

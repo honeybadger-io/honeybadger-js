@@ -2,6 +2,7 @@ import https from 'https'
 import http from 'http'
 import { URL } from 'url'
 import os from 'os'
+import domain from 'domain'
 
 import Client from './core/client'
 import { Config, Notice, BeforeNotifyHandler } from './core/types'
@@ -15,6 +16,7 @@ import uncaughtException from './server/integrations/uncaught_exception'
 import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
+import { AsyncStore } from './server/async_store'
 
 class Honeybadger extends Client {
   /** @internal */
@@ -102,6 +104,27 @@ class Honeybadger extends Client {
       req.write(data)
       req.end()
     })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public run<R>(handler: (...args: never[]) => R, onError?: (...args: any[]) => any): R|void {
+    const storeObject = this.__getStoreOrDefaultObject();
+    this.__setStore(AsyncStore)
+
+    if (onError) {
+      // ALS is fine for context-tracking, but `domain` allows us to catch errors
+      // thrown asynchronously (timers, event emitters)
+      // We can't use unhandledRejection/uncaughtException listeners; they're global and shared across all requests
+      // But the `onError` handler might be request-specific.
+      // Note that this doesn't still handle all cases. `domain` has its own problems:
+      // See https://github.com/honeybadger-io/honeybadger-js/pull/711
+      const dom = domain.create();
+      const onErrorWithContext = (err) => this.__store.run(storeObject, () => onError(err));
+      dom.on('error', onErrorWithContext);
+      handler = dom.bind(handler);
+    }
+
+    return this.__store.run(storeObject, handler);
   }
 }
 

@@ -192,4 +192,33 @@ describe('server client', function () {
       expect(request.isDone()).toBe(true)
     })
   })
+
+  describe('run', function () {
+    beforeEach(() => {
+      client.configure({
+        apiKey: 'testing'
+      })
+    })
+
+    // eslint-disable-next-line
+    it('captures errors in timers with the right context', (done) => {
+      let context, err;
+      const errorHandler = (e) => {
+        err = e;
+        context = client.__store.getStore().context;
+      }
+
+      client.run(() => client.setContext({a: true}), errorHandler)
+      client.run(() => {
+        client.setContext({b: true})
+        setTimeout(() => { throw new Error("Oh no") }, 10)
+      }, errorHandler)
+
+      setTimeout(() => {
+        expect(err.message).toStrictEqual("Oh no");
+        expect(context).toStrictEqual({b: true});
+        done();
+      }, 20);
+    });
+  })
 })

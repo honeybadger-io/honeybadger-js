@@ -30,7 +30,7 @@ function reportToHoneybadger(hb: Honeybadger, err: Error | string | null, callba
 
 function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
     return function wrappedLambdaHandler(event, context) {
-        hb.configure({store: AsyncStore})
+        hb.__setStore(AsyncStore)
         return new Promise<TResult>((resolve, reject) => {
             AsyncStore.run({context: {}, breadcrumbs: []}, () => {
                 try {
@@ -47,7 +47,7 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
 
 function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
     return function wrappedLambdaHandler(event, context, cb) {
-        hb.configure({store: AsyncStore})
+        hb.__setStore(AsyncStore)
         AsyncStore.run({context: {}, breadcrumbs: []}, () => {
             try {
                 handler(event, context, (error, result) => {
