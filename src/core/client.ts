@@ -399,6 +399,10 @@ export default class Client {
   protected __getStoreOrDefaultObject(): {context: Record<string, unknown>, breadcrumbs: BreadcrumbRecord[]} {
     const existingStore = this.__store.getStore();
     const store = existingStore || {};
-    return Object.assign({}, {context: {}, breadcrumbs: []}, store);
+    return {
+      context: {},
+      breadcrumbs: [],
+      ...store
+    };
   }
 }
