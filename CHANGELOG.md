@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Allow special characters in tags. Also support space-delimited tags:
   "one two three" and "one, two, three" are equivalent
+- Include reported error link in logs (#713)
 
 ### Changed
 - Name wrapped Lambda handlers for better stack traces (#700)
