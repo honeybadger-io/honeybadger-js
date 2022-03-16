@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][beta]
 ### Added
+- Nodejs: Include source snippet in backtraces when available (#624)
+- `notifyAsync`: Async version of `notify` that returns a promise (#327)
 - AsyncLocalStorage for AWS Lambda Handler (#688)
 - Node.js: Added the `hb.run(fn)` method, which runs a `fn` with a Honeybadger context, properly tracking the context across async chains and isolating it from other function invocations. The `Honeybadger.requestMiddleware` for Express is now a wrapper around this. (#711)
 
@@ -16,19 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Properly handle objects which are not native Errors but have the Error prototype (#712)
 
 ### Changed
-- Name wrapped Lambda handlers for better stack traces (#700)
-
-## [4.0.0-beta.0] - 2022-02-08
-### Added
-- Nodejs: Include source snippet in backtraces when available (#624)
-- `notifyAsync`: Async version of `notify` that returns a promise (#327)
-
-### Changed
 - Call afterNotify handlers with error if notify preconditions fail (#654)
 - Call beforeNotify handlers even if preconditions fail (#654)
 - `Honeybadger.lambdaHandler`: return async or callback based handler based on input handler (#677)
 - Remove deprecated `disabled` config option (#671)
 - Apply `enableUncaught` setting to timers and event listeners (#690)
+- Name wrapped Lambda handlers for better stack traces (#700)
 
 ## [3.2.8] - 2022-02-15
 ### Fixed
