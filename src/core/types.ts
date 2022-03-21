@@ -97,3 +97,4 @@ export interface CGIData {
 }
 
 export type HoneybadgerStore<T> = Pick<AsyncLocalStorage<T>, 'getStore' | 'run'>
+export type DefaultStoreContents = {context: Record<string, unknown>, breadcrumbs: BreadcrumbRecord[]}

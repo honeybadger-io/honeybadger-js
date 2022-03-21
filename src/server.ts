@@ -5,7 +5,7 @@ import os from 'os'
 import domain from 'domain'
 
 import Client from './core/client'
-import { Config, Notice, BeforeNotifyHandler } from './core/types'
+import { Config, Notice, BeforeNotifyHandler, DefaultStoreContents } from './core/types'
 import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
 import {
   fatallyLogAndExit,
@@ -18,6 +18,7 @@ import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { AsyncStore } from './server/async_store'
 
+const kHoneybadgerStore = Symbol.for("kHoneybadgerStore");
 class Honeybadger extends Client {
   /** @internal */
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
@@ -106,10 +107,23 @@ class Honeybadger extends Client {
     })
   }
 
+  // This method is intended for web frameworks.
+  // It allows us to track context for individual requests without leaking to other requests
+  // by doing two things:
+  // 1. Using AsyncLocalStorage so the context is tracked across async operations.
+  // 2. Attaching the store contents to the request object,
+  //   so, even if the store is destroyed, we can still recover the context for a given request
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public run<R>(handler: (...args: never[]) => R, onError?: (...args: any[]) => any): R|void {
-    const storeObject = this.__getStoreOrDefaultObject();
-    this.__setStore(AsyncStore)
+  public withRequest<R>(
+      request: Record<symbol, unknown>,
+      handler: (...args: never[]) => R,
+      onError?: (...args: any[]) => any
+  ): R|void {
+    const storeObject = (request[kHoneybadgerStore] || this.__getStoreContentsOrDefault()) as DefaultStoreContents;
+    this.__setStore(AsyncStore);
+    if (!request[kHoneybadgerStore]) {
+      request[kHoneybadgerStore] = storeObject;
+    }
 
     if (onError) {
       // ALS is fine for context-tracking, but `domain` allows us to catch errors
