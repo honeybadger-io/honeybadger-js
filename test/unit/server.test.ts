@@ -223,16 +223,15 @@ describe('server client', function () {
 
     // eslint-disable-next-line
     it('retrieves context from the same request object', (done) => {
-      let request1 = {};
-      let request2 = {};
+      const request = {};
 
-      client.withRequest(request1, () => {
+      client.withRequest(request, () => {
         client.setContext({request1: true})
       });
-      client.withRequest(request1, () => {
+      client.withRequest(request, () => {
         expect(client.__store.getStore().context).toStrictEqual({request1: true});
       });
-      client.withRequest(request1, () => {
+      client.withRequest(request, () => {
         setTimeout(() => {
           expect(client.__store.getStore().context).toStrictEqual({request1: true});
           done();
