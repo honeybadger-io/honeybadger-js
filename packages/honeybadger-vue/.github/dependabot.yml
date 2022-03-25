@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    target-branch: "vue3"
+    directory: "/"
+    versioning-strategy: "increase"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependabot"
