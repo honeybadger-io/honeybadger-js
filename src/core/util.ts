@@ -105,7 +105,7 @@ export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNot
 }
 
 // Returns a new object with properties from other object.
-export function newObject<T>(obj: T): T | Record<string, unknown> {
+export function shallowClone<T>(obj: T): T | Record<string, unknown> {
   if (typeof (obj) !== 'object' || obj === null) {
     return {}
   }
@@ -113,6 +113,23 @@ export function newObject<T>(obj: T): T | Record<string, unknown> {
   for (const k in obj) {
     result[k] = obj[k]
   }
+  return result
+}
+
+export function getJson(obj: unknown & { toJSON?: () => Record<string, unknown> }): Record<string, unknown> {
+  if (typeof (obj) !== 'object' || obj === null) {
+    return {}
+  }
+
+  if (typeof obj.toJSON === 'function') {
+    return obj.toJSON()
+  }
+
+  const result = {}
+  for (const k in obj) {
+    result[k] = typeof obj[k] === 'object' ? getJson(obj[k]) : obj[k]
+  }
+
   return result
 }
 
@@ -233,7 +250,7 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
     const e = thing as Error
     notice = merge(thing as Record<string, unknown>, {name: e.name, message: e.message, stack: e.stack})
   } else if (typeof thing === 'object') {
-    notice = newObject(thing)
+    notice = shallowClone(thing)
   } else {
     const m = String(thing)
     notice = {message: m}

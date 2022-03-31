@@ -5,7 +5,8 @@ import {
   makeNotice,
   makeBacktrace,
   runBeforeNotifyHandlers,
-  newObject,
+  shallowClone,
+  getJson,
   logger,
   generateStackTrace,
   filter,
@@ -196,7 +197,7 @@ export default class Client {
 
     // we need to have the source file data before the beforeNotifyHandlers,
     // in case they modify them
-    const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => newObject(trace) as BacktraceFrame) : null
+    const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
 
     getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler, sourcePerTrace => {
       sourcePerTrace.forEach((source, index) => {
@@ -311,7 +312,7 @@ export default class Client {
 
     opts = opts || {}
 
-    const metadata = newObject(opts.metadata)
+    const metadata = getJson(opts.metadata)
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 

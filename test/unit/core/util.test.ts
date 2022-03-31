@@ -1,6 +1,6 @@
 import {fake} from 'sinon'
 import Client from '../../../src/core/client'
-import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
+import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, shallowClone, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
 // @ts-ignore
 import { nullLogger } from '../helpers'
 
@@ -152,8 +152,8 @@ describe('utils', function () {
   describe('newObject', function () {
     it('returns a new object', function () {
       const obj = { expected: 'value' }
-      expect(newObject(obj)).toEqual(obj)
-      expect(newObject(obj)).not.toBe(obj)
+      expect(shallowClone(obj)).toEqual(obj)
+      expect(shallowClone(obj)).not.toBe(obj)
     })
   })
 

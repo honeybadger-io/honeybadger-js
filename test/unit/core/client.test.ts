@@ -797,6 +797,54 @@ describe('client', function () {
       expect(payload.breadcrumbs.enabled).toEqual(false)
       expect(payload.breadcrumbs.trail).toEqual([])
     })
+
+    it('respects toJSON() of metadata object', function () {
+      const metadata = {
+        ignored: true,
+        toJSON: () => {
+          return {
+            aProperty: 1,
+            bProperty: true,
+          }
+        }
+      }
+
+      client.addBreadcrumb('message', {
+        metadata
+      })
+
+      expect(client.getBreadcrumbs().length).toEqual(1)
+      expect(client.getBreadcrumbs()[0].metadata).toEqual({
+        aProperty: 1,
+        bProperty: true,
+      })
+    })
+
+    it('respects nested toJSON() of metadata object', function () {
+      const metadata = {
+        ignored: false,
+        aProperty: {
+          thisShouldBeIgnored: true,
+          toJSON: () => {
+            return {
+              bProperty: true
+            }
+          }
+        },
+      }
+
+      client.addBreadcrumb('message', {
+        metadata
+      })
+
+      expect(client.getBreadcrumbs().length).toEqual(1)
+      expect(client.getBreadcrumbs()[0].metadata).toEqual({
+        ignored: false,
+        aProperty: {
+          bProperty: true
+        }
+      })
+    })
   })
 
   it('has default filters', function () {
