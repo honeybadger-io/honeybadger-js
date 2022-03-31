@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Node.js: Added the `hb.run(fn)` method, which runs a `fn` with a Honeybadger context, properly tracking the context across async chains and isolating it from other function invocations. The `Honeybadger.requestMiddleware` for Express is now a wrapper around this. (#711)
 
 ### Fixed
+- Respect object.toJSON() in breadcrumb.metadata  (#722)
 - Allow special characters in tags. Also support space-delimited tags:
   "one two three" and "one, two, three" are equivalent
 - Include reported error link in logs (#713)
