@@ -134,8 +134,16 @@ export function sanitize(obj, maxDepth = 8) {
   }
 
   function canSerialize(obj) {
-    // Functions are TMI and Symbols can't convert to strings.
-    if (/function|symbol/.test(typeof (obj))) {
+    const typeOfObj = typeof obj
+
+    // Functions are TMI
+    if (/function/.test(typeOfObj)) {
+      // Let special toJSON method pass as it's used by JSON.stringify (#722)
+      return obj.name === 'toJSON'
+    }
+
+    // Symbols can't convert to strings.
+    if (/symbol/.test(typeOfObj)) {
       return false
     }
 
@@ -189,11 +197,6 @@ export function sanitize(obj, maxDepth = 8) {
 
   function safeSerialize(obj: unknown, depth = 0) {
     try {
-      if (Object.prototype.hasOwnProperty.call(obj, 'toJSON')) {
-        // @ts-ignore
-        return obj.toJSON()
-      }
-
       return serialize(obj, depth)
     } catch(e) {
       return `[ERROR] ${e}`

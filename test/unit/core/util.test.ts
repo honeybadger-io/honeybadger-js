@@ -229,6 +229,32 @@ describe('utils', function () {
       )
     })
 
+    it('supports toJSON() of objects', function () {
+      expect(
+          JSON.parse(JSON.stringify(sanitize(
+              {
+                ignored: false,
+                aProperty: {
+                  thisShouldBeIgnored: true,
+                  toJSON: () => {
+                    return {
+                      bProperty: true
+                    }
+                  }
+                },
+              },
+              6
+          )))
+      ).toEqual(
+          {
+            ignored: false,
+            aProperty: {
+              bProperty: true
+            }
+          }
+      )
+    })
+
     if (typeof Object.create === 'function') {
       it('handles objects without prototypes as values', function () {
         const obj = Object.create(null)
