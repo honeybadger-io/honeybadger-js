@@ -2,9 +2,9 @@ name: Node CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, v3-stable ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, v3-stable ]
 
 jobs:
   unit:
