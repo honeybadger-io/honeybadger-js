@@ -121,16 +121,18 @@ export function getJson(obj: unknown & { toJSON?: () => Record<string, unknown> 
     return {}
   }
 
-  if (typeof obj.toJSON === 'function') {
-    return obj.toJSON()
-  }
+  return JSON.parse(JSON.stringify(obj))
 
-  const result = {}
-  for (const k in obj) {
-    result[k] = typeof obj[k] === 'object' ? getJson(obj[k]) : obj[k]
-  }
-
-  return result
+  // if (typeof obj.toJSON === 'function') {
+  //   return obj.toJSON()
+  // }
+  //
+  // const result = {}
+  // for (const k in obj) {
+  //   result[k] = typeof obj[k] === 'object' ? getJson(obj[k]) : obj[k]
+  // }
+  //
+  // return result
 }
 
 export function sanitize(obj, maxDepth = 8) {
