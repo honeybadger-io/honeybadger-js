@@ -312,7 +312,7 @@ export default class Client {
 
     opts = opts || {}
 
-    const metadata = shallowClone(opts.metadata)
+    const metadata = getJson(opts.metadata)
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 
