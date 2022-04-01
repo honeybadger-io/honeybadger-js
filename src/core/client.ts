@@ -1,4 +1,4 @@
-import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, newObject, logger, generateStackTrace, filter, filterUrl, formatCGIData } from './util'
+import { merge, mergeNotice, objectIsEmpty, makeNotice, makeBacktrace, runBeforeNotifyHandlers, shallowClone, logger, generateStackTrace, filter, filterUrl, formatCGIData } from './util'
 import {
   Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable
 } from './types'
@@ -198,7 +198,7 @@ export default class Client {
 
     opts = opts || {}
 
-    const metadata = newObject(opts.metadata)
+    const metadata = shallowClone(opts.metadata)
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 
