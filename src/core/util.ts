@@ -105,7 +105,7 @@ export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNot
 }
 
 // Returns a new object with properties from other object.
-export function newObject<T>(obj: T): T | Record<string, unknown> {
+export function shallowClone<T>(obj: T): T | Record<string, unknown> {
   if (typeof (obj) !== 'object' || obj === null) {
     return {}
   }
@@ -134,8 +134,16 @@ export function sanitize(obj, maxDepth = 8) {
   }
 
   function canSerialize(obj) {
-    // Functions are TMI and Symbols can't convert to strings.
-    if (/function|symbol/.test(typeof (obj))) {
+    const typeOfObj = typeof obj
+
+    // Functions are TMI
+    if (/function/.test(typeOfObj)) {
+      // Let special toJSON method pass as it's used by JSON.stringify (#722)
+      return obj.name === 'toJSON'
+    }
+
+    // Symbols can't convert to strings.
+    if (/symbol/.test(typeOfObj)) {
       return false
     }
 
@@ -233,7 +241,7 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
     const e = thing as Error
     notice = merge(thing as Record<string, unknown>, {name: e.name, message: e.message, stack: e.stack})
   } else if (typeof thing === 'object') {
-    notice = newObject(thing)
+    notice = shallowClone(thing)
   } else {
     const m = String(thing)
     notice = {message: m}

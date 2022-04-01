@@ -1,6 +1,7 @@
 // @ts-ignore
 import { nullLogger, TestClient } from '../helpers'
 import { Notice } from '../../../src/core/types'
+import { sanitize } from "../../../src/core/util";
 
 class MyError extends Error {
   context = null
