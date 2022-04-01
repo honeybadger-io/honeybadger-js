@@ -1,6 +1,7 @@
 // @ts-ignore
 import { nullLogger, TestClient } from '../helpers'
 import { Notice } from '../../../src/core/types'
+import { sanitize } from "../../../src/core/util";
 
 class MyError extends Error {
   context = null
@@ -812,9 +813,11 @@ describe('client', function () {
       client.addBreadcrumb('message', {
         metadata
       })
+      const breadcrumbs = client.getBreadcrumbs();
+      const sanitized = sanitize(breadcrumbs);
 
-      expect(client.getBreadcrumbs().length).toEqual(1)
-      expect(client.getBreadcrumbs()[0].metadata).toEqual({
+      expect(sanitized.length).toEqual(1)
+      expect(sanitized[0].metadata).toEqual({
         aProperty: 1,
         bProperty: true,
       })
@@ -837,8 +840,11 @@ describe('client', function () {
         metadata
       })
 
-      expect(client.getBreadcrumbs().length).toEqual(1)
-      expect(client.getBreadcrumbs()[0].metadata).toEqual({
+      const breadcrumbs = client.getBreadcrumbs();
+      const sanitized = sanitize(breadcrumbs);
+
+      expect(sanitized.length).toEqual(1)
+      expect(sanitized[0].metadata).toEqual({
         ignored: false,
         aProperty: {
           bProperty: true

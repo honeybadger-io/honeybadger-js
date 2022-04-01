@@ -116,14 +116,6 @@ export function shallowClone<T>(obj: T): T | Record<string, unknown> {
   return result
 }
 
-export function getJson(obj: unknown & { toJSON?: () => Record<string, unknown> }): Record<string, unknown> {
-  if (typeof (obj) !== 'object' || obj === null) {
-    return {}
-  }
-
-  return JSON.parse(JSON.stringify(obj))
-}
-
 export function sanitize(obj, maxDepth = 8) {
   const seenObjects = []
 
@@ -197,6 +189,11 @@ export function sanitize(obj, maxDepth = 8) {
 
   function safeSerialize(obj: unknown, depth = 0) {
     try {
+      if (Object.prototype.hasOwnProperty.call(obj, 'toJSON')) {
+        // @ts-ignore
+        return obj.toJSON()
+      }
+
       return serialize(obj, depth)
     } catch(e) {
       return `[ERROR] ${e}`

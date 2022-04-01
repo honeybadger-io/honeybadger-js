@@ -6,7 +6,6 @@ import {
   makeBacktrace,
   runBeforeNotifyHandlers,
   shallowClone,
-  getJson,
   logger,
   generateStackTrace,
   filter,
@@ -312,7 +311,7 @@ export default class Client {
 
     opts = opts || {}
 
-    const metadata = getJson(opts.metadata)
+    const metadata = shallowClone(opts.metadata)
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 
