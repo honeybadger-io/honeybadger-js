@@ -29,7 +29,7 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "npm run build && husky install",
     "test": "concurrently \"npm:test:browser\" \"npm:test:server\"",
     "test:browser": "jest --env=jsdom --testPathPattern=\"test/unit/.*(?<![\\./]server)\\.test\\.(js|ts)\"",
     "test:server": "jest --env=node --testPathPattern=\"test/unit/.*(?<![\\./]browser)\\.test\\.(js|ts)\"",
@@ -45,6 +45,8 @@
     "stacktrace-parser": "^0.1.10"
   },
   "devDependencies": {
+    "@commitlint/cli": "^16.2.3",
+    "@commitlint/config-conventional": "^16.2.1",
     "@rollup/plugin-node-resolve": "^13.0.6",
     "@rollup/plugin-replace": "^4.0.0",
     "@rollup/plugin-typescript": "^8.3.0",
@@ -61,6 +63,7 @@
     "eslint-plugin-jest": "^26.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "express": "^4.17.1",
+    "husky": "^7.0.4",
     "jest": "^27.4.4",
     "nock": "^13.2.1",
     "rollup": "^2.61.1",
