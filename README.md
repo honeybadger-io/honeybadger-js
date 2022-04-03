@@ -14,7 +14,8 @@ For comprehensive documentation and support, [check out our documentation site](
 
 ## Changelog
 
-See https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md
+[Conventional Commits](https://www.conventionalcommits.org/) are enforced with a git hook ([husky](https://typicode.github.io/husky) + [commitlint](https://commitlint.js.org/)) in order to automate changelog generation.
+[CHANGELOG.md](CHANGELOG.md) is updated when a new version is released (npm run release) with [shipjs](https://community.algolia.com/shipjs/reference/all-config.html#updatechangelog).
 
 ## Contributing
 

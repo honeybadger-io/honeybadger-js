@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][beta]
 ### Added
+- Enforce Conventional Commits using a git hook (#731)
 - Nodejs: Include source snippet in backtraces when available (#624)
 - `notifyAsync`: Async version of `notify` that returns a promise (#327)
 - AsyncLocalStorage for AWS Lambda Handler (#688)

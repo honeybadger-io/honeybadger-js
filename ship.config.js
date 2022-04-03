@@ -4,6 +4,7 @@ const semver = require('semver')
 
 // eslint-disable-next-line no-undef
 module.exports = {
+  // todo: remove all except publishCommand + afterPublish when Conventional Commits transition is complete
   updateChangelog: false,
   shouldPrepare: ({ commits }) => {
     if (commits === '') {
@@ -13,7 +14,7 @@ module.exports = {
     const data = fs.readFileSync(`CHANGELOG.md`, 'utf8')
 
     const match = data.match(
-        /## \[Unreleased\]\[.+?\]\s+###\s+(?:Fixed|Added|Modified|Removed|Changed|Deprecated|Security)\s+-/
+      /## \[Unreleased\]\[.+?\]\s+###\s+(?:Fixed|Added|Modified|Removed|Changed|Deprecated|Security)\s+-/
     )
     if (!match) {
       console.log('No unreleased changes');
@@ -50,11 +51,15 @@ module.exports = {
       return `${yyyy}-${mm}-${dd}`
     }
   },
+  // todo: uncomment when Conventional Commits transition is complete
+  // publishCommand: ({ defaultCommand, tag }) =>
+  //  `${defaultCommand} --access public --tag ${tag}`,
   afterPublish: ({ exec }) => {
     exec(`./scripts/release-cdn.sh`)
-  }
+  },
 }
 
+// todo: remove when Conventional Commits transition is complete
 class Changelog {
   releaseType = "patch"
   releaseTag = "latest"
