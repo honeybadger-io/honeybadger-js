@@ -19,7 +19,7 @@ function fullUrl(req: Request): string {
 }
 
 export function requestHandler(req: Request, res: Response, next: NextFunction): void {
-  this.run(next, next)
+  this.withRequest(req, next, next)
 }
 
 export function errorHandler(err: Noticeable, req: Request, _res: Response, next: NextFunction): unknown {
@@ -33,5 +33,7 @@ export function errorHandler(err: Noticeable, req: Request, _res: Response, next
       REQUEST_METHOD: req.method
     }
   })
-  return next(err)
+  if (next) {
+    return next(err)
+  }
 }

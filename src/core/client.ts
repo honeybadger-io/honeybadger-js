@@ -23,7 +23,8 @@ import {
   Noticeable,
   HoneybadgerStore,
   BacktraceFrame,
-  BreadcrumbRecord
+  BreadcrumbRecord,
+  DefaultStoreContents
 } from './types'
 import { GlobalStore } from "./store";
 
@@ -191,7 +192,7 @@ export default class Client {
       }
     })
 
-    const breadcrumbs = this.__getStoreOrDefaultObject().breadcrumbs
+    const breadcrumbs = this.__getStoreContentsOrDefault().breadcrumbs
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs.slice() : []
 
     // we need to have the source file data before the beforeNotifyHandlers,
@@ -273,7 +274,7 @@ export default class Client {
       return null
     }
 
-    const context = this.__getStoreOrDefaultObject().context
+    const context = this.__getStoreContentsOrDefault().context
     const noticeTags = this.__constructTags(notice.tags)
     const contextTags = this.__constructTags(context["tags"])
     const configTags = this.__constructTags(this.config.tags)
@@ -393,16 +394,16 @@ export default class Client {
   /**
    * For ALS, the store may be uninitialized (if .run()` has not been called).
    * This provides an easy way to read the existing store object or fall back to a default.
-   * Returns *a copy* of the store.
+   * Returns *a copy* of the store contents.
    * @internal
    */
-  protected __getStoreOrDefaultObject(): {context: Record<string, unknown>, breadcrumbs: BreadcrumbRecord[]} {
-    const existingStore = this.__store.getStore();
-    const store = existingStore || {};
+  protected __getStoreContentsOrDefault(): DefaultStoreContents {
+    const existingStoreContents = this.__store.getStore();
+    const storeContents = existingStoreContents || {};
     return {
       context: {},
       breadcrumbs: [],
-      ...store
+      ...storeContents
     };
   }
 }
