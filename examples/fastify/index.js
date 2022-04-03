@@ -9,25 +9,16 @@ fastify.setErrorHandler((err, req, reply) => Honeybadger.withRequest(req, () => 
     reply.send("NOT OK")
 }));
 
-let reqId = 0;
-fastify.get('/test-context', function (request, reply) {
-    const localReqId = ++reqId;
+fastify.get('/unhandled', (request, reply) => {
     Honeybadger.setContext({
-        [localReqId]: true
-    })
+        user_id: '8yf84'
+    });
+    throw new Error('Unhandled error. Should be reported on Honeybadger dashboard');
+});
 
-    console.log(Honeybadger.__store.getStore().context);
-
-    if (localReqId === 2) {
-        setTimeout(() => {
-            throw new Error('Badgers!')
-        }, 100);
-    } else {
-        setTimeout(() => {
-            console.log(`Done: ${localReqId}`)
-            reply.send("OKK");
-        }, 100);
-    }
+fastify.get('/report', (request, reply) => {
+    Honeybadger.notify('Hello World!');
+    reply.send('Message should have been reported to Honeybadger! Please check your Honeybadger dashboard.');
 });
 
 fastify.listen(3000, function (err, address) {

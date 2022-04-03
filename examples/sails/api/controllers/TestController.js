@@ -1,23 +1,15 @@
-
 const Honeybadger = require("../../../../dist/server/honeybadger.js")
 
-let reqId = 0;
-
 module.exports = {
-    context: (req, res, next) => {
-        const localReqId = ++reqId;
+    unhandled: (req, res, next) => {
         Honeybadger.setContext({
-            [localReqId]: true
-        })
+            user_id: '8yf84'
+        });
+        throw new Error('Unhandled error. Should be reported on Honeybadger dashboard');
+    },
 
-        console.log(Honeybadger.__store?.getStore?.()?.context);
-
-        if (localReqId === 2) setTimeout(() => {
-            throw new Error('Badgers!')
-        }, 100)
-        else setTimeout(() => {
-            console.log(`Done: ${localReqId}`)
-            res.send("OK");
-        }, 100);
-    }
+    report: (req, res, next) => {
+        Honeybadger.notify('Hello World!');
+        res.send('Message should have been reported to Honeybadger! Please check your Honeybadger dashboard.');
+    },
 };

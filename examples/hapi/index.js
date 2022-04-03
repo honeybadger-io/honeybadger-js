@@ -1,5 +1,3 @@
-const {setTimeout} = require("node:timers/promises");
-
 const Honeybadger = require("../../dist/server/honeybadger.js")
 Honeybadger.configure({});
 
@@ -10,23 +8,23 @@ const server = Hapi.server({
     host: 'localhost'
 });
 
-let reqId = 0;
 server.route({
     method: 'GET',
-    path: '/test-context',
+    path: '/unhandled',
     handler: async (request, h) => Honeybadger.withRequest(request, () => {
-        const localReqId = ++reqId;
         Honeybadger.setContext({
-            [localReqId]: true
-        })
-
-        console.log(Honeybadger.__store.getStore().context);
-
-        return setTimeout(100).then(() => {
-            if (localReqId === 2) throw new Error('Badgers!');
-            else console.log(`Done: ${localReqId}`)
-            return "OK";
+            user_id: '8yf84'
         });
+        throw new Error('Unhandled error. Should be reported on Honeybadger dashboard');
+    })
+});
+
+server.route({
+    method: 'GET',
+    path: '/report',
+    handler: async (request, h) => Honeybadger.withRequest(request, () => {
+        Honeybadger.notify('Hello World!');
+        return 'Message should have been reported to Honeybadger! Please check your Honeybadger dashboard.';
     })
 });
 

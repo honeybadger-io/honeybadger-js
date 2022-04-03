@@ -20,7 +20,8 @@ module.exports.routes = {
   ***************************************************************************/
 
   '/': { view: 'pages/homepage' },
-  'GET /test-context': { action: 'test/context' }
+  'GET /unhandled': { action: 'test/unhandled' },
+  'GET /report': { action: 'test/report' },
 
 
   /***************************************************************************
