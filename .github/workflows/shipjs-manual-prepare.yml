@@ -62,4 +62,3 @@ jobs:
               repo: context.repo.repo,
               body: "@${{github.actor}} `shipjs prepare` fail"
             })
-
