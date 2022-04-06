@@ -41,7 +41,7 @@ const TAG_SEPARATOR = /,|\s+/
 const NOT_BLANK = /\S/
 
 export default class Client {
-  private __pluginsExecuted = false
+  protected __pluginsExecuted = false
 
   protected __store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }> = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
