@@ -5,6 +5,10 @@ on:
     types: [created]
 jobs:
   manual_prepare:
+    if: |
+      github.event_name == 'issue_comment' &&
+      (github.event.comment.author_association == 'member' || github.event.comment.author_association == 'owner') &&
+      startsWith(github.event.comment.body, '@shipjs prepare')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -49,8 +53,6 @@ jobs:
     needs: manual_prepare
     runs-on: ubuntu-latest
     steps:
-      - run: git status
-
       - uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -61,3 +63,22 @@ jobs:
               repo: context.repo.repo,
               body: "@${{github.actor}} `shipjs prepare` fail"
             })
+
+  debug_git_status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: master
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
+      - run: |
+          if [ -f "yarn.lock" ]; then
+            yarn install
+          else
+            npm install
+          fi
+      - run: git status
+
