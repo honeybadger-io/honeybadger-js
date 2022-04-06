@@ -1,13 +1,10 @@
 name: Ship js Manual Prepare
 on:
+  workflow_dispatch:
   issue_comment:
     types: [created]
 jobs:
   manual_prepare:
-    if: |
-      github.event_name == 'issue_comment' &&
-      (github.event.comment.author_association == 'member' || github.event.comment.author_association == 'owner') &&
-      startsWith(github.event.comment.body, '@shipjs prepare')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
