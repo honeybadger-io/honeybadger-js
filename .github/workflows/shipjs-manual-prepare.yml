@@ -1,6 +1,5 @@
 name: Ship js Manual Prepare
 on:
-  workflow_dispatch:
   issue_comment:
     types: [created]
 jobs:
