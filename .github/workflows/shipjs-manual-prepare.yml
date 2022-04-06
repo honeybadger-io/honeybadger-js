@@ -64,21 +64,3 @@ jobs:
               body: "@${{github.actor}} `shipjs prepare` fail"
             })
 
-  debug_git_status:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          ref: debug_shipjs_prepare
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '16.x'
-      - run: |
-          if [ -f "yarn.lock" ]; then
-            yarn install
-          else
-            npm install
-          fi
-      - run: git status
-
