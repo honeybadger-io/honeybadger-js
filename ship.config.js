@@ -23,8 +23,6 @@ module.exports = {
 
     return true;
   },
-  formatCommitMessage: ({ version, _releaseType, _baseBranch }) => `ci(release): v${version}`,
-  formatPullRequestTitle: ({ version, _releaseType }) => `Release v${version}`,
   getNextVersion: ({ _revisionRange, _commitTitles, _commitBodies, currentVersion, dir }) => {
     const changelog = new Changelog(`${dir}/CHANGELOG.md`)
     return changelog.nextVersion(currentVersion)
