@@ -1,15 +1,10 @@
-import https from 'https'
-import http from 'http'
-import { URL } from 'url'
 import os from 'os'
 import domain from 'domain'
 
 import Client from './core/client'
 import { Config, Notice, BeforeNotifyHandler, DefaultStoreContents } from './core/types'
-import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
 import {
   fatallyLogAndExit,
-  getStats,
   getSourceFile
 } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
@@ -17,6 +12,7 @@ import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { AsyncStore } from './server/async_store'
+import { ServerTransport } from "./server/transport";
 
 const kHoneybadgerStore = Symbol.for("kHoneybadgerStore");
 class Honeybadger extends Client {
@@ -43,7 +39,7 @@ class Honeybadger extends Client {
       projectRoot: process.cwd(),
       hostname: os.hostname(),
       ...opts,
-    })
+    }, new ServerTransport())
     this.__getSourceFileHandler = getSourceFile.bind(this)
     this.errorHandler = errorHandler.bind(this)
     this.requestHandler = requestHandler.bind(this)
@@ -52,59 +48,6 @@ class Honeybadger extends Client {
 
   factory(opts?: Partial<Config>): Honeybadger {
     return new Honeybadger(opts)
-  }
-
-  /** @internal */
-  protected __send(notice): void {
-    const {protocol} = new URL(this.config.endpoint)
-    const transport = (protocol === "http:" ? http : https)
-
-    const payload = this.__buildPayload(notice)
-    payload.server.pid = process.pid
-
-    getStats((stats: Record<string, unknown>) => {
-      payload.server.stats = stats
-
-      const data = Buffer.from(JSON.stringify(sanitize(payload, this.config.maxObjectDepth)), 'utf8')
-      const options = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': data.length,
-          'X-API-Key': this.config.apiKey
-        }
-      }
-
-      const req = transport.request(endpoint(this.config, '/v1/notices/js'), options, (res) => {
-        this.logger.debug(`statusCode: ${res.statusCode}`)
-
-        let body = ''
-        res.on('data', (chunk) => {
-          body += chunk
-        })
-
-        res.on('end', () => {
-          if (res.statusCode !== 201) {
-            runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${res.statusCode}`))
-            this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
-            return
-          }
-          const uuid = JSON.parse(body).id
-          runAfterNotifyHandlers(merge(notice, {
-            id: uuid
-          }), this.__afterNotifyHandlers)
-          this.logger.info(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
-        })
-      })
-
-      req.on('error', (err) => {
-        this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
-        runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
-      })
-
-      req.write(data)
-      req.end()
-    })
   }
 
   // This method is intended for web frameworks.
@@ -117,7 +60,7 @@ class Honeybadger extends Client {
   public withRequest<R>(
       request: Record<symbol, unknown>,
       handler: (...args: never[]) => R,
-      onError?: (...args: any[]) => any
+      onError?: (...args: unknown[]) => unknown
   ): R|void {
     const storeObject = (request[kHoneybadgerStore] || this.__getStoreContentsOrDefault()) as DefaultStoreContents;
     this.__setStore(AsyncStore);

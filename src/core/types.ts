@@ -96,5 +96,59 @@ export interface CGIData {
   [x: string]: unknown
 }
 
+export type ProcessStats = {
+ load: {
+   one: number,
+   five: number,
+   fifteen: number
+ };
+ mem: {
+   total?: number,
+   free?: number,
+   buffers?: number,
+   cached?: number,
+   free_total?: number
+ }
+}
+
+export type TransportOptions = {
+  apiKey: string,
+  endpoint: string,
+  maxObjectDepth: number,
+  logger: Logger
+  async?: boolean // don't like this here because it's only for browser
+}
+
+export type TransportPayload = {
+  notifier: {
+    name: string,
+    url: string,
+    version: string
+  },
+  breadcrumbs: {
+    enabled: boolean,
+    trail: BreadcrumbRecord[]
+  },
+  error: Pick<Notice, 'message' | 'backtrace' | 'fingerprint' | 'tags'> & {
+    class: string
+  },
+  request: Pick<Notice, 'url' | 'component' | 'action' | 'context' | 'params' | 'session'> & {
+    cgi_data: unknown
+  },
+  server: Pick<Notice, 'revision'> & {
+    pid?: number | undefined,
+    project_root?: string | undefined,
+    environment_name?: string | undefined,
+    hostname: string,
+    time: string,
+    stats?: ProcessStats | undefined
+  },
+  details: Record<string, Record<string, unknown>>
+}
+
+export interface Transport {
+  send(payload: TransportPayload, options: TransportOptions): Promise<{ statusCode: number; body: string; }>
+}
+
 export type HoneybadgerStore<T> = Pick<AsyncLocalStorage<T>, 'getStore' | 'run'>
 export type DefaultStoreContents = {context: Record<string, unknown>, breadcrumbs: BreadcrumbRecord[]}
