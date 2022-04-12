@@ -12,7 +12,7 @@ import {
   filterUrl,
   formatCGIData,
   getSourceForBacktrace,
-  runAfterNotifyHandlers
+  runAfterNotifyHandlers, endpoint, isBrowserConfig
 } from './util'
 import {
   Config,
@@ -24,7 +24,7 @@ import {
   HoneybadgerStore,
   BacktraceFrame,
   BreadcrumbRecord,
-  DefaultStoreContents, Transport, TransportPayload
+  DefaultStoreContents, Transport, NoticeTransportPayload
 } from './types'
 import { GlobalStore } from "./store";
 
@@ -207,12 +207,17 @@ export default abstract class Client {
 
       const payload = this.__buildPayload(notice)
       this.transport
-          .send(payload, {
-            apiKey: this.config.apiKey,
-            endpoint: this.config.endpoint,
+          .send({
+            headers: {
+              'X-API-Key': this.config.apiKey,
+              'Content-Type': 'application/json',
+              'Accept': 'text/json, application/json'
+            },
+            method: 'POST',
+            endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
             maxObjectDepth: this.config.maxObjectDepth,
             logger: this.config.logger,
-          })
+          }, payload)
           .then(res => {
             if (res.statusCode !== 201) {
               runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${res.statusCode}`))
@@ -277,6 +282,17 @@ export default abstract class Client {
       applyAfterNotify(objectToOverride)
       this.notify(noticeable, name, extra)
     })
+  }
+
+  checkIn(id: number): Promise<void> {
+    return this.transport
+        .send({
+          method: 'GET',
+          endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
+          logger: this.config.logger,
+          async: isBrowserConfig(this.config) ? this.config.async : false,
+        })
+        .then(() => Promise.resolve())
   }
 
   protected makeNotice(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Notice | null {
@@ -363,7 +379,7 @@ export default abstract class Client {
     return (this.config.environment && this.config.developmentEnvironments.includes(this.config.environment))
   }
 
-  protected __buildPayload(notice: Notice): TransportPayload {
+  protected __buildPayload(notice: Notice): NoticeTransportPayload {
     const headers = filter(notice.headers, this.config.filters) || {}
     const cgiData = filter({
       ...notice.cgiData,

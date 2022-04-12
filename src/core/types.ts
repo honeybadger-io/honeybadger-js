@@ -72,6 +72,11 @@ export interface Notice {
   [key: string]: unknown
 }
 
+export interface BrowserConfig extends Config {
+  async: boolean
+  maxErrors: number
+}
+
 export type Noticeable = string | Error | Partial<Notice>
 
 export interface BacktraceFrame {
@@ -112,14 +117,15 @@ export type ProcessStats = {
 }
 
 export type TransportOptions = {
-  apiKey: string,
+  method: 'GET' | 'POST',
+  headers?: Record<string, number | string | string[] | undefined>,
   endpoint: string,
-  maxObjectDepth: number,
+  maxObjectDepth?: number,
   logger: Logger
   async?: boolean // don't like this here because it's only for browser
 }
 
-export type TransportPayload = {
+export type NoticeTransportPayload = {
   notifier: {
     name: string,
     url: string,
@@ -147,7 +153,7 @@ export type TransportPayload = {
 }
 
 export interface Transport {
-  send(payload: TransportPayload, options: TransportOptions): Promise<{ statusCode: number; body: string; }>
+  send(options: TransportOptions, payload?: NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }>
 }
 
 export type HoneybadgerStore<T> = Pick<AsyncLocalStorage<T>, 'getStore' | 'run'>

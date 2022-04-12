@@ -1,7 +1,7 @@
 import * as stackTraceParser from 'stacktrace-parser'
 import Client from '../core/client'
 import {
-  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler
+  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler, Config, BrowserConfig
 } from './types'
 
 export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
@@ -430,4 +430,8 @@ function getSourceCodeSnippet(fileData: string, lineNumber: number, sourceRadius
     }
   }
   return result
+}
+
+export function isBrowserConfig(config: BrowserConfig | Config): config is BrowserConfig {
+  return (config as BrowserConfig).async !== undefined
 }

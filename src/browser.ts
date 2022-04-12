@@ -1,5 +1,5 @@
 import Client from './core/client'
-import { Config, Notice, BeforeNotifyHandler, TransportPayload } from './core/types'
+import { Notice, BeforeNotifyHandler, NoticeTransportPayload, BrowserConfig } from './core/types'
 import { merge, filter, objectIsExtensible } from './core/util'
 import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
@@ -8,11 +8,6 @@ import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
 import { BrowserTransport } from "./browser/transport";
-
-interface BrowserConfig extends Config {
-  async: boolean
-  maxErrors: number
-}
 
 interface WrappedFunc {
   (): (...args: unknown[]) => unknown
@@ -65,7 +60,7 @@ class Honeybadger extends Client {
   }
 
   /** @internal */
-  protected __buildPayload(notice:Notice): TransportPayload {
+  protected __buildPayload(notice:Notice): NoticeTransportPayload {
     const cgiData = {
       HTTP_USER_AGENT: undefined,
       HTTP_REFERER: undefined,

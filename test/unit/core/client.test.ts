@@ -924,4 +924,22 @@ describe('client', function () {
     const payload = client.getPayload('testing', { tags: ['tag1'] })
     expect(payload.error.tags).toEqual(['tag1'])
   })
+
+  describe('checkIn', function () {
+    it('sends a checkIn report', async function () {
+      await expect(client.checkIn(123)).resolves.not.toThrow()
+    })
+
+    it('throws an error if checkIn id does not exist', async function () {
+      const failingClient = new TestClient({
+        logger: nullLogger(),
+        environment: null
+      }, {
+        send(_options, _payload?): Promise<{ statusCode: number; body: string }> {
+          return Promise.reject(new Error('id not found'))
+        }
+      })
+      await expect(failingClient.checkIn(123)).rejects.toThrow()
+    })
+  })
 })

@@ -1,18 +1,22 @@
-import { Transport, TransportOptions, TransportPayload } from "../core/types";
-import { endpoint, sanitize } from "../core/util";
+import { Transport, TransportOptions, NoticeTransportPayload } from "../core/types";
+import { sanitize } from "../core/util";
 
 export class BrowserTransport implements Transport {
-    send(payload: TransportPayload, options: TransportOptions): Promise<{ statusCode: number; body: string; }> {
+    send(options: TransportOptions, payload?: NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }> {
         return new Promise((resolve, reject) => {
             try {
                 const x = new XMLHttpRequest()
-                x.open('POST', endpoint(options.endpoint, '/v1/notices/js'), options.async)
+                x.open(options.method, options.endpoint, options.async)
 
-                x.setRequestHeader('X-API-Key', options.apiKey)
-                x.setRequestHeader('Content-Type', 'application/json')
-                x.setRequestHeader('Accept', 'text/json, application/json')
+                if (Object.keys(options.headers).length) {
+                    for (const i in options.headers) {
+                        if (typeof options.headers !== 'undefined') {
+                            x.setRequestHeader(i, String(options.headers[i]))
+                        }
+                    }
+                }
 
-                x.send(JSON.stringify(sanitize(payload, options.maxObjectDepth)))
+                x.send(payload ? JSON.stringify(sanitize(payload, options.maxObjectDepth)) : undefined)
                 x.onload = () => resolve({ statusCode: x.status, body: x.response })
             } catch (err) {
                 reject(err)
