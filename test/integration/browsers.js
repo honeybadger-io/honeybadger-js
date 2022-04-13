@@ -25,5 +25,12 @@ module.exports = {
     browser: 'Edge',
     os: 'Windows',
     os_version: '10'
+  },
+  bs_ie11: {
+    base: 'BrowserStack',
+    browser: 'IE',
+    browser_version: '11',
+    os: 'Windows',
+    os_version: '8.1'
   }
 }
