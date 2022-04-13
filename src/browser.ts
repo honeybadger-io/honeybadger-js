@@ -111,10 +111,11 @@ class Honeybadger extends Client {
           this.logger.debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice)
           return
         }
+        const uuid = JSON.parse(x.response).id
         runAfterNotifyHandlers(merge(notice, {
-          id: JSON.parse(x.response).id
+          id: uuid
         }), this.__afterNotifyHandlers)
-        this.logger.debug('Error report sent', notice)
+        this.logger.debug(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
       }
     } catch (err) {
       runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
@@ -137,14 +138,7 @@ class Honeybadger extends Client {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const client = this
         func.___hb = <WrappedFunc>function () {
-          const onErrorEnabled = client.config.enableUncaught
-          // Catch if:
-          //   1. We explicitly want to catch (i.e. if the error could be
-          //      caught before reaching window.onerror)
-          //   2. The browser provides less information via the window.onerror
-          //      handler
-          //   3. The window.onerror handler is unavailable
-          if (opts.catch || preferCatch || !onErrorEnabled) {
+          if (preferCatch) {
             try {
               // eslint-disable-next-line prefer-rest-params
               return func.apply(this, arguments)
@@ -163,7 +157,9 @@ class Honeybadger extends Client {
                   }
                 }
               )
-              client.notify(err)
+              if (client.config.enableUncaught) {
+                client.notify(err)
+              }
               throw (err)
             }
           } else {

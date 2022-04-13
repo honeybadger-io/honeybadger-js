@@ -1,4 +1,5 @@
 import Client from './client'
+import { AsyncLocalStorage } from "async_hooks";
 
 export interface Logger {
   log(...args: unknown[]): unknown
@@ -94,3 +95,6 @@ export interface CGIData {
   HTTP_COOKIE: string | undefined,
   [x: string]: unknown
 }
+
+export type HoneybadgerStore<T> = Pick<AsyncLocalStorage<T>, 'getStore' | 'run'>
+export type DefaultStoreContents = {context: Record<string, unknown>, breadcrumbs: BreadcrumbRecord[]}

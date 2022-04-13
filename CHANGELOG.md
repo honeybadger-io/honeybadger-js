@@ -4,16 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased][latest]
+## [Unreleased][beta]
 ### Added
+- Enforce Conventional Commits using a git hook (#731)
 - Nodejs: Include source snippet in backtraces when available (#624)
 - `notifyAsync`: Async version of `notify` that returns a promise (#327)
+- AsyncLocalStorage for AWS Lambda Handler (#688)
+- Node.js: Added the `hb.withRequest(req, fn)` method for webserver apps, which runs a `fn`, isolating its context to the request `req` and tracking it across async chains. The `Honeybadger.requestMiddleware` for Express is now a wrapper around this. (#711, #717)
+
+### Fixed
+- Respect object.toJSON() in breadcrumb.metadata  (#722)
+- Allow special characters in tags. Also support space-delimited tags:
+  "one two three" and "one, two, three" are equivalent
+- Include reported error link in logs (#713)
+- Properly handle objects which are not native Errors but have the Error prototype (#712)
 
 ### Changed
 - Call afterNotify handlers with error if notify preconditions fail (#654)
 - Call beforeNotify handlers even if preconditions fail (#654)
 - `Honeybadger.lambdaHandler`: return async or callback based handler based on input handler (#677)
 - Remove deprecated `disabled` config option (#671)
+- Apply `enableUncaught` setting to timers and event listeners (#690)
+- Name wrapped Lambda handlers for better stack traces (#700)
+
+## [3.2.8] - 2022-02-15
+### Fixed
+- Catch unknown errors in data sanitizer
 
 ## [3.2.7] - 2021-11-01
 ### Fixed

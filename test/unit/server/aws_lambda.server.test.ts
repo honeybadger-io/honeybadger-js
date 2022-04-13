@@ -2,7 +2,7 @@ import Singleton from "../../../src/server";
 // @ts-ignore
 import { nullLogger } from "../helpers";
 import nock from "nock";
-import { spy } from 'sinon'
+import * as sinon from 'sinon'
 import { Notice } from "../../../src/core/types";
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
@@ -21,6 +21,15 @@ const mockAwsResult = (obj: Partial<APIGatewayProxyResult> = {}) => {
   return Object.assign({}, obj) as APIGatewayProxyResult;
 }
 
+const initNock = (expectedTimes = 1): nock.Scope => {
+    nock.cleanAll()
+
+    return nock("https://api.honeybadger.io")
+        .post("/v1/notices/js")
+        .times(expectedTimes)
+        .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+}
+
 describe('Lambda Handler', function () {
   let client: typeof Singleton;
 
@@ -31,41 +40,41 @@ describe('Lambda Handler', function () {
     })
   })
 
-  describe('with arguments', function() {
-    const awsEvent = mockAwsEvent({ body: '1' })
-    const awsContext = mockAwsContext({ awsRequestId: '2' })
-    let handlerFunc;
+    describe('with arguments', function () {
+        const awsEvent = mockAwsEvent({body: '1'})
+        const awsContext = mockAwsContext({awsRequestId: '2'})
+        let handlerFunc;
 
-    beforeEach(function() {
-      handlerFunc = spy()
-      const handler = client.lambdaHandler(handlerFunc) as AsyncHandler
-      return handler(awsEvent, awsContext)
-        .then(() => {
-          return new Promise((resolve => {
-            process.nextTick(function () {
-              resolve(true)
-            })
-          }))
+        beforeEach(function () {
+            handlerFunc = sinon.spy(() => Promise.resolve())
+            const handler = client.lambdaHandler(handlerFunc) as AsyncHandler
+            return handler(awsEvent, awsContext)
+                .then(() => {
+                    return new Promise((resolve => {
+                        process.nextTick(function () {
+                            resolve(true)
+                        })
+                    }))
+                })
+        })
+
+        it('calls original handler with arguments', function () {
+            expect(handlerFunc.lastCall.args.length).toBe(2)
+            expect(handlerFunc.lastCall.args[0]).toBe(awsEvent)
+            expect(handlerFunc.lastCall.args[1]).toBe(awsContext)
         })
     })
 
-    it('calls original handler with arguments', function() {
-      expect(handlerFunc.lastCall.args.length).toBe(2)
-      expect(handlerFunc.lastCall.args[0]).toBe(awsEvent)
-      expect(handlerFunc.lastCall.args[1]).toBe(awsContext)
-    })
-  })
-
-  describe('async handlers', function() {
+    describe('async handlers', function () {
 
     it('calls handler with asynchronous response if no error is thrown', async function () {
       client.configure({
         apiKey: 'testing'
       })
 
-      const handler = client.lambdaHandler(async function(_event, _context) {
-        return Promise.resolve(mockAwsResult({body:'works!'}))
-      }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+            const handler = client.lambdaHandler(async function (_event, _context) {
+                return Promise.resolve(mockAwsResult({body: 'works!'}))
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       const res = await handler(mockAwsEvent(), mockAwsContext())
       expect(res).toBeDefined()
@@ -77,9 +86,9 @@ describe('Lambda Handler', function () {
         apiKey: 'testing'
       })
 
-      const handler = client.lambdaHandler(async function(_event, _context) {
-        return mockAwsResult({body:'works!'})
-      }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+            const handler = client.lambdaHandler(async function (_event, _context) {
+                return mockAwsResult({body: 'works!'})
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       const res = await handler(mockAwsEvent(), mockAwsContext())
       expect(res).toBeDefined()
@@ -91,35 +100,30 @@ describe('Lambda Handler', function () {
         apiKey: null
       })
 
-      const handler = client.lambdaHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(async function(_event, _context) {
-        throw new Error("Badgers!")
-      }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+            // @ts-expect-error
+            const handler = client.lambdaHandler(async function (_event, _context) {
+                throw new Error("Badgers!")
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       return expect(handler(mockAwsEvent(), mockAwsContext())).rejects.toEqual(new Error("Badgers!"))
     })
 
-    it('reports errors to Honeybadger', async function() {
-      client.configure({
-        apiKey: 'testing'
-      })
+        it('reports errors to Honeybadger', async function () {
+            client.configure({
+                apiKey: 'testing'
+            })
+            const api = initNock()
+            // @ts-expect-error
+            const handler = client.lambdaHandler(async function (_event) {
+                throw new Error("Badgers!")
+            }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
-      nock.cleanAll()
-
-      const api = nock("https://api.honeybadger.io")
-        .post("/v1/notices/js")
-        .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
-
-      const handler = client.lambdaHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(async function(_event) {
-        throw new Error("Badgers!")
-      }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
-
-      try {
-        await handler(mockAwsEvent(), mockAwsContext())
-      }
-      catch (e) {
-        // eslint-disable-next-line jest/no-conditional-expect
-        expect(e).toEqual(new Error("Badgers!"))
-      }
+            try {
+                await handler(mockAwsEvent(), mockAwsContext())
+            } catch (e) {
+                // eslint-disable-next-line jest/no-conditional-expect
+                expect(e).toEqual(new Error("Badgers!"))
+            }
 
       return new Promise<void>(resolve => {
         setTimeout(() => {
@@ -129,33 +133,25 @@ describe('Lambda Handler', function () {
       })
     })
 
-    // eslint-disable-next-line jest/expect-expect
-    it('reports async errors to Honeybadger', async function() {
-      client.configure({
-        apiKey: 'testing'
-      })
+        it('reports async errors to Honeybadger', async function () {
+            client.configure({
+                apiKey: 'testing'
+            })
+            const api = initNock()
+            const handler = client.lambdaHandler(async function (_event) {
+                return new Promise<APIGatewayProxyResult>((resolve, reject) => {
+                    setTimeout(function () {
+                        reject(new Error("Badgers!"))
+                    }, 0)
+                })
+            }) as AsyncHandler
 
-      nock.cleanAll()
-
-      const api = nock("https://api.honeybadger.io")
-        .post("/v1/notices/js")
-        .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
-
-      const handler = client.lambdaHandler(async function(_event) {
-        return new Promise<APIGatewayProxyResult>((resolve, reject) => {
-          setTimeout(function() {
-            reject(new Error("Badgers!"))
-          }, 0)
-        })
-      }) as AsyncHandler
-
-      try {
-        await handler(mockAwsEvent(), mockAwsContext())
-      }
-      catch (e) {
-        // eslint-disable-next-line jest/no-conditional-expect
-        expect(e).toEqual(new Error("Badgers!"))
-      }
+            try {
+                await handler(mockAwsEvent(), mockAwsContext())
+            } catch (e) {
+                // eslint-disable-next-line jest/no-conditional-expect
+                expect(e).toEqual(new Error("Badgers!"))
+            }
 
       return new Promise<void>(resolve => {
         setTimeout(() => {
@@ -166,7 +162,7 @@ describe('Lambda Handler', function () {
     })
   })
 
-  describe('non-async handlers', function() {
+    describe('non-async handlers', function () {
 
     beforeEach(function () {
       client.configure({
@@ -174,11 +170,11 @@ describe('Lambda Handler', function () {
       })
     })
 
-    it('calls handler if no error is thrown', function () {
-      return new Promise((done) => {
-        const handler = client.lambdaHandler(function(_event, _context, callback) {
-          callback(null, mockAwsResult({ body: 'works!' }))
-        }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+        it('calls handler if no error is thrown', function () {
+            return new Promise((done) => {
+                const handler = client.lambdaHandler(function (_event, _context, callback) {
+                    callback(null, mockAwsResult({body: 'works!'}))
+                }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
         handler(mockAwsEvent(), mockAwsContext(), (err, res) => {
           expect(res).toBeDefined()
@@ -194,9 +190,9 @@ describe('Lambda Handler', function () {
           apiKey: null
         })
 
-        const handler = client.lambdaHandler(function(_event, _context, _callback) {
-          throw new Error("Badgers!")
-        }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+                const handler = client.lambdaHandler(function (_event, _context, _callback) {
+                    throw new Error("Badgers!")
+                }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
         handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
           expect(err).toEqual(new Error("Badgers!"))
@@ -205,16 +201,12 @@ describe('Lambda Handler', function () {
       })
     })
 
-    it('reports errors to Honeybadger', function() {
-      nock.cleanAll()
+        it('reports errors to Honeybadger', function () {
+            const api = initNock()
 
-      const api = nock("https://api.honeybadger.io")
-        .post("/v1/notices/js")
-        .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
-
-      const handler = client.lambdaHandler(function(_event, _context, _callback) {
-        throw new Error("Badgers!")
-      }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+            const handler = client.lambdaHandler(function (_event, _context, _callback) {
+                throw new Error("Badgers!")
+            }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       return new Promise(done => {
         handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
@@ -227,18 +219,14 @@ describe('Lambda Handler', function () {
       })
     })
 
-    it('reports async errors to Honeybadger', function() {
-      nock.cleanAll()
+        it('reports async errors to Honeybadger', function () {
+            const api = initNock()
 
-      const api = nock("https://api.honeybadger.io")
-        .post("/v1/notices/js")
-        .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
-
-      const handler = client.lambdaHandler(function(_event, _context, callback) {
-        setTimeout(function() {
-          callback(new Error("Badgers!"))
-        }, 0)
-      }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+            const handler = client.lambdaHandler(function (_event, _context, callback) {
+                setTimeout(function () {
+                    callback(new Error("Badgers!"))
+                }, 0)
+            }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       return new Promise(done => {
         handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {
@@ -251,28 +239,24 @@ describe('Lambda Handler', function () {
       })
     })
 
-    it('calls beforeNotify and afterNotify handlers', function () {
-      nock.cleanAll()
+        it('calls beforeNotify and afterNotify handlers', function () {
+            const api = initNock()
 
-      const api = nock("https://api.honeybadger.io")
-        .post("/v1/notices/js")
-        .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
+            const handler = client.lambdaHandler(function (_event, _context, callback) {
+                setTimeout(function () {
+                    callback(new Error("Badgers!"))
+                }, 0)
+            }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
-      const handler = client.lambdaHandler(function(_event, _context, callback) {
-        setTimeout(function() {
-          callback(new Error("Badgers!"))
-        }, 0)
-      }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+            client.beforeNotify(function (notice: Notice) {
+                notice.context = Object.assign(notice.context, {foo: 'bar'})
+            })
 
-      client.beforeNotify(function (notice: Notice) {
-        notice.context = Object.assign(notice.context, { foo: 'bar' })
-      })
-
-      let afterNotifyCalled = false;
-      client.afterNotify(function (err: Error | undefined, notice: Notice) {
-        expect(notice.context).toEqual({ foo: 'bar' })
-        afterNotifyCalled = true;
-      })
+            let afterNotifyCalled = false;
+            client.afterNotify(function (err: Error | undefined, notice: Notice) {
+                expect(notice.context).toEqual({foo: 'bar'})
+                afterNotifyCalled = true;
+            })
 
       return new Promise(done => {
         handler(mockAwsEvent(), mockAwsContext(), (err, _res) => {

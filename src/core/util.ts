@@ -91,7 +91,7 @@ export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeN
 
 export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNotifyHandler[], error?: Error): boolean {
   if (notice && notice.afterNotify) {
-    handlers.unshift(notice.afterNotify)
+    notice.afterNotify(error, notice)
   }
 
   for (let i = 0, len = handlers.length; i < len; i++) {
@@ -101,7 +101,7 @@ export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNot
 }
 
 // Returns a new object with properties from other object.
-export function newObject<T>(obj: T): T | Record<string, unknown> {
+export function shallowClone<T>(obj: T): T | Record<string, unknown> {
   if (typeof (obj) !== 'object' || obj === null) {
     return {}
   }
@@ -130,8 +130,16 @@ export function sanitize(obj, maxDepth = 8) {
   }
 
   function canSerialize(obj) {
-    // Functions are TMI and Symbols can't convert to strings.
-    if (/function|symbol/.test(typeof (obj))) {
+    const typeOfObj = typeof obj
+
+    // Functions are TMI
+    if (/function/.test(typeOfObj)) {
+      // Let special toJSON method pass as it's used by JSON.stringify (#722)
+      return obj.name === 'toJSON'
+    }
+
+    // Symbols can't convert to strings.
+    if (/symbol/.test(typeOfObj)) {
       return false
     }
 
@@ -164,7 +172,7 @@ export function sanitize(obj, maxDepth = 8) {
 
     // Serialize inside arrays
     if (Array.isArray(obj)) {
-      return obj.map(o => serialize(o, depth + 1))
+      return obj.map(o => safeSerialize(o, depth + 1))
     }
 
     // Serialize inside objects
@@ -173,7 +181,7 @@ export function sanitize(obj, maxDepth = 8) {
       for (const k in obj) {
         const v = obj[k]
         if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
-          ret[k] = serialize(v, depth + 1)
+          ret[k] = safeSerialize(v, depth + 1)
         }
       }
       return ret
@@ -183,7 +191,15 @@ export function sanitize(obj, maxDepth = 8) {
     return obj
   }
 
-  return serialize(obj)
+  function safeSerialize(obj: unknown, depth = 0) {
+    try {
+      return serialize(obj, depth)
+    } catch(e) {
+      return `[ERROR] ${e}`
+    }
+  }
+
+  return safeSerialize(obj)
 }
 
 export function logger(client: Client): Logger {
@@ -217,11 +233,11 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
 
   if (!thing) {
     notice = {}
-  } else if (Object.prototype.toString.call(thing) === '[object Error]') {
+  } else if (thing instanceof Error || Object.prototype.toString.call(thing) === '[object Error]') {
     const e = thing as Error
     notice = merge(thing as Record<string, unknown>, {name: e.name, message: e.message, stack: e.stack})
   } else if (typeof thing === 'object') {
-    notice = newObject(thing)
+    notice = shallowClone(thing)
   } else {
     const m = String(thing)
     notice = {message: m}

@@ -4,6 +4,7 @@ const semver = require('semver')
 
 // eslint-disable-next-line no-undef
 module.exports = {
+  // todo: remove all except publishCommand + afterPublish when Conventional Commits transition is complete
   updateChangelog: false,
   shouldPrepare: ({ commits }) => {
     if (commits === '') {
@@ -22,8 +23,6 @@ module.exports = {
 
     return true;
   },
-  formatCommitMessage: ({ version, _releaseType, _baseBranch }) => `Release v${version}`,
-  formatPullRequestTitle: ({ version, _releaseType }) => `Release v${version}`,
   getNextVersion: ({ _revisionRange, _commitTitles, _commitBodies, currentVersion, dir }) => {
     const changelog = new Changelog(`${dir}/CHANGELOG.md`)
     return changelog.nextVersion(currentVersion)
@@ -50,11 +49,15 @@ module.exports = {
       return `${yyyy}-${mm}-${dd}`
     }
   },
+  // todo: uncomment when Conventional Commits transition is complete
+  // publishCommand: ({ defaultCommand, tag }) =>
+  //  `${defaultCommand} --access public --tag ${tag}`,
   afterPublish: ({ exec }) => {
     exec(`./scripts/release-cdn.sh`)
-  }
+  },
 }
 
+// todo: remove when Conventional Commits transition is complete
 class Changelog {
   releaseType = "patch"
   releaseTag = "latest"

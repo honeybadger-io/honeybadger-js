@@ -1,6 +1,6 @@
 import {fake} from 'sinon'
 import Client from '../../../src/core/client'
-import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, newObject, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
+import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, shallowClone, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
 // @ts-ignore
 import { nullLogger } from '../helpers'
 
@@ -152,8 +152,8 @@ describe('utils', function () {
   describe('newObject', function () {
     it('returns a new object', function () {
       const obj = { expected: 'value' }
-      expect(newObject(obj)).toEqual(obj)
-      expect(newObject(obj)).not.toBe(obj)
+      expect(shallowClone(obj)).toEqual(obj)
+      expect(shallowClone(obj)).not.toBe(obj)
     })
   })
 
@@ -229,6 +229,32 @@ describe('utils', function () {
       )
     })
 
+    it('supports toJSON() of objects', function () {
+      expect(
+          JSON.parse(JSON.stringify(sanitize(
+              {
+                ignored: false,
+                aProperty: {
+                  thisShouldBeIgnored: true,
+                  toJSON: () => {
+                    return {
+                      bProperty: true
+                    }
+                  }
+                },
+              },
+              6
+          )))
+      ).toEqual(
+          {
+            ignored: false,
+            aProperty: {
+              bProperty: true
+            }
+          }
+      )
+    })
+
     if (typeof Object.create === 'function') {
       it('handles objects without prototypes as values', function () {
         const obj = Object.create(null)
@@ -270,5 +296,16 @@ describe('utils', function () {
         ).toEqual({})
       })
     }
+
+    it('handles other errors', function () {
+      const obj = []
+      // This will cause the map operation to blow up
+      obj.map = () => { throw(new Error("expected error")) }
+      expect(
+        sanitize({ obj: obj })
+      ).toEqual(
+        { obj: `[ERROR] Error: expected error` }
+      )
+    })
   })
 })

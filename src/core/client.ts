@@ -5,7 +5,7 @@ import {
   makeNotice,
   makeBacktrace,
   runBeforeNotifyHandlers,
-  newObject,
+  shallowClone,
   logger,
   generateStackTrace,
   filter,
@@ -15,8 +15,18 @@ import {
   runAfterNotifyHandlers
 } from './util'
 import {
-  Config, Logger, BreadcrumbRecord, BeforeNotifyHandler, AfterNotifyHandler, Notice, Noticeable, BacktraceFrame
+  Config,
+  Logger,
+  BeforeNotifyHandler,
+  AfterNotifyHandler,
+  Notice,
+  Noticeable,
+  HoneybadgerStore,
+  BacktraceFrame,
+  BreadcrumbRecord,
+  DefaultStoreContents
 } from './types'
+import { GlobalStore } from "./store";
 
 const notifier = {
   name: 'honeybadger-js',
@@ -24,32 +34,18 @@ const notifier = {
   version: '__VERSION__'
 }
 
-// Split at commas
-const TAG_SEPARATOR = /,/
-
-// Removes any non-word characters
-const TAG_SANITIZER = /[^\w]/g
-
-// Checks for blank strings
-const STRING_EMPTY = ''
+// Split at commas and spaces
+const TAG_SEPARATOR = /,|\s+/
 
 // Checks for non-blank characters
 const NOT_BLANK = /\S/
 
 export default class Client {
-  /** @internal */
-  private __pluginsExecuted = false
+  protected __pluginsExecuted = false
 
-  /** @internal */
-  protected __context: Record<string, unknown> = {}
-  /** @internal */
-  protected __breadcrumbs: BreadcrumbRecord[] = []
-  /** @internal */
+  protected __store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }> = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
-  /** @internal */
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
-
-  /** @internal */
   protected __getSourceFileHandler: (path: string) => Promise<string>
 
   config: Config
@@ -81,10 +77,14 @@ export default class Client {
 
       ...opts,
     }
+
+    // First, we go with the global (shared) store.
+    // Webserver middleware can then switch to the AsyncStore for async context tracking.
+    this.__store = new GlobalStore({ context: {}, breadcrumbs: [] })
     this.logger = logger(this)
   }
 
-  factory(_opts?: Record<string, unknown>): unknown {
+  factory(_opts?: Partial<Config>): Client {
     throw (new Error('Must implement __factory in subclass'))
   }
 
@@ -100,7 +100,13 @@ export default class Client {
       this.__pluginsExecuted = true
       this.config.__plugins.forEach((plugin) => plugin.load(this))
     }
+
     return this
+  }
+
+  /** @internal */
+  __setStore(store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>) {
+    this.__store = store
   }
 
   beforeNotify(handler: BeforeNotifyHandler): Client {
@@ -115,24 +121,31 @@ export default class Client {
 
   setContext(context: Record<string, unknown>): Client {
     if (typeof context === 'object') {
-      this.__context = merge(this.__context, context)
+      const store = this.__store.getStore()
+      store.context = merge(store.context, context)
     }
     return this
   }
 
   resetContext(context?: Record<string, unknown>): Client {
     this.logger.warn('Deprecation warning: `Honeybadger.resetContext()` has been deprecated; please use `Honeybadger.clear()` instead.')
+    const store = this.__store.getStore()
+
     if (typeof context === 'object' && context !== null) {
-      this.__context = merge({}, context)
-    } else {
-      this.__context = {}
+      store.context = context
     }
+    else {
+      store.context = {}
+    }
+
     return this
   }
 
   clear(): Client {
-    this.__context = {}
-    this.__breadcrumbs = []
+    const store = this.__store.getStore()
+    store.context = {}
+    store.breadcrumbs = []
+
     return this
   }
 
@@ -161,7 +174,7 @@ export default class Client {
 
     // we need to have the source file data before the beforeNotifyHandlers,
     // in case they modify them
-    const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => newObject(trace) as BacktraceFrame) : null
+    const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
 
     const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
     if (!preConditionError && !beforeNotifyResult) {
@@ -183,7 +196,8 @@ export default class Client {
       }
     })
 
-    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__breadcrumbs.slice() : []
+    const breadcrumbs = this.__getStoreContentsOrDefault().breadcrumbs
+    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs.slice() : []
 
     getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler)
       .then(sourcePerTrace => {
@@ -247,7 +261,7 @@ export default class Client {
 
     if (name && !(typeof name === 'object')) {
       const n = String(name)
-      name = {name: n}
+      name = { name: n }
     }
 
     if (name) {
@@ -261,8 +275,9 @@ export default class Client {
       return null
     }
 
+    const context = this.__getStoreContentsOrDefault().context
     const noticeTags = this.__constructTags(notice.tags)
-    const contextTags = this.__constructTags(this.__context["tags"])
+    const contextTags = this.__constructTags(context["tags"])
     const configTags = this.__constructTags(this.config.tags)
 
     // Turning into a Set will remove duplicates
@@ -271,7 +286,7 @@ export default class Client {
 
     notice = merge(notice, {
       name: notice.name || 'Error',
-      context: merge(this.__context, notice.context),
+      context: merge(context, notice.context),
       projectRoot: notice.projectRoot || this.config.projectRoot,
       environment: notice.environment || this.config.environment,
       component: notice.component || this.config.component,
@@ -298,11 +313,13 @@ export default class Client {
 
     opts = opts || {}
 
-    const metadata = newObject(opts.metadata)
+    const metadata = shallowClone(opts.metadata)
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 
-    this.__breadcrumbs.push({
+    const store = this.__store.getStore()
+    let breadcrumbs = store.breadcrumbs
+    breadcrumbs.push({
       category: category as string,
       message: message,
       metadata: metadata as Record<string, unknown>,
@@ -310,25 +327,23 @@ export default class Client {
     })
 
     const limit = this.config.maxBreadcrumbs
-    if (this.__breadcrumbs.length > limit) {
-      this.__breadcrumbs = this.__breadcrumbs.slice(this.__breadcrumbs.length - limit)
+    if (breadcrumbs.length > limit) {
+      breadcrumbs = breadcrumbs.slice(breadcrumbs.length - limit)
     }
+    store.breadcrumbs = breadcrumbs
 
     return this
   }
 
-  /** @internal */
   protected __developmentMode(): boolean {
     if (this.config.reportData === true) { return false }
     return (this.config.environment && this.config.developmentEnvironments.includes(this.config.environment))
   }
 
-  /** @internal */
   protected __send(_notice: Partial<Notice>): void {
     throw (new Error('Must implement send in subclass'))
   }
 
-  /** @internal */
   protected __buildPayload(notice: Notice): Record<string, Record<string, unknown>> {
     const headers = filter(notice.headers, this.config.filters) || {}
     const cgiData = filter({
@@ -369,14 +384,27 @@ export default class Client {
     }
   }
 
-  /** @internal */
   protected __constructTags(tags: unknown): Array<string> {
     if (!tags) {
       return []
     }
 
-    return tags.toString().split(TAG_SEPARATOR).map((tag: string) => {
-      return tag.replace(TAG_SANITIZER, STRING_EMPTY)
-    }).filter((tag) => NOT_BLANK.test(tag))
+    return tags.toString().split(TAG_SEPARATOR).filter((tag) => NOT_BLANK.test(tag))
+  }
+
+  /**
+   * For ALS, the store may be uninitialized (if .run()` has not been called).
+   * This provides an easy way to read the existing store object or fall back to a default.
+   * Returns *a copy* of the store contents.
+   * @internal
+   */
+  protected __getStoreContentsOrDefault(): DefaultStoreContents {
+    const existingStoreContents = this.__store.getStore();
+    const storeContents = existingStoreContents || {};
+    return {
+      context: {},
+      breadcrumbs: [],
+      ...storeContents
+    };
   }
 }

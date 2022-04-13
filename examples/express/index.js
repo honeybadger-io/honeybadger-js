@@ -26,7 +26,7 @@ app.get('/fail', (req, res) => {
     local: 'true'
   })
 
-  throw(new Error('Badgers!'))
+  throw new Error('Badgers!')
 })
 
 app.use(Honeybadger.errorHandler)

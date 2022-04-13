@@ -1,5 +1,4 @@
 import url from 'url'
-import domain from 'domain'
 import { NextFunction, Request, Response } from 'express'
 import { Noticeable } from '../core/types';
 
@@ -20,10 +19,7 @@ function fullUrl(req: Request): string {
 }
 
 export function requestHandler(req: Request, res: Response, next: NextFunction): void {
-  this.clear()
-  const dom = domain.create()
-  dom.on('error', next)
-  dom.run(next)
+  this.withRequest(req, next, next)
 }
 
 export function errorHandler(err: Noticeable, req: Request, _res: Response, next: NextFunction): unknown {
@@ -37,5 +33,7 @@ export function errorHandler(err: Noticeable, req: Request, _res: Response, next
       REQUEST_METHOD: req.method
     }
   })
-  return next(err)
+  if (next) {
+    return next(err)
+  }
 }

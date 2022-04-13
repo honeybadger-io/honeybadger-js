@@ -1,6 +1,7 @@
 // @ts-ignore
 import { nullLogger, TestClient } from '../helpers'
 import { Notice } from '../../../src/core/types'
+import { sanitize } from "../../../src/core/util";
 
 class MyError extends Error {
   context = null
@@ -22,6 +23,7 @@ describe('client', function () {
       logger: nullLogger(),
       environment: null
     })
+    client.configure()
   })
 
   describe('getVersion', function () {
@@ -247,7 +249,7 @@ describe('client', function () {
         }
       })
 
-      expect((payload.request.params as Record<string,string>).foo ).toEqual('bar')
+      expect((payload.request.params as Record<string, string>).foo).toEqual('bar')
     })
 
     it('reads default properties from error objects', function () {
@@ -294,6 +296,22 @@ describe('client', function () {
       expect(payload.request.context).toEqual({ foo: 'foo', bar: 'bar' })
     })
 
+    it('properly handles Error-prototype objects', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const error = {};
+      Object.setPrototypeOf(error, new TypeError("Some error message"))
+
+      expect(client.notify(error)).toEqual(true)
+      const payload = client.getPayload(error)
+      expect(payload.error.class).toEqual('TypeError')
+      expect(payload.error.message).toEqual('Some error message')
+      // @ts-ignore
+      expect(payload.error.backtrace.length).toBeGreaterThan(0)
+    })
+
     it('generates a backtrace when there isn\'t one', function () {
       client.configure({
         apiKey: 'testing'
@@ -331,7 +349,11 @@ describe('client', function () {
     })
 
     it('resolves when configured', async () => {
-      await expect(client.notifyAsync(new Error('test'))).resolves.not.toThrow();
+      let called = false
+      await client.notifyAsync(new Error('test')).then(() => {
+        called = true
+      })
+      expect(called).toBeTruthy()
     })
 
     it('calls afterNotify from client.afterNotify', async () => {
@@ -394,7 +416,7 @@ describe('client', function () {
         })
       }
 
-      for (let i =0; i < 100; i++) {
+      for (let i = 0; i < 100; i++) {
         register(i)
       }
 
@@ -448,7 +470,7 @@ describe('client', function () {
 
     it('delivers notice when beforeNotify has no return', function () {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      client.beforeNotify(function () {})
+      client.beforeNotify(function () { })
       expect(client.notify('testing')).toEqual(true)
     })
 
@@ -829,31 +851,40 @@ describe('client', function () {
       filters: ['secret']
     })
 
-    const payload = client.getPayload('testing', {url: 'https://www.example.com/?secret=value&foo=bar'})
+    const payload = client.getPayload('testing', { url: 'https://www.example.com/?secret=value&foo=bar' })
 
     expect(payload.request.url).toEqual('https://www.example.com/?secret=[FILTERED]&foo=bar')
   })
 
 
-  it('normalizes comma separated tags', function() {
+  it('normalizes comma separated tags', function () {
     client.configure({
       apiKey: 'testing'
     })
 
-    const payload = client.getPayload('testing', {tags: '  tag1, &%&@<$^tag2,tag3 , tag4,,tag5,'})
+    const payload = client.getPayload('testing', { tags: ' one,two   , three ,four' })
+    expect(payload.error.tags).toEqual(['one', 'two', 'three', 'four'])
+  })
+
+  it('normalizes arrays of tags', function () {
+    client.configure({
+      apiKey: 'testing'
+    })
+
+    const payload = client.getPayload('testing', { tags: ['  tag1,', ',tag2  ', 'tag3 ', 'tag4', 'tag5 '] })
     expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4', 'tag5'])
   })
 
-  it('normalizes arrays of tags', function() {
+  it('allows non-word characters in tags while stripping whitespace', function () {
     client.configure({
       apiKey: 'testing'
     })
 
-    const payload = client.getPayload('testing', {tags: ['  tag1,', ',tag2 * /^&:', 'tag3 ', 'tag4', '<script> tag5 </script>']})
-    expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4', 'scripttag5script'])
+    const payload = client.getPayload('testing', { tags: 'word,  with_underscore ,with space, with-dash,with$special*char' })
+    expect(payload.error.tags).toEqual(['word', 'with_underscore', 'with', 'space', 'with-dash', 'with$special*char'])
   })
 
-  it('sends configured tags to errors', function() {
+  it('sends configured tags to errors', function () {
     client.configure({
       apiKey: 'testing',
       tags: ['tag1']
@@ -863,35 +894,35 @@ describe('client', function () {
     expect(payload.error.tags).toEqual(['tag1'])
   })
 
-  it('sends context tags to errors', function() {
+  it('sends context tags to errors', function () {
     client.configure({
       apiKey: 'testing',
     })
 
-    client.setContext({tags: 'tag1, tag2'})
+    client.setContext({ tags: 'tag1, tag2' })
     const payload = client.getPayload('testing')
     expect(payload.error.tags).toEqual(['tag1', 'tag2'])
   })
 
-  it('sends config errors, context errors, and notice errors', function() {
+  it('sends config errors, context errors, and notice errors', function () {
     client.configure({
       apiKey: 'testing',
       tags: ['tag4']
     })
 
-    client.setContext({tags: 'tag3'})
+    client.setContext({ tags: 'tag3' })
 
-    const payload = client.getPayload('testing', {tags: ['tag1, tag2']})
+    const payload = client.getPayload('testing', { tags: ['tag1, tag2'] })
     expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
   })
 
-  it("should not send duplicate tags", function() {
+  it("should not send duplicate tags", function () {
     client.configure({
       apiKey: 'testing',
       tags: ['tag1']
     })
 
-    const payload = client.getPayload('testing', {tags: ['tag1']})
+    const payload = client.getPayload('testing', { tags: ['tag1'] })
     expect(payload.error.tags).toEqual(['tag1'])
   })
 })

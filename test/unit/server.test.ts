@@ -192,4 +192,51 @@ describe('server client', function () {
       expect(request.isDone()).toBe(true)
     })
   })
+
+  describe('withRequest', function () {
+    beforeEach(() => {
+      client.configure({
+        apiKey: 'testing'
+      })
+    })
+
+    // eslint-disable-next-line
+    it('captures errors in timers with the right context', (done) => {
+      let context, err;
+      const errorHandler = (e) => {
+        err = e;
+        context = client.__store.getStore().context;
+      }
+
+      client.withRequest({}, () => client.setContext({a: true}), errorHandler)
+      client.withRequest({}, () => {
+        client.setContext({b: true})
+        setTimeout(() => { throw new Error("Oh no") }, 10)
+      }, errorHandler)
+
+      setTimeout(() => {
+        expect(err.message).toStrictEqual("Oh no");
+        expect(context).toStrictEqual({b: true});
+        done();
+      }, 20);
+    });
+
+    // eslint-disable-next-line
+    it('retrieves context from the same request object', (done) => {
+      const request = {};
+
+      client.withRequest(request, () => {
+        client.setContext({request1: true})
+      });
+      client.withRequest(request, () => {
+        expect(client.__store.getStore().context).toStrictEqual({request1: true});
+      });
+      client.withRequest(request, () => {
+        setTimeout(() => {
+          expect(client.__store.getStore().context).toStrictEqual({request1: true});
+          done();
+        }, 200);
+      });
+    });
+  })
 })
