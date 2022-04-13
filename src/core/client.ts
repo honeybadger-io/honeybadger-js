@@ -216,7 +216,7 @@ export default abstract class Client {
             method: 'POST',
             endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
             maxObjectDepth: this.config.maxObjectDepth,
-            logger: this.config.logger,
+            logger: this.logger,
           }, payload)
           .then(res => {
             if (res.statusCode !== 201) {
@@ -284,12 +284,12 @@ export default abstract class Client {
     })
   }
 
-  checkIn(id: number): Promise<void> {
+  checkIn(id: string): Promise<void> {
     return this.transport
         .send({
           method: 'GET',
           endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
-          logger: this.config.logger,
+          logger: this.logger,
           async: isBrowserConfig(this.config) ? this.config.async : false,
         })
         .then(() => Promise.resolve())
