@@ -93,31 +93,31 @@ describe('Express Middleware', function () {
       })
   })
 
-    it('does not leak context between requests', function() {
-        const app = express()
+  it('does not leak context between requests', function() {
+    const app = express()
 
     app.use(client.requestHandler)
 
-        app.get("/:reqId", (req, res) => {
-            const initialContext = client.__store.getStore().context;
-            client.setContext({ reqId: req.params.reqId });
-            setTimeout(() => {
-                res.json({
-                    initial: initialContext,
-                    final: client.__store.getStore().context
-                });
-            }, 1000);
+    app.get("/:reqId", (req, res) => {
+      const initialContext = client.__store.getStore().context;
+      client.setContext({ reqId: req.params.reqId });
+      setTimeout(() => {
+        res.json({
+          initial: initialContext,
+          final: client.__store.getStore().context
         });
+      }, 1000);
+    });
 
     app.use(client.errorHandler)
 
-        return Promise.all([1, 2].map((i) => {
-            return request(app).get(`/${i}`)
-                .expect(200)
-                .then((response) => {
-                    const expectedContexts = {initial: {}, final: {reqId: `${i}`}}
-                    expect(response.body).toStrictEqual(expectedContexts)
-                })
-        }));
-    })
+    return Promise.all([1, 2].map((i) => {
+      return request(app).get(`/${i}`)
+        .expect(200)
+        .then((response) => {
+          const expectedContexts = {initial: {}, final: {reqId: `${i}`}}
+          expect(response.body).toStrictEqual(expectedContexts)
+        })
+    }));
+  })
 })

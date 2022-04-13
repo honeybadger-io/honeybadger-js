@@ -205,7 +205,7 @@ describe('server client', function () {
       let context, err;
       const errorHandler = (e) => {
         err = e;
-        context = client.__store.getStore().context;
+        context = (<any>client).__store.getStore().context;
       }
 
       client.withRequest({}, () => client.setContext({a: true}), errorHandler)
@@ -229,11 +229,11 @@ describe('server client', function () {
         client.setContext({request1: true})
       });
       client.withRequest(request, () => {
-        expect(client.__store.getStore().context).toStrictEqual({request1: true});
+        expect((<any>client).__store.getStore().context).toStrictEqual({request1: true});
       });
       client.withRequest(request, () => {
         setTimeout(() => {
-          expect(client.__store.getStore().context).toStrictEqual({request1: true});
+          expect((<any>client).__store.getStore().context).toStrictEqual({request1: true});
           done();
         }, 200);
       });

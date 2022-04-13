@@ -21,48 +21,48 @@ function isHandlerSync(handler: Handler): handler is SyncHandler {
 }
 
 function reportToHoneybadger(hb: Honeybadger, err: Error | string | null, callback: (err: Error | string | null) => void) {
-    hb.notify(err, {
-        afterNotify: function () {
-            hb.clear()
-            callback(err)
-        }
-    })
+  hb.notify(err, {
+    afterNotify: function () {
+      hb.clear()
+      callback(err)
+    }
+  })
 }
 
 function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
-    return function wrappedLambdaHandler(event, context) {
-        hb.__setStore(AsyncStore)
-        return new Promise<TResult>((resolve, reject) => {
-            AsyncStore.run({context: {}, breadcrumbs: []}, () => {
-                try {
-                    handler(event, context)
-                        .then(resolve)
-                        .catch(err => reportToHoneybadger(hb, err, reject))
-                } catch (err) {
-                    reportToHoneybadger(hb, err, reject)
-                }
-            })
-        })
-    }
+  return function wrappedLambdaHandler(event, context) {
+    hb.__setStore(AsyncStore)
+    return new Promise<TResult>((resolve, reject) => {
+      AsyncStore.run({context: {}, breadcrumbs: []}, () => {
+        try {
+          handler(event, context)
+            .then(resolve)
+            .catch(err => reportToHoneybadger(hb, err, reject))
+        } catch (err) {
+          reportToHoneybadger(hb, err, reject)
+        }
+      })
+    })
+  }
 }
 
 function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
-    return function wrappedLambdaHandler(event, context, cb) {
-        hb.__setStore(AsyncStore)
-        AsyncStore.run({context: {}, breadcrumbs: []}, () => {
-            try {
-                handler(event, context, (error, result) => {
-                    if (error) {
-                        return reportToHoneybadger(hb, error, cb)
-                    }
+  return function wrappedLambdaHandler(event, context, cb) {
+    hb.__setStore(AsyncStore)
+    AsyncStore.run({context: {}, breadcrumbs: []}, () => {
+      try {
+        handler(event, context, (error, result) => {
+          if (error) {
+            return reportToHoneybadger(hb, error, cb)
+          }
 
-                    cb(null, result)
-                });
-            } catch (err) {
-                reportToHoneybadger(hb, err, cb)
-            }
-        })
-    }
+          cb(null, result)
+        });
+      } catch (err) {
+        reportToHoneybadger(hb, err, cb)
+      }
+    })
+  }
 }
 
 export function lambdaHandler<TEvent = any, TResult = any>(handler: Handler<TEvent, TResult>): Handler<TEvent, TResult> {

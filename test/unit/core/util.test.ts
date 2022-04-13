@@ -231,27 +231,27 @@ describe('utils', function () {
 
     it('supports toJSON() of objects', function () {
       expect(
-          JSON.parse(JSON.stringify(sanitize(
-              {
-                ignored: false,
-                aProperty: {
-                  thisShouldBeIgnored: true,
-                  toJSON: () => {
-                    return {
-                      bProperty: true
-                    }
-                  }
-                },
-              },
-              6
-          )))
-      ).toEqual(
+        JSON.parse(JSON.stringify(sanitize(
           {
             ignored: false,
             aProperty: {
-              bProperty: true
-            }
+              thisShouldBeIgnored: true,
+              toJSON: () => {
+                return {
+                  bProperty: true
+                }
+              }
+            },
+          },
+          6
+        )))
+      ).toEqual(
+        {
+          ignored: false,
+          aProperty: {
+            bProperty: true
           }
+        }
       )
     })
 

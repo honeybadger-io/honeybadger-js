@@ -116,9 +116,9 @@ class Honeybadger extends Client {
   //   so, even if the store is destroyed, we can still recover the context for a given request
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public withRequest<R>(
-      request: Record<symbol, unknown>,
-      handler: (...args: never[]) => R,
-      onError?: (...args: any[]) => any
+    request: Record<symbol, unknown>,
+    handler: (...args: never[]) => R,
+    onError?: (...args: unknown[]) => unknown
   ): R|void {
     const storeObject = (request[kHoneybadgerStore] || this.__getStoreContentsOrDefault()) as DefaultStoreContents;
     this.__setStore(AsyncStore);
