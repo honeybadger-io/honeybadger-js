@@ -8,7 +8,7 @@ export class BrowserTransport implements Transport {
                 const x = new XMLHttpRequest()
                 x.open(options.method, options.endpoint, options.async)
 
-                if (Object.keys(options.headers).length) {
+                if (Object.keys(options.headers || []).length) {
                     for (const i in options.headers) {
                         if (typeof options.headers !== 'undefined') {
                             x.setRequestHeader(i, String(options.headers[i]))
