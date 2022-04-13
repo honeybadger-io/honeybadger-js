@@ -284,7 +284,11 @@ export default abstract class Client {
     })
   }
 
-  checkIn(id: string): Promise<void> {
+  checkIn(id: string): void {
+    this.checkInAsync(id).then()
+  }
+
+  checkInAsync(id: string): Promise<void> {
     return this.transport
         .send({
           method: 'GET',
@@ -292,7 +296,13 @@ export default abstract class Client {
           logger: this.logger,
           async: isBrowserConfig(this.config) ? this.config.async : false,
         })
-        .then(() => Promise.resolve())
+        .then(() => {
+          this.logger.info(`CheckIn sent`)
+          return Promise.resolve()
+        })
+        .catch(err => {
+          this.logger.error('CheckIn failed: an unknown error occurred.', `message=${err.message}`)
+        })
   }
 
   protected makeNotice(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Notice | null {
