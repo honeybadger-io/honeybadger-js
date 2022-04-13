@@ -10,7 +10,7 @@ export class BrowserTransport implements Transport {
 
                 if (Object.keys(options.headers || []).length) {
                     for (const i in options.headers) {
-                        if (typeof options.headers !== 'undefined') {
+                        if (typeof options.headers[i] !== 'undefined') {
                             x.setRequestHeader(i, String(options.headers[i]))
                         }
                     }

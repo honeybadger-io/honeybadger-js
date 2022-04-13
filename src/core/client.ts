@@ -48,7 +48,7 @@ export default abstract class Client {
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
   protected __getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void
 
-  protected readonly transport: Transport;
+  protected readonly __transport: Transport;
 
   config: Config
   logger: Logger
@@ -83,8 +83,8 @@ export default abstract class Client {
     // First, we go with the global (shared) store.
     // Webserver middleware can then switch to the AsyncStore for async context tracking.
     this.__store = new GlobalStore({ context: {}, breadcrumbs: [] })
+    this.__transport = transport
     this.logger = logger(this)
-    this.transport = transport
   }
 
   protected abstract factory(opts: Partial<Config>): void;
@@ -206,7 +206,7 @@ export default abstract class Client {
       })
 
       const payload = this.__buildPayload(notice)
-      this.transport
+      this.__transport
           .send({
             headers: {
               'X-API-Key': this.config.apiKey,
@@ -289,7 +289,7 @@ export default abstract class Client {
   }
 
   checkInAsync(id: string): Promise<void> {
-    return this.transport
+    return this.__transport
         .send({
           method: 'GET',
           endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),

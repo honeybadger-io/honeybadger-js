@@ -21,9 +21,10 @@
       apiKey: 'integration sandbox'
     });
 
-    Honeybadger.__send = (function(notice) {
-      results.notices.push(notice);
-    });
+    Honeybadger.__transport.send = function (options, payload) {
+      results.notices.push(payload);
+      return Promise.resolve({ statusCode: 201, body: JSON.stringify({id: 'test'}) })
+    };
   </script>
 </head>
 
