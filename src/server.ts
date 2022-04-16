@@ -5,7 +5,7 @@ import os from 'os'
 import domain from 'domain'
 
 import Client from './core/client'
-import { Config, Notice, BeforeNotifyHandler, DefaultStoreContents } from './core/types'
+import { Config, Notice, BeforeNotifyHandler, DefaultStoreContents, ServerlessConfig } from './core/types'
 import { merge, sanitize, runAfterNotifyHandlers, endpoint } from './core/util'
 import {
   fatallyLogAndExit,
@@ -33,25 +33,37 @@ class Honeybadger extends Client {
     }
   ]
 
-  public errorHandler: typeof errorHandler;
-  public requestHandler: typeof requestHandler;
-  public lambdaHandler: typeof lambdaHandler;
+  public errorHandler: typeof errorHandler
+  public requestHandler: typeof requestHandler
+  public lambdaHandler: typeof lambdaHandler
 
-  constructor(opts: Partial<Config> = {}) {
+  config: Config | ServerlessConfig
+
+  constructor(opts: Partial<Config | ServerlessConfig> = {}) {
     super({
       afterUncaught: fatallyLogAndExit,
       projectRoot: process.cwd(),
       hostname: os.hostname(),
       ...opts,
     })
+
+    // serverless defaults
+    const config = this.config as ServerlessConfig
+    config.reportTimeoutWarning = config.reportTimeoutWarning || true
+    config.timeoutWarningThresholdMs = config.timeoutWarningThresholdMs || 50
+
     this.__getSourceFileHandler = getSourceFile.bind(this)
     this.errorHandler = errorHandler.bind(this)
     this.requestHandler = requestHandler.bind(this)
     this.lambdaHandler = lambdaHandler.bind(this)
   }
 
-  factory(opts?: Partial<Config>): Honeybadger {
+  factory(opts?: Partial<Config | ServerlessConfig>): Honeybadger {
     return new Honeybadger(opts)
+  }
+
+  configure(opts: Partial<Config | ServerlessConfig> = {}): Honeybadger {
+    return super.configure(opts) as Honeybadger
   }
 
   /** @internal */

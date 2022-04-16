@@ -33,6 +33,11 @@ export interface Config {
   tags: unknown,
 }
 
+export interface ServerlessConfig extends Config {
+  reportTimeoutWarning: boolean;
+  timeoutWarningThresholdMs: number;
+}
+
 export interface BeforeNotifyHandler {
   (notice?: Notice): boolean | void
 }
