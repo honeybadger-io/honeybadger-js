@@ -924,10 +924,4 @@ describe('client', function () {
     const payload = client.getPayload('testing', { tags: ['tag1'] })
     expect(payload.error.tags).toEqual(['tag1'])
   })
-
-  describe('checkIn', function () {
-    it('sends a checkIn report', async function () {
-      await expect(client.checkIn('123')).resolves.not.toThrow()
-    })
-  })
 })

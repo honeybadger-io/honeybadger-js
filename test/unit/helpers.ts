@@ -23,6 +23,10 @@ export class TestClient extends BaseClient {
       throw new Error('Method not implemented.');
   }
 
+  public checkIn(_id: string): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+
   constructor(opts: Partial<Config>, transport: Transport) {
     super(opts, transport);
   }
