@@ -59,6 +59,10 @@ class Honeybadger extends Client {
     return new Honeybadger(opts)
   }
 
+  public checkIn(_id: string): Promise<void> {
+    throw new Error('Honeybadger.checkIn() is not supported on the browser')
+  }
+
   /** @internal */
   protected __buildPayload(notice:Notice): NoticeTransportPayload {
     const cgiData = {

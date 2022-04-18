@@ -87,7 +87,9 @@ export default abstract class Client {
     this.logger = logger(this)
   }
 
-  protected abstract factory(opts: Partial<Config>): void;
+  protected abstract factory(opts: Partial<Config>): void
+
+  protected abstract checkIn(id: string): Promise<void>
 
   getVersion(): string {
     return notifier.version
@@ -217,6 +219,7 @@ export default abstract class Client {
             endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
             maxObjectDepth: this.config.maxObjectDepth,
             logger: this.logger,
+            async: isBrowserConfig(this.config) ? this.config.async : undefined,
           }, payload)
           .then(res => {
             if (res.statusCode !== 201) {
@@ -282,23 +285,6 @@ export default abstract class Client {
       applyAfterNotify(objectToOverride)
       this.notify(noticeable, name, extra)
     })
-  }
-
-  checkIn(id: string): Promise<void> {
-    return this.__transport
-        .send({
-          method: 'GET',
-          endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
-          logger: this.logger,
-          async: isBrowserConfig(this.config) ? this.config.async : false,
-        })
-        .then(() => {
-          this.logger.info(`CheckIn sent`)
-          return Promise.resolve()
-        })
-        .catch(err => {
-          this.logger.error('CheckIn failed: an unknown error occurred.', `message=${err.message}`)
-        })
   }
 
   protected makeNotice(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): Notice | null {

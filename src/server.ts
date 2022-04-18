@@ -13,6 +13,7 @@ import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { AsyncStore } from './server/async_store'
 import { ServerTransport } from "./server/transport";
+import { endpoint } from "./core/util";
 
 const kHoneybadgerStore = Symbol.for("kHoneybadgerStore");
 class Honeybadger extends Client {
@@ -48,6 +49,22 @@ class Honeybadger extends Client {
 
   factory(opts?: Partial<Config>): Honeybadger {
     return new Honeybadger(opts)
+  }
+
+  checkIn(id: string): Promise<void> {
+    return this.__transport
+        .send({
+          method: 'GET',
+          endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
+          logger: this.logger,
+        })
+        .then(() => {
+          this.logger.info(`CheckIn sent`)
+          return Promise.resolve()
+        })
+        .catch(err => {
+          this.logger.error('CheckIn failed: an unknown error occurred.', `message=${err.message}`)
+        })
   }
 
   // This method is intended for web frameworks.
