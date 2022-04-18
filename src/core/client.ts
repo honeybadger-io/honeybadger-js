@@ -284,11 +284,7 @@ export default abstract class Client {
     })
   }
 
-  checkIn(id: string): void {
-    this.checkInAsync(id).then()
-  }
-
-  checkInAsync(id: string): Promise<void> {
+  checkIn(id: string): Promise<void> {
     return this.__transport
         .send({
           method: 'GET',

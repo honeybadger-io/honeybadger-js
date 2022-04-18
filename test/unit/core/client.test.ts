@@ -927,7 +927,7 @@ describe('client', function () {
 
   describe('checkIn', function () {
     it('sends a checkIn report', async function () {
-      await expect(client.checkInAsync('123')).resolves.not.toThrow()
+      await expect(client.checkIn('123')).resolves.not.toThrow()
     })
   })
 })
