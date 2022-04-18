@@ -82,7 +82,7 @@ function setupTimeoutWarning(hb: Honeybadger, context: Context) {
 
     const delay = context.getRemainingTimeInMillis() - ((hb.config as ServerlessConfig).timeoutWarningThresholdMs)
     return setTimeout(() => {
-        hb.notify(`${context.functionName}[${context.functionVersion}] may timeout`)
+        hb.notify(`${context.functionName}[${context.functionVersion}] may have timed out`)
     }, delay > 0 ? delay : 0)
 
 }

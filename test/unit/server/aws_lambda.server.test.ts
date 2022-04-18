@@ -172,7 +172,7 @@ describe('Lambda Handler', function () {
             let noticeSentAt: number
             const api = initNock(1, (body) => {
                 noticeSentAt = Date.now()
-                return body.error.message === 'serverlessFunction[v1.0.0] may timeout'
+                return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
             })
             const handler = client.lambdaHandler(async function (_event) {
                 return new Promise<APIGatewayProxyResult>((resolve, _reject) => {
@@ -220,7 +220,7 @@ describe('Lambda Handler', function () {
             let noticeSentAt: number
             const api = initNock(1, (body) => {
                 noticeSentAt = Date.now()
-                return body.error.message === 'serverlessFunction[v1.0.0] may timeout'
+                return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
             })
             const handler = client.lambdaHandler(async function (_event) {
                 return new Promise<APIGatewayProxyResult>((resolve, _reject) => {
@@ -299,7 +299,7 @@ describe('Lambda Handler', function () {
             let noticeSentAt: number
             const api = initNock(1, (body) => {
                 noticeSentAt = Date.now()
-                return body.error.message === 'serverlessFunction[v1.0.0] may timeout'
+                return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
             })
             const handler = client.lambdaHandler(async function (_event) {
                 return new Promise<APIGatewayProxyResult>((resolve, _reject) => {
@@ -447,7 +447,7 @@ describe('Lambda Handler', function () {
             let noticeSentAt: number
             const api = initNock(1, (body) => {
                 noticeSentAt = Date.now()
-                return body.error.message === 'serverlessFunction[v1.0.0] may timeout'
+                return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
             })
 
             const handler = client.lambdaHandler(function (_event, _context, callback) {
@@ -491,7 +491,7 @@ describe('Lambda Handler', function () {
             let noticeSentAt: number
             const api = initNock(1, (body) => {
                 noticeSentAt = Date.now()
-                return body.error.message === 'serverlessFunction[v1.0.0] may timeout'
+                return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
             })
 
             const handler = client.lambdaHandler(function (_event, _context, callback) {
@@ -564,7 +564,7 @@ describe('Lambda Handler', function () {
             let noticeSentAt: number
             const api = initNock(1, (body) => {
                 noticeSentAt = Date.now()
-                return body.error.message === 'serverlessFunction[v1.0.0] may timeout'
+                return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
             })
 
             const handler = client.lambdaHandler(function (_event, _context, callback) {

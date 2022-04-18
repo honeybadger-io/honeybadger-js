@@ -70,5 +70,21 @@ module.exports = {
       });
       callback(null, resp);
     }, 300);
-  })
+  }),
+  timeoutWarning: honeybadgerWrapper(async (event) => {
+    const asyncThatThrows = async (shouldTimeout) => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve()
+        }, shouldTimeout ? (1000 * 60 * 20) : 200) // 20 minutes
+      });
+    }
+
+    const shouldTimeout = event.body && event.body.timeout === 'yes';
+    await asyncThatThrows(shouldTimeout);
+    return formatJSONResponse({
+      message: `You summoned the timeoutWarning handler! Nothing was sent to Honeybadger. POST with { 'body': { 'timeout': 'yes' } } to run the function until it times out.`,
+      event,
+    });
+  }),
 }

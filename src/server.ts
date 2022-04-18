@@ -49,7 +49,7 @@ class Honeybadger extends Client {
 
     // serverless defaults
     const config = this.config as ServerlessConfig
-    config.reportTimeoutWarning = config.reportTimeoutWarning || true
+    config.reportTimeoutWarning = config.reportTimeoutWarning ?? true
     config.timeoutWarningThresholdMs = config.timeoutWarningThresholdMs || 50
 
     this.__getSourceFileHandler = getSourceFile.bind(this)
