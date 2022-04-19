@@ -6,119 +6,118 @@ import Singleton from "../../../src/server";
 import {nullLogger} from "../helpers";
 
 describe('Express Middleware', function () {
-    let client
-    let client_mock
-    const error = new Error('Badgers!')
+  let client
+  let client_mock
+  const error = new Error('Badgers!')
 
-    beforeEach(function () {
-        client = Singleton.factory({
-            logger: nullLogger(),
-            environment: null
-        })
-        client.configure()
-        client_mock = mock(client)
+  beforeEach(function () {
+    client = Singleton.factory({
+      logger: nullLogger(),
+      environment: null
+    })
+    client_mock = mock(client)
+  })
+
+  // eslint-disable-next-line jest/expect-expect
+  it('is sane', function () {
+    const app = express()
+
+    app.get('/user', function (req, res) {
+      res.status(200).json({ name: 'john' })
     })
 
-    // eslint-disable-next-line jest/expect-expect
-    it('is sane', function () {
-        const app = express()
+    client_mock.expects('notify').never()
 
-        app.get('/user', function (req, res) {
-            res.status(200).json({ name: 'john' })
-        })
+    return request(app)
+      .get('/user')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+  })
 
-        client_mock.expects('notify').never()
+  it('reports the error to Honeybadger and calls next error handler', function() {
+    const app = express()
+    const expected = spy()
 
-        return request(app)
-            .get('/user')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
+    app.use(client.requestHandler)
+
+    app.get('/', function(_req, _res) {
+      throw(error)
     })
 
-    it('reports the error to Honeybadger and calls next error handler', function() {
-        const app = express()
-        const expected = spy()
+    app.use(client.errorHandler)
 
-        app.use(client.requestHandler)
-
-        app.get('/', function(_req, _res) {
-            throw(error)
-        })
-
-        app.use(client.errorHandler)
-
-        app.use(function(err, _req, _res, next) {
-            expected()
-            next(err)
-        })
-
-        client_mock.expects('notify').once().withArgs(error)
-
-        return request(app)
-            .get('/')
-            .expect(500)
-            .then(() => {
-                client_mock.verify()
-                expect(expected.calledOnce).toBeTruthy()
-            })
+    app.use(function(err, _req, _res, next) {
+      expected()
+      next(err)
     })
 
-    it('reports async errors to Honeybadger and calls next error handler', function() {
-        const app = express()
-        const expected = spy()
+    client_mock.expects('notify').once().withArgs(error)
 
-        app.use(client.requestHandler)
+    return request(app)
+      .get('/')
+      .expect(500)
+      .then(() => {
+        client_mock.verify()
+        expect(expected.calledOnce).toBeTruthy()
+      })
+  })
 
-        app.get('/', function(_req, _res) {
-            setTimeout(function asyncThrow() {
-                throw(error)
-            }, 0)
-        })
+  it('reports async errors to Honeybadger and calls next error handler', function() {
+    const app = express()
+    const expected = spy()
 
-        app.use(client.errorHandler)
+    app.use(client.requestHandler)
 
-        app.use(function(err, _req, _res, next) {
-            expected()
-            next(err)
-        })
-
-        client_mock.expects('notify').once().withArgs(error)
-
-        return request(app)
-            .get('/')
-            .expect(500)
-            .then(() => {
-                client_mock.verify()
-                expect(expected.calledOnce).toBeTruthy()
-            })
+    app.get('/', function(_req, _res) {
+      setTimeout(function asyncThrow() {
+        throw(error)
+      }, 0)
     })
 
-    it('does not leak context between requests', function() {
-        const app = express()
+    app.use(client.errorHandler)
 
-        app.use(client.requestHandler)
+    app.use(function(err, _req, _res, next) {
+      expected()
+      next(err)
+    })
 
-        app.get("/:reqId", (req, res) => {
-            const initialContext = client.__store.getStore().context;
-            client.setContext({ reqId: req.params.reqId });
-            setTimeout(() => {
-                res.json({
-                    initial: initialContext,
-                    final: client.__store.getStore().context
-                });
-            }, 1000);
+    client_mock.expects('notify').once().withArgs(error)
+
+    return request(app)
+      .get('/')
+      .expect(500)
+      .then(() => {
+        client_mock.verify()
+        expect(expected.calledOnce).toBeTruthy()
+      })
+  })
+
+  it('does not leak context between requests', function() {
+    const app = express()
+
+    app.use(client.requestHandler)
+
+    app.get("/:reqId", (req, res) => {
+      const initialContext = client.__store.getStore().context;
+      client.setContext({ reqId: req.params.reqId });
+      setTimeout(() => {
+        res.json({
+          initial: initialContext,
+          final: client.__store.getStore().context
         });
+      }, 1000);
+    });
 
-        app.use(client.errorHandler)
+    app.use(client.errorHandler)
 
-        return Promise.all([1, 2].map((i) => {
-            return request(app).get(`/${i}`)
-                .expect(200)
-                .then((response) => {
-                    const expectedContexts = {initial: {}, final: {reqId: `${i}`}}
-                    expect(response.body).toStrictEqual(expectedContexts)
-                })
-        }));
-    })
+    return Promise.all([1, 2].map((i) => {
+      return request(app).get(`/${i}`)
+        .expect(200)
+        .then((response) => {
+          const expectedContexts = {initial: {}, final: {reqId: `${i}`}}
+          expect(response.body).toStrictEqual(expectedContexts)
+        })
+    }));
+  })
 })

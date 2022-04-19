@@ -4,24 +4,18 @@ import Singleton from '../../src/browser'
 import { nullLogger } from './helpers'
 
 describe('browser client', function () {
-  let client, requests, request, xhr
+  let client: typeof Singleton
+  let xhr: typeof useFakeXMLHttpRequest
 
   beforeEach(function () {
     client = Singleton.factory({
       logger: nullLogger()
-    })
+    });
 
-    // no need to test this in here
+    // @ts-ignore - no need to test this in here
     client.__getSourceFileHandler = null
 
-    // Stub HTTP requests.
-    request = undefined
-    requests = []
     xhr = useFakeXMLHttpRequest()
-    xhr.onCreate = function (xhr) {
-      request = xhr
-      return requests.push(xhr)
-    }
   })
 
   afterEach(function () {
@@ -65,8 +59,11 @@ describe('browser client', function () {
 
         client.notify('testing')
 
-        expect(requests).toHaveLength(1)
-        request.respond(201, {}, JSON.stringify({ id }))
+        xhr.onCreate = function (xhr) {
+          setTimeout(() => {
+            xhr.respond(201, {}, JSON.stringify({ id }))
+          }, 0)
+        }
       })
 
     })
@@ -80,8 +77,11 @@ describe('browser client', function () {
         })
         client.notify('testing')
 
-        expect(requests).toHaveLength(1)
-        request.respond(403, {}, '')
+        xhr.onCreate = function (xhr) {
+          setTimeout(() => {
+            xhr.respond(403, {}, '')
+          }, 0)
+        }
       })
     })
 
@@ -96,8 +96,11 @@ describe('browser client', function () {
         const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
         client.notify('testing', { afterNotify })
 
-        expect(requests).toHaveLength(1)
-        request.respond(201, {}, JSON.stringify({ id }))
+        xhr.onCreate = function (xhr) {
+          setTimeout(() => {
+            xhr.respond(201, {}, JSON.stringify({ id }))
+          },0)
+        }
       })
 
     })
@@ -105,7 +108,6 @@ describe('browser client', function () {
     it('is called with an error when passed as an option and the request fails', function () {
       return new Promise<void>((resolve) => {
         const afterNotify = (err,notice) => {
-
           expect(notice.message).toEqual('testing')
           expect(err.message).toMatch(/403/)
           resolve()
@@ -113,50 +115,68 @@ describe('browser client', function () {
 
         client.notify('testing', { afterNotify })
 
-        expect(requests).toHaveLength(1)
-        request.respond(403, {}, '')
+        xhr.onCreate = function (xhr) {
+          setTimeout(() => {
+            xhr.respond(403, {}, '')
+          }, 0)
+        }
       })
     })
   })
 
   describe('notify', function () {
     it('excludes cookies by default', function () {
-      client.configure({
-        apiKey: 'testing'
+      return new Promise<void>(resolve => {
+        client.configure({
+          apiKey: 'testing'
+        })
+
+        client.notify('testing')
+
+        xhr.onCreate = function (xhr) {
+          setTimeout(() => {
+            const payload = JSON.parse(xhr.requestBody)
+            expect(payload.request.cgi_data.HTTP_COOKIE).toBeUndefined()
+            resolve()
+          }, 0)
+        }
       })
-
-      client.notify('testing')
-
-      expect(requests).toHaveLength(1)
-
-      const payload = JSON.parse(requests[0].requestBody)
-      expect(payload.request.cgi_data.HTTP_COOKIE).toBeUndefined()
     })
 
     it('filters cookies string', function () {
-      client.configure({
-        apiKey: 'testing'
+      return new Promise<void>(resolve => {
+        client.configure({
+          apiKey: 'testing'
+        })
+
+        client.notify('testing', {cookies: 'expected=value; password=secret'})
+
+        xhr.onCreate = function (xhr) {
+          setTimeout(() => {
+            const payload = JSON.parse(xhr.requestBody)
+            expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
+            resolve()
+          }, 0)
+        }
       })
-
-      client.notify('testing', {cookies: 'expected=value; password=secret'})
-
-      expect(requests).toHaveLength(1)
-
-      const payload = JSON.parse(requests[0].requestBody)
-      expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
     })
 
     it('filters cookies object', function () {
-      client.configure({
-        apiKey: 'testing'
+      return new Promise<void>(resolve => {
+        client.configure({
+          apiKey: 'testing'
+        })
+
+        client.notify('testing', {cookies: {expected: 'value', password: 'secret'}})
+
+        xhr.onCreate = function (xhr) {
+          setTimeout(() => {
+            const payload = JSON.parse(xhr.requestBody)
+            expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
+            resolve()
+          })
+        }
       })
-
-      client.notify('testing', {cookies: {expected: 'value', password: 'secret'}})
-
-      expect(requests).toHaveLength(1)
-
-      const payload = JSON.parse(requests[0].requestBody)
-      expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
     })
   })
 })

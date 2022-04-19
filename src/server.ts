@@ -65,18 +65,18 @@ class Honeybadger extends Client {
 
   checkIn(id: string): Promise<void> {
     return this.__transport
-        .send({
-          method: 'GET',
-          endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
-          logger: this.logger,
-        })
-        .then(() => {
-          this.logger.info(`CheckIn sent`)
-          return Promise.resolve()
-        })
-        .catch(err => {
-          this.logger.error('CheckIn failed: an unknown error occurred.', `message=${err.message}`)
-        })
+      .send({
+        method: 'GET',
+        endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
+        logger: this.logger,
+      })
+      .then(() => {
+        this.logger.info(`CheckIn sent`)
+        return Promise.resolve()
+      })
+      .catch(err => {
+        this.logger.error('CheckIn failed: an unknown error occurred.', `message=${err.message}`)
+      })
   }
 
   // This method is intended for web frameworks.
@@ -87,9 +87,9 @@ class Honeybadger extends Client {
   //   so, even if the store is destroyed, we can still recover the context for a given request
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public withRequest<R>(
-      request: Record<symbol, unknown>,
-      handler: (...args: never[]) => R,
-      onError?: (...args: unknown[]) => unknown
+    request: Record<symbol, unknown>,
+    handler: (...args: never[]) => R,
+    onError?: (...args: unknown[]) => unknown
   ): R|void {
     const storeObject = (request[kHoneybadgerStore] || this.__getStoreContentsOrDefault()) as DefaultStoreContents;
     this.__setStore(AsyncStore);

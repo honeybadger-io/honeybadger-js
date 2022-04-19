@@ -36,7 +36,7 @@ function createSandbox(callback) {
     const report = function () {
       setTimeout(function () {
         window.reportResults(results);
-      });
+      }, 50);
     };
 
     sandbox.contentWindow.report = function () {

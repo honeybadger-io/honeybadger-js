@@ -6,7 +6,7 @@ import { nullLogger } from './helpers'
 import nock from 'nock'
 
 describe('server client', function () {
-  let client
+  let client: typeof Singleton
 
   beforeEach(function () {
     client = Singleton.factory({
@@ -70,10 +70,10 @@ describe('server client', function () {
     })
 
     nock('https://api.honeybadger.io')
-    .post('/v1/notices/js')
-    .reply(201, {
-      id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
-    })
+      .post('/v1/notices/js')
+      .reply(201, {
+        id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      })
 
     return new Promise(resolve => {
       client.notify('testing', {
@@ -174,10 +174,10 @@ describe('server client', function () {
 
     it('resolves after the http request is done', async () => {
       const request = nock('https://api.honeybadger.io')
-          .post('/v1/notices/js')
-          .reply(201, {
-            id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
-          })
+        .post('/v1/notices/js')
+        .reply(201, {
+          id: '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+        })
 
       await client.notifyAsync('testing')
       expect(request.isDone()).toBe(true)
@@ -185,8 +185,8 @@ describe('server client', function () {
 
     it('rejects on http error', async () => {
       const request = nock('https://api.honeybadger.io')
-          .post('/v1/notices/js')
-          .reply(400)
+        .post('/v1/notices/js')
+        .reply(400)
 
       await expect(client.notifyAsync('testing')).rejects.toThrow(/Bad HTTP response/)
       expect(request.isDone()).toBe(true)
@@ -205,7 +205,8 @@ describe('server client', function () {
       let context, err;
       const errorHandler = (e) => {
         err = e;
-        context = client.__store.getStore().context;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        context = (<any>client).__store.getStore().context;
       }
 
       client.withRequest({}, () => client.setContext({a: true}), errorHandler)
@@ -229,11 +230,13 @@ describe('server client', function () {
         client.setContext({request1: true})
       });
       client.withRequest(request, () => {
-        expect(client.__store.getStore().context).toStrictEqual({request1: true});
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect((<any>client).__store.getStore().context).toStrictEqual({request1: true});
       });
       client.withRequest(request, () => {
         setTimeout(() => {
-          expect(client.__store.getStore().context).toStrictEqual({request1: true});
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          expect((<any>client).__store.getStore().context).toStrictEqual({request1: true});
           done();
         }, 200);
       });
@@ -249,8 +252,8 @@ describe('server client', function () {
 
       const checkInId = "123"
       const request = nock('http://api.honeybadger.io')
-          .get(`/v1/check_in/${checkInId}`)
-          .reply(201)
+        .get(`/v1/check_in/${checkInId}`)
+        .reply(201)
 
       await client.checkIn(checkInId)
       expect(request.isDone()).toBe(true)

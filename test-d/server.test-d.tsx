@@ -1,21 +1,21 @@
 import Honeybadger from '../dist/server/honeybadger'
 
 Honeybadger.configure({
-    debug: false,
-    reportData: false,
-    endpoint: 'https://api.honeybadger.io',
-    projectRoot: 'webpack:///./',
-    apiKey: 'project api key',
-    environment: 'production',
-    hostname: 'badger01',
-    revision: 'git SHA/project version',
-    component: 'example_comonent',
-    action: 'example_action',
-    breadcrumbsEnabled: true
+  debug: false,
+  reportData: false,
+  endpoint: 'https://api.honeybadger.io',
+  projectRoot: 'webpack:///./',
+  apiKey: 'project api key',
+  environment: 'production',
+  hostname: 'badger01',
+  revision: 'git SHA/project version',
+  component: 'example_comonent',
+  action: 'example_action',
+  breadcrumbsEnabled: true
 })
 
 Honeybadger.resetContext({
-    user_id: 123
+  user_id: 123
 })
 Honeybadger.notify('test')
 Honeybadger.notify(new Error('test'))
@@ -38,6 +38,6 @@ client.clear()
 
 const client2 = Honeybadger.factory()
 client2.beforeNotify(() => {
-    console.log("Notifying")
+  console.log("Notifying")
 })
 client2.notify('test')

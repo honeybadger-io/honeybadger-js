@@ -46,7 +46,7 @@ export default abstract class Client {
   protected __store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }> = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
-  protected __getSourceFileHandler: (path: string, cb: (fileContent: string) => void) => void
+  protected __getSourceFileHandler: (path: string) => Promise<string>
 
   protected readonly __transport: Transport;
 
@@ -200,13 +200,14 @@ export default abstract class Client {
     const breadcrumbs = this.__getStoreContentsOrDefault().breadcrumbs
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs.slice() : []
 
-    getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler, sourcePerTrace => {
-      sourcePerTrace.forEach((source, index) => {
-        notice.backtrace[index].source = source
-      })
+    getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler)
+      .then(sourcePerTrace => {
+        sourcePerTrace.forEach((source, index) => {
+          notice.backtrace[index].source = source
+        })
 
-      const payload = this.__buildPayload(notice)
-      this.__transport
+        const payload = this.__buildPayload(notice)
+        this.__transport
           .send({
             headers: {
               'X-API-Key': this.config.apiKey,
@@ -235,7 +236,7 @@ export default abstract class Client {
             this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
             runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
           })
-    })
+      })
 
     return true
   }
