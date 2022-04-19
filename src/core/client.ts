@@ -174,7 +174,9 @@ export default abstract class Client {
       this.logger.warn('could not send error report: no API key has been configured', notice)
       preConditionError = new Error('missing API key')
     }
-
+    // we need to have the source file data before the beforeNotifyHandlers,
+    // in case they modify them
+    const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
     const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
     if (!preConditionError && !beforeNotifyResult) {
       this.logger.debug('skipping error report: beforeNotify handlers returned false', notice)
@@ -197,10 +199,6 @@ export default abstract class Client {
 
     const breadcrumbs = this.__getStoreContentsOrDefault().breadcrumbs
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs.slice() : []
-
-    // we need to have the source file data before the beforeNotifyHandlers,
-    // in case they modify them
-    const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
 
     getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler, sourcePerTrace => {
       sourcePerTrace.forEach((source, index) => {
