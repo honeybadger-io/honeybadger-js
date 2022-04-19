@@ -1,8 +1,7 @@
 import {fake} from 'sinon'
-import Client from '../../../src/core/client'
 import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, shallowClone, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
 // @ts-ignore
-import { nullLogger } from '../helpers'
+import { nullLogger, TestClient, TestTransport } from '../helpers'
 
 describe('utils', function () {
   describe('filterUrl', function () {
@@ -44,7 +43,7 @@ describe('utils', function () {
       const mockDebug = jest.fn()
       const console = nullLogger()
       console.debug = mockDebug
-      const client = new Client({ logger: console })
+      const client = new TestClient({ logger: console }, new TestTransport())
 
       logger(client).debug('expected')
 
@@ -55,7 +54,7 @@ describe('utils', function () {
       const mockDebug = jest.fn()
       const console = nullLogger()
       console.log = mockDebug
-      const client = new Client({ logger: console, debug: true })
+      const client = new TestClient({ logger: console, debug: true }, new TestTransport())
 
       logger(client).debug('expected')
 

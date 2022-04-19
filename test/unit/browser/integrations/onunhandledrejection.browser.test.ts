@@ -1,5 +1,6 @@
 import onUnhandledRejection from '../../../../src/browser/integrations/onunhandledrejection'
-import { nullLogger, TestClient } from '../../helpers'
+// @ts-ignore
+import { nullLogger, TestClient, TestTransport } from '../../helpers'
 
 describe('window.onunhandledrejection integration', function () {
   let client, mockNotify
@@ -7,7 +8,7 @@ describe('window.onunhandledrejection integration', function () {
   beforeEach(function () {
     client = new TestClient({
       logger: nullLogger()
-    })
+    }, new TestTransport())
     mockNotify = jest.fn()
     client.notify = mockNotify
   })

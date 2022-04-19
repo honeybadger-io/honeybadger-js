@@ -82,7 +82,7 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].message).toEqual('unhandled exception');
+        expect(results.notices[0].error.message).toEqual('unhandled exception');
         done();
       })
       .catch(done);
@@ -95,7 +95,7 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].message).toEqual('expected message');
+        expect(results.notices[0].error.message).toEqual('expected message');
         done();
       })
       .catch(done);
@@ -142,9 +142,9 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].__breadcrumbs[0].message).toEqual('expected message');
-        expect(results.notices[0].__breadcrumbs[0].category).toEqual('log');
+        expect(results.notices[0].breadcrumbs.trail.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('expected message');
+        expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('log');
         done();
       })
       .catch(done);
@@ -158,9 +158,9 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].__breadcrumbs[0].message).toEqual('null');
-        expect(results.notices[0].__breadcrumbs[0].category).toEqual('log');
+        expect(results.notices[0].breadcrumbs.trail.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('null');
+        expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('log');
         done();
       })
       .catch(done);
@@ -175,11 +175,11 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].__breadcrumbs[0].message).toEqual('button#buttonId');
-        expect(results.notices[0].__breadcrumbs[0].category).toEqual('ui.click');
-        expect(results.notices[0].__breadcrumbs[0].metadata.selector).toEqual('body > div#buttonDivId > button#buttonId');
-        expect(results.notices[0].__breadcrumbs[0].metadata.text).toEqual('button text');
+        expect(results.notices[0].breadcrumbs.trail.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('button#buttonId');
+        expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('ui.click');
+        expect(results.notices[0].breadcrumbs.trail[0].metadata.selector).toEqual('body > div#buttonDivId > button#buttonId');
+        expect(results.notices[0].breadcrumbs.trail[0].metadata.text).toEqual('button text');
         done();
       })
       .catch(done);
@@ -200,11 +200,11 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].__breadcrumbs[0].message).toEqual('GET /example/path');
-        expect(results.notices[0].__breadcrumbs[0].category).toEqual('request');
-        expect(results.notices[0].__breadcrumbs[0].metadata.type).toEqual('xhr');
-        expect('message' in results.notices[0].__breadcrumbs[0].metadata).toBe(false);
+        expect(results.notices[0].breadcrumbs.trail.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('GET /example/path');
+        expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('request');
+        expect(results.notices[0].breadcrumbs.trail[0].metadata.type).toEqual('xhr');
+        expect('message' in results.notices[0].breadcrumbs.trail[0].metadata).toBe(false);
         done();
       })
       .catch(done);
@@ -225,11 +225,11 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].__breadcrumbs[0].message).toEqual('GET https://example.com/example/path');
-        expect(results.notices[0].__breadcrumbs[0].category).toEqual('request');
-        expect(results.notices[0].__breadcrumbs[0].metadata.type).toEqual('xhr');
-        expect('message' in results.notices[0].__breadcrumbs[0].metadata).toBe(false);
+        expect(results.notices[0].breadcrumbs.trail.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('GET https://example.com/example/path');
+        expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('request');
+        expect(results.notices[0].breadcrumbs.trail[0].metadata.type).toEqual('xhr');
+        expect('message' in results.notices[0].breadcrumbs.trail[0].metadata).toBe(false);
         done();
       })
       .catch(done);
@@ -247,11 +247,11 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].__breadcrumbs[0].message).toEqual('GET /example/path');
-        expect(results.notices[0].__breadcrumbs[0].category).toEqual('request');
+        expect(results.notices[0].breadcrumbs.trail.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('GET /example/path');
+        expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('request');
         // fetch polyfill uses XHR.
-        expect(results.notices[0].__breadcrumbs[0].metadata.type).toEqual(isIE ? 'xhr' : 'fetch');
+        expect(results.notices[0].breadcrumbs.trail[0].metadata.type).toEqual(isIE ? 'xhr' : 'fetch');
         done();
       })
       .catch(done);
@@ -265,10 +265,10 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs.length).toEqual(2);
-        expect(results.notices[0].__breadcrumbs[0].message).toEqual('Page changed');
-        expect(results.notices[0].__breadcrumbs[0].category).toEqual('navigation');
-        expect(results.notices[0].__breadcrumbs[0].metadata).toEqual({
+        expect(results.notices[0].breadcrumbs.trail.length).toEqual(2);
+        expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('Page changed');
+        expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('navigation');
+        expect(results.notices[0].breadcrumbs.trail[0].metadata).toEqual({
           // The hostname is different when running locally vs. in CI.
           from: jasmine.stringMatching(/http:\/\/.+:9876\/base\/test\/integration\/sandbox\.html/),
           to: 'foo.html'
@@ -285,15 +285,15 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs[0].message).toEqual('Honeybadger Notice');
-        expect(results.notices[0].__breadcrumbs[0].category).toEqual('notice');
-        expect(results.notices[0].__breadcrumbs[0].metadata).toEqual(jasmine.objectContaining({
+        expect(results.notices[0].breadcrumbs.trail.length).toEqual(1);
+        expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('Honeybadger Notice');
+        expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('notice');
+        expect(results.notices[0].breadcrumbs.trail[0].metadata).toEqual(jasmine.objectContaining({
           name: 'expected name',
           message: 'expected message',
           stack: jasmine.any(String)
         }));
-        expect(results.notices[0].__breadcrumbs[0].metadata).not.toEqual(jasmine.objectContaining({
+        expect(results.notices[0].breadcrumbs.trail[0].metadata).not.toEqual(jasmine.objectContaining({
           context: jasmine.anything()
         }));
         done();
@@ -309,9 +309,9 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs).toBeArray();
+        expect(results.notices[0].breadcrumbs.trail).toBeArray();
 
-        const errorBreadcrumbs = results.notices[0].__breadcrumbs.filter(function (c) { return c.category === 'error'; })
+        const errorBreadcrumbs = results.notices[0].breadcrumbs.trail.filter(function (c) { return c.category === 'error'; })
         console.log(errorBreadcrumbs)
 
         expect(errorBreadcrumbs.length).toEqual(1)
@@ -342,9 +342,9 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs).toBeArray();
+        expect(results.notices[0].breadcrumbs.trail).toBeArray();
 
-        const errorBreadcrumbs = results.notices[0].__breadcrumbs.filter(function (c) { return c.category === 'error'; })
+        const errorBreadcrumbs = results.notices[0].breadcrumbs.trail.filter(function (c) { return c.category === 'error'; })
 
         expect(errorBreadcrumbs.length).toEqual(1);
         expect(errorBreadcrumbs[0].message).toEqual('window.onunhandledrejection: Error');
@@ -373,9 +373,9 @@ describe('browser integration', function () {
       })
       .then(function (results) {
         expect(results.notices.length).toEqual(1);
-        expect(results.notices[0].__breadcrumbs).toBeArray();
+        expect(results.notices[0].breadcrumbs.trail).toBeArray();
 
-        const errorBreadcrumbs = results.notices[0].__breadcrumbs.filter(function (c) { return c.category === 'error'; })
+        const errorBreadcrumbs = results.notices[0].breadcrumbs.trail.filter(function (c) { return c.category === 'error'; })
 
         expect(errorBreadcrumbs.length).toEqual(0);
         done();

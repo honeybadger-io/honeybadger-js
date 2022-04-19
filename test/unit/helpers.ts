@@ -1,8 +1,8 @@
 import BaseClient from '../../src/core/client'
-import {Logger, Notice, Noticeable} from '../../src/core/types'
+import { Config, Logger, Notice, Noticeable, Transport, TransportOptions, NoticeTransportPayload } from '../../src/core/types'
 import { runAfterNotifyHandlers } from "../../src/core/util";
 
-export function nullLogger (): Logger {
+export function nullLogger(): Logger {
   return {
     log: () => true,
     info: () => true,
@@ -12,7 +12,24 @@ export function nullLogger (): Logger {
   }
 }
 
+export class TestTransport implements Transport {
+  send(_options: TransportOptions, _payload: NoticeTransportPayload): Promise<{ statusCode: number; body: string }> {
+    return Promise.resolve({body: JSON.stringify({ id: 'uuid' }), statusCode: 201});
+  }
+}
+
 export class TestClient extends BaseClient {
+  protected factory(_opts: Partial<Config>): void {
+      throw new Error('Method not implemented.');
+  }
+
+  public checkIn(_id: string): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+
+  constructor(opts: Partial<Config>, transport: Transport) {
+    super(opts, transport);
+  }
 
   public getContext() {
     return this.__store.getStore().context

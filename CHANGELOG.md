@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `notifyAsync`: Async version of `notify` that returns a promise (#327)
 - AsyncLocalStorage for AWS Lambda Handler (#688)
 - Node.js: Added the `hb.withRequest(req, fn)` method for webserver apps, which runs a `fn`, isolating its context to the request `req` and tracking it across async chains. The `Honeybadger.requestMiddleware` for Express is now a wrapper around this. (#711, #717)
+- `Honeybadger.checkIn()` (#725)
 
 ### Fixed
 - Respect object.toJSON() in breadcrumb.metadata  (#722)
