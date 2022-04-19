@@ -17,5 +17,10 @@ hb.configure({
       log("Failing in event listener...");
       throw new Error("This is a test error raised from an addEventListener callback.");
     });
+
+    document.getElementById('btn-check-in').addEventListener("click", function(){
+      const checkInId = prompt("Enter check-in id:")
+      hb.checkIn(checkInId)
+    });
   };
 })();

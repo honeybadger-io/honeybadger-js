@@ -1,5 +1,5 @@
 // @ts-ignore
-import { nullLogger, TestClient } from '../helpers'
+import { nullLogger, TestClient, TestTransport } from '../helpers'
 import { Notice } from '../../../src/core/types'
 
 class MyError extends Error {
@@ -21,7 +21,7 @@ describe('client', function () {
     client = new TestClient({
       logger: nullLogger(),
       environment: null
-    })
+    }, new TestTransport())
     client.configure()
   })
 
@@ -319,7 +319,7 @@ describe('client', function () {
       const payload = client.getPayload('expected message')
 
       expect(payload.error.message).toEqual('expected message')
-      expect((payload.error.backtrace as Array<Record<string, unknown>>).length).toBeGreaterThan(0)
+      expect((payload.error.backtrace).length).toBeGreaterThan(0)
       expect(payload.error.backtrace[0].file).toMatch("helpers.ts")
     })
 
@@ -781,7 +781,7 @@ describe('client', function () {
       const payload = client.getPayload('message')
 
       expect(payload.breadcrumbs.enabled).toEqual(true)
-      expect((payload.breadcrumbs.trail as Array<Record<string, unknown>>).length).toEqual(2)
+      expect((payload.breadcrumbs.trail).length).toEqual(2)
       expect(payload.breadcrumbs.trail[0].message).toEqual('expected message')
     })
 

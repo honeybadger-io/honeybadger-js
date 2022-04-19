@@ -1,5 +1,6 @@
 import os from 'os'
 import fs from 'fs'
+import { ProcessStats } from '../core/types';
 import { promisify } from 'util'
 
 const readFile = promisify(fs.readFile)
@@ -10,9 +11,9 @@ export function fatallyLogAndExit(err: Error): never {
   process.exit(1)
 }
 
-export async function getStats(): Promise<Record<string, unknown>> {
+export async function getStats(): Promise<ProcessStats> {
   const load = os.loadavg()
-  const stats = {
+  const stats: ProcessStats = {
     load: {
       one: load[0],
       five: load[1],

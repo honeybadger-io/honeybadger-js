@@ -21,11 +21,11 @@ const mockAwsResult = (obj: Partial<APIGatewayProxyResult> = {}) => {
   return Object.assign({}, obj) as APIGatewayProxyResult;
 }
 
-const initNock = (expectedTimes = 1): nock.Scope => {
+const initNock = (expectedTimes = 1, requestBodyMatcher?: (body: any) => boolean): nock.Scope => {
   nock.cleanAll()
 
   return nock("https://api.honeybadger.io")
-    .post("/v1/notices/js")
+    .post("/v1/notices/js", requestBodyMatcher)
     .times(expectedTimes)
     .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 }
@@ -160,6 +160,176 @@ describe('Lambda Handler', function () {
         }, 50)
       })
     })
+
+    it('reports timeout warning to Honeybadger by default', async function () {
+      const REMAINING_TIME_MS = 200
+      const TIMEOUT_THRESHOLD_MS = 50 // default
+      const SHOULD_BE_CALLED_AFTER_MS = REMAINING_TIME_MS - TIMEOUT_THRESHOLD_MS
+
+      client.configure({
+        apiKey: 'testing',
+      })
+
+      let noticeSentAt: number
+      const api = initNock(1, (body) => {
+        noticeSentAt = Date.now()
+        return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
+      })
+      const handler = client.lambdaHandler(async function (_event) {
+        return new Promise<APIGatewayProxyResult>((resolve, _reject) => {
+          setTimeout(function () {
+            resolve({body: 'should not resolve', statusCode: 200})
+          }, REMAINING_TIME_MS * 2)
+        })
+      }) as AsyncHandler
+
+      const handlerCalledAt = Date.now()
+      let handlerResolvedAt: number
+      handler(mockAwsEvent(), mockAwsContext({
+        functionName: 'serverlessFunction',
+        functionVersion: 'v1.0.0',
+        getRemainingTimeInMillis: () => REMAINING_TIME_MS
+      }))
+        .then(() => {
+          handlerResolvedAt = Date.now()
+        })
+
+      return new Promise<void>(resolve => {
+        setTimeout(() => {
+          if (handlerResolvedAt) {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(noticeSentAt).toBeLessThan(handlerResolvedAt)
+          }
+          // let a 100ms window because setTimeout cannot guarantee exact execution at specified interval
+          expect(noticeSentAt - handlerCalledAt).toBeLessThan(SHOULD_BE_CALLED_AFTER_MS + 100)
+          api.done()
+          resolve()
+        }, SHOULD_BE_CALLED_AFTER_MS + 150)
+      })
+    })
+
+    it('reports timeout warning to Honeybadger with custom timeout threshold', async function () {
+      const REMAINING_TIME_MS = 2000
+      const TIMEOUT_THRESHOLD_MS = 1000
+      const SHOULD_BE_CALLED_AFTER_MS = REMAINING_TIME_MS - TIMEOUT_THRESHOLD_MS
+
+      client.configure({
+        apiKey: 'testing',
+        timeoutWarningThresholdMs: TIMEOUT_THRESHOLD_MS
+      })
+
+      let noticeSentAt: number
+      const api = initNock(1, (body) => {
+        noticeSentAt = Date.now()
+        return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
+      })
+      const handler = client.lambdaHandler(async function (_event) {
+        return new Promise<APIGatewayProxyResult>((resolve, _reject) => {
+          setTimeout(function () {
+            resolve({body: 'should not resolve', statusCode: 200})
+          }, REMAINING_TIME_MS * 2)
+        })
+      }) as AsyncHandler
+
+      const handlerCalledAt = Date.now()
+      let handlerResolvedAt: number
+      handler(mockAwsEvent(), mockAwsContext({
+        functionName: 'serverlessFunction',
+        functionVersion: 'v1.0.0',
+        getRemainingTimeInMillis: () => REMAINING_TIME_MS
+      }))
+        .then(() => {
+          handlerResolvedAt = Date.now()
+        })
+
+      return new Promise<void>(resolve => {
+        setTimeout(() => {
+          if (handlerResolvedAt) {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(noticeSentAt).toBeLessThan(handlerResolvedAt)
+          }
+          // let a 100ms window because setTimeout cannot guarantee exact execution at specified interval
+          expect(noticeSentAt - handlerCalledAt).toBeLessThan(SHOULD_BE_CALLED_AFTER_MS + 100)
+          api.done()
+          resolve()
+        }, SHOULD_BE_CALLED_AFTER_MS + 150)
+      })
+    })
+
+    it('does not report timeout warning to Honeybadger', async function () {
+      const REMAINING_TIME_MS = 100
+      const HANDLER_RESOLVE_AFTER_MS = 200
+
+      client.configure({
+        apiKey: 'testing',
+        reportTimeoutWarning: false
+      })
+
+      const api = initNock()
+
+      const handler = client.lambdaHandler(async function (_event) {
+        return new Promise<APIGatewayProxyResult>((resolve, _reject) => {
+          setTimeout(function () {
+            resolve({body: 'should resolve', statusCode: 200})
+          }, HANDLER_RESOLVE_AFTER_MS)
+        })
+      }) as AsyncHandler
+
+      const handlerCalledAt = Date.now()
+      const result = await handler(mockAwsEvent(), mockAwsContext({
+        functionName: 'serverlessFunction',
+        functionVersion: 'v1.0.0',
+        getRemainingTimeInMillis: () => REMAINING_TIME_MS
+      }))
+      const handlerResolvedAt = Date.now()
+
+      expect(result.statusCode).toEqual(200)
+      expect(handlerResolvedAt - handlerCalledAt).toBeLessThan(HANDLER_RESOLVE_AFTER_MS + 50)
+      expect(api.isDone()).toBe(false)
+    })
+
+    it('does not report timeout warning if function resolves', async function () {
+      const REMAINING_TIME_MS = 200
+      const TIMEOUT_THRESHOLD_MS = 50 // default
+      const SHOULD_BE_CALLED_AFTER_MS = REMAINING_TIME_MS - TIMEOUT_THRESHOLD_MS
+
+      client.configure({
+        apiKey: 'testing',
+      })
+
+      let noticeSentAt: number
+      const api = initNock(1, (body) => {
+        noticeSentAt = Date.now()
+        return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
+      })
+      const handler = client.lambdaHandler(async function (_event) {
+        return new Promise<APIGatewayProxyResult>((resolve, _reject) => {
+          setTimeout(function () {
+            resolve({body: 'should resolve', statusCode: 200})
+          }, REMAINING_TIME_MS / 2)
+        })
+      }) as AsyncHandler
+
+      const handlerCalledAt = Date.now()
+      let handlerResolvedAt: number
+      handler(mockAwsEvent(), mockAwsContext({
+        functionName: 'serverlessFunction',
+        functionVersion: 'v1.0.0',
+        getRemainingTimeInMillis: () => REMAINING_TIME_MS
+      }))
+        .then(() => {
+          handlerResolvedAt = Date.now()
+        })
+
+      return new Promise<void>(resolve => {
+        setTimeout(() => {
+          expect(handlerResolvedAt).toBeGreaterThan(handlerCalledAt)
+          expect(noticeSentAt).toBeUndefined()
+          expect(api.isDone()).toEqual(false)
+          resolve()
+        }, SHOULD_BE_CALLED_AFTER_MS + 150)
+      })
+    })
   })
 
   describe('non-async handlers', function () {
@@ -267,6 +437,159 @@ describe('Lambda Handler', function () {
             done(null)
           }, 50)
         })
+      })
+    })
+
+    it('reports timeout warning to Honeybadger', async function () {
+      const REMAINING_TIME_MS = 200
+      const TIMEOUT_THRESHOLD_MS = 50 // default
+      const SHOULD_BE_CALLED_AFTER_MS = REMAINING_TIME_MS - TIMEOUT_THRESHOLD_MS
+
+      let noticeSentAt: number
+      const api = initNock(1, (body) => {
+        noticeSentAt = Date.now()
+        return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
+      })
+
+      const handler = client.lambdaHandler(function (_event, _context, callback) {
+        setTimeout(function () {
+          callback(null, { body: 'should not resolve', statusCode: 200 })
+        }, REMAINING_TIME_MS * 2)
+      }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+
+      return new Promise<void>((resolve) => {
+        const handlerCalledAt = Date.now()
+        let handlerResolvedAt: number
+        handler(mockAwsEvent(), mockAwsContext(mockAwsContext({
+          functionName: 'serverlessFunction',
+          functionVersion: 'v1.0.0',
+          getRemainingTimeInMillis: () => REMAINING_TIME_MS
+        })), (_err, _res) => {
+          handlerResolvedAt = Date.now()
+        })
+        setTimeout(() => {
+          if (handlerResolvedAt) {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(noticeSentAt).toBeLessThan(handlerResolvedAt)
+          }
+          // let a 100ms window because setTimeout cannot guarantee exact execution at specified interval
+          expect(noticeSentAt - handlerCalledAt).toBeLessThan(SHOULD_BE_CALLED_AFTER_MS + 100)
+          api.done()
+          resolve()
+        }, SHOULD_BE_CALLED_AFTER_MS + 150)
+      })
+    })
+
+    it('reports timeout warning to Honeybadger with custom timeout threshold', async function () {
+      const REMAINING_TIME_MS = 2000
+      const TIMEOUT_THRESHOLD_MS = 1000 // default
+      const SHOULD_BE_CALLED_AFTER_MS = REMAINING_TIME_MS - TIMEOUT_THRESHOLD_MS
+
+      client.configure({
+        timeoutWarningThresholdMs: TIMEOUT_THRESHOLD_MS
+      })
+
+      let noticeSentAt: number
+      const api = initNock(1, (body) => {
+        noticeSentAt = Date.now()
+        return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
+      })
+
+      const handler = client.lambdaHandler(function (_event, _context, callback) {
+        setTimeout(function () {
+          callback(null, { body: 'should not resolve', statusCode: 200 })
+        }, REMAINING_TIME_MS * 2)
+      }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+
+      return new Promise<void>((resolve) => {
+        const handlerCalledAt = Date.now()
+        let handlerResolvedAt: number
+        handler(mockAwsEvent(), mockAwsContext(mockAwsContext({
+          functionName: 'serverlessFunction',
+          functionVersion: 'v1.0.0',
+          getRemainingTimeInMillis: () => REMAINING_TIME_MS
+        })), (_err, _res) => {
+          handlerResolvedAt = Date.now()
+        })
+        setTimeout(() => {
+          if (handlerResolvedAt) {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(noticeSentAt).toBeLessThan(handlerResolvedAt)
+          }
+          // let a 100ms window because setTimeout cannot guarantee exact execution at specified interval
+          expect(noticeSentAt - handlerCalledAt).toBeLessThan(SHOULD_BE_CALLED_AFTER_MS + 100)
+          api.done()
+          resolve()
+        }, SHOULD_BE_CALLED_AFTER_MS + 150)
+      })
+    })
+
+    it('does not report timeout warning to Honeybadger', async function () {
+      const REMAINING_TIME_MS = 100
+      const HANDLER_RESOLVE_AFTER_MS = 200
+
+      client.configure({
+        reportTimeoutWarning: false
+      })
+
+      const api = initNock()
+
+      const handler = client.lambdaHandler(function (_event, _context, callback) {
+        setTimeout(function () {
+          callback(null, { body: 'should resolve', statusCode: 200 })
+        }, HANDLER_RESOLVE_AFTER_MS)
+      }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+
+      return new Promise<void>(resolve => {
+        const handlerCalledAt = Date.now()
+        handler(mockAwsEvent(), mockAwsContext({
+          functionName: 'serverlessFunction',
+          functionVersion: 'v1.0.0',
+          getRemainingTimeInMillis: () => REMAINING_TIME_MS
+        }), (err, result) => {
+          const handlerResolvedAt = Date.now()
+          expect(err).toBeNull()
+          expect(result.statusCode).toEqual(200)
+          expect(handlerResolvedAt - handlerCalledAt).toBeLessThan(HANDLER_RESOLVE_AFTER_MS + 50)
+          expect(api.isDone()).toBe(false)
+          resolve()
+        })
+      })
+    })
+
+    it('does not report timeout warning if function resolves', async function () {
+      const REMAINING_TIME_MS = 200
+      const TIMEOUT_THRESHOLD_MS = 50 // default
+      const SHOULD_BE_CALLED_AFTER_MS = REMAINING_TIME_MS - TIMEOUT_THRESHOLD_MS
+
+      let noticeSentAt: number
+      const api = initNock(1, (body) => {
+        noticeSentAt = Date.now()
+        return body.error.message === 'serverlessFunction[v1.0.0] may have timed out'
+      })
+
+      const handler = client.lambdaHandler(function (_event, _context, callback) {
+        setTimeout(function () {
+          callback(null, { body: 'should resolve', statusCode: 200 })
+        }, REMAINING_TIME_MS / 2)
+      }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+
+      return new Promise<void>((resolve) => {
+        const handlerCalledAt = Date.now()
+        let handlerResolvedAt: number
+        handler(mockAwsEvent(), mockAwsContext(mockAwsContext({
+          functionName: 'serverlessFunction',
+          functionVersion: 'v1.0.0',
+          getRemainingTimeInMillis: () => REMAINING_TIME_MS
+        })), (_err, _res) => {
+          handlerResolvedAt = Date.now()
+        })
+        setTimeout(() => {
+          expect(handlerResolvedAt).toBeGreaterThan(handlerCalledAt)
+          expect(noticeSentAt).toBeUndefined()
+          expect(api.isDone()).toEqual(false)
+          resolve()
+        }, SHOULD_BE_CALLED_AFTER_MS + 150)
       })
     })
   })

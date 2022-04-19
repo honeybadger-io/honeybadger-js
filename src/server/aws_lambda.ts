@@ -4,6 +4,7 @@ import Honeybadger from '../core/client'
 // eslint-disable-next-line import/no-unresolved
 import { Handler, Callback, Context } from 'aws-lambda'
 import { AsyncStore } from "./async_store";
+import { ServerlessConfig } from "../core/types";
 
 export type SyncHandler<TEvent = any, TResult = any> = (
     event: TEvent,
@@ -34,11 +35,14 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
     hb.__setStore(AsyncStore)
     return new Promise<TResult>((resolve, reject) => {
       AsyncStore.run({context: {}, breadcrumbs: []}, () => {
+        const timeoutHandler = setupTimeoutWarning(hb, context)
         try {
           handler(event, context)
             .then(resolve)
             .catch(err => reportToHoneybadger(hb, err, reject))
+            .finally(() => clearTimeout(timeoutHandler))
         } catch (err) {
+          clearTimeout(timeoutHandler)
           reportToHoneybadger(hb, err, reject)
         }
       })
@@ -50,8 +54,10 @@ function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, T
   return function wrappedLambdaHandler(event, context, cb) {
     hb.__setStore(AsyncStore)
     AsyncStore.run({context: {}, breadcrumbs: []}, () => {
+      const timeoutHandler = setupTimeoutWarning(hb, context)
       try {
         handler(event, context, (error, result) => {
+          clearTimeout(timeoutHandler)
           if (error) {
             return reportToHoneybadger(hb, error, cb)
           }
@@ -59,10 +65,27 @@ function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, T
           cb(null, result)
         });
       } catch (err) {
+        clearTimeout(timeoutHandler)
         reportToHoneybadger(hb, err, cb)
       }
     })
   }
+}
+
+function shouldReportTimeoutWarning(hb: Honeybadger, context: Context): boolean {
+  return typeof context.getRemainingTimeInMillis === 'function' && !!((hb.config as ServerlessConfig).reportTimeoutWarning)
+}
+
+function setupTimeoutWarning(hb: Honeybadger, context: Context) {
+  if (!shouldReportTimeoutWarning(hb, context)) {
+    return
+  }
+
+  const delay = context.getRemainingTimeInMillis() - ((hb.config as ServerlessConfig).timeoutWarningThresholdMs)
+  return setTimeout(() => {
+    hb.notify(`${context.functionName}[${context.functionVersion}] may have timed out`)
+  }, delay > 0 ? delay : 0)
+
 }
 
 export function lambdaHandler<TEvent = any, TResult = any>(handler: Handler<TEvent, TResult>): Handler<TEvent, TResult> {

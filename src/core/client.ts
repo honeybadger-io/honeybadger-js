@@ -12,7 +12,7 @@ import {
   filterUrl,
   formatCGIData,
   getSourceForBacktrace,
-  runAfterNotifyHandlers
+  runAfterNotifyHandlers, endpoint, isBrowserConfig
 } from './util'
 import {
   Config,
@@ -24,7 +24,7 @@ import {
   HoneybadgerStore,
   BacktraceFrame,
   BreadcrumbRecord,
-  DefaultStoreContents
+  DefaultStoreContents, Transport, NoticeTransportPayload
 } from './types'
 import { GlobalStore } from "./store";
 
@@ -40,7 +40,7 @@ const TAG_SEPARATOR = /,|\s+/
 // Checks for non-blank characters
 const NOT_BLANK = /\S/
 
-export default class Client {
+export default abstract class Client {
   protected __pluginsExecuted = false
 
   protected __store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }> = null;
@@ -48,10 +48,12 @@ export default class Client {
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
   protected __getSourceFileHandler: (path: string) => Promise<string>
 
+  protected readonly __transport: Transport;
+
   config: Config
   logger: Logger
 
-  constructor(opts: Partial<Config> = {}) {
+  protected constructor(opts: Partial<Config> = {}, transport: Transport) {
     this.config = {
       apiKey: null,
       endpoint: 'https://api.honeybadger.io',
@@ -81,12 +83,13 @@ export default class Client {
     // First, we go with the global (shared) store.
     // Webserver middleware can then switch to the AsyncStore for async context tracking.
     this.__store = new GlobalStore({ context: {}, breadcrumbs: [] })
+    this.__transport = transport
     this.logger = logger(this)
   }
 
-  factory(_opts?: Partial<Config>): Client {
-    throw (new Error('Must implement __factory in subclass'))
-  }
+  protected abstract factory(opts: Partial<Config>): void
+
+  protected abstract checkIn(id: string): Promise<void>
 
   getVersion(): string {
     return notifier.version
@@ -171,11 +174,9 @@ export default class Client {
       this.logger.warn('could not send error report: no API key has been configured', notice)
       preConditionError = new Error('missing API key')
     }
-
     // we need to have the source file data before the beforeNotifyHandlers,
     // in case they modify them
     const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
-
     const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
     if (!preConditionError && !beforeNotifyResult) {
       this.logger.debug('skipping error report: beforeNotify handlers returned false', notice)
@@ -205,7 +206,36 @@ export default class Client {
           notice.backtrace[index].source = source
         })
 
-        this.__send(notice)
+        const payload = this.__buildPayload(notice)
+        this.__transport
+          .send({
+            headers: {
+              'X-API-Key': this.config.apiKey,
+              'Content-Type': 'application/json',
+              'Accept': 'text/json, application/json'
+            },
+            method: 'POST',
+            endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
+            maxObjectDepth: this.config.maxObjectDepth,
+            logger: this.logger,
+            async: isBrowserConfig(this.config) ? this.config.async : undefined,
+          }, payload)
+          .then(res => {
+            if (res.statusCode !== 201) {
+              runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${res.statusCode}`))
+              this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
+              return
+            }
+            const uuid = JSON.parse(res.body).id
+            runAfterNotifyHandlers(merge(notice, {
+              id: uuid
+            }), this.__afterNotifyHandlers)
+            this.logger.info(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
+          })
+          .catch(err => {
+            this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
+            runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
+          })
       })
 
     return true
@@ -340,11 +370,7 @@ export default class Client {
     return (this.config.environment && this.config.developmentEnvironments.includes(this.config.environment))
   }
 
-  protected __send(_notice: Partial<Notice>): void {
-    throw (new Error('Must implement send in subclass'))
-  }
-
-  protected __buildPayload(notice: Notice): Record<string, Record<string, unknown>> {
+  protected __buildPayload(notice: Notice): NoticeTransportPayload {
     const headers = filter(notice.headers, this.config.filters) || {}
     const cgiData = filter({
       ...notice.cgiData,

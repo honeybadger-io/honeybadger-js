@@ -1,6 +1,6 @@
 import { onError } from '../../../../src/browser/integrations/onerror'
 // @ts-ignore
-import { nullLogger, TestClient } from '../../helpers'
+import { nullLogger, TestClient, TestTransport } from '../../helpers'
 
 describe('window.onerror integration', function () {
   let client, mockNotify, mockAddBreadcrumb
@@ -8,7 +8,7 @@ describe('window.onerror integration', function () {
   beforeEach(function () {
     client = new TestClient({
       logger: nullLogger()
-    })
+    }, new TestTransport())
     mockNotify = jest.fn()
     mockAddBreadcrumb = jest.fn()
     client.notify = mockNotify

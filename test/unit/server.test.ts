@@ -239,4 +239,21 @@ describe('server client', function () {
       });
     });
   })
+
+  describe('checkIn', function () {
+    it('sends a checkIn report', async function () {
+      client.configure({
+        apiKey: 'testing',
+        endpoint: 'http://api.honeybadger.io'
+      })
+
+      const checkInId = "123"
+      const request = nock('http://api.honeybadger.io')
+          .get(`/v1/check_in/${checkInId}`)
+          .reply(201)
+
+      await client.checkIn(checkInId)
+      expect(request.isDone()).toBe(true)
+    })
+  })
 })
