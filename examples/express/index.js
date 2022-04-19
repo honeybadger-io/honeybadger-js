@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-const Honeybadger = require('@honeybadger-io/js');
+const Honeybadger = require('@honeybadger-io/js')
 Honeybadger.configure({
   apiKey: process.env.HONEYBADGER_API_KEY,
   reportData: true
@@ -27,6 +27,13 @@ app.get('/fail', (req, res) => {
   })
 
   throw new Error('Badgers!')
+})
+
+app.get('/checkin/:id', (req, res) => {
+  Honeybadger.checkIn(req.params.id)
+    .then(() => {
+      res.send('Done!')
+    })
 })
 
 app.use(Honeybadger.errorHandler)

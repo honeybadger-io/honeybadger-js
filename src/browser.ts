@@ -1,17 +1,13 @@
 import Client from './core/client'
-import { Config, Notice, BeforeNotifyHandler } from './core/types'
-import { merge, sanitize, filter, runAfterNotifyHandlers, objectIsExtensible, endpoint } from './core/util'
+import { Notice, BeforeNotifyHandler, NoticeTransportPayload, BrowserConfig } from './core/types'
+import { merge, filter, objectIsExtensible } from './core/util'
 import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
-
-interface BrowserConfig extends Config {
-  async: boolean
-  maxErrors: number
-}
+import { BrowserTransport } from "./browser/transport";
 
 interface WrappedFunc {
   (): (...args: unknown[]) => unknown
@@ -36,6 +32,8 @@ class Honeybadger extends Client {
 
       if (!notice.url) { notice.url = document.URL }
 
+      this.__incrementErrorsCount()
+
       return true
     }
   ]
@@ -46,7 +44,7 @@ class Honeybadger extends Client {
       maxErrors: null,
       projectRoot: window.location.protocol + '//' + window.location.host,
       ...opts
-    })
+    }, new BrowserTransport())
   }
 
   configure(opts: Partial<BrowserConfig> = {}) {
@@ -57,12 +55,16 @@ class Honeybadger extends Client {
     return (this.__errorsSent = 0)
   }
 
-  factory(opts?: Partial<BrowserConfig>): Honeybadger {
+  public factory(opts?: Partial<BrowserConfig>): Honeybadger {
     return new Honeybadger(opts)
   }
 
+  public checkIn(_id: string): Promise<void> {
+    throw new Error('Honeybadger.checkIn() is not supported on the browser')
+  }
+
   /** @internal */
-  protected __buildPayload(notice:Notice): Record<string, Record<string, unknown>> {
+  protected __buildPayload(notice:Notice): NoticeTransportPayload {
     const cgiData = {
       HTTP_USER_AGENT: undefined,
       HTTP_REFERER: undefined,
@@ -88,39 +90,6 @@ class Honeybadger extends Client {
     payload.request.cgi_data = merge(cgiData, payload.request.cgi_data as Record<string, unknown>)
 
     return payload
-  }
-
-  /** @internal */
-  protected __send(notice): void {
-    this.__incrementErrorsCount()
-
-    const payload = this.__buildPayload(notice)
-
-    try {
-      const x = new XMLHttpRequest()
-      x.open('POST', endpoint(this.config, '/v1/notices/js'), this.config.async)
-
-      x.setRequestHeader('X-API-Key', this.config.apiKey)
-      x.setRequestHeader('Content-Type', 'application/json')
-      x.setRequestHeader('Accept', 'text/json, application/json')
-
-      x.send(JSON.stringify(sanitize(payload, this.config.maxObjectDepth)))
-      x.onload = () => {
-        if (x.status !== 201) {
-          runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${x.status}`))
-          this.logger.debug(`Unable to send error report: ${x.status}: ${x.statusText}`, x, notice)
-          return
-        }
-        const uuid = JSON.parse(x.response).id
-        runAfterNotifyHandlers(merge(notice, {
-          id: uuid
-        }), this.__afterNotifyHandlers)
-        this.logger.debug(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
-      }
-    } catch (err) {
-      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
-      this.logger.error('Unable to send error report: error while initializing request', err, notice)
-    }
   }
 
   /**

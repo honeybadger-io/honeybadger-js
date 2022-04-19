@@ -1,5 +1,6 @@
 import os from 'os'
 import fs from 'fs'
+import { ProcessStats } from '../core/types';
 
 export function fatallyLogAndExit(err: Error): never {
   console.error('[Honeybadger] Exiting process due to uncaught exception')
@@ -7,9 +8,9 @@ export function fatallyLogAndExit(err: Error): never {
   process.exit(1)
 }
 
-export function getStats(cb: (stats: Record<string, unknown>) => void): void {
+export function getStats(cb: (stats: ProcessStats) => void): void {
   const load = os.loadavg(),
-    stats = {
+    stats: ProcessStats = {
       load: {
         one: load[0],
         five: load[1],
