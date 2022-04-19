@@ -2,7 +2,8 @@ import os from 'os'
 import domain from 'domain'
 
 import Client from './core/client'
-import { Config, Notice, BeforeNotifyHandler, DefaultStoreContents } from './core/types'
+import { Config, Notice, BeforeNotifyHandler, DefaultStoreContents, ServerlessConfig } from './core/types'
+import { endpoint } from './core/util'
 import {
   fatallyLogAndExit,
   getSourceFile
@@ -13,7 +14,6 @@ import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { AsyncStore } from './server/async_store'
 import { ServerTransport } from "./server/transport";
-import { endpoint } from "./core/util";
 
 const kHoneybadgerStore = Symbol.for("kHoneybadgerStore");
 class Honeybadger extends Client {
@@ -30,25 +30,37 @@ class Honeybadger extends Client {
     }
   ]
 
-  public errorHandler: typeof errorHandler;
-  public requestHandler: typeof requestHandler;
-  public lambdaHandler: typeof lambdaHandler;
+  public errorHandler: typeof errorHandler
+  public requestHandler: typeof requestHandler
+  public lambdaHandler: typeof lambdaHandler
 
-  constructor(opts: Partial<Config> = {}) {
+  config: Config | ServerlessConfig
+
+  constructor(opts: Partial<Config | ServerlessConfig> = {}) {
     super({
       afterUncaught: fatallyLogAndExit,
       projectRoot: process.cwd(),
       hostname: os.hostname(),
       ...opts,
     }, new ServerTransport())
+
+    // serverless defaults
+    const config = this.config as ServerlessConfig
+    config.reportTimeoutWarning = config.reportTimeoutWarning ?? true
+    config.timeoutWarningThresholdMs = config.timeoutWarningThresholdMs || 50
+
     this.__getSourceFileHandler = getSourceFile.bind(this)
     this.errorHandler = errorHandler.bind(this)
     this.requestHandler = requestHandler.bind(this)
     this.lambdaHandler = lambdaHandler.bind(this)
   }
 
-  factory(opts?: Partial<Config>): Honeybadger {
+  factory(opts?: Partial<Config | ServerlessConfig>): Honeybadger {
     return new Honeybadger(opts)
+  }
+
+  configure(opts: Partial<Config | ServerlessConfig> = {}): Honeybadger {
+    return super.configure(opts) as Honeybadger
   }
 
   checkIn(id: string): Promise<void> {

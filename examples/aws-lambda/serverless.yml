@@ -45,3 +45,9 @@ functions:
       - httpApi:
           path: /set-timeout-error
           method: post
+  timeoutWarning:
+    handler: handler.timeoutWarning
+    events:
+      - httpApi:
+          path: /timeout-warning
+          method: post
