@@ -20,7 +20,7 @@ export class TestTransport implements Transport {
 
 export class TestClient extends BaseClient {
   protected factory(_opts: Partial<Config>): void {
-      throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 
   public checkIn(_id: string): Promise<void> {

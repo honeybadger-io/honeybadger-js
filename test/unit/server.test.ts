@@ -205,6 +205,7 @@ describe('server client', function () {
       let context, err;
       const errorHandler = (e) => {
         err = e;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         context = (<any>client).__store.getStore().context;
       }
 
@@ -229,10 +230,12 @@ describe('server client', function () {
         client.setContext({request1: true})
       });
       client.withRequest(request, () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((<any>client).__store.getStore().context).toStrictEqual({request1: true});
       });
       client.withRequest(request, () => {
         setTimeout(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           expect((<any>client).__store.getStore().context).toStrictEqual({request1: true});
           done();
         }, 200);
@@ -249,8 +252,8 @@ describe('server client', function () {
 
       const checkInId = "123"
       const request = nock('http://api.honeybadger.io')
-          .get(`/v1/check_in/${checkInId}`)
-          .reply(201)
+        .get(`/v1/check_in/${checkInId}`)
+        .reply(201)
 
       await client.checkIn(checkInId)
       expect(request.isDone()).toBe(true)

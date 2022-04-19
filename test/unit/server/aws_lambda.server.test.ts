@@ -21,7 +21,7 @@ const mockAwsResult = (obj: Partial<APIGatewayProxyResult> = {}) => {
   return Object.assign({}, obj) as APIGatewayProxyResult;
 }
 
-const initNock = (expectedTimes = 1, requestBodyMatcher?: (body: any) => boolean): nock.Scope => {
+const initNock = (expectedTimes = 1, requestBodyMatcher?: (body: {error: {message:string}}) => boolean): nock.Scope => {
   nock.cleanAll()
 
   return nock("https://api.honeybadger.io")
