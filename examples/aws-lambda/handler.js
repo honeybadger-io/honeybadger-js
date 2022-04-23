@@ -24,7 +24,7 @@ module.exports = {
     }
 
     return formatJSONResponse({
-      message: 'You summoned the sync-error handler! Nothing was sent to Honeybadger. POST with { \'body\': { \'report\': \'yes\' } } to report to Honeybadger.',
+      message: "You summoned the async-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
       event,
     });
   }),
