@@ -11,7 +11,7 @@ module.exports = {
       return false;
     }
 
-    const data = fs.readFileSync(`CHANGELOG.md`, 'utf8')
+    const data = fs.readFileSync('CHANGELOG.md', 'utf8')
 
     const match = data.match(
       /## \[Unreleased\]\[.+?\]\s+###\s+(?:Fixed|Added|Modified|Removed|Changed|Deprecated|Security)\s+-/
@@ -38,7 +38,7 @@ module.exports = {
     const match = data.match(/## \[Unreleased\](?:\[(.*)\])?/)
     if (!match) { throw(new Error('Release heading not found in CHANGELOG.md')) }
 
-    const result = data.replace(match[0], `## [Unreleased][${match[1] || "latest"}]\n\n## [${nextVersion}] - ${getDateString()}`)
+    const result = data.replace(match[0], `## [Unreleased][${match[1] || 'latest'}]\n\n## [${nextVersion}] - ${getDateString()}`)
     fs.writeFileSync(changelogFile, result, 'utf8')
 
     function getDateString() {
@@ -53,14 +53,14 @@ module.exports = {
   // publishCommand: ({ defaultCommand, tag }) =>
   //  `${defaultCommand} --access public --tag ${tag}`,
   afterPublish: ({ exec }) => {
-    exec(`./scripts/release-cdn.sh`)
+    exec('./scripts/release-cdn.sh')
   },
 }
 
 // todo: remove when Conventional Commits transition is complete
 class Changelog {
-  releaseType = "patch"
-  releaseTag = "latest"
+  releaseType = 'patch'
+  releaseTag = 'latest'
 
   constructor(path) {
     const data = fs.readFileSync(path, 'utf8')
@@ -68,18 +68,18 @@ class Changelog {
     const headings = []
     let unreleased = false
     lines.every((line) => {
-      if (line.startsWith("## [Unreleased]")) {
+      if (line.startsWith('## [Unreleased]')) {
         unreleased = true
         const tagMatch = line.match(/## \[Unreleased\]\[(.*)\]/)
         if (tagMatch) {
           this.releaseTag = tagMatch[1].trim()
         }
-      } else if (line.startsWith("## ")) {
+      } else if (line.startsWith('## ')) {
         return false
       }
 
       if (unreleased) {
-        if (line.startsWith("### ")) {
+        if (line.startsWith('### ')) {
           headings.push(line.match(/### (.*)/)[1].trim())
         }
       }
@@ -87,21 +87,21 @@ class Changelog {
       return true
     });
 
-    if (headings.includes("Changed")) {
-      this.releaseType = "major"
-    } else if (headings.includes("Added")) {
-      this.releaseType = "minor"
-    } else if (headings.includes("Fixed")) {
-      this.releaseType = "patch"
+    if (headings.includes('Changed')) {
+      this.releaseType = 'major'
+    } else if (headings.includes('Added')) {
+      this.releaseType = 'minor'
+    } else if (headings.includes('Fixed')) {
+      this.releaseType = 'patch'
     }
   }
 
   nextVersion(version) {
     const parsedVersion = semver.parse(version)
 
-    if (this.releaseTag !== "latest") {
+    if (this.releaseTag !== 'latest') {
       if (parsedVersion.prerelease.length) {
-        parsedVersion.inc("prerelease", this.releaseTag)
+        parsedVersion.inc('prerelease', this.releaseTag)
       } else {
         parsedVersion.inc(this.releaseType)
         parsedVersion.prerelease = [ this.releaseTag, 0 ]

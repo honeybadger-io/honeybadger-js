@@ -93,17 +93,17 @@ Honeybadger.notify('Example message', {
   afterNotify: (err, notice) => console.log(err || notice.id)
 })
 
-Honeybadger.notify("Example message", {
+Honeybadger.notify('Example message', {
   details: {
-    "Section Name": {
-      "Key": "Value"
+    'Section Name': {
+      'Key': 'Value'
     }
   }
 })
 
 const client = Honeybadger.factory()
-client.setContext({a: 2}).notify({ message: 'test' })
+client.setContext({ a: 2 }).notify({ message: 'test' })
 client.resetContext()
-client.addBreadcrumb("testing")
+client.addBreadcrumb('testing')
 client.notify(new Error('test'))
 client.clear()

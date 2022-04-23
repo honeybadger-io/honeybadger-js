@@ -1,6 +1,6 @@
-var hb = require('../../dist/browser/honeybadger');
+let hb = require('../../dist/browser/honeybadger');
 hb.configure({
-  apiKey: prompt("Enter the API key for your Honeybadger project:"),
+  apiKey: prompt('Enter the API key for your Honeybadger project:'),
   debug: true
 });
 
@@ -12,10 +12,10 @@ hb.configure({
   }
 
   window.onload = function(){
-    log("Attaching event");
-    document.getElementById('btn').addEventListener("click", function(){
-      log("Failing in event listener...");
-      throw new Error("This is a test error raised from an addEventListener callback.");
+    log('Attaching event');
+    document.getElementById('btn').addEventListener('click', function(){
+      log('Failing in event listener...');
+      throw new Error('This is a test error raised from an addEventListener callback.');
     });
   };
 })();

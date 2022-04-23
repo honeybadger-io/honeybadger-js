@@ -7,7 +7,7 @@ class MyError extends Error {
   component = null
 
   sayHello() {
-    return "hello " + this.message
+    return 'hello ' + this.message
   }
   constructor(m: string) {
     super(m)
@@ -301,7 +301,7 @@ describe('client', function () {
       })
 
       const error = {};
-      Object.setPrototypeOf(error, new TypeError("Some error message"))
+      Object.setPrototypeOf(error, new TypeError('Some error message'))
 
       expect(client.notify(error)).toEqual(true)
       const payload = client.getPayload(error)
@@ -320,7 +320,7 @@ describe('client', function () {
 
       expect(payload.error.message).toEqual('expected message')
       expect((payload.error.backtrace).length).toBeGreaterThan(0)
-      expect(payload.error.backtrace[0].file).toMatch("helpers.ts")
+      expect(payload.error.backtrace[0].file).toMatch('helpers.ts')
     })
 
     it('sends details', function () {
@@ -329,12 +329,12 @@ describe('client', function () {
       })
 
       const details = {
-        "Expected Section Name": {
-          "Expected Key": "Expected Value"
+        'Expected Section Name': {
+          'Expected Key': 'Expected Value'
         }
       }
 
-      const payload = client.getPayload("testing", { details: details })
+      const payload = client.getPayload('testing', { details: details })
 
       expect(payload.details).toEqual(details)
     })
@@ -915,7 +915,7 @@ describe('client', function () {
     expect(payload.error.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
   })
 
-  it("should not send duplicate tags", function () {
+  it('should not send duplicate tags', function () {
     client.configure({
       apiKey: 'testing',
       tags: ['tag1']

@@ -1,5 +1,5 @@
-import { Transport, TransportOptions, NoticeTransportPayload } from "../core/types";
-import { sanitize } from "../core/util";
+import { Transport, TransportOptions, NoticeTransportPayload } from '../core/types';
+import { sanitize } from '../core/util';
 
 export class BrowserTransport implements Transport {
   send(options: TransportOptions, payload?: NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }> {

@@ -1,4 +1,4 @@
-import {fake} from 'sinon'
+import { fake } from 'sinon'
 import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, shallowClone, sanitize, logger, filter, filterUrl } from '../../../src/core/util'
 // @ts-ignore
 import { nullLogger, TestClient, TestTransport } from '../helpers'
@@ -30,11 +30,11 @@ describe('utils', function () {
 
   describe('filter', function () {
     it('filters partial match', function () {
-      expect(filter({secret_key: 'secret'}, ['secret'])).toEqual({ secret_key: '[FILTERED]' })
+      expect(filter({ secret_key: 'secret' }, ['secret'])).toEqual({ secret_key: '[FILTERED]' })
     })
 
     it('ignores case', function () {
-      expect(filter({foo: 'secret', FOO: 'secret'}, ['Foo'])).toEqual({ foo: '[FILTERED]', FOO: '[FILTERED]' })
+      expect(filter({ foo: 'secret', FOO: 'secret' }, ['Foo'])).toEqual({ foo: '[FILTERED]', FOO: '[FILTERED]' })
     })
   })
 
@@ -299,11 +299,11 @@ describe('utils', function () {
     it('handles other errors', function () {
       const obj = []
       // This will cause the map operation to blow up
-      obj.map = () => { throw(new Error("expected error")) }
+      obj.map = () => { throw(new Error('expected error')) }
       expect(
         sanitize({ obj: obj })
       ).toEqual(
-        { obj: `[ERROR] Error: expected error` }
+        { obj: '[ERROR] Error: expected error' }
       )
     })
   })

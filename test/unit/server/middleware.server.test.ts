@@ -1,9 +1,9 @@
-import express from "express";
-import {mock, spy} from 'sinon'
+import express from 'express';
+import { mock, spy } from 'sinon'
 import request from 'supertest'
-import Singleton from "../../../src/server";
+import Singleton from '../../../src/server';
 // @ts-ignore
-import {nullLogger} from "../helpers";
+import { nullLogger } from '../helpers';
 
 describe('Express Middleware', function () {
   let client
@@ -98,7 +98,7 @@ describe('Express Middleware', function () {
 
     app.use(client.requestHandler)
 
-    app.get("/:reqId", (req, res) => {
+    app.get('/:reqId', (req, res) => {
       const initialContext = client.__store.getStore().context;
       client.setContext({ reqId: req.params.reqId });
       setTimeout(() => {
@@ -115,7 +115,7 @@ describe('Express Middleware', function () {
       return request(app).get(`/${i}`)
         .expect(200)
         .then((response) => {
-          const expectedContexts = {initial: {}, final: {reqId: `${i}`}}
+          const expectedContexts = { initial: {}, final: { reqId: `${i}` } }
           expect(response.body).toStrictEqual(expectedContexts)
         })
     }));

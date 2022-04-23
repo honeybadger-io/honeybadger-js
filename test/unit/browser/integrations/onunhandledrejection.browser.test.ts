@@ -23,7 +23,7 @@ describe('window.onunhandledrejection integration', function () {
     const window = { onunhandledrejection: undefined }
     onUnhandledRejection(window).load(client)
     const reason = 'Honeybadgers!'
-    window.onunhandledrejection({reason})
+    window.onunhandledrejection({ reason })
     expect(mockNotify.mock.calls.length).toBe(1)
     expect(mockNotify.mock.calls[0][0]).toEqual(expect.objectContaining({
       name: 'window.onunhandledrejection',
@@ -38,7 +38,7 @@ describe('window.onunhandledrejection integration', function () {
     expect(mockNotify.mock.calls.length).toBe(1)
     expect(mockNotify.mock.calls[0][0]).toEqual(expect.objectContaining({
       name: 'window.onunhandledrejection',
-      message: `UnhandledPromiseRejectionWarning: Unspecified reason`
+      message: 'UnhandledPromiseRejectionWarning: Unspecified reason'
     }))
   })
 })

@@ -21,23 +21,23 @@ Honeybadger.notify('test')
 Honeybadger.notify(new Error('test'))
 Honeybadger.notify({ message: 'test' })
 
-Honeybadger.notify("Example message", {
+Honeybadger.notify('Example message', {
   details: {
-    "Section Name": {
-      "Key": "Value"
+    'Section Name': {
+      'Key': 'Value'
     }
   }
 })
 
 const client = Honeybadger.factory()
-client.setContext({a: 2}).notify({ message: 'test' })
+client.setContext({ a: 2 }).notify({ message: 'test' })
 client.resetContext()
-client.addBreadcrumb("testing")
+client.addBreadcrumb('testing')
 client.notify(new Error('test'))
 client.clear()
 
 const client2 = Honeybadger.factory()
 client2.beforeNotify(() => {
-  console.log("Notifying")
+  console.log('Notifying')
 })
 client2.notify('test')

@@ -1,5 +1,5 @@
-import { ServerTransport } from "../../../src/server/transport";
-import nock from "nock";
+import { ServerTransport } from '../../../src/server/transport';
+import nock from 'nock';
 
 describe('ServerTransport', function () {
   let transport: ServerTransport

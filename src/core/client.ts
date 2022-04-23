@@ -26,7 +26,7 @@ import {
   BreadcrumbRecord,
   DefaultStoreContents, Transport, NoticeTransportPayload
 } from './types'
-import { GlobalStore } from "./store";
+import { GlobalStore } from './store';
 
 const notifier = {
   name: 'honeybadger-js',
@@ -307,7 +307,7 @@ export default abstract class Client {
 
     const context = this.__getStoreContentsOrDefault().context
     const noticeTags = this.__constructTags(notice.tags)
-    const contextTags = this.__constructTags(context["tags"])
+    const contextTags = this.__constructTags(context['tags'])
     const configTags = this.__constructTags(this.config.tags)
 
     // Turning into a Set will remove duplicates

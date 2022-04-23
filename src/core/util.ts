@@ -235,12 +235,12 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
     notice = {}
   } else if (thing instanceof Error || Object.prototype.toString.call(thing) === '[object Error]') {
     const e = thing as Error
-    notice = merge(thing as Record<string, unknown>, {name: e.name, message: e.message, stack: e.stack})
+    notice = merge(thing as Record<string, unknown>, { name: e.name, message: e.message, stack: e.stack })
   } else if (typeof thing === 'object') {
     notice = shallowClone(thing)
   } else {
     const m = String(thing)
-    notice = {message: m}
+    notice = { message: m }
   }
 
   return notice

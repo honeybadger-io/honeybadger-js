@@ -1,6 +1,6 @@
 import BaseClient from '../../src/core/client'
 import { Config, Logger, Notice, Noticeable, Transport, TransportOptions, NoticeTransportPayload } from '../../src/core/types'
-import { runAfterNotifyHandlers } from "../../src/core/util";
+import { runAfterNotifyHandlers } from '../../src/core/util';
 
 export function nullLogger(): Logger {
   return {
@@ -14,7 +14,7 @@ export function nullLogger(): Logger {
 
 export class TestTransport implements Transport {
   send(_options: TransportOptions, _payload: NoticeTransportPayload): Promise<{ statusCode: number; body: string }> {
-    return Promise.resolve({body: JSON.stringify({ id: 'uuid' }), statusCode: 201});
+    return Promise.resolve({ body: JSON.stringify({ id: 'uuid' }), statusCode: 201 });
   }
 }
 

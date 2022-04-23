@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.get('/fail', (req, res) => {
+app.get('/fail', (_req, _res) => {
   Honeybadger.setContext({
     local: 'true'
   })

@@ -209,15 +209,15 @@ describe('server client', function () {
         context = (<any>client).__store.getStore().context;
       }
 
-      client.withRequest({}, () => client.setContext({a: true}), errorHandler)
+      client.withRequest({}, () => client.setContext({ a: true }), errorHandler)
       client.withRequest({}, () => {
-        client.setContext({b: true})
-        setTimeout(() => { throw new Error("Oh no") }, 10)
+        client.setContext({ b: true })
+        setTimeout(() => { throw new Error('Oh no') }, 10)
       }, errorHandler)
 
       setTimeout(() => {
-        expect(err.message).toStrictEqual("Oh no");
-        expect(context).toStrictEqual({b: true});
+        expect(err.message).toStrictEqual('Oh no');
+        expect(context).toStrictEqual({ b: true });
         done();
       }, 20);
     });
@@ -227,16 +227,16 @@ describe('server client', function () {
       const request = {};
 
       client.withRequest(request, () => {
-        client.setContext({request1: true})
+        client.setContext({ request1: true })
       });
       client.withRequest(request, () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect((<any>client).__store.getStore().context).toStrictEqual({request1: true});
+        expect((<any>client).__store.getStore().context).toStrictEqual({ request1: true });
       });
       client.withRequest(request, () => {
         setTimeout(() => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          expect((<any>client).__store.getStore().context).toStrictEqual({request1: true});
+          expect((<any>client).__store.getStore().context).toStrictEqual({ request1: true });
           done();
         }, 200);
       });
@@ -250,7 +250,7 @@ describe('server client', function () {
         endpoint: 'http://api.honeybadger.io'
       })
 
-      const checkInId = "123"
+      const checkInId = '123'
       const request = nock('http://api.honeybadger.io')
         .get(`/v1/check_in/${checkInId}`)
         .reply(201)

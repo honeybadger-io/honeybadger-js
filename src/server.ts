@@ -13,9 +13,9 @@ import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { AsyncStore } from './server/async_store'
-import { ServerTransport } from "./server/transport";
+import { ServerTransport } from './server/transport';
 
-const kHoneybadgerStore = Symbol.for("kHoneybadgerStore");
+const kHoneybadgerStore = Symbol.for('kHoneybadgerStore');
 class Honeybadger extends Client {
   /** @internal */
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
@@ -71,7 +71,7 @@ class Honeybadger extends Client {
         logger: this.logger,
       })
       .then(() => {
-        this.logger.info(`CheckIn sent`)
+        this.logger.info('CheckIn sent')
         return Promise.resolve()
       })
       .catch(err => {

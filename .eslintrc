@@ -10,7 +10,17 @@
   ],
   "parser": "@typescript-eslint/parser",
   "rules": {
+    "quotes": [
+      "error",
+      "single"
+    ],
     "indent": ["error", 2],
+    "no-var": "error",
+    "object-curly-spacing": [
+      "error",
+      "always"
+    ],
+    "@typescript-eslint/no-var-requires": 0,
     "@typescript-eslint/ban-ts-comment": 0,
     "@typescript-eslint/no-unused-vars": [
       "error",
@@ -21,8 +31,7 @@
   },
   "ignorePatterns": [
     "test/integration/",
-    "dist",
-    "examples"
+    "dist"
   ],
   "plugins": [
     "@typescript-eslint",
@@ -32,6 +41,7 @@
   {
     "browser": true,
     "node": true,
-    "es6": true
+    "es6": true,
+    "webextensions": true
   }
 }

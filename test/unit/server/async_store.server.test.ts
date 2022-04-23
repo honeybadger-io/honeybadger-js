@@ -1,7 +1,7 @@
-import Singleton from "../../../src/server";
+import Singleton from '../../../src/server';
 // @ts-ignore
-import { nullLogger } from "../helpers";
-import nock from "nock";
+import { nullLogger } from '../helpers';
+import nock from 'nock';
 // eslint-disable-next-line import/no-unresolved
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 import { AsyncHandler, SyncHandler } from '../../../src/server/aws_lambda'
@@ -17,8 +17,8 @@ const mockAwsContext = (obj: Partial<Context> = {}) => {
 const initNock = (expectedTimes = 1): nock.Scope => {
   nock.cleanAll()
 
-  return nock("https://api.honeybadger.io")
-    .post("/v1/notices/js")
+  return nock('https://api.honeybadger.io')
+    .post('/v1/notices/js')
     .times(expectedTimes)
     .reply(201, '{"id":"1a327bf6-e17a-40c1-ad79-404ea1489c7a"}')
 }
@@ -90,20 +90,20 @@ describe('AsyncStore', function () {
 
       // @ts-expect-error
       const handler1 = client.lambdaHandler(async function (_event) {
-        client.setContext({handler: 1, valueOnlyPresentInOneHandler: 'badgers 1'})
+        client.setContext({ handler: 1, valueOnlyPresentInOneHandler: 'badgers 1' })
         return new Promise<string>((_resolve, reject) => {
           setTimeout(() => {
-            reject(new Error("Badgers 1!"))
+            reject(new Error('Badgers 1!'))
           }, 50)
         })
       }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       // @ts-expect-error
       const handler2 = client.lambdaHandler(async function (_event) {
-        client.setContext({handler: 2})
+        client.setContext({ handler: 2 })
         return new Promise<string>((_resolve, reject) => {
           setTimeout(() => {
-            reject(new Error("Badgers 2!"))
+            reject(new Error('Badgers 2!'))
           }, 50)
         })
       }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
@@ -113,13 +113,13 @@ describe('AsyncStore', function () {
         handler1(mockAwsEvent(), mockAwsContext())
           .catch(err => {
             // eslint-disable-next-line jest/no-conditional-expect
-            expect(err).toEqual(new Error("Badgers 1!"))
+            expect(err).toEqual(new Error('Badgers 1!'))
             done('handler1Resolved')
           })
         handler2(mockAwsEvent(), mockAwsContext())
           .catch(err => {
             // eslint-disable-next-line jest/no-conditional-expect
-            expect(err).toEqual(new Error("Badgers 2!"))
+            expect(err).toEqual(new Error('Badgers 2!'))
             done('handler2Resolved')
           })
       })
@@ -167,13 +167,13 @@ describe('AsyncStore', function () {
       // @ts-expect-error
       const handler1 = client.lambdaHandler(async function (_event) {
         client.addBreadcrumb('handler 1')
-        throw new Error("Badgers 1!")
+        throw new Error('Badgers 1!')
       }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       // @ts-expect-error
       const handler2 = client.lambdaHandler(async function (_event) {
         client.addBreadcrumb('handler 2')
-        throw new Error("Badgers 2!")
+        throw new Error('Badgers 2!')
       }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       return new Promise<void>(resolve => {
@@ -181,13 +181,13 @@ describe('AsyncStore', function () {
         handler1(mockAwsEvent(), mockAwsContext())
           .catch(err => {
             // eslint-disable-next-line jest/no-conditional-expect
-            expect(err).toEqual(new Error("Badgers 1!"))
+            expect(err).toEqual(new Error('Badgers 1!'))
             done('handler1Resolved')
           })
         handler2(mockAwsEvent(), mockAwsContext())
           .catch(err => {
             // eslint-disable-next-line jest/no-conditional-expect
-            expect(err).toEqual(new Error("Badgers 2!"))
+            expect(err).toEqual(new Error('Badgers 2!'))
             done('handler2Resolved')
           })
       })
@@ -229,14 +229,14 @@ describe('AsyncStore', function () {
 
       // @ts-expect-error
       const handler1 = client.lambdaHandler(async function (_event) {
-        client.setContext({handler: 1, valueOnlyPresentInOneHandler: 'badgers 1'})
+        client.setContext({ handler: 1, valueOnlyPresentInOneHandler: 'badgers 1' })
         return 'done!';
       }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       // @ts-expect-error
       const handler2 = client.lambdaHandler(async function (_event) {
-        client.setContext({handler: 2})
-        throw new Error("Badgers 2!")
+        client.setContext({ handler: 2 })
+        throw new Error('Badgers 2!')
       }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       return new Promise<void>(resolve => {
@@ -248,7 +248,7 @@ describe('AsyncStore', function () {
         handler2(mockAwsEvent(), mockAwsContext())
           .catch(err => {
             // eslint-disable-next-line jest/no-conditional-expect
-            expect(err).toEqual(new Error("Badgers 2!"))
+            expect(err).toEqual(new Error('Badgers 2!'))
             done('handler2Resolved')
           })
       })
@@ -301,16 +301,16 @@ describe('AsyncStore', function () {
       })
 
       const handler1 = client.lambdaHandler(function (_event, _context, callback) {
-        client.setContext({handler: 1, valueOnlyPresentInOneHandler: 'badgers 1'})
+        client.setContext({ handler: 1, valueOnlyPresentInOneHandler: 'badgers 1' })
         setTimeout(function () {
-          callback(new Error("Badgers 1!"))
+          callback(new Error('Badgers 1!'))
         }, 100)
       }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       const handler2 = client.lambdaHandler(function (_event, _context, callback) {
-        client.setContext({handler: 2})
+        client.setContext({ handler: 2 })
         setTimeout(function () {
-          callback(new Error("Badgers 2!"))
+          callback(new Error('Badgers 2!'))
         }, 50)
       }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
@@ -372,14 +372,14 @@ describe('AsyncStore', function () {
       const handler1 = client.lambdaHandler(function (_event, _context, callback) {
         client.addBreadcrumb('handler 1')
         setTimeout(function () {
-          callback(new Error("Badgers 1!"))
+          callback(new Error('Badgers 1!'))
         }, 0)
       }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
       const handler2 = client.lambdaHandler(function (_event, _context, callback) {
         client.addBreadcrumb('handler 2')
         setTimeout(function () {
-          callback(new Error("Badgers 2!"))
+          callback(new Error('Badgers 2!'))
         }, 0)
       }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 
@@ -432,16 +432,16 @@ describe('AsyncStore', function () {
       })
 
       const handler1 = client.lambdaHandler(function (_event, _context, callback) {
-        client.setContext({handler: 1, valueOnlyPresentInOneHandler: 'badgers 1'})
+        client.setContext({ handler: 1, valueOnlyPresentInOneHandler: 'badgers 1' })
         setTimeout(function () {
           callback(null, 'done!')
         }, 0)
       }) as SyncHandler<APIGatewayProxyEvent, string>
 
       const handler2 = client.lambdaHandler(function (_event, _context, callback) {
-        client.setContext({handler: 2})
+        client.setContext({ handler: 2 })
         setTimeout(function () {
-          callback(new Error("Badgers 2!"))
+          callback(new Error('Badgers 2!'))
         }, 0)
       }) as SyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
 

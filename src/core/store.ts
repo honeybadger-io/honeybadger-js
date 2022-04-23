@@ -1,4 +1,4 @@
-import { HoneybadgerStore } from "./types";
+import { HoneybadgerStore } from './types';
 
 export class GlobalStore<T> implements HoneybadgerStore<T> {
   private store: T

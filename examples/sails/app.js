@@ -29,8 +29,8 @@ process.chdir(__dirname);
 
 
 // Attempt to import `sails` dependency, as well as `rc` (for loading `.sailsrc` files).
-var sails;
-var rc;
+let sails;
+let rc;
 try {
   sails = require('sails');
   rc = require('sails/accessible/rc');
