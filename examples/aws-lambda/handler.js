@@ -24,7 +24,7 @@ module.exports = {
     }
 
     return formatJSONResponse({
-      message: "You summoned the async-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
+      message: "You summoned the sync-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
       event,
     });
   }),
@@ -65,7 +65,7 @@ module.exports = {
       }
 
       const resp = formatJSONResponse({
-        message: "You summoned the callback-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
+        message: "You summoned the setTimeout-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
         event,
       });
       callback(null, resp);
