@@ -40,7 +40,7 @@ module.exports = {
     const willReport = event.body && event.body.report === 'yes';
     await asyncThatThrows(willReport);
     return formatJSONResponse({
-      message: 'You summoned the async-error handler! Nothing was sent to Honeybadger. POST with { \'body\': { \'report\': \'yes\' } } to report to Honeybadger.',
+      message: "You summoned the async-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
       event,
     });
   }),
@@ -52,7 +52,7 @@ module.exports = {
     }
 
     const resp = formatJSONResponse({
-      message: 'You summoned the callback-error handler! Nothing was sent to Honeybadger. POST with { \'body\': { \'report\': \'yes\' } } to report to Honeybadger.',
+      message: "You summoned the callback-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
       event,
     });
     callback(null, resp);
@@ -65,7 +65,7 @@ module.exports = {
       }
 
       const resp = formatJSONResponse({
-        message: 'You summoned the set-timeout-error handler! Nothing was sent to Honeybadger. POST with { \'body\': { \'report\': \'yes\' } } to report to Honeybadger.',
+        message: "You summoned the callback-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
         event,
       });
       callback(null, resp);
@@ -83,7 +83,7 @@ module.exports = {
     const shouldTimeout = event.body && event.body.timeout === 'yes';
     await asyncThatThrows(shouldTimeout);
     return formatJSONResponse({
-      message: 'You summoned the timeoutWarning handler! Nothing was sent to Honeybadger. POST with { \'body\': { \'timeout\': \'yes\' } } to run the function until it times out.',
+      message: "You summoned the timeoutWarning handler! Nothing was sent to Honeybadger. POST with { 'body': { 'timeout': 'yes' } } to run the function until it times out.",
       event,
     });
   }),
