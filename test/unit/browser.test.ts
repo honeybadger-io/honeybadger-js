@@ -1,4 +1,4 @@
-import {useFakeXMLHttpRequest} from 'sinon'
+import { useFakeXMLHttpRequest } from 'sinon'
 import Singleton from '../../src/browser'
 // @ts-ignore
 import { nullLogger } from './helpers'
@@ -149,7 +149,7 @@ describe('browser client', function () {
           apiKey: 'testing'
         })
 
-        client.notify('testing', {cookies: 'expected=value; password=secret'})
+        client.notify('testing', { cookies: 'expected=value; password=secret' })
 
         xhr.onCreate = function (xhr) {
           setTimeout(() => {
@@ -167,7 +167,7 @@ describe('browser client', function () {
           apiKey: 'testing'
         })
 
-        client.notify('testing', {cookies: {expected: 'value', password: 'secret'}})
+        client.notify('testing', { cookies: { expected: 'value', password: 'secret' } })
 
         xhr.onCreate = function (xhr) {
           setTimeout(() => {

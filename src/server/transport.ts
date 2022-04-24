@@ -1,14 +1,14 @@
-import { Transport, TransportOptions, NoticeTransportPayload } from "../core/types"
-import { URL } from "url";
-import http from "http";
-import https from "https";
-import { getStats } from "./util";
-import { sanitize } from "../core/util";
+import { Transport, TransportOptions, NoticeTransportPayload } from '../core/types'
+import { URL } from 'url';
+import http from 'http';
+import https from 'https';
+import { getStats } from './util';
+import { sanitize } from '../core/util';
 
 export class ServerTransport implements Transport {
   send(options: TransportOptions, payload?: NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }> {
-    const {protocol} = new URL(options.endpoint)
-    const transport = (protocol === "http:" ? http : https)
+    const { protocol } = new URL(options.endpoint)
+    const transport = (protocol === 'http:' ? http : https)
 
     return new Promise((resolve, reject) => {
       let promise: Promise<void>;

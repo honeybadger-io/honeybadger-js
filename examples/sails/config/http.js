@@ -1,5 +1,5 @@
 
-const Honeybadger = require("../../../dist/server/honeybadger.js")
+const Honeybadger = require('../../../dist/server/honeybadger.js')
 Honeybadger.configure({});
 
 module.exports.http = {

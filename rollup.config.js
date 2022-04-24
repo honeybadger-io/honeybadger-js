@@ -20,8 +20,8 @@ const umdPlugins = [
   typescript({
     tsconfig: './tsconfig.json',
     exclude: [
-      "./src/server.ts",
-      "./src/server/**"
+      './src/server.ts',
+      './src/server/**'
     ]
   })
 ]
@@ -32,8 +32,8 @@ const nodePlugins = [
   typescript({
     tsconfig: './tsconfig.json',
     exclude: [
-      "./src/browser.ts",
-      "./src/browser/**"
+      './src/browser.ts',
+      './src/browser/**'
     ]
   })
 ]

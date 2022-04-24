@@ -8,7 +8,7 @@ export default function (): Plugin {
 
       process.on('unhandledRejection', function (reason, _promise) {
         if (!client.config.enableUnhandledRejection) { return }
-        client.notify(reason as Noticeable, {component: 'unhandledRejection'})
+        client.notify(reason as Noticeable, { component: 'unhandledRejection' })
       })
     }
   }

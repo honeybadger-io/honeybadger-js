@@ -7,7 +7,7 @@ import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
-import { BrowserTransport } from "./browser/transport";
+import { BrowserTransport } from './browser/transport';
 
 interface WrappedFunc {
   (): (...args: unknown[]) => unknown

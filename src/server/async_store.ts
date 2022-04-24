@@ -1,4 +1,4 @@
-import { BreadcrumbRecord, HoneybadgerStore } from "../core/types"
+import { BreadcrumbRecord, HoneybadgerStore } from '../core/types'
 
 let Store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[]; }>
 try {

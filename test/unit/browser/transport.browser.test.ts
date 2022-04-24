@@ -1,5 +1,5 @@
-import {useFakeXMLHttpRequest} from 'sinon'
-import { BrowserTransport } from "../../../src/browser/transport";
+import { useFakeXMLHttpRequest } from 'sinon'
+import { BrowserTransport } from '../../../src/browser/transport';
 
 describe('BrowserTransport', function () {
   let transport: BrowserTransport

@@ -8,52 +8,86 @@ on:
 
 jobs:
   unit:
-
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [12.x, 14.x, 16.x]
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm test
+        cache: 'npm'
+
+    - name: Build
+      run: npm ci
+
+    - name: Run unit tests
+      run: npm test
 
   integration:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v1
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
         node-version: '14.x'
-    - name: npm install, build, and test
+        cache: 'npm'
+        cache-dependency-path: |
+          package-lock.json
+          test/integration/package-lock.json
+
+    - name: Build
       run: |
         npm ci
         cd test/integration
         npm ci
-        npm test
+
+    - name: Run integration tests
       env:
         CI: true
         BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+      run: npm run test:integration
 
   tsd:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v1
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
         node-version: '14.x'
-    - run: npm ci
-    - run: npm run tsd
+        cache: 'npm'
+
+    - name: Build
+      run: npm ci
+
+    - name: Check Typescript type definitions
+      run: npm run tsd
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          cache: 'npm'
+
+      - name: Build
+        run: npm ci
+
+      - name: Run lint checks
+        run: npm run lint
