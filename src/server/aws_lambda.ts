@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Honeybadger from '../core/client'
-// @ts-ignore
-// eslint-disable-next-line import/no-unresolved
-import { Handler, Callback, Context } from 'aws-lambda'
+/** @ts-ignore */
+import type { Handler, Callback, Context } from 'aws-lambda'
 import { AsyncStore } from './async_store';
 import { ServerlessConfig } from '../core/types';
 

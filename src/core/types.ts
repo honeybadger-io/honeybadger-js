@@ -1,5 +1,6 @@
 import Client from './client'
-import { AsyncLocalStorage } from 'async_hooks';
+/** @ts-ignore */
+import type { AsyncLocalStorage } from 'async_hooks';
 
 export interface Logger {
   log(...args: unknown[]): unknown
