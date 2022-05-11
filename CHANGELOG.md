@@ -1,3 +1,7 @@
+## [4.0.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.1...v4.0.2) (2022-05-11)
+
+
+
 # Changelog
 All notable changes to this project will be documented in this file.
 
