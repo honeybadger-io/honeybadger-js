@@ -55,12 +55,13 @@ class Honeybadger extends Client {
     this.lambdaHandler = lambdaHandler.bind(this)
   }
 
-  factory(opts?: Partial<Config | ServerlessConfig>): Honeybadger {
-    return new Honeybadger(opts)
+  factory(opts?: Partial<Config | ServerlessConfig>): this {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new Honeybadger(opts) as any
   }
 
-  configure(opts: Partial<Config | ServerlessConfig> = {}): Honeybadger {
-    return super.configure(opts) as Honeybadger
+  configure(opts: Partial<Config | ServerlessConfig> = {}) {
+    return super.configure(opts)
   }
 
   checkIn(id: string): Promise<void> {

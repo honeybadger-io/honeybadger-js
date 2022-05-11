@@ -55,8 +55,9 @@ class Honeybadger extends Client {
     return (this.__errorsSent = 0)
   }
 
-  public factory(opts?: Partial<BrowserConfig>): Honeybadger {
-    return new Honeybadger(opts)
+  public factory(opts?: Partial<BrowserConfig>): this {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new Honeybadger(opts) as any
   }
 
   public checkIn(_id: string): Promise<void> {
