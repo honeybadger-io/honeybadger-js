@@ -19,7 +19,7 @@ export class TestTransport implements Transport {
 }
 
 export class TestClient extends BaseClient {
-  protected factory(_opts: Partial<Config>): void {
+  protected factory(_opts: Partial<Config>): this {
     throw new Error('Method not implemented.');
   }
 
