@@ -38,6 +38,7 @@ This project is _isomorphic_, meaning it's a single library which contains both 
 1. The server build, which transpiles `src/server.ts` and its dependencies into `dist/server/honeybadger.js`.
 2. The browser build, which transpiles `src/browser.ts` and its dependencies into `dist/browser/honeybadger.js`.
 3. The minified browser build, which transpiles `src/browser.ts` and its dependencies into `dist/browser/honeybadger.min.js` (+ source maps).
+4. The browser ESM build, which transpiles `src/browser.ts` and its dependencies into `dist/browser/honeybadger.js`, as ES6 modules.
 
 In addition, the TypeScript type declaration for each build is generated into its `types/` directory (ie `dist/browser/types/browser.d.ts` and `dist/server/types/server.d.ts`).
 
