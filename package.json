@@ -21,6 +21,7 @@
   ],
   "main": "dist/server/honeybadger.js",
   "browser": "dist/browser/honeybadger.js",
+  "esm": "dist/esm/honeybadger.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:honeybadger-io/honeybadger-js.git"

@@ -15,7 +15,7 @@ const sharedPlugins = [
 ]
 
 // These plugins are used for UMD builds
-const umdPlugins = [
+const browserPlugins = [
   ...sharedPlugins,
   typescript({
     tsconfig: './tsconfig.json',
@@ -48,7 +48,18 @@ export default [
       format: 'umd',
       sourcemap: true
     },
-    plugins: umdPlugins
+    plugins: browserPlugins
+  },
+
+  // ESM build
+  {
+    input: 'src/browser.ts',
+    output: {
+      name: 'Honeybadger',
+      file: pkg.esm,
+      format: 'es'
+    },
+    plugins: browserPlugins
   },
 
   // Browser build (minified)
@@ -60,7 +71,7 @@ export default [
       format: 'umd',
       sourcemap: true
     },
-    plugins: [...umdPlugins, uglify()]
+    plugins: [...browserPlugins, uglify()]
   },
 
   // Server build
