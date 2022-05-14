@@ -60,7 +60,7 @@ class Honeybadger extends Client {
     return new Honeybadger(opts) as any
   }
 
-  configure(opts: Partial<Config | ServerlessConfig> = {}) {
+  configure(opts: Partial<Config | ServerlessConfig> = {}): this {
     return super.configure(opts)
   }
 

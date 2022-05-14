@@ -47,7 +47,7 @@ class Honeybadger extends Client {
     }, new BrowserTransport())
   }
 
-  configure(opts: Partial<BrowserConfig> = {}) {
+  configure(opts: Partial<BrowserConfig> = {}): this {
     return super.configure(opts)
   }
 
