@@ -23,7 +23,7 @@ jobs:
           if [ -f "yarn.lock" ]; then
             yarn install
           else
-            npm install
+            npm ci
           fi
       - run: npx shipjs trigger
         env:
