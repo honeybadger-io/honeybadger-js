@@ -1,3 +1,14 @@
+## [4.0.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.1...v4.0.2) (2022-05-16)
+
+
+### Bug Fixes
+
+* cleanup CHANGELOG.md file to use with conventional-changelog ([#786](https://github.com/honeybadger-io/honeybadger-js/issues/786)) ([05b8b76](https://github.com/honeybadger-io/honeybadger-js/commit/05b8b7602dced5dfef7c6c177c8494f983aa7586)), closes [#778](https://github.com/honeybadger-io/honeybadger-js/issues/778)
+* improve typings ([#788](https://github.com/honeybadger-io/honeybadger-js/issues/788)) ([2552a5f](https://github.com/honeybadger-io/honeybadger-js/commit/2552a5f7604116d4647bfcffe48e054263433705))
+* make sure shipjs workflows do not modify package-lock.json ([#787](https://github.com/honeybadger-io/honeybadger-js/issues/787)) ([b1568ff](https://github.com/honeybadger-io/honeybadger-js/commit/b1568ff775a975015fef87226a0b467df922f8ef))
+
+
+
 ## [4.0.1] - 2022-05-06
 ### Fixed
 - Typescript typings for optional dependencies
