@@ -1,0 +1,45 @@
+{
+  "name": "aws-lambda-typescript",
+  "version": "1.0.0",
+  "description": "This is simple REST API example for AWS Lambda By Serverless framwork with TypeScript and MongoDB Atlas.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "local": "serverless offline",
+    "deploy": "serverless deploy",
+    "test": "cross-env NODE_ENV=dev mocha -r ts-node/register tests/*.test.ts --exit",
+    "coverage": "nyc --reporter lcov npm run test"
+  },
+  "pre-commit": [
+    "lint"
+  ],
+  "dependencies": {
+    "@honeybadger-io/js": "honeybadger-io/honeybadger-js#server_vs_browser_typings",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.51",
+    "@types/dotenv-safe": "^8.1.0",
+    "cross-env": "^7.0.2",
+    "serverless-offline": "^5.12.1",
+    "serverless-plugin-typescript": "^1.1.9",
+    "ts-node": "^8.9.1",
+    "typescript": "^3.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Q-Angelo/aws-node-typescript-rest-api.git"
+  },
+  "keywords": [
+    "Nodejs",
+    "TypeScript",
+    "ServerLess",
+    "AWS Lambda"
+  ],
+  "author": "May",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Q-Angelo/aws-node-typescript-rest-api/issues"
+  },
+  "homepage": "https://github.com/Q-Angelo/aws-node-typescript-rest-api#readme"
+}

@@ -87,7 +87,7 @@ export default abstract class Client {
     this.logger = logger(this)
   }
 
-  protected abstract factory(opts: Partial<Config>): void
+  protected abstract factory(opts: Partial<Config>): this
 
   protected abstract checkIn(id: string): Promise<void>
 
@@ -95,7 +95,7 @@ export default abstract class Client {
     return notifier.version
   }
 
-  configure(opts: Partial<Config> = {}): Client {
+  configure(opts: Partial<Config> = {}): this {
     for (const k in opts) {
       this.config[k] = opts[k]
     }

@@ -1,0 +1,60 @@
+app: honeybadger-io
+service: aws-lambda-typescript
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  environment:
+    NODE_ENV: dev
+    HONEYBADGER_API_KEY: ${param:HONEYBADGER_API_KEY}
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+
+package:
+  exclude:
+    - config/.env.stg
+    - config/.env.pro
+  include:
+    - config/.env.dev
+
+functions:
+  hello:
+    handler: app/handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
+  syncError:
+    handler: app/handler.syncError
+    events:
+      - http:
+          path: sync-error
+          method: post
+  asyncError:
+    handler: app/handler.asyncError
+    events:
+      - http:
+          path: async-error
+          method: post
+  callbackError:
+    handler: app/handler.callbackError
+    events:
+      - http:
+          path: callback-error
+          method: post
+
+  setTimeoutError:
+    handler: app/handler.setTimeoutError
+    events:
+      - http:
+          path: set-timeout-error
+          method: post
+  timeoutWarning:
+    handler: app/handler.timeoutWarning
+    events:
+      - http:
+          path: timeout-warning
+          method: post
+
