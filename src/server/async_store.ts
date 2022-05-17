@@ -1,4 +1,5 @@
 import { BreadcrumbRecord, HoneybadgerStore } from '../core/types'
+import { GlobalStore } from '../core/store';
 
 let Store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[]; }>
 try {
@@ -7,9 +8,7 @@ try {
   Store = new AsyncLocalStorage()
 }
 catch (e) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GlobalStore } = require('../core/store')
-  Store = new GlobalStore()
+  Store = new GlobalStore({ context: {}, breadcrumbs: [] })
 }
 
 export const AsyncStore = Store
