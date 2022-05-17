@@ -1,3 +1,12 @@
+## [4.0.3](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.2...v4.0.3) (2022-05-17)
+
+
+### Bug Fixes
+
+* make sure file is bundled with rollup ([#793](https://github.com/honeybadger-io/honeybadger-js/issues/793)) ([fbcfea6](https://github.com/honeybadger-io/honeybadger-js/commit/fbcfea6b63c348269e8ef70c2611747d29f8b6e8))
+
+
+
 ## [4.0.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.1...v4.0.2) (2022-05-16)
 
 
