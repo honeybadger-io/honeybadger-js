@@ -64,7 +64,7 @@
     "eslint-plugin-promise": "^6.0.0",
     "express": "^4.17.1",
     "husky": "^8.0.1",
-    "jest": "^27.4.4",
+    "jest": "^28.1.0",
     "nock": "^13.2.1",
     "rollup": "^2.61.1",
     "rollup-plugin-uglify": "^6.0.2",
