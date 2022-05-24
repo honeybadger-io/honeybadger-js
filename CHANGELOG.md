@@ -1,3 +1,7 @@
+## [4.0.4](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.3...v4.0.4) (2022-05-24)
+
+
+
 ## [4.0.3](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.2...v4.0.3) (2022-05-17)
 
 
