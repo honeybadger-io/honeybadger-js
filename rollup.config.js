@@ -1,7 +1,7 @@
 import typescript from '@rollup/plugin-typescript'
 import replace from '@rollup/plugin-replace'
 import resolve from '@rollup/plugin-node-resolve'
-import { uglify } from 'rollup-plugin-uglify'
+import { terser } from 'rollup-plugin-terser'
 import pkg from './package.json'
 
 // These plugins are used for all builds
@@ -60,7 +60,7 @@ export default [
       format: 'umd',
       sourcemap: true
     },
-    plugins: [...umdPlugins, uglify()]
+    plugins: [...umdPlugins, terser()]
   },
 
   // Server build
