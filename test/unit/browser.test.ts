@@ -125,6 +125,16 @@ describe('browser client', function () {
   })
 
   describe('notify', function () {
+
+    it('does not report if notice is empty', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const result = client.notify({})
+      expect(result).toEqual(false)
+    })
+
     it('excludes cookies by default', function () {
       return new Promise<void>(resolve => {
         client.configure({

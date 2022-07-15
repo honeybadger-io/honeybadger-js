@@ -19,14 +19,16 @@ const kHoneybadgerStore = Symbol.for('kHoneybadgerStore');
 class Honeybadger extends Client {
   /** @internal */
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
-    (notice: Notice) => {
-      notice.backtrace.forEach((line) => {
-        if (line.file) {
-          line.file = line.file.replace(/.*\/node_modules\/(.+)/, '[NODE_MODULES]/$1')
-          line.file = line.file.replace(notice.projectRoot, '[PROJECT_ROOT]')
-        }
-        return line
-      })
+    (notice?: Notice) => {
+      if (notice && notice.backtrace) {
+        notice.backtrace.forEach((line) => {
+          if (line.file) {
+            line.file = line.file.replace(/.*\/node_modules\/(.+)/, '[NODE_MODULES]/$1')
+            line.file = line.file.replace(notice.projectRoot, '[PROJECT_ROOT]')
+          }
+          return line
+        })
+      }
     }
   ]
 

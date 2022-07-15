@@ -24,13 +24,13 @@ class Honeybadger extends Client {
 
   /** @internal */
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = [
-    (notice: Notice) => {
+    (notice?: Notice) => {
       if (this.__exceedsMaxErrors()) {
         this.logger.debug('Dropping notice: max errors exceeded', notice)
         return false
       }
 
-      if (!notice.url) { notice.url = document.URL }
+      if (notice && !notice.url) { notice.url = document.URL }
 
       this.__incrementErrorsCount()
 
