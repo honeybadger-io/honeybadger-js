@@ -1,3 +1,13 @@
+## [4.0.4](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.3...v4.0.4) (2022-07-19)
+
+
+### Bug Fixes
+
+* check for null ([#834](https://github.com/honeybadger-io/honeybadger-js/issues/834)) ([fb50601](https://github.com/honeybadger-io/honeybadger-js/commit/fb50601f8f6b603633392866ebcd0669107806c7)), closes [#829](https://github.com/honeybadger-io/honeybadger-js/issues/829)
+* install correct rollup deps, replace uglify with terser ([#812](https://github.com/honeybadger-io/honeybadger-js/issues/812)) ([674f3e7](https://github.com/honeybadger-io/honeybadger-js/commit/674f3e758216c9167af1625153e768ec2367d85a))
+
+
+
 ## [4.0.3](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.2...v4.0.3) (2022-05-17)
 
 
