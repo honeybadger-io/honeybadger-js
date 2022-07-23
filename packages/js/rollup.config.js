@@ -1,0 +1,50 @@
+import replace from '@rollup/plugin-replace'
+import resolve from '@rollup/plugin-node-resolve'
+import { terser } from 'rollup-plugin-terser'
+import pkg from './package.json'
+
+const sharedPlugins = [
+  replace({
+    preventAssignment: false,
+    exclude: 'node_modules/**',
+    __VERSION__: pkg.version
+  }),
+  resolve()
+]
+
+export default [
+  // Browser build
+  {
+    input: 'build/browser.js',
+    output: {
+      name: 'Honeybadger',
+      file: pkg.browser,
+      format: 'umd',
+      sourcemap: true
+    },
+    plugins: sharedPlugins
+  },
+
+  // Browser build (minified)
+  {
+    input: 'build/browser.js',
+    output: {
+      name: 'Honeybadger',
+      file: 'dist/browser/honeybadger.min.js',
+      format: 'umd',
+      sourcemap: true
+    },
+    plugins: [terser()]
+  },
+
+  // Server build
+  {
+    input: 'build/server.js',
+    external: ['http', 'https', 'url', 'os', 'fs', 'util', 'domain', 'async_hooks'],
+    output: {
+      file: pkg.main,
+      format: 'cjs'
+    },
+    plugins: []
+  }
+]

@@ -1,0 +1,47 @@
+{
+  "name": "@honeybadger-io/core",
+  "version": "4.0.3",
+  "author": {
+    "name": "Joshua Wood",
+    "email": "josh@honeybadger.io"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js",
+  "description": "JavaScript error notifier for Honeybadger.io",
+  "keywords": [
+    "exception",
+    "error",
+    "honeybadger",
+    "javascript",
+    "monitoring"
+  ],
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "files": [
+    "./build"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:honeybadger-io/honeybadger-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json",
+    "test": "jest"
+  },
+  "dependencies": {
+    "stacktrace-parser": "^0.1.10"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.89",
+    "@types/express": "^4.17.13",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^12.20.46",
+    "jest": "^27.4.4",
+    "sinon": "^14.0.0",
+    "ts-jest": "^27.1.5",
+    "typescript": "^4.5.3"
+  }
+}

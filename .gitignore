@@ -1,6 +1,8 @@
 .DS_Store
-node_modules/
-dist/
-local.log
-browserstack.err
-.idea/
+node_modules
+.idea
+*/**/*.tsbuildinfo
+*/**/build
+*/**/dist
+*/**/.DS_Store
+*/**/node_modules
