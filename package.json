@@ -16,7 +16,6 @@
     "prepare": "npm run build && husky install",
     "build": "lerna run build --stream",
     "test": "lerna run test --stream",
-    "test:integration": "lerna run test:integration --stream",
     "install": "lerna bootstrap",
     "lint": "npx eslint .",
     "release": "lerna publish --conventional-commits"

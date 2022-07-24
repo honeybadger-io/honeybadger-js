@@ -46,7 +46,7 @@ jobs:
     - name: Build
       run: |
         npm ci
-        cd test/integration
+        cd packages/js/test/integration
         npm ci
 
     - name: Run integration tests
@@ -54,7 +54,9 @@ jobs:
         CI: true
         BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-      run: npm run test:integration
+      run: |
+        cd packages/js
+        npm run test:integration
 
   lint:
     runs-on: ubuntu-latest
