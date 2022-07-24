@@ -23,7 +23,6 @@
 - [ ] README - js
 - [ ] README - monorepo
 - [ ] js - enable postpublish script when monorepo is ready
-
 - [x] ci - tests
 - [x] ci - release new version
 - [ ] ci - scheduled deployment
