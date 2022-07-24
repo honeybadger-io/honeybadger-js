@@ -17,13 +17,14 @@
 - [x] js - package.json
 - [x] replace shipjs with lerna version
 - [x] create draft PR
-- [ ] js - npm run build - remove warnings
+- [ ] js - integration tests
+- [x] js - npm run build - remove warnings
 - [ ] README - core
 - [ ] README - js
 - [ ] README - monorepo
 - [ ] js - enable postpublish script when monorepo is ready
-- [ ] js - integration tests
-- [ ] ci - tests
+
+- [x] ci - tests
 - [x] ci - release new version
 - [ ] ci - scheduled deployment
 - [ ] test lerna publish

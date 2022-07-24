@@ -1,5 +1,6 @@
 import replace from '@rollup/plugin-replace'
 import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 import { terser } from 'rollup-plugin-terser'
 import pkg from './package.json'
 
@@ -9,6 +10,7 @@ const sharedPlugins = [
     exclude: 'node_modules/**',
     __VERSION__: pkg.version
   }),
+  commonjs(),
   resolve()
 ]
 
@@ -34,7 +36,7 @@ export default [
       format: 'umd',
       sourcemap: true
     },
-    plugins: [terser()]
+    plugins: [...sharedPlugins, terser()]
   },
 
   // Server build
@@ -45,6 +47,6 @@ export default [
       file: pkg.main,
       format: 'cjs'
     },
-    plugins: []
+    plugins: sharedPlugins
   }
 ]

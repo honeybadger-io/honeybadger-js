@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "allowJs": false,
-    "target": "es5",
+    "target": "es6",
+    "module": "commonjs",
     "moduleResolution": "node",
     "strict": false,
     "esModuleInterop": true,
@@ -9,6 +10,6 @@
     "declaration": true,
     "declarationMap": true,
     "stripInternal": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   }
 }

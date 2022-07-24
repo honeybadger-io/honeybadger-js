@@ -53,6 +53,7 @@
     "@honeybadger-io/core": "4.0.3"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
     "@types/aws-lambda": "^8.10.89",
@@ -65,9 +66,9 @@
     "rollup": "^2.77.0",
     "rollup-plugin-terser": "^7.0.2",
     "sinon": "^14.0.0",
+    "supertest": "^6.1.6",
     "ts-jest": "^27.1.5",
     "tsd": "^0.22.0",
-    "typescript": "^4.5.3",
-    "supertest": "^6.1.6"
+    "typescript": "^4.5.3"
   }
 }
