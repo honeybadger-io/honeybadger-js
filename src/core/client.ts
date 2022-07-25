@@ -82,7 +82,7 @@ export default abstract class Client {
 
     // First, we go with the global (shared) store.
     // Webserver middleware can then switch to the AsyncStore for async context tracking.
-    this.__store = new GlobalStore({ context: {}, breadcrumbs: [] })
+    this.__store = GlobalStore
     this.__transport = transport
     this.logger = logger(this)
   }
@@ -125,7 +125,9 @@ export default abstract class Client {
   setContext(context: Record<string, unknown>): Client {
     if (typeof context === 'object') {
       const store = this.__store.getStore()
-      store.context = merge(store.context, context)
+      if (store) {
+        store.context = merge(store.context, context)
+      }
     }
     return this
   }
@@ -133,6 +135,8 @@ export default abstract class Client {
   resetContext(context?: Record<string, unknown>): Client {
     this.logger.warn('Deprecation warning: `Honeybadger.resetContext()` has been deprecated; please use `Honeybadger.clear()` instead.')
     const store = this.__store.getStore()
+
+    if (store === undefined) return this
 
     if (typeof context === 'object' && context !== null) {
       store.context = context
@@ -146,8 +150,10 @@ export default abstract class Client {
 
   clear(): Client {
     const store = this.__store.getStore()
-    store.context = {}
-    store.breadcrumbs = []
+    if (store) {
+      store.context = {}
+      store.breadcrumbs = []
+    }
 
     return this
   }
@@ -347,13 +353,17 @@ export default abstract class Client {
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 
-    const store = this.__store.getStore()
+    let store = this.__store.getStore()
+    if (!store) {
+      this.__setStore(GlobalStore)
+      store = this.__store.getStore()
+    }
     let breadcrumbs = store.breadcrumbs
     breadcrumbs.push({
       category: category as string,
-      message: message,
       metadata: metadata as Record<string, unknown>,
-      timestamp: timestamp
+      message,
+      timestamp,
     })
 
     const limit = this.config.maxBreadcrumbs
@@ -426,11 +436,9 @@ export default abstract class Client {
    */
   protected __getStoreContentsOrDefault(): DefaultStoreContents {
     const existingStoreContents = this.__store.getStore();
-    const storeContents = existingStoreContents || {};
     return {
-      context: {},
-      breadcrumbs: [],
-      ...storeContents
+      ...GlobalStore.getStore(),
+      ...existingStoreContents || {}
     };
   }
 }

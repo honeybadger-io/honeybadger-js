@@ -11,6 +11,7 @@ describe('browser client', function () {
     client = Singleton.factory({
       logger: nullLogger()
     });
+    client.clear()
 
     // @ts-ignore - no need to test this in here
     client.__getSourceFileHandler = null

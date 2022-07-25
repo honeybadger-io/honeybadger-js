@@ -8,7 +8,7 @@ try {
   Store = new AsyncLocalStorage()
 }
 catch (e) {
-  Store = new GlobalStore({ context: {}, breadcrumbs: [] })
+  Store = GlobalStore
 }
 
 export const AsyncStore = Store

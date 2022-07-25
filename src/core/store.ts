@@ -1,6 +1,6 @@
-import { HoneybadgerStore } from './types';
+import { HoneybadgerStore, DefaultStoreContents } from './types';
 
-export class GlobalStore<T> implements HoneybadgerStore<T> {
+class SyncStore<T> implements HoneybadgerStore<T> {
   private store: T
 
   constructor(store: T) {
@@ -15,4 +15,10 @@ export class GlobalStore<T> implements HoneybadgerStore<T> {
     this.store = store;
     return callback(...args);
   }
+
+  static create(): SyncStore<DefaultStoreContents> {
+    return new SyncStore({ context: {}, breadcrumbs: [] })
+  }
 }
+
+export const GlobalStore = SyncStore.create()
