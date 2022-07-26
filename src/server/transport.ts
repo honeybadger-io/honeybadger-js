@@ -23,6 +23,7 @@ export class ServerTransport implements Transport {
       }
 
       promise.then(() => {
+        //
         // We use a httpOptions object to limit issues with libraries that may patch Node.js
         // See https://github.com/honeybadger-io/honeybadger-js/issues/825#issuecomment-1193113433
         const httpOptions = {
