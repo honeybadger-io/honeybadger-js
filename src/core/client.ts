@@ -359,7 +359,7 @@ export default abstract class Client {
       this.__setStore(GlobalStore)
       store = this.__store.getStore()
     }
-    let breadcrumbs = store.breadcrumbs
+    let breadcrumbs = store.breadcrumbs || []
     breadcrumbs.push({
       category: category as string,
       metadata: metadata as Record<string, unknown>,
@@ -374,6 +374,10 @@ export default abstract class Client {
     store.breadcrumbs = breadcrumbs
 
     return this
+  }
+
+  getBreadcrumbs() {
+    return this.__store.getStore().breadcrumbs
   }
 
   protected __developmentMode(): boolean {

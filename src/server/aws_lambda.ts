@@ -4,6 +4,7 @@ import Honeybadger from '../core/client'
 import type { Handler, Callback, Context } from 'aws-lambda'
 import { AsyncStore } from './async_store';
 import { ServerlessConfig } from '../core/types';
+import { GlobalStore } from '../core/store';
 
 export type SyncHandler<TEvent = any, TResult = any> = (
     event: TEvent,
@@ -33,7 +34,7 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
   return function wrappedLambdaHandler(event, context) {
     hb.__setStore(AsyncStore)
     return new Promise<TResult>((resolve, reject) => {
-      AsyncStore.run({ context: {}, breadcrumbs: [] }, () => {
+      AsyncStore.run(GlobalStore.getStoreCopy(), () => {
         const timeoutHandler = setupTimeoutWarning(hb, context)
         try {
           handler(event, context)
@@ -52,7 +53,7 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
 function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
   return function wrappedLambdaHandler(event, context, cb) {
     hb.__setStore(AsyncStore)
-    AsyncStore.run({ context: {}, breadcrumbs: [] }, () => {
+    AsyncStore.run(GlobalStore.getStoreCopy(), () => {
       const timeoutHandler = setupTimeoutWarning(hb, context)
       try {
         handler(event, context, (error, result) => {

@@ -35,10 +35,6 @@ export class TestClient extends BaseClient {
     return this.__store.getStore().context
   }
 
-  public getBreadcrumbs() {
-    return this.__store.getStore().breadcrumbs
-  }
-
   public getPayload(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined) {
     // called in client.notify()
     const notice = this.makeNotice(noticeable, name, extra)

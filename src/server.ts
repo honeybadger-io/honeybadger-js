@@ -14,6 +14,7 @@ import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { AsyncStore } from './server/async_store'
 import { ServerTransport } from './server/transport';
+import { GlobalStore } from './core/store';
 
 const kHoneybadgerStore = Symbol.for('kHoneybadgerStore');
 class Honeybadger extends Client {
@@ -94,7 +95,7 @@ class Honeybadger extends Client {
     handler: (...args: never[]) => R,
     onError?: (...args: unknown[]) => unknown
   ): R|void {
-    const storeObject = (request[kHoneybadgerStore] || this.__getStoreContentsOrDefault()) as DefaultStoreContents;
+    const storeObject = (request[kHoneybadgerStore] || GlobalStore.getStoreCopy() ) as DefaultStoreContents;
     this.__setStore(AsyncStore);
     if (!request[kHoneybadgerStore]) {
       request[kHoneybadgerStore] = storeObject;

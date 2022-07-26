@@ -11,6 +11,10 @@ class SyncStore<T> implements HoneybadgerStore<T> {
     return this.store
   }
 
+  getStoreCopy(): T {
+    return JSON.parse(JSON.stringify(this.store))
+  }
+
   run<R, TArgs extends never[]>(store: T, callback: (...args: TArgs) => R, ...args: TArgs): R {
     this.store = store;
     return callback(...args);

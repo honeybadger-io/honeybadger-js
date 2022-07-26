@@ -87,6 +87,42 @@ describe('server client', function () {
     })
   })
 
+  it('combines previous global store when reporting', function () {
+    let expectedAssertions = 2;
+
+    client.addBreadcrumb('global 1')
+    client.addBreadcrumb('global 2')
+    const req1 = {}
+    const req2 = {}
+    client.withRequest(req1, () => {
+      client.addBreadcrumb('async 1 from request 1')
+    })
+    client.withRequest(req2, () => {
+      client.addBreadcrumb('async 1 from request 2')
+      expect(client.getBreadcrumbs()).toHaveLength(3)
+      expect(client.getBreadcrumbs().map(({ message }) => message)).toEqual(
+        ['global 1', 'global 2', 'async 1 from request 2']
+      )
+      expectedAssertions--
+    })
+    client.withRequest(req1, () => {
+      client.addBreadcrumb('async 2 from request 1')
+      expect(client.getBreadcrumbs()).toHaveLength(4)
+      expect(client.getBreadcrumbs().map(({ message }) => message)).toEqual(
+        ['global 1', 'global 2', 'async 1 from request 1', 'async 2 from request 1']
+      )
+      expectedAssertions--
+    })
+
+    client.addBreadcrumb('global 3')
+    expect(client.getBreadcrumbs()).toHaveLength(3)
+    expect(client.getBreadcrumbs().map(({ message }) => message)).toEqual(['global 1', 'global 2', 'global 3'])
+
+    if (expectedAssertions !== 0) { // Safeguard for if the handlers above were not called
+      throw new Error(`Not all assertions ran. ${expectedAssertions} assertions did not run.`)
+    }
+  })
+
   describe('afterNotify', function () {
     beforeEach(function () {
       client.configure({
