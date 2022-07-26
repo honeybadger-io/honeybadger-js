@@ -1,3 +1,12 @@
+## [4.0.5](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.4...v4.0.5) (2022-07-26)
+
+
+### Bug Fixes
+
+* refactor http.request for libraries that may patch it ([8007395](https://github.com/honeybadger-io/honeybadger-js/commit/8007395f8d048a49cab11a5e58e5dfa6c732f847)), closes [#843](https://github.com/honeybadger-io/honeybadger-js/issues/843)
+
+
+
 ## [4.0.4](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.3...v4.0.4) (2022-07-19)
 
 
