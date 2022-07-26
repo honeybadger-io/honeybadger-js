@@ -13,7 +13,6 @@ describe('server client', function () {
       logger: nullLogger(),
       environment: null
     })
-    client.clear()
   })
 
   it('inherits from base client', function () {

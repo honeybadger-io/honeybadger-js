@@ -23,7 +23,6 @@ describe('client', function () {
       environment: null
     }, new TestTransport())
     client.configure()
-    client.clear()
   })
 
   describe('getVersion', function () {

@@ -83,6 +83,7 @@ export default abstract class Client {
     // First, we go with the global (shared) store.
     // Webserver middleware can then switch to the AsyncStore for async context tracking.
     this.__store = GlobalStore
+    this.clear()
     this.__transport = transport
     this.logger = logger(this)
   }
