@@ -441,9 +441,6 @@ export default abstract class Client {
    */
   protected __getStoreContentsOrDefault(): DefaultStoreContents {
     const existingStoreContents = this.__store.getStore();
-    return {
-      ...GlobalStore.getStore(),
-      ...existingStoreContents || {}
-    };
+    return Object.assign(GlobalStore.getStoreCopy(), existingStoreContents || {})
   }
 }

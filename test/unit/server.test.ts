@@ -88,7 +88,7 @@ describe('server client', function () {
   })
 
   it('combines previous global store when reporting', function () {
-    let expectedAssertions = 2;
+    let expectedAssertions = 2; // Safeguard to ensure all handlers are called
 
     client.addBreadcrumb('global 1')
     client.addBreadcrumb('global 2')
@@ -116,9 +116,11 @@ describe('server client', function () {
 
     client.addBreadcrumb('global 3')
     expect(client.getBreadcrumbs()).toHaveLength(3)
-    expect(client.getBreadcrumbs().map(({ message }) => message)).toEqual(['global 1', 'global 2', 'global 3'])
+    expect(client.getBreadcrumbs().map(({ message }) => message)).toEqual(
+      ['global 1', 'global 2', 'global 3']
+    )
 
-    if (expectedAssertions !== 0) { // Safeguard for if the handlers above were not called
+    if (expectedAssertions !== 0) {
       throw new Error(`Not all assertions ran. ${expectedAssertions} assertions did not run.`)
     }
   })
