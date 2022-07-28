@@ -47,7 +47,7 @@
     "test:integration:browserstack": "npm run test:integration",
     "test:integration:headless": "HEADLESS=1 npm run test:integration",
     "tsd": "tsd",
-    "postpublish-enable-when-ready": "./scripts/release-cdn.sh"
+    "enable-when-ready-postpublish": "./scripts/release-cdn.sh"
   },
   "dependencies": {
     "@hb-test/core": "4.0.5"

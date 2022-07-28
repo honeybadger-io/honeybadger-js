@@ -19,15 +19,18 @@
 - [x] create draft PR
 - [x] js - integration tests
 - [x] js - npm run build - remove warnings
+- [x] ci - tests
+- [x] ci - release new version
 - [ ] README - core
 - [ ] README - js
 - [ ] README - monorepo
-- [ ] js - enable postpublish script when monorepo is ready
-- [x] ci - tests
-- [x] ci - release new version
 - [ ] ci - scheduled deployment
-- [ ] test lerna publish
+- [ ] test lerna publish with test org
 - [ ] example projects
+- [ ] when monorepo is ready: 
+  - [ ] enable post-publish script in js package,
+  - [ ] modify lerna publish workflow to checkout from master and set correct NPM_AUTH_TOKEN
+  - [ ] remove --no-git-tag-version from lerna publish
 
 # notes
 
