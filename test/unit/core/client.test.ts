@@ -931,6 +931,7 @@ describe('client', function () {
     expect(payload.error.class).toEqual(outerError.name)
     expect(payload.error.message).toEqual(outerError.message)
 
+    /* eslint-disable jest/no-conditional-expect */
     if (outerError.cause) { // `.cause` in constructor is only supported on certain platforms/Node versions
       expect(payload.error.causes).toHaveLength(1)
       expect(payload.error.causes[0].class).toEqual(innerError.name)
@@ -939,5 +940,6 @@ describe('client', function () {
     } else {
       expect(payload.error.causes).toHaveLength(0)
     }
+    /* eslint-enable jest/no-conditional-expect */
   })
 })
