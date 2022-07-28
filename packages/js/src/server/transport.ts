@@ -9,7 +9,7 @@ const { sanitize } = Util
 // eslint-disable-next-line import/namespace
 export class ServerTransport implements Types.Transport {
   send(options: Types.TransportOptions, payload?: Types.NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }> {
-    const { protocol } = new URL(options.endpoint)
+    const { protocol, hostname, pathname } = new URL(options.endpoint)
     const transport = (protocol === 'http:' ? http : https)
 
     return new Promise((resolve, reject) => {
@@ -25,9 +25,15 @@ export class ServerTransport implements Types.Transport {
       }
 
       promise.then(() => {
+        //
+        // We use a httpOptions object to limit issues with libraries that may patch Node.js
+        // See https://github.com/honeybadger-io/honeybadger-js/issues/825#issuecomment-1193113433
         const httpOptions = {
           method: options.method,
           headers: options.headers,
+          path: pathname,
+          protocol,
+          hostname,
         }
 
         let data: Buffer | undefined = undefined
@@ -36,7 +42,7 @@ export class ServerTransport implements Types.Transport {
           httpOptions.headers['Content-Length'] = data.length
         }
 
-        const req = transport.request(options.endpoint, httpOptions, (res) => {
+        const req = transport.request(httpOptions, (res) => {
           options.logger.debug(`statusCode: ${res.statusCode}`)
 
           let body = ''
