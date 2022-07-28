@@ -930,9 +930,14 @@ describe('client', function () {
     const payload = client.getPayload(outerError)
     expect(payload.error.class).toEqual(outerError.name)
     expect(payload.error.message).toEqual(outerError.message)
-    expect(payload.error.causes).toHaveLength(1)
-    expect(payload.error.causes[0].class).toEqual(innerError.name)
-    expect(payload.error.causes[0].message).toEqual(innerError.message)
-    expect(payload.error.causes[0].backtrace).toBeTruthy()
+
+    if (outerError.cause) { // `.cause` in constructor is only supported on certain platforms/Node versions
+      expect(payload.error.causes).toHaveLength(1)
+      expect(payload.error.causes[0].class).toEqual(innerError.name)
+      expect(payload.error.causes[0].message).toEqual(innerError.message)
+      expect(payload.error.causes[0].backtrace).toBeTruthy()
+    } else {
+      expect(payload.error.causes).toHaveLength(0)
+    }
   })
 })
