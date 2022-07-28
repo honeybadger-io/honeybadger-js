@@ -1,6 +1,6 @@
 {
   "name": "@hb-test/js",
-  "version": "4.0.3",
+  "version": "4.0.5",
   "license": "MIT",
   "homepage": "https://github.com/honeybadger-io/honeybadger-js",
   "author": {
@@ -50,7 +50,7 @@
     "postpublish-enable-when-ready": "./scripts/release-cdn.sh"
   },
   "dependencies": {
-    "@hb-test/core": "4.0.3"
+    "@hb-test/core": "4.0.5"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
