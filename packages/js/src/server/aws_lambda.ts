@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Client as Honeybadger, Types } from '@honeybadger-io/core'
+import { Client as Honeybadger, Types } from '@hb-test/core'
 import type { Handler, Callback, Context } from 'aws-lambda'
 import { AsyncStore } from './async_store';
 

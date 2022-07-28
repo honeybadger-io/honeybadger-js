@@ -1,6 +1,6 @@
 import os from 'os'
 import fs from 'fs'
-import { Types } from '@honeybadger-io/core'
+import { Types } from '@hb-test/core'
 import { promisify } from 'util'
 
 const readFile = promisify(fs.readFile)

@@ -1,4 +1,4 @@
-import { Types, Util } from '@honeybadger-io/core'
+import { Types, Util } from '@hb-test/core'
 import { URL } from 'url';
 import http from 'http';
 import https from 'https';

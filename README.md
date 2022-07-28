@@ -17,7 +17,7 @@
 - [x] js - package.json
 - [x] replace shipjs with lerna version
 - [x] create draft PR
-- [ ] js - integration tests
+- [x] js - integration tests
 - [x] js - npm run build - remove warnings
 - [ ] README - core
 - [ ] README - js

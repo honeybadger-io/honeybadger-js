@@ -2,7 +2,7 @@ import Singleton from '../../../src/server'
 import { nullLogger } from '../helpers'
 import nock from 'nock'
 import { spy } from 'sinon'
-import { Types } from '@honeybadger-io/core'
+import { Types } from '@hb-test/core'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 import { AsyncHandler, SyncHandler } from '../../../src/server/aws_lambda'
 

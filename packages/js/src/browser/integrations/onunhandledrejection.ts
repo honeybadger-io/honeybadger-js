@@ -1,5 +1,5 @@
 /* eslint-disable prefer-rest-params */
-import { Types, Util } from '@honeybadger-io/core'
+import { Types, Util } from '@hb-test/core'
 import Client from '../../browser'
 
 const { instrument } = Util
