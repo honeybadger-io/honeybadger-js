@@ -855,7 +855,6 @@ describe('client', function () {
     expect(payload.request.url).toEqual('https://www.example.com/?secret=[FILTERED]&foo=bar')
   })
 
-
   it('normalizes comma separated tags', function () {
     client.configure({
       apiKey: 'testing'
@@ -923,5 +922,17 @@ describe('client', function () {
 
     const payload = client.getPayload('testing', { tags: ['tag1'] })
     expect(payload.error.tags).toEqual(['tag1'])
+  })
+
+  it('supports nested errors', function () {
+    const innerError = new Error('Inner')
+    const outerError = new Error('Outer', { cause: innerError })
+    const payload = client.getPayload(outerError)
+    expect(payload.error.class).toEqual(outerError.name)
+    expect(payload.error.message).toEqual(outerError.message)
+    expect(payload.error.causes).toHaveLength(1)
+    expect(payload.error.causes[0].class).toEqual(innerError.name)
+    expect(payload.error.causes[0].message).toEqual(innerError.message)
+    expect(payload.error.causes[0].backtrace).toBeTruthy()
   })
 })

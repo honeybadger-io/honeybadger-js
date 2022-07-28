@@ -59,6 +59,21 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
   }
 }
 
+export function getCauses(notice: Partial<Notice>) {
+  if (notice.cause) {
+    const cause = notice.cause as Error
+    return [
+      {
+        class: cause.name,
+        message: cause.message,
+        backtrace: typeof cause.stack == 'string' ? makeBacktrace(cause.stack) : null
+      }
+    ]
+  }
+
+  return []
+}
+
 export async function getSourceForBacktrace(backtrace: BacktraceFrame[],
   getSourceFileHandler: (path: string) => Promise<string>): Promise<Record<string, string>[]> {
 
@@ -233,9 +248,9 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
 
   if (!thing) {
     notice = {}
-  } else if (thing instanceof Error || Object.prototype.toString.call(thing) === '[object Error]') {
+  } else if (isErrorObject(thing)) {
     const e = thing as Error
-    notice = merge(thing as Record<string, unknown>, { name: e.name, message: e.message, stack: e.stack })
+    notice = merge(thing as Record<string, unknown>, { name: e.name, message: e.message, stack: e.stack, cause: e.cause })
   } else if (typeof thing === 'object') {
     notice = shallowClone(thing)
   } else {
@@ -244,6 +259,11 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
   }
 
   return notice
+}
+
+export function isErrorObject(thing: unknown) {
+  return thing instanceof Error
+      || Object.prototype.toString.call(thing) === '[object Error]' // Important for cross-realm objects
 }
 
 /**
