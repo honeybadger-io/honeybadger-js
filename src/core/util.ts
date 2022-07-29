@@ -61,14 +61,16 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
 
 export function getCauses(notice: Partial<Notice>) {
   if (notice.cause) {
-    const cause = notice.cause as Error
-    return [
-      {
+    const causes =[]
+    let cause = notice as Error
+    while (causes.length < 3 && (cause = cause.cause) as Error) {
+      causes.push({
         class: cause.name,
         message: cause.message,
         backtrace: typeof cause.stack == 'string' ? makeBacktrace(cause.stack) : null
-      }
-    ]
+      })
+    }
+    return causes
   }
 
   return []
