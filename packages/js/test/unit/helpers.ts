@@ -1,4 +1,4 @@
-import { Client as BaseClient, Types, Util } from '@hb-test/core'
+import { Client as BaseClient, Types, Util } from '@honeybadger-io/core'
 
 const { runAfterNotifyHandlers } = Util
 

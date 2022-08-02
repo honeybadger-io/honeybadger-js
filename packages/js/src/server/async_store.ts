@@ -1,4 +1,4 @@
-import { Types, Store as StoreModule } from '@hb-test/core'
+import { Types, Store as StoreModule } from '@honeybadger-io/core'
 
 let Store: Types.HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: Types.BreadcrumbRecord[]; }>
 try {

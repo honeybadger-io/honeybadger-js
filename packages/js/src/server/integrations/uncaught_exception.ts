@@ -1,4 +1,4 @@
-import { Types } from '@hb-test/core'
+import { Types } from '@honeybadger-io/core'
 import { fatallyLogAndExit } from '../util'
 import Client from '../../server'
 import { removeAwsDefaultUncaughtExceptionListener } from '../aws_lambda'

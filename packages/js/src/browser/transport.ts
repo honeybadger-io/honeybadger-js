@@ -1,4 +1,4 @@
-import { Types, Util } from '@hb-test/core'
+import { Types, Util } from '@honeybadger-io/core'
 
 const { sanitize } = Util
 

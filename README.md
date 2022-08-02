@@ -21,16 +21,29 @@
 - [x] js - npm run build - remove warnings
 - [x] ci - tests
 - [x] ci - release new version
+- [x] test lerna publish with test org
 - [ ] README - core
 - [ ] README - js
 - [ ] README - monorepo
 - [ ] ci - scheduled deployment
-- [ ] test lerna publish with test org
 - [ ] example projects
-- [ ] when monorepo is ready: 
-  - [ ] enable post-publish script in js package,
-  - [ ] modify lerna publish workflow to checkout from master and set correct NPM_AUTH_TOKEN
-  - [ ] remove --no-git-tag-version from lerna publish
+  - [x] express
+  - [x] almond - (uglify did not work because of es6)
+  - [x] aws-lambda
+  - [x] aws-lambda-typescript (ts source not found - to check with old version)
+  - [x] browserify
+  - [ ] chrome-extension
+  - [ ] fastify
+  - [ ] global
+  - [ ] hapi
+  - [ ] requirejs
+  - [ ] restify
+  - [ ] sails
+  - [x] webpack
+- [x] when monorepo is ready: 
+  - [x] enable post-publish script in js package,
+  - [x] modify lerna publish workflow to checkout from master and set correct NPM_AUTH_TOKEN
+  - [x] remove --no-git-tag-version from lerna publish
 
 # notes
 

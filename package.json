@@ -18,6 +18,6 @@
     "test": "lerna run test --stream",
     "install": "lerna bootstrap",
     "lint": "npx eslint .",
-    "release": "lerna publish --conventional-commits --no-git-tag-version --yes"
+    "release": "lerna publish --conventional-commits --yes"
   }
 }

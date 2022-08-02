@@ -1,6 +1,6 @@
 import os from 'os'
 import domain from 'domain'
-import { Client, Util, Types } from '@hb-test/core'
+import { Client, Util, Types } from '@honeybadger-io/core'
 import {
   fatallyLogAndExit,
   getSourceFile

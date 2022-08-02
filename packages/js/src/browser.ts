@@ -1,4 +1,4 @@
-import { Types, Util, Client } from '@hb-test/core'
+import { Types, Util, Client } from '@honeybadger-io/core'
 import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandledRejection from './browser/integrations/onunhandledrejection'

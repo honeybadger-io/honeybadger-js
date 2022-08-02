@@ -1,4 +1,4 @@
-import { Util } from '@hb-test/core'
+import { Util } from '@honeybadger-io/core'
 import { getSourceFile } from '../../../src/server/util'
 
 const { getSourceForBacktrace, makeBacktrace, makeNotice } = Util

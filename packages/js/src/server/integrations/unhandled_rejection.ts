@@ -1,4 +1,4 @@
-import { Types } from '@hb-test/core'
+import { Types } from '@honeybadger-io/core'
 import Client from '../../server'
 
 export default function (): Types.Plugin {

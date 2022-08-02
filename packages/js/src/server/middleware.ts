@@ -1,6 +1,6 @@
 import url from 'url'
 import { NextFunction, Request, Response } from 'express'
-import { Types } from '@hb-test/core'
+import { Types } from '@honeybadger-io/core'
 
 function fullUrl(req: Request): string {
   const connection = req.connection

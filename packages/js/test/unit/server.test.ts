@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { Client as BaseClient } from '@hb-test/core'
+import { Client as BaseClient } from '@honeybadger-io/core'
 import nock from 'nock'
 import Singleton from '../../src/server'
 import { nullLogger } from './helpers'
