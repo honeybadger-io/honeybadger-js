@@ -1,4 +1,4 @@
-name: Bump Version and Publish
+name: Publish New Release
 on:
   workflow_dispatch:
   # uncomment to enable scheduled releases

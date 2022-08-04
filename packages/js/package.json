@@ -47,7 +47,7 @@
     "test:integration:browserstack": "npm run test:integration",
     "test:integration:headless": "HEADLESS=1 npm run test:integration",
     "tsd": "tsd",
-    "enable-when-ready-postpublish": "./scripts/release-cdn.sh"
+    "postpublish": "./scripts/release-cdn.sh"
   },
   "dependencies": {
     "@honeybadger-io/core": "4.0.5"
