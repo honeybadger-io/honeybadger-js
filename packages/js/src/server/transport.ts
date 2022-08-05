@@ -6,7 +6,6 @@ import { getStats } from './util';
 
 const { sanitize } = Util
 
-// eslint-disable-next-line import/namespace
 export class ServerTransport implements Types.Transport {
   send(options: Types.TransportOptions, payload?: Types.NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }> {
     const { protocol, hostname, pathname } = new URL(options.endpoint)

@@ -43,16 +43,16 @@ function copyFolderRecursiveSync( source, target ) {
   }
 }
 
-copyFolderRecursiveSync('build/browser', 'dist/browser');
+copyFolderRecursiveSync('build/src/browser', 'dist/browser');
 fs.writeFileSync(
   'dist/browser/honeybadger.d.ts',
-  (fs.readFileSync('build/browser.d.ts', 'utf8')).replace(/'\.\/browser\//g, '\'./')
+  (fs.readFileSync('build/src/browser.d.ts', 'utf8')).replace(/'\.\/browser\//g, '\'./')
 );
 
-copyFolderRecursiveSync('build/server', 'dist/server');
+copyFolderRecursiveSync('build/src/server', 'dist/server');
 fs.writeFileSync(
   'dist/server/honeybadger.d.ts',
-  (fs.readFileSync('build/server.d.ts', 'utf8')).replace(/'\.\/server\//g, '\'./')
+  (fs.readFileSync('build/src/server.d.ts', 'utf8')).replace(/'\.\/server\//g, '\'./')
 );
 
 console.info('Copied declaration files');

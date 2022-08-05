@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import Honeybadger from '../dist/browser/honeybadger'
+import Honeybadger from '../src/browser'
 
 Honeybadger.configure({
   debug: false,
@@ -42,11 +41,11 @@ Honeybadger.resetContext({
   user_id: 123
 })
 
-Honeybadger.beforeNotify((notice: any) => {
+Honeybadger.beforeNotify((notice) => {
   if (/third-party-domain/.test(notice.stack)) { return false }
 })
 
-Honeybadger.afterNotify((err: any, notice: { id: any }) => {
+Honeybadger.afterNotify((err, notice: { id }) => {
   if (err) { return console.log(`Honeybadger notification failed: ${err}`) }
   console.log(`Honeybadger notice: https://app.honeybadger.io/notice/${notice.id}`)
 })

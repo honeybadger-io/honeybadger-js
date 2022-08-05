@@ -19,7 +19,7 @@ For comprehensive documentation and support, [check out our documentation site](
 - [Conventional Commits](https://www.conventionalcommits.org/) are enforced with a git hook ([husky](https://typicode.github.io/husky) + [commitlint](https://commitlint.js.org/)) in order to automate changelog generation.
 
 - [CHANGELOG.md](CHANGELOG.md) is updated when a new version is released (`npm run release`).
-The root `CHANGELOG.md` has a collective changelog from changes in all the packages of the monorepo. Each package also has it's own `CHANGELOG.md` with changes related only to itself.
+  The root `CHANGELOG.md` has a collective changelog from changes in all the packages of the monorepo. Each package also has it's own `CHANGELOG.md` with changes related only to itself.
 
 ## Contributing
 
@@ -34,6 +34,12 @@ The root `CHANGELOG.md` has a collective changelog from changes in all the packa
 1. Run `npm install` from the monorepo root.
 2. Run `npm test` from the monorepo root to run unit tests for all packages.
 
+### Troubleshooting Typescript
+
+- Not seeing changes when working in `.ts` files? Make sure that you rebuild every time you make a change. Or enable "compile on save" with your IDE - [WebStorm(Jetbrains)](https://www.jetbrains.com/help/webstorm/compiling-typescript-to-javascript.html#ts_compiler_compile_code_automatically) / [VS Code](https://code.visualstudio.com/docs/typescript/typescript-compiling#_step-2-run-the-typescript-build).
+- If you are getting errors with Typescript, make sure that you do `npm run build`.
+  It's a prerequisite for [Typescript Project References](https://www.typescriptlang.org/docs/handbook/project-references.html#caveats-for-project-references).
+
 ### Lerna Tips
 
 - Always install from the root, i.e. `npm install` only from the root folder, otherwise you may get unexpected issues with the linked packages.
@@ -47,8 +53,8 @@ For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
 All packages in the monorepo are released in [fixed mode](https://lerna.js.org/docs/features/version-and-publish#fixedlocked-mode-default), meaning they are released under the same version.  
 Releasing is done using `npm run release`. This command calls `lerna publish`, which does the following:
 - generates changelog based on the commit messages (see [Changelog](#changelog) above)
-- npm version
-- npm publish
+- `npm version`
+- `npm publish`
 
 *Note*: some packages may have a `postpublish` script, for example `@honeybadger-io/js` (found in `packages/js`) has a script to also publish to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront). 
 

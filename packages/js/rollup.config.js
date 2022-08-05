@@ -17,7 +17,7 @@ const sharedPlugins = [
 export default [
   // Browser build
   {
-    input: 'build/browser.js',
+    input: 'build/src/browser.js',
     output: {
       name: 'Honeybadger',
       file: pkg.browser,
@@ -29,7 +29,7 @@ export default [
 
   // Browser build (minified)
   {
-    input: 'build/browser.js',
+    input: 'build/src/browser.js',
     output: {
       name: 'Honeybadger',
       file: 'dist/browser/honeybadger.min.js',
@@ -41,7 +41,7 @@ export default [
 
   // Server build
   {
-    input: 'build/server.js',
+    input: 'build/src/server.js',
     external: ['http', 'https', 'url', 'os', 'fs', 'util', 'domain', 'async_hooks'],
     output: {
       file: pkg.main,

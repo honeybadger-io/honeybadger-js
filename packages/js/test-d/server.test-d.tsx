@@ -1,4 +1,4 @@
-import Honeybadger from '../dist/server/honeybadger'
+import Honeybadger from '../src/server'
 
 Honeybadger.configure({
   debug: false,

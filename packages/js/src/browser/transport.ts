@@ -2,7 +2,6 @@ import { Types, Util } from '@honeybadger-io/core'
 
 const { sanitize } = Util
 
-// eslint-disable-next-line import/namespace
 export class BrowserTransport implements Types.Transport {
   send(options: Types.TransportOptions, payload?: Types.NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }> {
     return new Promise((resolve, reject) => {

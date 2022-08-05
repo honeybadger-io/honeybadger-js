@@ -12,7 +12,6 @@ export function nullLogger(): Types.Logger {
   }
 }
 
-// eslint-disable-next-line import/namespace
 export class TestTransport implements Types.Transport {
   send(_options: Types.TransportOptions, _payload: Types.NoticeTransportPayload): Promise<{ statusCode: number; body: string }> {
     return Promise.resolve({ body: JSON.stringify({ id: 'uuid' }), statusCode: 201 });
