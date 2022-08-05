@@ -1,4 +1,4 @@
-import Honeybadger from '../src/browser'
+import Honeybadger from '../dist/browser/honeybadger'
 
 Honeybadger.configure({
   debug: false,
