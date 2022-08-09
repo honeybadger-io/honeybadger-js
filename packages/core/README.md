@@ -10,7 +10,7 @@ Universal JavaScript library for integrating apps with the :zap: [Honeybadger Er
 ## Usage
 
 You shouldn't need to use this package directly. This package serves as the core implementation of a Honeybadger client
-for our packages written in Javascript.
+for our packages written in JavaScript.
 
 ## Development
 
