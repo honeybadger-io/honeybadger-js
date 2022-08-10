@@ -854,7 +854,6 @@ describe('client', function () {
     expect(payload.request.url).toEqual('https://www.example.com/?secret=[FILTERED]&foo=bar')
   })
 
-
   it('normalizes comma separated tags', function () {
     client.configure({
       apiKey: 'testing'
@@ -922,5 +921,50 @@ describe('client', function () {
 
     const payload = client.getPayload('testing', { tags: ['tag1'] })
     expect(payload.error.tags).toEqual(['tag1'])
+  })
+
+  it('supports nested errors', function () {
+    const level1Error = new Error('Level 1')
+    const level2Error = new Error('Level 2', { cause: level1Error })
+    const level3Error = new Error('Level 3', { cause: level2Error })
+    const payload = client.getPayload(level3Error)
+    expect(payload.error.class).toEqual(level3Error.name)
+    expect(payload.error.message).toEqual(level3Error.message)
+
+    /* eslint-disable jest/no-conditional-expect */
+    if (level3Error.cause) { // `.cause` in constructor is only supported on certain platforms/Node versions
+      expect(payload.error.causes).toHaveLength(2)
+      expect(payload.error.causes[0].class).toEqual(level2Error.name)
+      expect(payload.error.causes[0].message).toEqual(level2Error.message)
+      expect(payload.error.causes[0].backtrace).toBeTruthy()
+      expect(payload.error.causes[1].class).toEqual(level1Error.name)
+      expect(payload.error.causes[1].message).toEqual(level1Error.message)
+      expect(payload.error.causes[1].backtrace).toBeTruthy()
+    } else {
+      expect(payload.error.causes).toHaveLength(0)
+    }
+    /* eslint-enable jest/no-conditional-expect */
+  })
+
+  it('keeps a maximum of 3 nested errors', function () {
+    const level1Error = new Error('Level 1')
+    const level2Error = new Error('Level 2', { cause: level1Error })
+    const level3Error = new Error('Level 3', { cause: level2Error })
+    const level4Error = new Error('Level 4', { cause: level3Error })
+    const level5Error = new Error('Level 5', { cause: level4Error })
+    const payload = client.getPayload(level5Error)
+    expect(payload.error.class).toEqual(level5Error.name)
+    expect(payload.error.message).toEqual(level5Error.message)
+
+    /* eslint-disable jest/no-conditional-expect */
+    if (level5Error.cause) { // `.cause` in constructor is only supported on certain platforms/Node versions
+      expect(payload.error.causes).toHaveLength(3)
+      expect(payload.error.causes[0].class).toEqual(level3Error.name)
+      expect(payload.error.causes[1].class).toEqual(level2Error.name)
+      expect(payload.error.causes[2].class).toEqual(level1Error.name)
+    } else {
+      expect(payload.error.causes).toHaveLength(0)
+    }
+    /* eslint-enable jest/no-conditional-expect */
   })
 })

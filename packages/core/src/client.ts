@@ -12,7 +12,7 @@ import {
   filterUrl,
   formatCGIData,
   getSourceForBacktrace,
-  runAfterNotifyHandlers, endpoint, isBrowserConfig
+  runAfterNotifyHandlers, endpoint, isBrowserConfig, getCauses
 } from './util'
 import {
   Config,
@@ -321,7 +321,8 @@ export abstract class Client {
       component: notice.component || this.config.component,
       action: notice.action || this.config.action,
       revision: notice.revision || this.config.revision,
-      tags: uniqueTags
+      tags: uniqueTags,
+      causes: getCauses(notice),
     })
 
     let backtraceShift = 0
@@ -387,7 +388,8 @@ export abstract class Client {
         message: notice.message,
         backtrace: notice.backtrace,
         fingerprint: notice.fingerprint,
-        tags: notice.tags
+        tags: notice.tags,
+        causes: notice.causes,
       },
       request: {
         url: filterUrl(notice.url, this.config.filters),
