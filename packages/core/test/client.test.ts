@@ -931,7 +931,6 @@ describe('client', function () {
     expect(payload.error.class).toEqual(level3Error.name)
     expect(payload.error.message).toEqual(level3Error.message)
 
-    /* eslint-disable jest/no-conditional-expect */
     if (level3Error.cause) { // `.cause` in constructor is only supported on certain platforms/Node versions
       expect(payload.error.causes).toHaveLength(2)
       expect(payload.error.causes[0].class).toEqual(level2Error.name)
@@ -943,7 +942,6 @@ describe('client', function () {
     } else {
       expect(payload.error.causes).toHaveLength(0)
     }
-    /* eslint-enable jest/no-conditional-expect */
   })
 
   it('keeps a maximum of 3 nested errors', function () {
@@ -956,7 +954,6 @@ describe('client', function () {
     expect(payload.error.class).toEqual(level5Error.name)
     expect(payload.error.message).toEqual(level5Error.message)
 
-    /* eslint-disable jest/no-conditional-expect */
     if (level5Error.cause) { // `.cause` in constructor is only supported on certain platforms/Node versions
       expect(payload.error.causes).toHaveLength(3)
       expect(payload.error.causes[0].class).toEqual(level3Error.name)
@@ -965,6 +962,5 @@ describe('client', function () {
     } else {
       expect(payload.error.causes).toHaveLength(0)
     }
-    /* eslint-enable jest/no-conditional-expect */
   })
 })
