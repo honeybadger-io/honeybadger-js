@@ -322,7 +322,6 @@ export abstract class Client {
       action: notice.action || this.config.action,
       revision: notice.revision || this.config.revision,
       tags: uniqueTags,
-      causes: getCauses(notice),
     })
 
     let backtraceShift = 0
@@ -389,7 +388,7 @@ export abstract class Client {
         backtrace: notice.backtrace,
         fingerprint: notice.fingerprint,
         tags: notice.tags,
-        causes: notice.causes,
+        causes: getCauses(notice),
       },
       request: {
         url: filterUrl(notice.url, this.config.filters),

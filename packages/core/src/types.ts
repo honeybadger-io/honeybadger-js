@@ -75,7 +75,6 @@ export interface Notice {
   __breadcrumbs: BreadcrumbRecord[],
   afterNotify?: AfterNotifyHandler,
   cause?: Error|Record<string, unknown>,
-  causes: Array<{class: string, message: string, backtrace: BacktraceFrame[]}>,
   [key: string]: unknown
 }
 
@@ -142,7 +141,8 @@ export type NoticeTransportPayload = {
     enabled: boolean,
     trail: BreadcrumbRecord[]
   },
-  error: Pick<Notice, 'message' | 'backtrace' | 'fingerprint' | 'tags' | 'causes'> & {
+  error: Pick<Notice, 'message' | 'backtrace' | 'fingerprint' | 'tags'> & {
+    causes: Array<{class: string, message: string, backtrace: BacktraceFrame[]}>,
     class: string,
   },
   request: Pick<Notice, 'url' | 'component' | 'action' | 'context' | 'params' | 'session'> & {
