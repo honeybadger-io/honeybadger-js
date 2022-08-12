@@ -1,3 +1,27 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [4.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.5...v4.1.0) (2022-08-12)
+
+
+### Bug Fixes
+
+* lint nags ([1d92728](https://github.com/honeybadger-io/honeybadger-js/commit/1d927285c005b5f6cf0f6b50b553dee2133bd101))
+* support older Node.js versions ([7ea04a5](https://github.com/honeybadger-io/honeybadger-js/commit/7ea04a5161462605e30f416462d6d841d63d1696))
+
+
+### Features
+
+* **monorepo:** setup monorepo skeleton and break js to 2 packages ([#844](https://github.com/honeybadger-io/honeybadger-js/issues/844)) ([2fbdc56](https://github.com/honeybadger-io/honeybadger-js/commit/2fbdc56678da3ccebca3dbb99795e803888540fd)), closes [#854](https://github.com/honeybadger-io/honeybadger-js/issues/854)
+* support nested exceptions (Error.prototype.cause) ([ac958ee](https://github.com/honeybadger-io/honeybadger-js/commit/ac958ee4fe8dd479fa9a9412c9c3a98823555fc3))
+* unwind nested error causes ([551fcee](https://github.com/honeybadger-io/honeybadger-js/commit/551fcee52ff00b50fed6df964a883aeb915490d8))
+
+
+
+
+
 ## [4.0.5](https://github.com/honeybadger-io/honeybadger-js/compare/v4.0.4...v4.0.5) (2022-07-26)
 
 
