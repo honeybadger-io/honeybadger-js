@@ -3,7 +3,6 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:jest/recommended",
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript"
@@ -34,11 +33,11 @@
   },
   "ignorePatterns": [
     "test/integration/",
-    "dist"
+    "dist",
+    "build"
   ],
   "plugins": [
-    "@typescript-eslint",
-    "jest"
+    "@typescript-eslint"
   ],
   "env":
   {
