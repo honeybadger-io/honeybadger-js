@@ -21,7 +21,11 @@ jobs:
       - name: Install Deps
         run: npm ci
 
-      - name: Publish to NPM
-        run: lerna publish from-package --yes --loglevel silly
+      - name: NPM Login
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        run: npm config set "//registry.npmjs.org/:_authToken" "\\\${NPM_AUTH_TOKEN}"
+
+      - name: Publish to NPM
+        # run: lerna publish from-package --yes --loglevel silly
+        run: cat ~/.npmrc

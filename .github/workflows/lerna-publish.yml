@@ -30,12 +30,19 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - run: npm run release
+      - name: NPM Login
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        run: npm config set "//registry.npmjs.org/:_authToken" "\\\${NPM_AUTH_TOKEN}"
+
+
+
+      - name: Publish Release
+        run: npm run release
         env:
           # for lerna
           GH_TOKEN: ${{ secrets.LERNA_PUBLISH_PAT }}
           GITHUB_TOKEN: ${{ secrets.LERNA_PUBLISH_PAT }}
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: "us-east-1"
