@@ -12,6 +12,7 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v3
         with:
+          token: ${{ secrets.PAT_GITHUB }}
           fetch-depth: 0
           ref: master
 
