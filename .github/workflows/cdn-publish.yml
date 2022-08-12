@@ -21,7 +21,8 @@ jobs:
       - name: Install Deps
         run: npm ci
 
-      - run: |
+      - name: Publish to CDN
+        run: |
           cd packages/js
           npm run postpublish
         env:
