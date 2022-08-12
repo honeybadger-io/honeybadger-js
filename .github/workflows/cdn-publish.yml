@@ -1,0 +1,29 @@
+# Run this workflow if the release to CDN failed with "Publish New Release"
+name: Publish Latest Release to Honeybadger's CDN
+on:
+  workflow_dispatch:
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+
+      - run: |
+          cd packages/js
+          npm run postpublish
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-east-1"
+          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
+          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
