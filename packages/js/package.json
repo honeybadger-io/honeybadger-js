@@ -59,7 +59,7 @@
     "@types/aws-lambda": "^8.10.89",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.0.3",
-    "@types/node": "^12.20.46",
+    "@types/node": "^17.0.45",
     "express": "^4.17.1",
     "jest": "^27.4.4",
     "nock": "^13.2.1",
