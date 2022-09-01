@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.1.1...v4.1.2) (2022-09-01)
+
+
+### Bug Fixes
+
+* add @types/aws-lambda as a dependency ([#865](https://github.com/honeybadger-io/honeybadger-js/issues/865)) ([56a7dc3](https://github.com/honeybadger-io/honeybadger-js/commit/56a7dc353b8cf61ef9f34403de3a921c42a0b01d)), closes [#863](https://github.com/honeybadger-io/honeybadger-js/issues/863)
+
+
+
+
+
 ## [4.1.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.1.0...v4.1.1) (2022-08-20)
 
 
