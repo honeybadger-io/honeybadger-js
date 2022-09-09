@@ -82,4 +82,4 @@ You can manually trigger a new release using the `Publish New Release` (`lerna-p
 
 ## License
 
-The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
+This Honeybadger repository and published packages are MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.

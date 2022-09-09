@@ -80,34 +80,8 @@ environment.plugins.append(
 module.exports = environment
 ```
 
-## Changelog
-
-See https://github.com/honeybadger-io/honeybadger-webpack/blob/master/CHANGELOG.md
-
-## Contributing
-
-1. Fork it.
-2. Create a topic branch `git checkout -b my_branch`
-3. Commit your changes `git commit -am "Boom"`
-3. Push to your branch `git push origin my_branch`
-4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-webpack/pulls)
-
 ## Development
 
 1. Run `npm install`
 2. Run the tests with `npm test`
-3. Build/test on save with `npm run build:watch` and `npm run test:watch`
-
-## Releasing
-
-1. With a clean working tree, use `npm version [new version]` to bump the version,
-   commit the changes, tag the release, and push to GitHub. See `npm help version`
-   for documentation.
-2. To publish the release, use `npm publish`. See `npm help publish` for
-   documentation.
-
-## License
-
-The Honeybadger's Webpack Source Map Plugin is MIT licensed. See the
-[MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-webpack/master/MIT-LICENSE)
-file in this repository for details.
+3. Build/test on save with `npm run build:watch` and `npm run test:watch`.
