@@ -84,6 +84,9 @@ jobs:
       - name: Build
         run: |
           npm ci
+
+      - name: Build TS
+        run: |
           cd packages/js/examples/aws-lambda-typescript
           npm ci
 
