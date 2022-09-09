@@ -13,6 +13,9 @@ You can refer to the README of each package for more information and instruction
 - [@honeybadger-io/webpack](./packages/webpack)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)  
   Webpack plugin to upload source maps to Honeybadger
+- [@honeybadger-io/vue](./packages/vue)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fvue.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fvue)  
+  SDK for vue.js integration
 
 ## Documentation and Support
 
