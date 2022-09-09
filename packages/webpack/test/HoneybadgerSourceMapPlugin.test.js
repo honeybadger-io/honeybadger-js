@@ -28,7 +28,7 @@ describe('HoneybadgerSourceMapPlugin', function() {
 
     it('should set options', function() {
       const options = Object.assign({}, this.options, {
-        apiKey: "other-api-key",
+        apiKey: 'other-api-key',
         assetsUrl: 'https://cdn.example.com/assets'
       });
       const plugin = new HoneybadgerSourceMapPlugin(options);
@@ -40,7 +40,7 @@ describe('HoneybadgerSourceMapPlugin', function() {
     });
 
     it('should default revision to "master"', function() {
-      expect(this.plugin).toInclude({ revision: "master" });
+      expect(this.plugin).toInclude({ revision: 'master' });
     });
   });
 
@@ -284,8 +284,8 @@ describe('HoneybadgerSourceMapPlugin', function() {
 
     it('should callback without err param if upload is success', function(done) {
       // FIXME/TODO test multipart form body ... it isn't really supported easily by nock
-      const scope = nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
-        .filteringRequestBody(function(body) { return '*'; })
+      nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
+        .filteringRequestBody(function(_body) { return '*'; })
         .post('/v1/source_maps', '*')
         .reply(201, JSON.stringify({ status: 'OK' }));
 
@@ -300,8 +300,8 @@ describe('HoneybadgerSourceMapPlugin', function() {
     });
 
     it('should not log upload to console if silent option is true', function(done) {
-      const scope = nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
-        .filteringRequestBody(function(body) { return '*'; })
+      nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
+        .filteringRequestBody(function(_body) { return '*'; })
         .post('/v1/source_maps', '*')
         .reply(201, JSON.stringify({ status: 'OK' }));
 
@@ -317,8 +317,8 @@ describe('HoneybadgerSourceMapPlugin', function() {
     });
 
     it('should log upload to console if silent option is false', function(done) {
-      const scope = nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
-        .filteringRequestBody(function(body) { return '*'; })
+      nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
+        .filteringRequestBody(function(_body) { return '*'; })
         .post('/v1/source_maps', '*')
         .reply(201, JSON.stringify({ status: 'OK' }));
 
@@ -334,8 +334,8 @@ describe('HoneybadgerSourceMapPlugin', function() {
     });
 
     it('should return error message if failure response includes message', function(done) {
-      const scope = nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
-        .filteringRequestBody(function(body) { return '*'; })
+      nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
+        .filteringRequestBody(function(_body) { return '*'; })
         .post('/v1/source_maps', '*')
         .reply(422, JSON.stringify({ error: 'The "source_map" parameter is required' }));
 
@@ -350,8 +350,8 @@ describe('HoneybadgerSourceMapPlugin', function() {
     });
 
     it('should handle error response with empty body', function(done) {
-      const scope = nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
-        .filteringRequestBody(function(body) { return '*'; })
+      nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
+        .filteringRequestBody(function(_body) { return '*'; })
         .post('/v1/source_maps', '*')
         .reply(422, null);
 
@@ -364,8 +364,8 @@ describe('HoneybadgerSourceMapPlugin', function() {
     });
 
     it('should handle HTTP request error', function(done) {
-      const scope = nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
-        .filteringRequestBody(function(body) { return '*'; })
+      nock('https://api.honeybadger.io') // eslint-disable-line no-unused-vars
+        .filteringRequestBody(function(_body) { return '*'; })
         .post('/v1/source_maps', '*')
         .replyWithError('something awful happened');
 

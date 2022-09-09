@@ -6,11 +6,11 @@ import reduce from 'lodash.reduce';
 import { handleError, validateOptions } from './helpers';
 import { ENDPOINT, PLUGIN_NAME } from './constants';
 
-class HoneybadgerSourceMapPlugin {
+export default class HoneybadgerSourceMapPlugin {
   constructor({
     apiKey,
     assetsUrl,
-    revision = "master",
+    revision = 'master',
     silent = false,
     ignoreErrors = false
   }) {
@@ -63,8 +63,6 @@ class HoneybadgerSourceMapPlugin {
     const { chunks } = compilation.getStats().toJson();
 
     return reduce(chunks, (result, chunk) => {
-      const chunkName = chunk.names[0];
-
       const sourceFile = find(chunk.files, file => /\.js$/.test(file));
       const sourceMap = find(chunk.files, file => /\.js\.map$/.test(file));
 
