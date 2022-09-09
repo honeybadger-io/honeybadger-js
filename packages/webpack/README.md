@@ -1,7 +1,9 @@
 # Honeybadger's Webpack Source Map Plugin
 
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fhoneybadger-io%2Fhoneybadger-webpack%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/honeybadger-io/honeybadger-webpack/goto?ref=master)
+![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
 [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)
+[![npm dm](https://img.shields.io/npm/dm/@honeybadger-io/webpack)](https://www.npmjs.com/package/@honeybadger-io/webpack)
+[![npm dt](https://img.shields.io/npm/dt/@honeybadger-io/webpack)](https://www.npmjs.com/package/@honeybadger-io/webpack)
 
 This is a [webpack](https://webpack.js.org/) plugin to upload javascript
 sourcemaps to [Honeybadger's](https://honeybadger.io/)
