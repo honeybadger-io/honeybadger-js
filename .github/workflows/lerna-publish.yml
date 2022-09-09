@@ -1,10 +1,21 @@
 name: Publish New Release
 on:
   workflow_dispatch:
-  # uncomment to enable scheduled releases
-  # schedule:
-    # * is a special character in YAML so you have to quote this string
-    # - cron: "0 19 * * 2"
+  workflow_call:
+    secrets:
+      NPM_AUTH_TOKEN:
+        required: true
+      HONEYBADGER_DISTRIBUTION_ID:
+        required: true
+      HONEYBADGER_JS_S3_BUCKET:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+      LERNA_PUBLISH_PAT:
+        required: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest

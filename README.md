@@ -62,7 +62,8 @@ Releasing is done using `npm run release`. This command calls `lerna publish`, w
 
 ### Release Automation
 
-For the moment, there are no automated releases. You can manually trigger a new release using the `Publish New Release` (`lerna-publish.yml`) workflow.
+The repository automatically releases new packages every week (see `lerna-scheduled-publish.yml`).
+You can manually trigger a new release using the `Publish New Release` (`lerna-publish.yml`) workflow.
 
 *Note*: only users with _write_ permissions can trigger this workflow (i.e. Collaborators).
 
