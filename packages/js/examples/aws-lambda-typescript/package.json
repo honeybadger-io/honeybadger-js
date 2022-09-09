@@ -14,7 +14,7 @@
     "lint"
   ],
   "dependencies": {
-    "@honeybadger-io/js": "honeybadger-io/honeybadger-js#server_vs_browser_typings",
+    "@honeybadger-io/js": "^4.1.3",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
