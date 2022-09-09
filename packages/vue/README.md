@@ -1,9 +1,12 @@
 # Honeybadger Vue.js Integration
-[![Build Status](https://github.com/honeybadger-io/honeybadger-vue/actions/workflows/nodejs.yml/badge.svg)](https://github.com/honeybadger-io/honeybadger-vue/actions/workflows/nodejs.yml)
+![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
 [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fvue.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fvue)
-> [Vue.js integration for Honeybadger.io](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=vue&utm_content=Vue.js+integration+for+Honeybadger.io)
+[![npm dm](https://img.shields.io/npm/dm/@honeybadger-io/vue)](https://www.npmjs.com/package/@honeybadger-io/vue)
+[![npm dt](https://img.shields.io/npm/dt/@honeybadger-io/vue)](https://www.npmjs.com/package/@honeybadger-io/vue)
 
-**Note:** Since v3.2 release of this project, both Vue.js v2.x and v3.x are supported!
+[Vue.js integration for Honeybadger.io](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=vue&utm_content=Vue.js+integration+for+Honeybadger.io)
+
+> **Note:** Since v3.2 release of this project, both Vue.js v2.x and v3.x are supported!
 
 ## Documentation and Support
 
@@ -36,20 +39,7 @@ variables.
 This project is built using a webpack-based Vue template. It's possible
 your own build environment may be just different enough to require some
 adjustments. If you find that our artifacts don't quite meet your needs,
-please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-vue/issues).
-
-## Changelog
-
-See https://github.com/honeybadger-io/honeybadger-vue/blob/master/CHANGELOG.md
-Changelog is automatically generated with [our release automation process](#release-automation).
-
-## Contributing
-
-1. Fork it.
-2. Create a topic branch `git checkout -b my_branch`
-3. Commit your changes `git commit -am "Boom"`
-3. Push to your branch `git push origin my_branch`
-4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-vue/pulls)
+please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-js/issues).
 
 ## Development
 
@@ -74,36 +64,3 @@ HONEYBADGER_API_KEY=yourkey npm run test:all
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-
-## Releasing
-
-Releasing is done with two commands: `npm version` and `npm publish`. **Both
-commands should be used with care.**
-
-To perform a release:
-
-1. With a clean working tree, use `npm version [new version]` to bump the version, commit the
-   changes, tag the release, and push to GitHub. See `npm help version` for
-   documentation. Make sure to checkout the correct branch (i.e. if you are planning to release a version with other than `latest` dist tag).
-
-
-2. To publish the release, use `npm publish`. See `npm help publish` for
-   documentation. This command will publish the version with the `latest` tag. To publish with a different tag, i.e. `next`, use `npm publish --tag next`.
-
-
-3. Verify the published version in Versions tab from [here](https://www.npmjs.com/package/@honeybadger-io/vue).
-
-### Release Automation
-
-We use [Ship.js](https://github.com/algolia/shipjs) to automate releasing.
-
-Ship.js creates a PR once per week when unreleased changes are present. You can also trigger a release PR by saying "@shipjs prepare" in any issue or pull request comment on GitHub.
-
-#### Troubleshooting a failed Ship.js release
-
-If a ship.js release fails, you need to revert the release commit and delete the release branch (e.g `releases/v1.1.0`)
-Then, you can debug the issue by simulating the release process locally (`npm run release -- --dry-run --yes --no-browse`).
-
-### License
-
-*honeybadger-vue* is MIT licensed. See the [LICENSE](https://raw.github.com/honeybadger-io/honeybadger-vue/master/LICENSE) file in this repository for details.
