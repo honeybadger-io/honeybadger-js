@@ -29,7 +29,7 @@
     "unit": "jest --config test/unit/jest.conf.js --coverage",
     "e2e": "node test/e2e/runner.js",
     "tsd": "npx tsd",
-    "test": "npm run unit",
+    "test": "npm run tsd && npm run unit",
     "test:all": "npm run tsd && npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src examples test/unit",
     "build": "npm run build:umd & npm run build:es & npm run build:unpkg & npm run build:unpkg-minify",
@@ -62,6 +62,7 @@
     "rollup-plugin-vue": "^6.0.0",
     "shipjs": "^0.24.4",
     "sinon": "^14.0.0",
+    "tsd": "^0.23.0",
     "vue": "^3.2.37",
     "vue-jest": "^5.0.0-alpha.10"
   },
