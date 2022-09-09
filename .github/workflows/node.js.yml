@@ -49,7 +49,7 @@ jobs:
         cache: 'npm'
         cache-dependency-path: |
           package-lock.json
-          test/integration/package-lock.json
+          packages/js/test/integration/package-lock.json
 
     - name: Build
       run: |
@@ -77,6 +77,9 @@ jobs:
         with:
           node-version: '14.x'
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            packages/js/examples/aws-lambda-typescript/package-lock.json
 
       - name: Build
         run: |
