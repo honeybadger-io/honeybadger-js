@@ -4,6 +4,10 @@
 [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)
 
 Welcome! This is the monorepo which holds all [Honeybadger](https://honeybadger.io) packages for JavaScript.
+You can refer to the README of each package for more information and instructions:
+- [@honeybadger-io/core](./packages/core): The core package that integrates with Honeybadger API
+- [@honeybadger-io/js](./packages/js): SDK for browser, nodejs and AWS Lambda 
+- [@honeybadger-io/webpack](./packages/webpack): Webpack plugin to upload source maps to Honeybadger
 
 ## Documentation and Support
 
