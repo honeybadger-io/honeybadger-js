@@ -156,6 +156,8 @@ class Honeybadger extends Client {
   }
 }
 
+export { Types } from '@honeybadger-io/core'
+
 export default new Honeybadger({
   __plugins: [
     onError(),
