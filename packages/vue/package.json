@@ -26,7 +26,7 @@
   ],
   "homepage": "https://github.com/honeybadger-io/honeybadger-vue#readme",
   "scripts": {
-    "unit": "jest --config test/unit/jest.conf.js --coverage",
+    "unit": "jest --coverage",
     "e2e": "node test/e2e/runner.js",
     "tsd": "npx tsd",
     "test": "npm run tsd && npm run unit",
