@@ -2,7 +2,7 @@ import HoneybadgerVue from '../../../src/index'
 import Honeybadger from '@honeybadger-io/js'
 import Miniwolf from '../Miniwolf.vue'
 import TestCanvasForProps from '../TestCanvasForProps.vue'
-import sinon from 'sinon'
+import { createSandbox } from 'sinon'
 import { mount } from '@vue/test-utils'
 
 describe('HoneybadgerVue', () => {
@@ -48,7 +48,7 @@ describe('HoneybadgerVue', () => {
       error: jest.fn()
     }
 
-    sandbox = sinon.createSandbox()
+    sandbox = createSandbox()
 
     // Refresh singleton state.
     // Honeybadger.reset()
