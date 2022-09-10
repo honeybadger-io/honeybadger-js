@@ -37,6 +37,8 @@ jobs:
       run: npm test
 
   integration:
+    # integration tests from "js" package fail if they are executed at the same time
+    concurrency: js-concurrency
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
