@@ -5,11 +5,11 @@
   "description": "Honeybadger Vue.js client",
   "author": "Jason Truesdell <jason@yuzuten.com> (https://github.com/JasonTrue)",
   "bugs": {
-    "url": "https://github.com/honeybadger-io/honeybadger-vue/issues"
+    "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/honeybadger-io/honeybadger-vue.git"
+    "url": "git+ssh://git@github.com/honeybadger-io/honeybadger-js.git"
   },
   "keywords": [
     "vue",
@@ -24,7 +24,7 @@
     "src",
     "honeybadger-vue.d.ts"
   ],
-  "homepage": "https://github.com/honeybadger-io/honeybadger-vue#readme",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/vue",
   "scripts": {
     "unit": "jest --coverage",
     "e2e": "node test/e2e/runner.js",
