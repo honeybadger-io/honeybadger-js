@@ -1,5 +1,6 @@
 import expect, { createSpy, isSpy, spyOn } from 'expect';
 import nock from 'nock';
+// eslint-disable-next-line import/default
 import HoneybadgerSourceMapPlugin from '../src/HoneybadgerSourceMapPlugin';
 
 describe('HoneybadgerSourceMapPlugin', function() {

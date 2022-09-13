@@ -6,7 +6,7 @@ import reduce from 'lodash.reduce';
 import { handleError, validateOptions } from './helpers';
 import { ENDPOINT, PLUGIN_NAME } from './constants';
 
-export default class HoneybadgerSourceMapPlugin {
+class HoneybadgerSourceMapPlugin {
   constructor({
     apiKey,
     assetsUrl,
