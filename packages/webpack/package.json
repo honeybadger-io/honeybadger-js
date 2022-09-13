@@ -1,0 +1,58 @@
+{
+  "name": "@honeybadger-io/webpack",
+  "version": "1.1.2",
+  "description": "Webpack plugin to upload source maps to Honeybadger's API - http://docs.honeybadger.io/guides/source-maps.html",
+  "main": "./dist/HoneybadgerSourceMapPlugin.js",
+  "scripts": {
+    "build": "babel src -d dist",
+    "build:watch": "watch 'npm run build' ./src",
+    "clean": "rimraf dist",
+    "prebuild": "npm run -s clean",
+    "prepublishOnly": "npm run clean && npm run build && npm run test",
+    "test": "nyc mocha --compilers js:babel-register",
+    "test:watch": "npm test -- -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/honeybadger-io/honeybadger-webpack.git"
+  },
+  "keywords": [
+    "webpack",
+    "sourcemap",
+    "source map",
+    "minified js",
+    "honeybadger",
+    "honey badger"
+  ],
+  "author": "Honeybadger.io <support@honeybadger.io> (https://www.honeybadger.io/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/honeybadger-io/honeybadger-webpack/issues"
+  },
+  "homepage": "https://github.com/honeybadger-io/honeybadger-webpack#readme",
+  "devDependencies": {
+    "babel-cli": "^6.16.0",
+    "babel-plugin-transform-runtime": "^6.8.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "babel-register": "^6.16.3",
+    "cross-env": "^5.0.0",
+    "expect": "^1.20.1",
+    "mocha": "^5.1.1",
+    "nock": "^10.0.1",
+    "nyc": "^12.0.2",
+    "rimraf": "^2.5.2",
+    "watch": "^1.0.1",
+    "debug": "^4.1.0",
+    "lodash": "^4.17.5"
+  },
+  "dependencies": {
+    "async": "^2.1.4",
+    "babel-runtime": "^6.20.0",
+    "lodash.find": "^4.3.0",
+    "lodash.foreach": "^4.2.0",
+    "lodash.reduce": "^4.3.0",
+    "request": "^2.87.0",
+    "verror": "^1.6.1"
+  }
+}

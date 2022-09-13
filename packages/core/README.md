@@ -18,3 +18,7 @@ Everything is written in Typescript and transpiled to es6 (see `tsconfig.base.js
 Other packages are responsible to bundle for different browsers/environments/frameworks.
 
 Run tests with `npm test`.
+
+## License
+
+This package is MIT licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.

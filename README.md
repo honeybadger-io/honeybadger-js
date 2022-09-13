@@ -1,9 +1,18 @@
 # Honeybadger for JavaScript
 
 ![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
-[![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)
 
 Welcome! This is the monorepo which holds all [Honeybadger](https://honeybadger.io) packages for JavaScript.
+You can refer to the README of each package for more information and instructions:
+- [@honeybadger-io/core](./packages/core)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fcore.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fcore)  
+  The core package that integrates with Honeybadger API
+- [@honeybadger-io/js](./packages/js)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)
+  SDK for browser, nodejs and AWS Lambda 
+- [@honeybadger-io/webpack](./packages/webpack)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)  
+  Webpack plugin to upload source maps to Honeybadger
 
 ## Documentation and Support
 
@@ -73,4 +82,4 @@ You can manually trigger a new release using the `Publish New Release` (`lerna-p
 
 ## License
 
-The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
+This Honeybadger repository and published packages are MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
