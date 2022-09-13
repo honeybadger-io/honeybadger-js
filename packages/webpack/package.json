@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/webpack",
-  "version": "1.1.2",
+  "version": "4.2.0",
   "description": "Webpack plugin to upload source maps to Honeybadger's API - http://docs.honeybadger.io/guides/source-maps.html",
   "main": "./dist/HoneybadgerSourceMapPlugin.js",
   "scripts": {
@@ -37,14 +37,14 @@
     "babel-preset-stage-0": "^6.16.0",
     "babel-register": "^6.16.3",
     "cross-env": "^5.0.0",
+    "debug": "^4.1.0",
     "expect": "^1.20.1",
+    "lodash": "^4.17.5",
     "mocha": "^5.1.1",
     "nock": "^10.0.1",
     "nyc": "^12.0.2",
     "rimraf": "^2.5.2",
-    "watch": "^1.0.1",
-    "debug": "^4.1.0",
-    "lodash": "^4.17.5"
+    "watch": "^1.0.1"
   },
   "dependencies": {
     "async": "^2.1.4",
