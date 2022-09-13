@@ -52,3 +52,7 @@ re-run the release manually with by executing the script `npm run postpublish`.
 ---
 <p><a href="https://www.browserstack.com/"><img src="./browserstack-logo.png" width="150"></a><br>
  <small>We use <a href="https://www.browserstack.com/">BrowserStack</a> to run our automated integration tests on multiple platforms in CI.</small></p>
+
+## License
+
+This package is MIT licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.

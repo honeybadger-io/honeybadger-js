@@ -85,3 +85,7 @@ module.exports = environment
 1. Run `npm install`
 2. Run the tests with `npm test`
 3. Build/test on save with `npm run build:watch` and `npm run test:watch`.
+
+## License
+
+This package is MIT licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.
