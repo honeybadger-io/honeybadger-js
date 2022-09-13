@@ -64,3 +64,7 @@ HONEYBADGER_API_KEY=yourkey npm run test:all
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+## License
+
+This package is MIT licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.
