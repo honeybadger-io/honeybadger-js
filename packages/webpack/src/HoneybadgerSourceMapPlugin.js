@@ -119,8 +119,9 @@ class HoneybadgerSourceMapPlugin {
 
   getUrlToAsset (sourceFile) {
     if (typeof sourceFile === 'string') {
-      const sep = this.assetsUrl.endsWith('/') ? '' : '/'
-      return `${this.assetsUrl}${sep}${sourceFile}`
+      const sep = '/'
+      const unsanitized = `${this.assetsUrl}${sep}${sourceFile}`
+      return unsanitized.replace(/([^:]\/)\/+/g, '$1')
     }
     return this.assetsUrl(sourceFile)
   }
