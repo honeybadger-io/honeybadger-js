@@ -1,133 +1,296 @@
-import async from 'async';
-import request from 'request';
-import VError from 'verror';
-import find from 'lodash.find';
-import reduce from 'lodash.reduce';
-import { handleError, validateOptions } from './helpers';
-import { ENDPOINT, PLUGIN_NAME } from './constants';
+import { promises as fs } from 'fs'
+import { join } from 'path'
+// eslint-disable-next-line import/default
+import fetch from 'node-fetch-retry'
+import VError from 'verror'
+import find from 'lodash.find'
+import reduce from 'lodash.reduce'
+import FormData from 'form-data'
+import { handleError, validateOptions } from './helpers'
+import { ENDPOINT, DEPLOY_ENDPOINT, PLUGIN_NAME, MAX_RETRIES, MIN_WORKER_COUNT } from './constants'
+import { resolvePromiseWithWorkers } from './resolvePromiseWithWorkers'
+
+/**
+ * @typedef {Object} DeployObject
+ * @property {?string} environment - production, development, staging, etc
+ * @property {?string} repository - URL for repository IE: https://github.com/foo/bar
+ * @property {?string} localUsername - The name of the user deploying. IE: Jane
+ */
 
 class HoneybadgerSourceMapPlugin {
-  constructor({
+  constructor ({
     apiKey,
     assetsUrl,
+    endpoint = ENDPOINT,
     revision = 'master',
     silent = false,
-    ignoreErrors = false
+    ignoreErrors = false,
+    retries = 3,
+    workerCount = 5,
+    deploy = false
   }) {
-    this.apiKey = apiKey;
-    this.assetsUrl = assetsUrl;
-    this.revision = revision;
-    this.silent = silent;
-    this.ignoreErrors = ignoreErrors;
-    this.emittedAssets = new Map();
+    this.apiKey = apiKey
+    this.assetsUrl = assetsUrl
+    this.endpoint = endpoint
+    this.revision = revision
+    this.silent = silent
+    this.ignoreErrors = ignoreErrors
+    this.workerCount = Math.max(workerCount, MIN_WORKER_COUNT)
+    /** @type DeployObject|boolean */
+    this.deploy = deploy
+    this.retries = retries
+
+    if (this.retries > MAX_RETRIES) {
+      this.retries = MAX_RETRIES
+    }
   }
 
-  assetEmitted(file, content, done) {
-    this.emittedAssets.set(file, content);
-    done();
-  }
+  async afterEmit (compilation) {
+    if (this.isDevServerRunning()) {
+      if (!this.silent) {
+        console.info('\nHoneybadgerSourceMapPlugin will not upload source maps because webpack-dev-server is running.')
+      }
 
-  afterEmit(compilation, done) {
-    const errors = validateOptions(this);
+      return
+    }
+
+    const errors = validateOptions(this)
 
     if (errors) {
-      compilation.errors.push(...handleError(errors));
-      return done();
+      compilation.errors.push(...handleError(errors))
+      return
     }
 
-    this.uploadSourceMaps(compilation, (err) => {
-      if (err) {
-        if (!this.ignoreErrors) {
-          compilation.errors.push(...handleError(err));
-        } else if (!this.silent) {
-          compilation.warnings.push(...handleError(err));
-        }
+    try {
+      await this.uploadSourceMaps(compilation)
+      await this.sendDeployNotification()
+    } catch (err) {
+      if (!this.ignoreErrors) {
+        compilation.errors.push(...handleError(err))
+      } else if (!this.silent) {
+        compilation.warnings.push(...handleError(err))
       }
-      this.emittedAssets.clear();
-      done();
-    });
-  }
-
-  apply(compiler) {
-    if (compiler.hooks) {
-      compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, this.afterEmit.bind(this));
-      if (compiler.hooks.assetEmitted) {
-        compiler.hooks.assetEmitted.tapAsync(PLUGIN_NAME, this.assetEmitted.bind(this));
-      }
-    } else {
-      compiler.plugin('after-emit', this.afterEmit.bind(this));
     }
   }
 
-  getAssets(compilation) {
-    const { chunks } = compilation.getStats().toJson();
+  isDevServerRunning () {
+    return process.env.WEBPACK_DEV_SERVER === 'true'
+  }
+
+  apply (compiler) {
+    compiler.hooks.afterEmit.tapPromise(PLUGIN_NAME, this.afterEmit.bind(this))
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getAssetPath (compilation, name) {
+    return join(
+      compilation.getPath(compilation.compiler.outputPath),
+      name.split('?')[0]
+    )
+  }
+
+  getSource (compilation, name) {
+    const path = this.getAssetPath(compilation, name)
+    return fs.readFile(path, { encoding: 'utf-8' })
+  }
+
+  getAssets (compilation) {
+    const { chunks } = compilation.getStats().toJson()
 
     return reduce(chunks, (result, chunk) => {
-      const sourceFile = find(chunk.files, file => /\.js$/.test(file));
-      const sourceMap = find(chunk.files, file => /\.js\.map$/.test(file));
+      const sourceFile = find(chunk.files, file => /\.js$/.test(file))
+
+      // Webpack 4 using chunk.files, Webpack 5 uses chunk.auxiliaryFiles
+      // https://webpack.js.org/blog/2020-10-10-webpack-5-release/#stats
+      const sourceMap = (chunk.auxiliaryFiles || chunk.files).find(file =>
+        /\.js\.map$/.test(file)
+      )
 
       if (!sourceFile || !sourceMap) {
-        return result;
+        return result
       }
 
       return [
         ...result,
         { sourceFile, sourceMap }
-      ];
-    }, []);
+      ]
+    }, [])
   }
 
-  uploadSourceMap(compilation, { sourceFile, sourceMap }, done) {
-    const req = request.post(ENDPOINT, (err, res, body) => {
-      if (!err && res.statusCode === 201) {
-        if (!this.silent) {
-          console.info(`Uploaded ${sourceMap} to Honeybadger API`); // eslint-disable-line no-console
-        }
-        return done();
-      }
+  getUrlToAsset (sourceFile) {
+    if (typeof sourceFile === 'string') {
+      const sep = this.assetsUrl.endsWith('/') ? '' : '/'
+      return `${this.assetsUrl}${sep}${sourceFile}`
+    }
+    return this.assetsUrl(sourceFile)
+  }
 
-      const errMessage = `failed to upload ${sourceMap} to Honeybadger API`;
-      if (err) {
-        return done(new VError(err, errMessage));
-      }
+  async uploadSourceMap (compilation, { sourceFile, sourceMap }) {
+    const errorMessage = `failed to upload ${sourceMap} to Honeybadger API`
 
-      let result;
+    let sourceMapSource
+    let sourceFileSource
 
-      try {
-        const { error } = JSON.parse(body);
-        result = new Error(error ? `${errMessage}: ${error}` : errMessage);
-      } catch (parseErr) {
-        result = new VError(parseErr, errMessage);
-      }
+    try {
+      sourceMapSource = await this.getSource(compilation, sourceMap)
+      sourceFileSource = await this.getSource(compilation, sourceFile)
+    } catch (err) {
+      throw new VError(err, err.message)
+    }
 
-      return done(result);
-    });
-
-    const form = req.form();
-    form.append('api_key', this.apiKey);
-    form.append('minified_url', `${this.assetsUrl.toString().replace(/^\//, '')}/${sourceFile.replace(/^\//, '')}`);
-    form.append('minified_file', (this.emittedAssets.get(sourceFile) || compilation.assets[sourceFile].source()), {
+    const form = new FormData()
+    form.append('api_key', this.apiKey)
+    form.append('minified_url', this.getUrlToAsset(sourceFile))
+    form.append('minified_file', sourceFileSource, {
       filename: sourceFile,
       contentType: 'application/javascript'
-    });
-    form.append('source_map', (this.emittedAssets.get(sourceMap) || compilation.assets[sourceMap].source()), {
+    })
+    form.append('source_map', sourceMapSource, {
       filename: sourceMap,
       contentType: 'application/octet-stream'
-    });
-    form.append('revision', this.revision);
+    })
+    form.append('revision', this.revision)
+
+    let res
+    try {
+      res = await fetch(this.endpoint, {
+        method: 'POST',
+        body: form,
+        redirect: 'follow',
+        retry: this.retries,
+        pause: 1000
+      })
+    } catch (err) {
+      // network / operational errors. Does not include 404 / 500 errors
+      throw new VError(err, errorMessage)
+    }
+
+    // >= 400 responses
+    if (!res.ok) {
+      // Attempt to parse error details from response
+      let details
+      try {
+        const body = await res.json()
+
+        if (body && body.error) {
+          details = body.error
+        } else {
+          details = `${res.status} - ${res.statusText}`
+        }
+      } catch (parseErr) {
+        details = `${res.status} - ${res.statusText}`
+      }
+
+      throw new Error(`${errorMessage}: ${details}`)
+    }
+
+    // Success
+    if (!this.silent) {
+      // eslint-disable-next-line no-console
+      console.info(`Uploaded ${sourceMap} to Honeybadger API`)
+    }
   }
 
-  uploadSourceMaps(compilation, done) {
-    const assets = this.getAssets(compilation);
-    const upload = this.uploadSourceMap.bind(this, compilation);
+  uploadSourceMaps (compilation) {
+    const assets = this.getAssets(compilation)
 
-    async.each(assets, upload, (err, results) => {
-      if (err) {
-        return done(err);
+    if (assets.length <= 0) {
+      // We should probably tell people they're not uploading assets.
+      // this is also an open issue on Rollbar sourcemap plugin
+      // https://github.com/thredup/rollbar-sourcemap-webpack-plugin/issues/39
+      if (!this.silent) {
+        console.info(this.noAssetsFoundMessage)
       }
-      return done(null, results);
-    });
+
+      return
+    }
+
+    console.info('\n')
+
+    // On large projects source maps should not all be uploaded at the same time,
+    // but in parallel with a reasonable worker count in order to avoid network issues
+    return resolvePromiseWithWorkers(
+      assets.map(asset => () => this.uploadSourceMap(compilation, asset)),
+      this.workerCount
+    )
+  }
+
+  async sendDeployNotification () {
+    if (this.deploy === false || this.apiKey == null) {
+      return
+    }
+
+    let body
+
+    if (this.deploy === true) {
+      body = {
+        deploy: {
+          revision: this.revision
+        }
+      }
+    } else if (typeof this.deploy === 'object' && this.deploy !== null) {
+      body = {
+        deploy: {
+          revision: this.revision,
+          repository: this.deploy.repository,
+          local_username: this.deploy.localUsername,
+          environment: this.deploy.environment
+        }
+      }
+    }
+
+    const errorMessage = 'Unable to send deploy notification to Honeybadger API.'
+    let res
+
+    try {
+      res = await fetch(DEPLOY_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'X-API-KEY': this.apiKey,
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify(body),
+        redirect: 'follow',
+        retry: this.retries,
+        pause: 1000
+      })
+    } catch (err) {
+      // network / operational errors. Does not include 404 / 500 errors
+      if (!this.ignoreErrors) {
+        throw new VError(err, errorMessage)
+      }
+    }
+
+    // >= 400 responses
+    if (!res.ok) {
+      // Attempt to parse error details from response
+      let details
+      try {
+        const body = await res.json()
+
+        if (body && body.error) {
+          details = body.error
+        } else {
+          details = `${res.status} - ${res.statusText}`
+        }
+      } catch (parseErr) {
+        details = `${res.status} - ${res.statusText}`
+      }
+
+      if (!this.ignoreErrors) {
+        throw new Error(`${errorMessage}: ${details}`)
+      }
+    }
+
+    if (!this.silent) {
+      console.info('Successfully sent deploy notification to Honeybadger API.')
+    }
+  }
+
+  get noAssetsFoundMessage () {
+    return '\nHoneybadger could not find any sourcemaps. Nothing will be uploaded.'
   }
 }
 
-module.exports = HoneybadgerSourceMapPlugin;
+module.exports = HoneybadgerSourceMapPlugin
