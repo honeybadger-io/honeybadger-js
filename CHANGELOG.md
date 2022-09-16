@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.2.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.2.0...v4.2.1) (2022-09-16)
+
+
+### Bug Fixes
+
+* release correct version, lerna import did not work ([#883](https://github.com/honeybadger-io/honeybadger-js/issues/883)) ([cbe73ac](https://github.com/honeybadger-io/honeybadger-js/commit/cbe73ac7c715c626c07f56f667b2c9c447c9dcb4))
+
+
+
+
+
 # [4.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.1.3...v4.2.0) (2022-09-13)
 
 
