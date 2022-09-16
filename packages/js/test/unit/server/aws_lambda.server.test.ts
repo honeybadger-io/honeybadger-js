@@ -92,6 +92,21 @@ describe('Lambda Handler', function () {
       expect(res.body).toEqual('works!')
     })
 
+    it('calls sync handler with synchronous response if no error is thrown', async function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const handler = client.lambdaHandler(<any>function (_event, _context) {
+        return mockAwsResult({ body: 'works!' })
+      }) as AsyncHandler<APIGatewayProxyEvent, APIGatewayProxyResult>
+
+      const res = await handler(mockAwsEvent(), mockAwsContext())
+      expect(res).toBeDefined()
+      expect(res.body).toEqual('works!')
+    })
+
     it('calls handler if notify exits on preconditions', async function () {
       client.configure({
         apiKey: null

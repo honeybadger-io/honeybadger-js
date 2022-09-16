@@ -17,6 +17,13 @@ module.exports = {
       event,
     });
   },
+  helloWrapped: honeybadgerWrapper((event) => {
+    const hbKey = !!process.env.HONEYBADGER_API_KEY;
+    return formatJSONResponse({
+      message: `Hello, welcome to the exciting Serverless world! HB Key available: ${hbKey ? 'yes' : 'no'}. This handler is honeybadgerWrapped!`,
+      event,
+    });
+  }),
   syncError: honeybadgerWrapper(async (event) => {
     const willReport = event.body && event.body.report === 'yes';
     if (willReport) {

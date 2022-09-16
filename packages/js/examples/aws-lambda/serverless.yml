@@ -1,3 +1,4 @@
+org: hiteqsoftware
 service: aws-lambda
 app: honeybadger-io
 frameworkVersion: '2'
@@ -20,6 +21,12 @@ functions:
     events:
       - httpApi:
           path: /hello
+          method: get
+  helloWrapped:
+    handler: handler.helloWrapped
+    events:
+      - httpApi:
+          path: /hello-wrapped
           method: get
   syncError:
     handler: handler.syncError

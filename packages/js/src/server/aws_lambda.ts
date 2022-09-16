@@ -34,10 +34,18 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
       AsyncStore.run({ context: {}, breadcrumbs: [] }, () => {
         const timeoutHandler = setupTimeoutWarning(hb, context)
         try {
-          handler(event, context)
-            .then(resolve)
-            .catch(err => reportToHoneybadger(hb, err, reject))
-            .finally(() => clearTimeout(timeoutHandler))
+          const result = handler(event, context);
+          // check if handler returns a promise
+          if (result && result.then) {
+            result
+              .then(resolve)
+              .catch(err => reportToHoneybadger(hb, err, reject))
+              .finally(() => clearTimeout(timeoutHandler))
+          }
+          else {
+            clearTimeout(timeoutHandler)
+            resolve(result)
+          }
         } catch (err) {
           clearTimeout(timeoutHandler)
           reportToHoneybadger(hb, err, reject)
