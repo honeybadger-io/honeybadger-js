@@ -18,10 +18,22 @@ jobs:
           node-version: '16.x'
           cache: 'npm'
 
+      # https://stackoverflow.com/questions/61919141/read-json-file-in-github-actions
+      - name: Read package version
+        id: read_package_version
+        run: |
+          content=`cat ./packages/js/package.json`
+          # the following lines are only required for multi line json
+          content=${content//%/%25}
+          content=${content//$n/%0A}
+          content=${content//$r/%0D}
+          # end of optional handling for multi line json
+          echo ::set-output name=packageJson::$content
+
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
         with:
           repository: 'subzero10/honeybadger-cdn-version-resolver'
           token: ${{ secrets.PAN_TEMP_TOKEN }}
           event-type: new-release
-          client-payload: '{"ref": "${{ github.ref }}", "version": "5.0"}'
+          client-payload: '{"ref": "${{ github.ref }}", "version": "${{ fromJson(steps.read_package_version.outputs.packageJson).version }}"}'
