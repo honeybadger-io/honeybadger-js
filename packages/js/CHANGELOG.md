@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.2.1...v4.3.0) (2022-09-17)
+
+
+### Bug Fixes
+
+* handle sync lambda handlers (non callback-based) ([#887](https://github.com/honeybadger-io/honeybadger-js/issues/887)) ([be5c2fd](https://github.com/honeybadger-io/honeybadger-js/commit/be5c2fd8ca5ef61971bc522f036e2f6ab9555477)), closes [#860](https://github.com/honeybadger-io/honeybadger-js/issues/860)
+
+
+### Features
+
+* migrate honeybadger-vue to monorepo ([#881](https://github.com/honeybadger-io/honeybadger-js/issues/881)) ([3172203](https://github.com/honeybadger-io/honeybadger-js/commit/317220310f07edd18283214fe8901cab31218416)), closes [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870)
+
+
+
+
+
 # [4.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.1.3...v4.2.0) (2022-09-13)
 
 
