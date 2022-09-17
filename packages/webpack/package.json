@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/honeybadger-io/honeybadger-webpack.git"
+    "url": "git+https://github.com/honeybadger-io/honeybadger-js.git"
   },
   "keywords": [
     "webpack",
@@ -27,9 +27,9 @@
   "author": "Honeybadger.io <support@honeybadger.io> (https://www.honeybadger.io/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/honeybadger-io/honeybadger-webpack/issues"
+    "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
-  "homepage": "https://github.com/honeybadger-io/honeybadger-webpack#readme",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/webpack",
   "devDependencies": {
     "@babel/cli": "^7.14.5",
     "@babel/core": "^7.14.5",

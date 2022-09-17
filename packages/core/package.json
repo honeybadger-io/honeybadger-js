@@ -6,7 +6,7 @@
     "email": "josh@honeybadger.io"
   },
   "license": "MIT",
-  "homepage": "https://github.com/honeybadger-io/honeybadger-js",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/core",
   "description": "JavaScript error notifier for Honeybadger.io",
   "keywords": [
     "exception",

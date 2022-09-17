@@ -37,6 +37,8 @@ jobs:
       run: npm test
 
   integration:
+    # integration tests from "js" package fail if they are executed at the same time
+    concurrency: js-concurrency
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -82,9 +84,18 @@ jobs:
             packages/js/examples/aws-lambda-typescript/package-lock.json
 
       - name: Build
+        run: npm ci
+
+      - name: Build Typescript example projects
         run: |
-          npm ci
           cd packages/js/examples/aws-lambda-typescript
+          npm ci
+
+      - name: Install Vue examples deps
+        run: |
+          cd packages/vue/examples/vue2
+          npm ci --force
+          cd ../vue3
           npm ci
 
       - name: Run lint checks

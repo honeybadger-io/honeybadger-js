@@ -2,7 +2,7 @@
   "name": "@honeybadger-io/js",
   "version": "4.2.0",
   "license": "MIT",
-  "homepage": "https://github.com/honeybadger-io/honeybadger-js",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js",
   "author": {
     "name": "Joshua Wood",
     "email": "josh@honeybadger.io"
