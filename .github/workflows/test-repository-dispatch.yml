@@ -1,0 +1,26 @@
+name: Repository Dispatch event
+on:
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAN_TEMP_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          repository: 'subzero10/honeybadger-cdn-version-resolver'
+          token: ${{ secrets.PAN_TEMP_TOKEN }}
+          event-type: new-release
+          client-payload: '{"ref": "${{ github.ref }}", "version": "5.0"}'
