@@ -24,4 +24,4 @@ jobs:
           repository: 'subzero10/honeybadger-cdn-version-resolver'
           token: ${{ secrets.PAN_TEMP_TOKEN }}
           event-type: new-release
-          client-payload: '{ "ref": "${{ github.ref }}", "packages": "${{ fromJson(steps.package_versions.outputs.packages) }}" }'
+          client-payload: '{ "ref": "${{ github.ref }}", "packages": "${{ steps.package_versions.outputs.packages }}" }'
