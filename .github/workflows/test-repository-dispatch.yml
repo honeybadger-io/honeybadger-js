@@ -2,6 +2,10 @@ name: Repository Dispatch event
 on:
   push:
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      PAN_TEMP_TOKEN:
+        required: true
 
 jobs:
   dispatch:
@@ -9,59 +13,10 @@ jobs:
     steps:
       - name: Git Checkout
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.PAN_TEMP_TOKEN }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-          cache: 'npm'
-
-      # https://stackoverflow.com/questions/61919141/read-json-file-in-github-actions
-      - name: Read core package.json
-        id: core_package_json
-        run: |
-          content=`cat ./packages/core/package.json`
-          # the following lines are only required for multi line json
-          content=${content//%/%25}
-          content=${content//$n/%0A}
-          content=${content//$r/%0D}
-          # end of optional handling for multi line json
-          echo ::set-output name=packageJson::$content
-
-      - name: Read js package.json
-        id: js_package_json
-        run: |
-          content=`cat ./packages/js/package.json`
-          # the following lines are only required for multi line json
-          content=${content//%/%25}
-          content=${content//$n/%0A}
-          content=${content//$r/%0D}
-          # end of optional handling for multi line json
-          echo ::set-output name=packageJson::$content
-
-      - name: Read vue package.json
-        id: vue_package_json
-        run: |
-          content=`cat ./packages/vue/package.json`
-          # the following lines are only required for multi line json
-          content=${content//%/%25}
-          content=${content//$n/%0A}
-          content=${content//$r/%0D}
-          # end of optional handling for multi line json
-          echo ::set-output name=packageJson::$content
-
-      - name: Read webpack package.json
-        id: webpack_package_json
-        run: |
-          content=`cat ./packages/webpack/package.json`
-          # the following lines are only required for multi line json
-          content=${content//%/%25}
-          content=${content//$n/%0A}
-          content=${content//$r/%0D}
-          # end of optional handling for multi line json
-          echo ::set-output name=packageJson::$content
+      - name: Read package versions
+        id: package_versions
+        uses: .github/actions/get-package-versions
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
@@ -69,24 +24,4 @@ jobs:
           repository: 'subzero10/honeybadger-cdn-version-resolver'
           token: ${{ secrets.PAN_TEMP_TOKEN }}
           event-type: new-release
-          client-payload: |
-                    '{ \
-                    "ref": "${{ github.ref }}", \ 
-                    "packages": [ \
-                    { \
-                      "name": "${{ fromJson(steps.core_package_json.outputs.packageJson).name }}", \
-                      "version": "${{ fromJson(steps.core_package_json.outputs.packageJson).version }}" \ 
-                    }, \
-                    { \
-                      "name": "${{ fromJson(steps.js_package_json.outputs.packageJson).name }}", \
-                      "version": "${{ fromJson(steps.js_package_json.outputs.packageJson).version }}" \ 
-                    }, \
-                    { \
-                      "name": "${{ fromJson(steps.vue_package_json.outputs.packageJson).name }}", \
-                      "version": "${{ fromJson(steps.vue_package_json.outputs.packageJson).version }}" \ 
-                    }, \
-                    { \
-                      "name": "${{ fromJson(steps.webpack_package_json.outputs.packageJson).name }}", \
-                      "version": "${{ fromJson(steps.webpack_package_json.outputs.packageJson).version }}" \ 
-                    } \
-                    ]}'
+          client-payload: '{ "ref": "${{ github.ref }}", "packages": "${{ fromJson(steps.package_versions.outputs.packages) }}" }'
