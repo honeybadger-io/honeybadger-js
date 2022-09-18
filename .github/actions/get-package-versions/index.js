@@ -1,8 +1,8 @@
 const core = require('@actions/core')
 const fs = require('fs')
-const path = require('path')
+const path = require('path');
 
-(async function () {
+async function main() {
   const ROOT_PACKAGES_FOLDER = 'packages'
   core.info('Reading package versions from monorepo')
   const result = []
@@ -24,4 +24,6 @@ const path = require('path')
   }
   core.setOutput('packages', JSON.stringify(result))
   core.info('Done')
-})()
+}
+
+main().catch(error => core.setFailed(error.message))

@@ -7,9 +7,9 @@ module.exports =
 
 const core = __webpack_require__(186)
 const fs = __webpack_require__(747)
-const path = __webpack_require__(622)
+const path = __webpack_require__(622);
 
-(async function () {
+async function main() {
   const ROOT_PACKAGES_FOLDER = 'packages'
   core.info('Reading package versions from monorepo')
   const result = []
@@ -31,7 +31,9 @@ const path = __webpack_require__(622)
   }
   core.setOutput('packages', JSON.stringify(result))
   core.info('Done')
-})()
+}
+
+main().catch(error => core.setFailed(error.message))
 
 
 /***/ }),
