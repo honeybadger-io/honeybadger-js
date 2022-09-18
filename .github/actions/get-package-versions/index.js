@@ -22,7 +22,7 @@ async function main() {
       core.error(`There was an error reading package[${p}]: ${error.message}`)
     }
   }
-  core.setOutput('packages', JSON.stringify(result))
+  core.setOutput('packages', result)
   core.info('Done')
 }
 
