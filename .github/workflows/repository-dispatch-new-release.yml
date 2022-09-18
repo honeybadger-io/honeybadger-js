@@ -1,4 +1,4 @@
-name: Repository Dispatch event
+name: Repository Dispatch - New Release
 on:
   push:
   workflow_dispatch:
