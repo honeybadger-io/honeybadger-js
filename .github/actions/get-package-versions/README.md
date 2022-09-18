@@ -6,7 +6,7 @@ This action reads package versions from the monorepo and stores them as an array
 
 ### `packages`
 
-A stringified array in the structure of:
+An array in the structure of:
 
 ```json
 [

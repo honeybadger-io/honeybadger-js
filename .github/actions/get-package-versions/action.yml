@@ -2,7 +2,7 @@ name: 'Get Package Versions'
 description: 'Read version packages in the monorepo and store to a json variable'
 outputs:
   packages:
-    description: 'An stringified array of package names and versions'
+    description: 'An array of package names and versions'
 runs:
   using: 'node16'
   main: 'dist/index.js'
