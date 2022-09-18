@@ -16,7 +16,7 @@ jobs:
 
       - name: Read package versions
         id: package_versions
-        uses: .github/actions/get-package-versions
+        uses: ./.github/actions/get-package-versions
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
