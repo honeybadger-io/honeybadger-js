@@ -468,6 +468,21 @@ describe(PLUGIN_NAME, function () {
       await plugin.uploadSourceMap(compilation, chunk)
       expect(this.info.calledWith('Uploaded vendor.5190.js.map to Honeybadger API')).to.eq(true)
     })
+
+    it('should build correct assert url', function () {
+      const sourceFile1 = '/js/app.js'
+      const sourceFile2 = 'js/app.js'
+
+      const plugin = new HoneybadgerSourceMapPlugin({ assetsUrl: 'https://example.com' });
+      expect(plugin.assetsUrl).to.eq('https://example.com')
+      expect(plugin.getUrlToAsset(sourceFile1)).to.eq('https://example.com/js/app.js')
+      expect(plugin.getUrlToAsset(sourceFile2)).to.eq('https://example.com/js/app.js')
+
+      plugin.assetsUrl = 'https://example.com/'
+      expect(plugin.assetsUrl).to.eq('https://example.com/')
+      expect(plugin.getUrlToAsset(sourceFile1)).to.eq('https://example.com/js/app.js')
+      expect(plugin.getUrlToAsset(sourceFile2)).to.eq('https://example.com/js/app.js')
+    })
   })
 
   describe('sendDeployNotification', function () {
