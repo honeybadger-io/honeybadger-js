@@ -1,11 +1,12 @@
-import React, {Component} from "react"
-import PropTypes from "prop-types";
+import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 export interface DefaultErrorComponentProps {
   error: Error | null
   info: React.ErrorInfo | null
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export default class DefaultErrorComponent extends Component<DefaultErrorComponentProps, {}> {
 
   static propTypes = {

@@ -1,19 +1,18 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "./build",
     "jsx": "react-jsx",
     "target": "es2018",
     "module": "esnext",
     "moduleResolution": "node",
-    "declaration": true,
     "sourceMap": true,
     "inlineSources": true,
-    "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true,
     "lib": [
       "dom",
       "dom.iterable",
@@ -23,7 +22,6 @@
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true
   },
   "exclude": [
     "node_modules"

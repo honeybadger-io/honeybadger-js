@@ -1,10 +1,10 @@
-import React, {Component, ReactNode} from 'react'
-import HoneybadgerClient from '@honeybadger-io/js/dist/browser/types/core/client'
-import DefaultErrorComponent, {DefaultErrorComponentProps} from "./DefaultErrorComponent"
-import PropTypes from "prop-types";
+import React, { Component, ReactNode } from 'react'
+import Honeybadger from '@honeybadger-io/js/dist/browser/honeybadger'
+import DefaultErrorComponent, { DefaultErrorComponentProps } from './DefaultErrorComponent'
+import PropTypes from 'prop-types';
 
 interface HoneybadgerErrorBoundaryProps {
-  honeybadger: HoneybadgerClient
+  honeybadger: typeof Honeybadger
   ErrorComponent?: ReactNode
 }
 
@@ -30,17 +30,17 @@ export default class HoneybadgerErrorBoundary extends Component<HoneybadgerError
   }
 
   public static getDerivedStateFromError(error: Error): HoneybadgerErrorBoundaryState {
-    return {error: error, errorOccurred: true, info: null}
+    return { error: error, errorOccurred: true, info: null }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    this.setState({errorOccurred: true, error: error, info: errorInfo})
-    this.props.honeybadger.notify(error, {context: errorInfo as any})
+    this.setState({ errorOccurred: true, error: error, info: errorInfo })
+    this.props.honeybadger.notify(error, { context: errorInfo as never })
   }
 
   private getErrorComponent(): ReactNode {
     return this.props.ErrorComponent
-      ? React.createElement(this.props.ErrorComponent as any, this.state)
+      ? React.createElement(this.props.ErrorComponent as never, this.state)
       : <DefaultErrorComponent {...this.state} />
   }
 
