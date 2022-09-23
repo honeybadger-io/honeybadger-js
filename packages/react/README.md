@@ -1,8 +1,11 @@
 # Honeybadger React.js Integration
 
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fhoneybadger-io%2Fhoneybadger-react%2Fbadge&style=flat)](https://actions-badge.atrox.dev/honeybadger-io/honeybadger-react/goto)
+![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
 [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact)
-> [React.js integration for Honeybadger.io](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=react&utm_content=React.js+integration+for+Honeybadger.io)
+[![npm dm](https://img.shields.io/npm/dm/@honeybadger-io/react)](https://www.npmjs.com/package/@honeybadger-io/react)
+[![npm dt](https://img.shields.io/npm/dt/@honeybadger-io/react)](https://www.npmjs.com/package/@honeybadger-io/react)
+
+> [React.js Integration for Honeybadger.io](https://www.honeybadger.io/for/javascript/?utm_source=github&utm_medium=readme&utm_campaign=react&utm_content=React.js+integration+for+Honeybadger.io)
 
 ## Documentation and Support
 
@@ -56,19 +59,6 @@ This will serve the demo app with hot reload at localhost:3000
 
 For a detailed explanation on how hot reloading works, check out the [documentation](https://webpack.js.org/concepts/hot-module-replacement/).
 
-## Changelog
-
-See https://github.com/honeybadger-io/honeybadger-react/blob/master/CHANGELOG.md
-Changelog is automatically generated with [our release automation process](#release-automation).
-
-## Contributing
-
-1. Fork it.
-2. Create a topic branch `git checkout -b my_branch`
-3. Commit your changes `git commit -am "Boom"`
-3. Push to your branch `git push origin my_branch`
-4. Send a [pull request](https://github.com/honeybadger-io/honeybadger-react/pulls)
-
 ## Development
 
 ``` bash
@@ -85,25 +75,6 @@ npm test
 npm run start
 ```
 
-## Releasing
-
-1. With a clean working tree, use `npm version [new version]` to bump the version,
-   commit the changes, tag the release, and push to GitHub. See `npm help version`
-   for documentation.
-2. To publish the release, use `npm publish`. See `npm help publish` for
-   documentation.
-
-### Release Automation
-
-We use [Ship.js](https://github.com/algolia/shipjs) to automate releasing.
-
-Ship.js creates a PR once per week when unreleased changes are present. You can also trigger a release PR by saying "@shipjs prepare" in any issue or pull request comment on GitHub.
-
-#### Troubleshooting a failed Ship.js release
-
-If a ship.js release fails, you need to revert the release commit and delete the release branch (e.g `releases/v1.1.0`)
-Then, you can debug the issue by simulating the release process locally (`npm run release -- --dry-run --yes --no-browse`).
-
 ### License
 
-*honeybadger-react* is MIT licensed. See the [LICENSE](https://raw.github.com/honeybadger-io/honeybadger-react/master/LICENSE) file in this repository for details.
+This package is MIT licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.
