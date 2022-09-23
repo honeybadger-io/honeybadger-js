@@ -21,7 +21,7 @@
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "build": "tsc --build tsconfig.json && rollup -c",
+    "build": "tsc --build tsconfig.json && rollup -c && tsc --build tsconfig.types.json",
     "start": "rollup -c -w",
     "prepare": "npm run build",
     "predeploy": "cd example && npm install && npm run build",
