@@ -1,0 +1,48 @@
+{
+  "name": "@honeybadger-io/react",
+  "version": "2.1.0",
+  "description": "React.js integration for honeybadger",
+  "author": "Jason Truesdell <jason@yuzuten.com> (https://github.com/JasonTrue)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/honeybadger-io/honeybadger-react.git"
+  },
+  "main": "dist/honeybadger-react.cjs.js",
+  "types": "./dist/index.d.ts",
+  "module": "dist/honeybadger-react.esm.js",
+  "unpkg": "dist/honeybadger-react.js",
+  "jsnext:main": "dist/honeybadger-react.esm.js",
+  "engines": {
+    "node": ">=8",
+    "npm": ">=5"
+  },
+  "peerDependencies": {
+    "prop-types": "^15.5.4",
+    "react": "^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0",
+    "react-dom": "^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.0.0",
+    "@commitlint/config-conventional": "^17.0.0",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-typescript": "^8.3.2",
+    "@types/jest": "^29.0.0",
+    "@types/react": "^17.0.44",
+    "@types/react-test-renderer": "^18.0.0",
+    "@types/sinon": "^10.0.11",
+    "cross-env": "^7.0.0",
+    "gh-pages": "^4.0.0",
+    "husky": "^8.0.0",
+    "react": "^18.1.0",
+    "react-scripts": "^5.0.1",
+    "react-test-renderer": "^18.1.0",
+    "rollup": "^2.70.2",
+    "shipjs": "0.24.4",
+    "sinon": "^14.0.0",
+    "typescript": "^4.6.3"
+  },
+  "files": [
+    "dist"
+  ]
+}
