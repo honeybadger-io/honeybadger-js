@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.3.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.3.0...v4.3.1) (2022-09-26)
+
+
+### Bug Fixes
+
+* clean asset url with regex ([#886](https://github.com/honeybadger-io/honeybadger-js/issues/886)) ([9c0032b](https://github.com/honeybadger-io/honeybadger-js/commit/9c0032bcfbe739dc68804f7dfe7ebf557aa45060)), closes [#878](https://github.com/honeybadger-io/honeybadger-js/issues/878)
+
+
+
+
+
 # [4.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.2.1...v4.3.0) (2022-09-17)
 
 
