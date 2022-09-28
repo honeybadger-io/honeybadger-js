@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/react",
-  "version": "2.1.0",
+  "version": "4.4.0",
   "description": "React.js integration for honeybadger",
   "author": "Jason Truesdell <jason@yuzuten.com> (https://github.com/JasonTrue)",
   "license": "MIT",
