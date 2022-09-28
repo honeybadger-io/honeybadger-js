@@ -32,12 +32,6 @@
       }
     ]
   },
-  "ignorePatterns": [
-    "test/integration/",
-    "dist",
-    "build",
-    "tmp"
-  ],
   "plugins": [
     "@typescript-eslint"
   ],
