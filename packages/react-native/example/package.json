@@ -10,7 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@honeybadger-io/react-native": "git+ssh://git@github.com:honeybadger-io/honeybadger-react-native.git",
+    "@honeybadger-io/react-native": "^0.0.12",
     "react": "16.13.1",
     "react-native": "0.64.1"
   },
