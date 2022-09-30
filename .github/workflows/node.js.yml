@@ -98,5 +98,10 @@ jobs:
           cd ../vue3
           npm ci
 
+      - name: Install React Native example deps
+        run: |
+          cd packages/react-native/example
+          npm ci
+
       - name: Run lint checks
         run: npm run lint

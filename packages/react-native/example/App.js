@@ -14,17 +14,17 @@ import Honeybadger from '@honeybadger-io/react-native';
 
 export default function App() {
 
-	const HONEYBADGER_API_KEY = '<Your Honeybadger.io API key>'; // TODO
-	Honeybadger.configure(HONEYBADGER_API_KEY);
+  const HONEYBADGER_API_KEY = '<Your Honeybadger.io API key>'; // TODO
+  Honeybadger.configure(HONEYBADGER_API_KEY);
 
-	function onBtnClicked() {
-		throw ( new Error('This is a test error!') );
-	}
+  function onBtnClicked() {
+    throw ( new Error('This is a test error!') );
+  }
 
-	return (
-		<SafeAreaView>
-			<Button onPress={ onBtnClicked } title="Click me!" />
-		</SafeAreaView>
-	);
+  return (
+    <SafeAreaView>
+      <Button onPress={ onBtnClicked } title="Click me!" />
+    </SafeAreaView>
+  );
 
 }
