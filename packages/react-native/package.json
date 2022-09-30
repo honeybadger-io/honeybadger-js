@@ -7,19 +7,20 @@
     "types": "index.d.ts",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build": "tsc",
+        "test": "echo \"Error: no test specified\""
     },
     "bin": {
         "honeybadger-generate-sourcemaps": "./honeybadger-generate-sourcemaps.sh"
     },
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@github.com:honeybadger-io/honeybadger-react-native.git"
+        "url": "git@github.com:honeybadger-io/honeybadger-js.git"
     },
     "keywords": [
         "Honeybadger"
     ],
-    "homepage": "https://github.com/honeybadger-io/honeybadger-react-native",
+    "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/react-native",
     "peerDependencies": {
         "react": ">=16.13.1",
         "react-native": ">=0.60.0-rc.0 <1.0.x"

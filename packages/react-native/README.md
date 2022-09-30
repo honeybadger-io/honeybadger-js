@@ -1,5 +1,8 @@
 # Honeybadger for React Native
+![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
 [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact-native.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact-native)
+[![npm dm](https://img.shields.io/npm/dm/@honeybadger-io/react-native)](https://www.npmjs.com/package/@honeybadger-io/react-native)
+[![npm dt](https://img.shields.io/npm/dt/@honeybadger-io/react-native)](https://www.npmjs.com/package/@honeybadger-io/react-native)
 
 A React Native library for integrating [Honeybadger](https://honeybadger.io) into your React Native iOS and Android apps.
 
@@ -34,12 +37,12 @@ You can log into your [Honeybadger](https://honeybadger.io) account to obtain yo
 
 The configure method takes additional configuration options.
 
-| Name | Type | Required | Default | Example | 
-| ----- | ---- | ------- | ------- | ------- | 
-| apiKey | String | YES | `""` | `"hb-api-key-1234"` |
-| reportErrors | Boolean | NO | true |
-| revision | String | NO | `""` | `"8afb34a"` |
-| projectRoot | String | NO | `""` | `"/path/to/project"` |
+| Name         | Type    | Required | Default | Example              |
+|--------------|---------|----------|---------|----------------------|
+| apiKey       | String  | YES      | `""`    | `"hb-api-key-1234"`  |
+| reportErrors | Boolean | NO       | true    |                      |
+| revision     | String  | NO       | `""`    | `"8afb34a"`          |
+| projectRoot  | String  | NO       | `""`    | `"/path/to/project"` |
 
 ```js
   Honeybadger.configure(
@@ -85,16 +88,13 @@ Sets the logging level for the Honeybadger library.
 
 The following values are accepted:
 
-| Value | Meaning | 
-| ----- | ---- | 
-| "debug" | Everything will be logged to console. |
+| Value     | Meaning                                  |
+|-----------|------------------------------------------|
+| "debug"   | Everything will be logged to console.    |
 | "warning" | Only warnings will be logged to console. |
-| "error" | Only errors will be logged to console. |
-
+| "error"   | Only errors will be logged to console.   |
 
 The default logging level is "warning".
-
-
 
 ## Source Maps
 
@@ -119,4 +119,4 @@ npx react-native run-ios
 
 ## License
 
-The Honeybadger React Native library is MIT-licensed. See the LICENSE file in this repository for details.
+The Honeybadger React Native library is MIT-licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.
