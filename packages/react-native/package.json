@@ -1,0 +1,32 @@
+{
+    "name": "@honeybadger-io/react-native",
+    "version": "0.0.12",
+    "description": "Honeybadger.io for React Native.",
+    "author": "Andrey Butov <andreybutov@antair.com> (https://andreybutov.com)",
+    "license": "MIT",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "bin": {
+        "honeybadger-generate-sourcemaps": "./honeybadger-generate-sourcemaps.sh"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com:honeybadger-io/honeybadger-react-native.git"
+    },
+    "keywords": [
+        "Honeybadger"
+    ],
+    "homepage": "https://github.com/honeybadger-io/honeybadger-react-native",
+    "peerDependencies": {
+        "react": ">=16.13.1",
+        "react-native": ">=0.60.0-rc.0 <1.0.x"
+    },
+    "devDependencies": {
+        "react": "^16.13.1",
+        "react-native": "^0.63.3",
+        "typescript": "^4.3.5"
+    }
+}
