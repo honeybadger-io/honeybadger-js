@@ -22,9 +22,7 @@ import {
   Notice,
   Noticeable,
   HoneybadgerStore,
-  BacktraceFrame,
-  BreadcrumbRecord,
-  DefaultStoreContents, Transport, NoticeTransportPayload
+  BacktraceFrame, Transport, NoticeTransportPayload
 } from './types'
 import { GlobalStore } from './store';
 
@@ -43,7 +41,7 @@ const NOT_BLANK = /\S/
 export abstract class Client {
   protected __pluginsExecuted = false
 
-  protected __store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }> = null;
+  protected __store: HoneybadgerStore = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
   protected __getSourceFileHandler: (path: string) => Promise<string>
@@ -80,9 +78,7 @@ export abstract class Client {
       ...opts,
     }
 
-    // First, we go with the global (shared) store.
-    // Webserver middleware can then switch to the AsyncStore for async context tracking.
-    this.__store = new GlobalStore({ context: {}, breadcrumbs: [] })
+    this.__initStore();
     this.__transport = transport
     this.logger = logger(this)
   }
@@ -107,8 +103,8 @@ export abstract class Client {
     return this
   }
 
-  __setStore(store: HoneybadgerStore<{ context: Record<string, unknown>; breadcrumbs: BreadcrumbRecord[] }>) {
-    this.__store = store
+  protected __initStore() {
+    this.__store = new GlobalStore({ context: {}, breadcrumbs: [] }, this.config.maxBreadcrumbs);
   }
 
   beforeNotify(handler: BeforeNotifyHandler): Client {
@@ -122,31 +118,24 @@ export abstract class Client {
   }
 
   setContext(context: Record<string, unknown>): Client {
-    if (typeof context === 'object') {
-      const store = this.__store.getStore()
-      store.context = merge(store.context, context)
+    if (typeof context === 'object' && context != null) {
+      this.__store.setContext(context)
     }
     return this
   }
 
   resetContext(context?: Record<string, unknown>): Client {
     this.logger.warn('Deprecation warning: `Honeybadger.resetContext()` has been deprecated; please use `Honeybadger.clear()` instead.')
-    const store = this.__store.getStore()
-
+    this.__store.clear()
     if (typeof context === 'object' && context !== null) {
-      store.context = context
-    }
-    else {
-      store.context = {}
+      this.__store.setContext(context)
     }
 
     return this
   }
 
   clear(): Client {
-    const store = this.__store.getStore()
-    store.context = {}
-    store.breadcrumbs = []
+    this.__store.clear()
 
     return this
   }
@@ -196,8 +185,8 @@ export abstract class Client {
       }
     })
 
-    const breadcrumbs = this.__getStoreContentsOrDefault().breadcrumbs
-    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs.slice() : []
+    const breadcrumbs = this.__store.getContents('breadcrumbs')
+    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs : []
 
     getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler)
       .then(sourcePerTrace => {
@@ -304,7 +293,7 @@ export abstract class Client {
       return null
     }
 
-    const context = this.__getStoreContentsOrDefault().context
+    const context = this.__store.getContents('context')
     const noticeTags = this.__constructTags(notice.tags)
     const contextTags = this.__constructTags(context['tags'])
     const configTags = this.__constructTags(this.config.tags)
@@ -346,22 +335,22 @@ export abstract class Client {
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 
-    const store = this.__store.getStore()
-    let breadcrumbs = store.breadcrumbs
-    breadcrumbs.push({
+    this.__store.addBreadcrumb({
       category: category as string,
-      message: message,
+      message,
       metadata: metadata as Record<string, unknown>,
-      timestamp: timestamp
+      timestamp
     })
 
-    const limit = this.config.maxBreadcrumbs
-    if (breadcrumbs.length > limit) {
-      breadcrumbs = breadcrumbs.slice(breadcrumbs.length - limit)
-    }
-    store.breadcrumbs = breadcrumbs
-
     return this
+  }
+
+  __getBreadcrumbs() {
+    return this.__store.getContents('breadcrumbs').slice()
+  }
+
+  __getContext() {
+    return this.__store.getContents('context')
   }
 
   protected __developmentMode(): boolean {
@@ -416,20 +405,5 @@ export abstract class Client {
     }
 
     return tags.toString().split(TAG_SEPARATOR).filter((tag) => NOT_BLANK.test(tag))
-  }
-
-  /**
-   * For ALS, the store may be uninitialized (if .run()` has not been called).
-   * This provides an easy way to read the existing store object or fall back to a default.
-   * Returns *a copy* of the s tore contents.
-   */
-  protected __getStoreContentsOrDefault(): DefaultStoreContents {
-    const existingStoreContents = this.__store.getStore();
-    const storeContents = existingStoreContents || {};
-    return {
-      context: {},
-      breadcrumbs: [],
-      ...storeContents
-    };
   }
 }

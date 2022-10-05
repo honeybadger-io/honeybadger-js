@@ -1,5 +1,4 @@
 import { Client } from './client'
-import type { AsyncLocalStorage } from 'async_hooks';
 
 export interface Logger {
   log(...args: unknown[]): unknown
@@ -163,5 +162,29 @@ export interface Transport {
   send(options: TransportOptions, payload?: NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }>
 }
 
-export type HoneybadgerStore<T> = Pick<AsyncLocalStorage<T>, 'getStore' | 'run'>
-export type DefaultStoreContents = {context: Record<string, unknown>, breadcrumbs: BreadcrumbRecord[]}
+export interface HoneybadgerStore {
+  /**
+   * Is the store available for writing and reading?
+   */
+  available(): boolean
+
+  /**
+   * With no arguments, returns a copy of the store contents for reading.
+   * When a key is supplied, returns the value of that key in the store.
+   */
+  getContents(): StoreContents
+  getContents<K extends keyof StoreContents>(key: K): StoreContents[K]
+
+  setContext(context: Record<string, unknown>): void
+
+  addBreadcrumb(breadcrumb: BreadcrumbRecord): void
+
+  clear(): void
+
+  run<R>(callback: () => R, ...opts: unknown[]): R
+}
+
+export type StoreContents = {
+  context: Record<string, unknown>,
+  breadcrumbs: BreadcrumbRecord[]
+}
