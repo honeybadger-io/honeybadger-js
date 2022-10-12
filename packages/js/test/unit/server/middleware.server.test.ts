@@ -97,17 +97,15 @@ describe('Express Middleware', function () {
     app.use(client.requestHandler)
 
     app.get('/:reqId', (req, res) => {
-      const initialContext = client.__store.getStore().context;
+      const initialContext = client.__getContext();
       client.setContext({ reqId: req.params.reqId });
       setTimeout(() => {
         res.json({
           initial: initialContext,
-          final: client.__store.getStore().context
+          final: client.__getContext()
         });
-      }, 1000);
+      }, 500);
     });
-
-    app.use(client.errorHandler)
 
     return Promise.all([1, 2].map((i) => {
       return request(app).get(`/${i}`)
@@ -115,6 +113,39 @@ describe('Express Middleware', function () {
         .then((response) => {
           const expectedContexts = { initial: {}, final: { reqId: `${i}` } }
           expect(response.body).toStrictEqual(expectedContexts)
+        })
+    }));
+  })
+
+  it('preserves context in the error handlers', function() {
+    client.afterNotify((err, notice) => {
+      expect(notice.context.reqId).toEqual(notice.message)
+      expect(Object.keys(notice.context.initialContext)).toHaveLength(0)
+    })
+
+    const app = express()
+
+    app.use(client.requestHandler)
+
+    app.get('/:reqId', (req, _res) => {
+      client.setContext({ reqId: req.params.reqId, initialContext: client.__getContext() });
+      setTimeout(function asyncThrow() {
+        throw new Error(req.params.reqId)
+      }, 500)
+    });
+
+    app.use(client.errorHandler)
+
+    app.use(function(_err, _req, res, _next) {
+      res.json(client.__getContext(), 500);
+    })
+
+    return Promise.all([80, 90].map((i) => {
+      return request(app).get(`/${i}`)
+        .expect(500)
+        .then((response) => {
+          const expectedContext = { reqId: `${i}`, initialContext: {} }
+          expect(response.body).toStrictEqual(expectedContext)
         })
     }));
   })

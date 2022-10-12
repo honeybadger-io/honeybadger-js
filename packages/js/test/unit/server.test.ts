@@ -88,6 +88,44 @@ describe('server client', function () {
     })
   })
 
+  it('combines previous global state when reporting', function () {
+    let expectedAssertions = 2; // Safeguard to ensure all handlers are called
+
+    client.addBreadcrumb('global 1')
+    client.addBreadcrumb('global 2')
+    const req1 = {}
+    const req2 = {}
+    client.withRequest(req1, () => {
+      client.addBreadcrumb('async 1 from request 1')
+    })
+    client.withRequest(req2, () => {
+      client.addBreadcrumb('async 1 from request 2')
+      expect(client.__getBreadcrumbs()).toHaveLength(3)
+      expect(client.__getBreadcrumbs().map(({ message }) => message)).toEqual(
+        ['global 1', 'global 2', 'async 1 from request 2']
+      )
+      expectedAssertions--
+    })
+    client.withRequest(req1, () => {
+      client.addBreadcrumb('async 2 from request 1')
+      expect(client.__getBreadcrumbs()).toHaveLength(4)
+      expect(client.__getBreadcrumbs().map(({ message }) => message)).toEqual(
+        ['global 1', 'global 2', 'async 1 from request 1', 'async 2 from request 1']
+      )
+      expectedAssertions--
+    })
+
+    client.addBreadcrumb('global 3')
+    expect(client.__getBreadcrumbs()).toHaveLength(3)
+    expect(client.__getBreadcrumbs().map(({ message }) => message)).toEqual(
+      ['global 1', 'global 2', 'global 3']
+    )
+
+    if (expectedAssertions !== 0) {
+      throw new Error(`Not all assertions ran. ${expectedAssertions} assertions did not run.`)
+    }
+  })
+
   describe('afterNotify', function () {
     beforeEach(function () {
       client.configure({
@@ -207,7 +245,7 @@ describe('server client', function () {
       const errorHandler = (e) => {
         err = e;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        context = (<any>client).__store.getStore().context;
+        context = (<any>client).__getContext();
       }
 
       client.withRequest({}, () => client.setContext({ a: true }), errorHandler)
@@ -232,12 +270,12 @@ describe('server client', function () {
       });
       client.withRequest(request, () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect((<any>client).__store.getStore().context).toStrictEqual({ request1: true });
+        expect((<any>client).__getContext()).toStrictEqual({ request1: true });
       });
       client.withRequest(request, () => {
         setTimeout(() => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          expect((<any>client).__store.getStore().context).toStrictEqual({ request1: true });
+          expect((<any>client).__getContext()).toStrictEqual({ request1: true });
           done();
         }, 200);
       });
