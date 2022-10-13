@@ -1,20 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Types } from '@honeybadger-io/core'
 import Honeybadger from '../server'
-import type { Handler, Callback, Context } from 'aws-lambda'
 
-export type SyncHandler<TEvent = any, TResult = any> = (
-    event: TEvent,
-    context: Context,
-    callback: Callback<TResult>,
+interface LambdaContext extends Record<string, unknown> {
+  getRemainingTimeInMillis(): number;
+}
+
+type LambdaCallback<TResult> = (error?: Error | string | null, result?: TResult) => void | TResult;
+
+type LambdaHandler<TResult = any> = (
+    event: unknown,
+    context: LambdaContext,
+    callback?: LambdaCallback<TResult>,
+) => void | Promise<TResult>;
+
+export type SyncHandler<TResult = any> = (
+    event: unknown,
+    context: LambdaContext,
+    callback: LambdaCallback<TResult>,
 ) => void;
 
-export type AsyncHandler<TEvent = any, TResult = any> = (
-    event: TEvent,
-    context: Context,
+export type AsyncHandler<TResult = any> = (
+    event: unknown,
+    context: LambdaContext,
 ) => Promise<TResult>;
 
-function isHandlerSync(handler: Handler): handler is SyncHandler {
+function isHandlerSync(handler: LambdaHandler): handler is SyncHandler {
   return handler.length > 2
 }
 
@@ -27,7 +38,7 @@ function reportToHoneybadger(hb: typeof Honeybadger, err: Error | string | null,
   })
 }
 
-function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: typeof Honeybadger): AsyncHandler<TEvent, TResult> {
+function asyncHandler<TResult = any>(handler: AsyncHandler<TResult>, hb: typeof Honeybadger): AsyncHandler<TResult> {
   return function wrappedLambdaHandler(event, context) {
     return new Promise<TResult>((resolve, reject) => {
       hb.run(() => {
@@ -54,7 +65,7 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
   }
 }
 
-function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: typeof Honeybadger): SyncHandler<TEvent, TResult> {
+function syncHandler<TResult = any>(handler: SyncHandler<TResult>, hb: typeof Honeybadger): SyncHandler<TResult> {
   return function wrappedLambdaHandler(event, context, cb) {
     hb.run(() => {
       const timeoutHandler = setupTimeoutWarning(hb, context)
@@ -75,11 +86,11 @@ function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, T
   }
 }
 
-function shouldReportTimeoutWarning(hb: typeof Honeybadger, context: Context): boolean {
+function shouldReportTimeoutWarning(hb: typeof Honeybadger, context: LambdaContext): boolean {
   return typeof context.getRemainingTimeInMillis === 'function' && !!((hb.config as Types.ServerlessConfig).reportTimeoutWarning)
 }
 
-function setupTimeoutWarning(hb: typeof Honeybadger, context: Context) {
+function setupTimeoutWarning(hb: typeof Honeybadger, context: LambdaContext) {
   if (!shouldReportTimeoutWarning(hb, context)) {
     return
   }
@@ -91,7 +102,7 @@ function setupTimeoutWarning(hb: typeof Honeybadger, context: Context) {
 
 }
 
-export function lambdaHandler<TEvent = any, TResult = any>(handler: Handler<TEvent, TResult>): Handler<TEvent, TResult> {
+export function lambdaHandler<TResult = any>(handler: LambdaHandler<TResult>): LambdaHandler<TResult> {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const hb: typeof Honeybadger = this
   if (isHandlerSync(handler)) {
