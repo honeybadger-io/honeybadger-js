@@ -1,8 +1,21 @@
-import url from 'url'
-import { NextFunction, Request, Response } from 'express'
+import url from 'node:url'
+import http from 'node:http'
 import { Types } from '@honeybadger-io/core'
 
-function fullUrl(req: Request): string {
+type ExpressNextFunction = (err?: unknown) => unknown
+interface ExpressRequest extends http.IncomingMessage {
+  body: unknown;
+  query: unknown;
+  protocol: string;
+  path: string;
+  hostname: string;
+  [x: string]: unknown;
+}
+interface ExpressResponse extends http.ServerResponse {
+  [x: string]: unknown;
+}
+
+function fullUrl(req: ExpressRequest): string {
   const connection = req.connection
   const address = connection && connection.address()
   // @ts-ignore The old @types/node incorrectly defines `address` as string|Address
@@ -18,11 +31,11 @@ function fullUrl(req: Request): string {
   })
 }
 
-export function requestHandler(req: Request, res: Response, next: NextFunction): void {
+export function requestHandler(req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction): void {
   this.withRequest(req, next, next)
 }
 
-export function errorHandler(err: Types.Noticeable, req: Request, _res: Response, next: NextFunction): unknown {
+export function errorHandler(err: Types.Noticeable, req: ExpressRequest, _res: ExpressResponse, next: ExpressNextFunction): unknown {
   this.notify(err, {
     url:     fullUrl(req),
     params:  req.body,    // http://expressjs.com/en/api.html#req.body
