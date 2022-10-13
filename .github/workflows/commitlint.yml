@@ -1,0 +1,27 @@
+name: Node CI
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  commitlint:
+    name: Check PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            packages/js/examples/aws-lambda-typescript/package-lock.json
+      - name: Install deps
+        run: npm ci --ignore-scripts
+      - name: Verify PR title is in the correct format
+        run: |
+          echo "${{ github.event.pull_request.title }}" | npx commitlint -V
