@@ -21,7 +21,7 @@ This project is _isomorphic_, meaning it's a single library which contains both 
 
 In addition, the TypeScript type declaration for each build is generated into its `types/` directory (ie `dist/browser/types/browser.d.ts` and `dist/server/types/server.d.ts`).
 
-However, since the package is isomorphic, TypeScript users will likely be writing `import * as Honeybadger from '@honeybadger-io/js'` or `import Honeybadger = require('@honeybadger-io/js')` in their IDE. Our `package.json` has ` main` and `browser` fields that determine which build they get, but [there can only be a single type declaration file](https://github.com/Microsoft/TypeScript/issues/29128). So we use an extra file in the project root, `honeybadger.d.ts`, that combines the types from both builds.
+However, since the package is isomorphic, TypeScript users will likely be writing `import Honeybadger from '@honeybadger-io/js'` or `import Honeybadger = require('@honeybadger-io/js')` in their IDE. Our `package.json` has ` main` and `browser` fields that determine which build they get, but [there can only be a single type declaration file](https://github.com/Microsoft/TypeScript/issues/29128). So we use an extra file in the project root, `honeybadger.d.ts`, that combines the types from both builds.
 
 ### Tests
 1. To run unit tests for both browser and server builds: `npm test`. Or separately: `npm run test:browser`, `npm run test:server`.
