@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.6.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.6.0...v4.6.1) (2022-10-24)
+
+
+### Bug Fixes
+
+* README.md misleading dev to use wrong import code on while working with ES6 Import.  ([#916](https://github.com/honeybadger-io/honeybadger-js/issues/916)) ([246633a](https://github.com/honeybadger-io/honeybadger-js/commit/246633a4db1c422868b530ad925ff99ed0b90503))
+
+
+
+
+
 # [4.6.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.5.0...v4.6.0) (2022-10-17)
 
 
