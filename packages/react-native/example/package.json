@@ -12,7 +12,7 @@
   "dependencies": {
     "@honeybadger-io/react-native": "^0.0.12",
     "react": "16.13.1",
-    "react-native": "0.64.1"
+    "react-native": "0.70.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.0",
