@@ -9,11 +9,10 @@
     "eslint": "^8.20.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-promise": "^6.0.0",
-    "husky": "^8.0.1",
     "lerna": "^5.1.8"
   },
   "scripts": {
-    "prepare": "npm run build && husky install",
+    "prepare": "npm run build",
     "build": "lerna run build --stream",
     "test": "lerna run test --stream",
     "install": "lerna bootstrap",

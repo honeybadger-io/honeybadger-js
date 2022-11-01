@@ -3,6 +3,58 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.6.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.6.1...v4.6.2) (2022-10-28)
+
+
+### Bug Fixes
+
+* add @types/express in deps ([#917](https://github.com/honeybadger-io/honeybadger-js/issues/917)) ([d06717b](https://github.com/honeybadger-io/honeybadger-js/commit/d06717b1ada4d96a1eefd3eff7c1084371e5986d))
+
+
+
+
+
+## [4.6.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.6.0...v4.6.1) (2022-10-24)
+
+
+### Bug Fixes
+
+* README.md misleading dev to use wrong import code on while working with ES6 Import.  ([#916](https://github.com/honeybadger-io/honeybadger-js/issues/916)) ([246633a](https://github.com/honeybadger-io/honeybadger-js/commit/246633a4db1c422868b530ad925ff99ed0b90503))
+
+
+
+
+
+# [4.6.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.5.0...v4.6.0) (2022-10-17)
+
+
+### Features
+
+* rework store API ([d814174](https://github.com/honeybadger-io/honeybadger-js/commit/d81417456f2f0b3b69f22cf96c24c5fd330fd5d8))
+
+
+
+
+
+# [4.5.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.4.1...v4.5.0) (2022-10-04)
+
+
+### Features
+
+* migrate gatsby-plugin to monorepo ([#903](https://github.com/honeybadger-io/honeybadger-js/issues/903)) ([84bc0f9](https://github.com/honeybadger-io/honeybadger-js/commit/84bc0f9d57bd3b6a56f51508072b91afd36cede9))
+
+
+
+
+
+## [4.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.4.0...v4.4.1) (2022-10-03)
+
+**Note:** Version bump only for package root
+
+
+
+
+
 # [4.4.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.3.1...v4.4.0) (2022-09-28)
 
 

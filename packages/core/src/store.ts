@@ -1,18 +1,45 @@
-import { HoneybadgerStore } from './types';
+import { HoneybadgerStore, StoreContents } from './types';
+import { merge } from './util';
 
-export class GlobalStore<T> implements HoneybadgerStore<T> {
-  private store: T
+export class GlobalStore implements HoneybadgerStore {
+  private readonly contents: StoreContents;
+  private readonly breadcrumbsLimit: number;
 
-  constructor(store: T) {
-    this.store = store;
+  constructor(contents: StoreContents, breadcrumbsLimit: number) {
+    this.contents = contents;
+    this.breadcrumbsLimit = breadcrumbsLimit;
   }
 
-  getStore(): T {
-    return this.store
+  static create(contents: StoreContents, breadcrumbsLimit: number) {
+    return new GlobalStore(contents, breadcrumbsLimit);
   }
 
-  run<R, TArgs extends unknown[]>(store: T, callback: (...args: TArgs) => R, ...args: TArgs): R {
-    this.store = store;
-    return callback(...args);
+  available() {
+    return true
+  }
+
+  getContents(key?: keyof StoreContents) {
+    const value = key ? this.contents[key] : this.contents;
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  setContext(context) {
+    this.contents.context = merge(this.contents.context, context || {});
+  }
+
+  addBreadcrumb(breadcrumb) {
+    if (this.contents.breadcrumbs.length == this.breadcrumbsLimit) {
+      this.contents.breadcrumbs.shift()
+    }
+    this.contents.breadcrumbs.push(breadcrumb);
+  }
+
+  clear() {
+    this.contents.context = {}
+    this.contents.breadcrumbs = []
+  }
+
+  run(callback) {
+    return callback();
   }
 }

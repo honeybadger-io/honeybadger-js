@@ -31,14 +31,6 @@ export class TestClient extends BaseClient {
     super(opts, transport);
   }
 
-  public getContext() {
-    return this.__store.getStore().context
-  }
-
-  public getBreadcrumbs() {
-    return this.__store.getStore().breadcrumbs
-  }
-
   public getPayload(noticeable: Types.Noticeable, name: string | Partial<Types.Notice> = undefined, extra: Partial<Types.Notice> = undefined) {
     // called in client.notify()
     const notice = this.makeNotice(noticeable, name, extra)
@@ -52,7 +44,7 @@ export class TestClient extends BaseClient {
       }
     })
 
-    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.getBreadcrumbs().slice() : []
+    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? this.__getBreadcrumbs() : []
 
     // called in (server|browser).__send()
     return this.__buildPayload(notice)

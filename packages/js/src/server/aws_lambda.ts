@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Client as Honeybadger, Types } from '@honeybadger-io/core'
+import { Types } from '@honeybadger-io/core'
+import Honeybadger from '../server'
 import type { Handler, Callback, Context } from 'aws-lambda'
-import { AsyncStore } from './async_store';
 
 export type SyncHandler<TEvent = any, TResult = any> = (
     event: TEvent,
@@ -18,7 +18,7 @@ function isHandlerSync(handler: Handler): handler is SyncHandler {
   return handler.length > 2
 }
 
-function reportToHoneybadger(hb: Honeybadger, err: Error | string | null, callback: (err: Error | string | null) => void) {
+function reportToHoneybadger(hb: typeof Honeybadger, err: Error | string | null, callback: (err: Error | string | null) => void) {
   hb.notify(err, {
     afterNotify: function () {
       hb.clear()
@@ -27,11 +27,10 @@ function reportToHoneybadger(hb: Honeybadger, err: Error | string | null, callba
   })
 }
 
-function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: Honeybadger): AsyncHandler<TEvent, TResult> {
+function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent, TResult>, hb: typeof Honeybadger): AsyncHandler<TEvent, TResult> {
   return function wrappedLambdaHandler(event, context) {
-    hb.__setStore(AsyncStore)
     return new Promise<TResult>((resolve, reject) => {
-      AsyncStore.run({ context: {}, breadcrumbs: [] }, () => {
+      hb.run(() => {
         const timeoutHandler = setupTimeoutWarning(hb, context)
         try {
           const result = handler(event, context);
@@ -55,10 +54,9 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
   }
 }
 
-function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: Honeybadger): SyncHandler<TEvent, TResult> {
+function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, TResult>, hb: typeof Honeybadger): SyncHandler<TEvent, TResult> {
   return function wrappedLambdaHandler(event, context, cb) {
-    hb.__setStore(AsyncStore)
-    AsyncStore.run({ context: {}, breadcrumbs: [] }, () => {
+    hb.run(() => {
       const timeoutHandler = setupTimeoutWarning(hb, context)
       try {
         handler(event, context, (error, result) => {
@@ -77,11 +75,11 @@ function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, T
   }
 }
 
-function shouldReportTimeoutWarning(hb: Honeybadger, context: Context): boolean {
+function shouldReportTimeoutWarning(hb: typeof Honeybadger, context: Context): boolean {
   return typeof context.getRemainingTimeInMillis === 'function' && !!((hb.config as Types.ServerlessConfig).reportTimeoutWarning)
 }
 
-function setupTimeoutWarning(hb: Honeybadger, context: Context) {
+function setupTimeoutWarning(hb: typeof Honeybadger, context: Context) {
   if (!shouldReportTimeoutWarning(hb, context)) {
     return
   }
@@ -95,7 +93,7 @@ function setupTimeoutWarning(hb: Honeybadger, context: Context) {
 
 export function lambdaHandler<TEvent = any, TResult = any>(handler: Handler<TEvent, TResult>): Handler<TEvent, TResult> {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const hb: Honeybadger = this
+  const hb: typeof Honeybadger = this
   if (isHandlerSync(handler)) {
     return syncHandler(handler, hb)
   }

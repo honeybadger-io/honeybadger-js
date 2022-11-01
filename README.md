@@ -19,6 +19,9 @@ You can refer to the README of each package for more information and instruction
 - [@honeybadger-io/react](./packages/react)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact)  
   SDK for React integration
+- [@honeybadger-io/gatsby-plugin-honeybadger](./packages/gatsby-plugin)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger)  
+  [Gatsby](https://www.gatsbyjs.com) plugin
 - [@honeybadger-io/react-native](./packages/react-native)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact-native.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact-native)  
   SDK for React Native integration

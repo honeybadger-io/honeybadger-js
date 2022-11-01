@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.6.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.5.0...v4.6.0) (2022-10-17)
+
+
+### Features
+
+* rework store API ([d814174](https://github.com/honeybadger-io/honeybadger-js/commit/d81417456f2f0b3b69f22cf96c24c5fd330fd5d8))
+
+
+
+
+
 # [4.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.2.1...v4.3.0) (2022-09-17)
 
 

@@ -47,7 +47,7 @@ describe('client', function () {
   })
 
   it('has a context object', function () {
-    expect(client.getContext()).toEqual({})
+    expect(client.__getContext()).toEqual({})
   })
 
   describe('setContext', function () {
@@ -58,8 +58,7 @@ describe('client', function () {
         foo: 'bar'
       })
 
-      expect(client.getContext().user_id).toEqual('1')
-      expect(client.getContext().foo).toEqual('bar')
+      expect(client.__getContext()).toEqual({ user_id: '1', foo: 'bar' })
     })
 
     it('is chainable', function () {
@@ -70,7 +69,7 @@ describe('client', function () {
 
     it('does not accept non-objects', function () {
       client.setContext(<never>'foo')
-      expect(client.getContext()).toEqual({})
+      expect(client.__getContext()).toEqual({})
     })
 
     it('keeps previous context when called with non-object', function () {
@@ -78,7 +77,7 @@ describe('client', function () {
         foo: 'bar'
       }).setContext(<never>false)
 
-      expect(client.getContext()).toEqual({
+      expect(client.__getContext()).toEqual({
         foo: 'bar'
       })
     })
@@ -91,13 +90,13 @@ describe('client', function () {
         user_id: '1'
       })
 
-      expect(client.getContext()).not.toEqual({})
-      expect(client.getBreadcrumbs()).not.toEqual([])
+      expect(client.__getContext()).not.toEqual({})
+      expect(client.__getBreadcrumbs()).not.toEqual([])
 
       client.clear()
 
-      expect(client.getContext()).toEqual({})
-      expect(client.getBreadcrumbs()).toEqual([])
+      expect(client.__getContext()).toEqual({})
+      expect(client.__getBreadcrumbs()).toEqual([])
     })
   })
 
@@ -107,7 +106,7 @@ describe('client', function () {
         user_id: '1'
       }).resetContext()
 
-      expect(client.getContext()).toEqual({})
+      expect(client.__getContext()).toEqual({})
     })
 
     it('replaces the context with arguments', function () {
@@ -117,7 +116,7 @@ describe('client', function () {
         foo: 'bar'
       })
 
-      expect(client.getContext()).toEqual({
+      expect(client.__getContext()).toEqual({
         foo: 'bar'
       })
     })
@@ -127,7 +126,7 @@ describe('client', function () {
         foo: 'bar'
       }).resetContext(<never>'foo')
 
-      expect(client.getContext()).toEqual({})
+      expect(client.__getContext()).toEqual({})
     })
 
     it('is chainable', function () {
@@ -706,15 +705,15 @@ describe('client', function () {
 
   describe('addBreadcrumb', function () {
     it('has default breadcrumbs', function () {
-      expect(client.getBreadcrumbs()).toEqual([])
+      expect(client.__getBreadcrumbs()).toEqual([])
     })
 
     it('adds a breadcrumb with defaults', function () {
       client.addBreadcrumb('expected message')
 
-      expect(client.getBreadcrumbs().length).toEqual(1)
+      expect(client.__getBreadcrumbs().length).toEqual(1)
 
-      const crumb = client.getBreadcrumbs()[0]
+      const crumb = client.__getBreadcrumbs()[0]
 
       expect(crumb.message).toEqual('expected message')
       expect(crumb.category).toEqual('custom')
@@ -727,8 +726,8 @@ describe('client', function () {
         category: 'test'
       })
 
-      expect(client.getBreadcrumbs().length).toEqual(1)
-      expect(client.getBreadcrumbs()[0].category).toEqual('test')
+      expect(client.__getBreadcrumbs().length).toEqual(1)
+      expect(client.__getBreadcrumbs()[0].category).toEqual('test')
     })
 
     it('overrides the default metadata', function () {
@@ -738,8 +737,8 @@ describe('client', function () {
         }
       })
 
-      expect(client.getBreadcrumbs().length).toEqual(1)
-      expect(client.getBreadcrumbs()[0].metadata).toEqual({
+      expect(client.__getBreadcrumbs().length).toEqual(1)
+      expect(client.__getBreadcrumbs()[0].metadata).toEqual({
         key: 'expected value'
       })
     })
@@ -755,9 +754,9 @@ describe('client', function () {
         metadata: metadata
       })
 
-      expect(client.getBreadcrumbs().length).toEqual(2)
-      expect(client.getBreadcrumbs()[0].metadata).toEqual(client.getBreadcrumbs()[1].metadata)
-      expect(client.getBreadcrumbs()[0].metadata).not.toBe(client.getBreadcrumbs()[1].metadata)
+      expect(client.__getBreadcrumbs().length).toEqual(2)
+      expect(client.__getBreadcrumbs()[0].metadata).toEqual(client.__getBreadcrumbs()[1].metadata)
+      expect(client.__getBreadcrumbs()[0].metadata).not.toBe(client.__getBreadcrumbs()[1].metadata)
     })
 
     it('maintains the size of the breadcrumbs queue', function () {
@@ -765,10 +764,10 @@ describe('client', function () {
         client.addBreadcrumb('expected message ' + i)
       }
 
-      expect(client.getBreadcrumbs().length).toEqual(40)
+      expect(client.__getBreadcrumbs().length).toEqual(40)
 
-      expect(client.getBreadcrumbs()[0].message).toEqual('expected message 6')
-      expect(client.getBreadcrumbs()[39].message).toEqual('expected message 45')
+      expect(client.__getBreadcrumbs()[0].message).toEqual('expected message 6')
+      expect(client.__getBreadcrumbs()[39].message).toEqual('expected message 45')
     })
 
     it('sends breadcrumbs by default', function () {
