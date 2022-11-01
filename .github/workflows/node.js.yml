@@ -83,6 +83,9 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             packages/js/examples/aws-lambda-typescript/package-lock.json
+            packages/vue/examples/vue2/package-lock.json
+            packages/vue/examples/vue3/package-lock.json
+            packages/react-native/example/package-lock.json
 
       - name: Build
         run: npm ci
@@ -98,6 +101,11 @@ jobs:
           npm ci --force
           cd ../vue3
           npm ci
+
+      - name: Install React Native example deps
+        run: |
+          cd packages/react-native/example
+          npm ci --force
 
       - name: Run lint checks
         run: npm run lint
