@@ -14,7 +14,11 @@ similar webpack plugin they have authored.
 ## Installation
 
 ```
+# npm
 npm install @honeybadger-io/webpack --save-dev
+
+# yarn
+yarn add @honeybadger-io/webpack --dev
 ```
 
 ## Configuration
