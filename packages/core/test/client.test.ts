@@ -966,7 +966,7 @@ describe('client', function () {
 
   it('supports causes that are not errors', function () {
     const causeObj = { code: 'NonInteger', prop: 'a value' }
-    // @ts-ignore
+    //@ts-expect-error
     const error = new Error('An Error', { cause: causeObj })
     const payload = client.getPayload(error)
     expect(payload.error.class).toEqual(error.name)

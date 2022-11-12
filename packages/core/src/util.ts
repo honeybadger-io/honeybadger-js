@@ -69,13 +69,13 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
 
 
 
-function objHasCause(obj: unknown): obj is ((Error | Record<string, unknown>) & { cause: unknown }) {
+function objHasCause(obj: unknown): obj is ((Error | Record<string, unknown>) & { cause: Record<string, unknown> }) {
   return typeof obj === 'object' && obj != null && 'cause' in obj
 }
 
-export function getCauses(notice: Partial<Notice>): Array<ErrorNestedCause | unknown> {
+export function getCauses(notice: Partial<Notice>): Array<ErrorNestedCause | Record<string, unknown>> {
   if (notice.cause) {
-    const causes: Array<ErrorNestedCause | unknown> = []
+    const causes: Array<ErrorNestedCause | Record<string, unknown>> = []
     let cause: unknown = notice.cause || null
     while (causes.length < 3 && cause) {
       if (cause instanceof Error) {
