@@ -1,5 +1,5 @@
 import { nullLogger, TestClient, TestTransport } from './helpers'
-import { Notice } from '../src/types'
+import { ErrorNestedCause, Notice } from '../src/types'
 
 class MyError extends Error {
   context = null
@@ -932,12 +932,13 @@ describe('client', function () {
 
     if (level3Error.cause) { // `.cause` in constructor is only supported on certain platforms/Node versions
       expect(payload.error.causes).toHaveLength(2)
-      expect(payload.error.causes[0].class).toEqual(level2Error.name)
-      expect(payload.error.causes[0].message).toEqual(level2Error.message)
-      expect(payload.error.causes[0].backtrace).toBeTruthy()
-      expect(payload.error.causes[1].class).toEqual(level1Error.name)
-      expect(payload.error.causes[1].message).toEqual(level1Error.message)
-      expect(payload.error.causes[1].backtrace).toBeTruthy()
+      expect((payload.error.causes[0] as ErrorNestedCause).class).toEqual(level2Error.name)
+      expect((payload.error.causes[0] as ErrorNestedCause).message).toEqual(level2Error.message)
+      expect((payload.error.causes[0] as ErrorNestedCause).backtrace).toBeTruthy()
+
+      expect((payload.error.causes[1] as ErrorNestedCause).class).toEqual(level1Error.name)
+      expect((payload.error.causes[1] as ErrorNestedCause).message).toEqual(level1Error.message)
+      expect((payload.error.causes[1] as ErrorNestedCause).backtrace).toBeTruthy()
     } else {
       expect(payload.error.causes).toHaveLength(0)
     }
@@ -955,10 +956,27 @@ describe('client', function () {
 
     if (level5Error.cause) { // `.cause` in constructor is only supported on certain platforms/Node versions
       expect(payload.error.causes).toHaveLength(3)
-      expect(payload.error.causes[0].class).toEqual(level3Error.name)
-      expect(payload.error.causes[1].class).toEqual(level2Error.name)
-      expect(payload.error.causes[2].class).toEqual(level1Error.name)
+      expect((payload.error.causes[0] as ErrorNestedCause).class).toEqual(level3Error.name)
+      expect((payload.error.causes[1] as ErrorNestedCause).class).toEqual(level2Error.name)
+      expect((payload.error.causes[2] as ErrorNestedCause).class).toEqual(level1Error.name)
     } else {
+      expect(payload.error.causes).toHaveLength(0)
+    }
+  })
+
+  it('supports causes that are not errors', function () {
+    const causeObj = { code: 'NonInteger', prop: 'a value' }
+    // @ts-ignore
+    const error = new Error('An Error', { cause: causeObj })
+    const payload = client.getPayload(error)
+    expect(payload.error.class).toEqual(error.name)
+    expect(payload.error.message).toEqual(error.message)
+
+    if (error.cause) {
+      expect(payload.error.causes).toHaveLength(1)
+      expect(payload.error.causes[0]).toEqual(causeObj)
+    }
+    else {
       expect(payload.error.causes).toHaveLength(0)
     }
   })

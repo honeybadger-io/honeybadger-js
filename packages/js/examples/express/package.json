@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@honeybadger-io/js": "^3.0.4",
+    "@honeybadger-io/js": "../../",
     "express": "^4.17.1"
   }
 }

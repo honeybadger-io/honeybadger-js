@@ -377,7 +377,7 @@ export abstract class Client {
         backtrace: notice.backtrace,
         fingerprint: notice.fingerprint,
         tags: notice.tags,
-        causes: getCauses(notice),
+        causes: getCauses(notice).map(c => filter(c, this.config.filters)),
       },
       request: {
         url: filterUrl(notice.url, this.config.filters),

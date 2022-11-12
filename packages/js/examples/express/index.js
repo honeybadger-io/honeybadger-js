@@ -21,12 +21,13 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.get('/fail', (_req, _res) => {
+app.get('/fail', (_req, res) => {
   Honeybadger.setContext({
     local: 'true'
   })
 
-  throw new Error('Badgers!')
+  const err = new Error('Cause is error!', { cause: new Error('cause') });
+  Honeybadger.notifyAsync(err).then(() => res.send('Done! Check HB Dashboard.'))
 })
 
 app.get('/checkin/:id', (req, res) => {

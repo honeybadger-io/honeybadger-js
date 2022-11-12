@@ -1,7 +1,15 @@
 import * as stackTraceParser from 'stacktrace-parser'
 import { Client } from './client'
 import {
-  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler, Config, BrowserConfig
+  Logger,
+  BacktraceFrame,
+  Notice,
+  Noticeable,
+  BeforeNotifyHandler,
+  AfterNotifyHandler,
+  Config,
+  BrowserConfig,
+  ErrorNestedCause
 } from './types'
 
 export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
@@ -59,16 +67,29 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
   }
 }
 
-export function getCauses(notice: Partial<Notice>) {
+
+
+function objHasCause(obj: unknown): obj is ((Error | Record<string, unknown>) & { cause: unknown }) {
+  return typeof obj === 'object' && obj != null && 'cause' in obj
+}
+
+export function getCauses(notice: Partial<Notice>): Array<ErrorNestedCause | unknown> {
   if (notice.cause) {
-    const causes =[]
-    let cause = notice as Error
-    while (causes.length < 3 && (cause = cause.cause) as Error) {
-      causes.push({
-        class: cause.name,
-        message: cause.message,
-        backtrace: typeof cause.stack == 'string' ? makeBacktrace(cause.stack) : null
-      })
+    const causes: Array<ErrorNestedCause | unknown> = []
+    let cause: unknown = notice.cause || null
+    while (causes.length < 3 && cause) {
+      if (cause instanceof Error) {
+        causes.push({
+          class: cause.name,
+          message: cause.message,
+          backtrace: typeof cause.stack == 'string' ? makeBacktrace(cause.stack) : null
+        })
+      }
+      else {
+        causes.push({ ...(cause as object) })
+      }
+
+      cause = objHasCause(cause) ? cause.cause : null
     }
     return causes
   }

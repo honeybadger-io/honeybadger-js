@@ -73,7 +73,7 @@ export interface Notice {
   details: Record<string, Record<string, unknown>>,
   __breadcrumbs: BreadcrumbRecord[],
   afterNotify?: AfterNotifyHandler,
-  cause?: Error|Record<string, unknown>,
+  cause?: Error | Record<string, unknown>,
   [key: string]: unknown
 }
 
@@ -130,6 +130,12 @@ export type TransportOptions = {
   async?: boolean // don't like this here because it's only for browser
 }
 
+export type ErrorNestedCause = {
+  class: string
+  message: string,
+  backtrace: BacktraceFrame[]
+}
+
 export type NoticeTransportPayload = {
   notifier: {
     name: string,
@@ -141,7 +147,7 @@ export type NoticeTransportPayload = {
     trail: BreadcrumbRecord[]
   },
   error: Pick<Notice, 'message' | 'backtrace' | 'fingerprint' | 'tags'> & {
-    causes: Array<{class: string, message: string, backtrace: BacktraceFrame[]}>,
+    causes: Array<ErrorNestedCause | unknown>,
     class: string,
   },
   request: Pick<Notice, 'url' | 'component' | 'action' | 'context' | 'params' | 'session'> & {
