@@ -45,7 +45,8 @@ export default [
     external: ['http', 'https', 'url', 'os', 'fs', 'util', 'domain', 'async_hooks'],
     output: {
       file: pkg.main,
-      format: 'cjs'
+      format: 'cjs',
+      sourcemap: true
     },
     plugins: sharedPlugins
   }
