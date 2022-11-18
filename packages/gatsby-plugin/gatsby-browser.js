@@ -1,4 +1,4 @@
-const Honeybadger = require('honeybadger-js')
+const Honeybadger = require('@honeybadger-io/js')
 
 exports.onClientEntry = function(_, { apiKey, revision, environment = process.env.NODE_ENV }) {
   if (!apiKey) {

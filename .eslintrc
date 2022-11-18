@@ -32,6 +32,11 @@
       }
     ]
   },
+  "settings": {
+    "import/ignore": [
+      "node_modules/react-native/index\\.js$"
+    ]
+  },
   "plugins": [
     "@typescript-eslint"
   ],

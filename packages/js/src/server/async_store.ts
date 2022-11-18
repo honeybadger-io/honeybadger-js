@@ -1,5 +1,5 @@
 import { Types } from '@honeybadger-io/core';
-import { AsyncLocalStorage } from 'async_hooks';
+import type { AsyncLocalStorage } from 'async_hooks';
 
 const kHoneybadgerStore = Symbol.for('kHoneybadgerStore');
 

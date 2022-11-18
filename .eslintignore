@@ -2,3 +2,4 @@ test/integration/
 dist
 build
 tmp
+index.d.ts

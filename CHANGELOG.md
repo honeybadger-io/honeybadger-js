@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.7.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.7.0...v4.7.1) (2022-11-14)
+
+**Note:** Version bump only for package root
+
+
+
+
+
+# [4.7.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.6.2...v4.7.0) (2022-11-01)
+
+
+### Bug Fixes
+
+* require correct honeybadger js package ([#919](https://github.com/honeybadger-io/honeybadger-js/issues/919)) ([9ab2288](https://github.com/honeybadger-io/honeybadger-js/commit/9ab2288b01780194525448201044f932044d03ad))
+
+
+### Features
+
+* migrate honeybadger-react-native to monorepo ([#901](https://github.com/honeybadger-io/honeybadger-js/issues/901)) ([46f3d7e](https://github.com/honeybadger-io/honeybadger-js/commit/46f3d7e0db7c4c18698fb2044802351efbbdbab9))
+
+
+
+
+
+## [4.6.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.6.1...v4.6.2) (2022-10-28)
+
+
+### Bug Fixes
+
+* add @types/express in deps ([#917](https://github.com/honeybadger-io/honeybadger-js/issues/917)) ([d06717b](https://github.com/honeybadger-io/honeybadger-js/commit/d06717b1ada4d96a1eefd3eff7c1084371e5986d))
+
+
+
+
+
 ## [4.6.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.6.0...v4.6.1) (2022-10-24)
 
 
