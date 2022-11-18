@@ -14,28 +14,53 @@ function removeAwsLambdaListener() {
   removeAwsDefaultUncaughtExceptionListener()
 }
 
+/**
+ * If there are no other uncaughtException listeners,
+ * we want to report the exception to Honeybadger and
+ * mimic the default behavior of NodeJs,
+ * which is to exit the process with code 1
+ */
+function hasUncaughtExceptionListeners() {
+  return process.listeners('uncaughtException').length !== 0
+}
+
 export default function (): Types.Plugin {
   return {
     load: (client: typeof Client) => {
-      if (!client.config.enableUncaught) { return }
+      if (!client.config.enableUncaught) {
+        return
+      }
 
       removeAwsLambdaListener()
 
+      const hasOtherListeners = hasUncaughtExceptionListeners();
       process.on('uncaughtException', function honeybadgerUncaughtExceptionListener(uncaughtError) {
-        // Prevent recursive errors
-        if (count > 1) { fatallyLogAndExit(uncaughtError) }
+        if (!client.config.enableUncaught) {
+          client.config.afterUncaught(uncaughtError)
+          if (!hasOtherListeners) {
+            fatallyLogAndExit(uncaughtError)
+          }
+          return
+        }
 
-        if (client.config.enableUncaught) {
+        // report only the first error - prevent reporting recursive errors
+        if (count < 1) {
           client.notify(uncaughtError, {
             afterNotify: (_err, _notice) => {
-              count += 1
+              count++
               client.config.afterUncaught(uncaughtError)
+              if (!hasOtherListeners) {
+                fatallyLogAndExit(uncaughtError)
+              }
             }
           })
-        } else {
-          count += 1
-          client.config.afterUncaught(uncaughtError)
         }
+        else {
+          if (!hasOtherListeners) {
+            fatallyLogAndExit(uncaughtError)
+          }
+        }
+
       })
     }
   }
