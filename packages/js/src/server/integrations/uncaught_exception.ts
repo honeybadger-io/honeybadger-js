@@ -3,6 +3,7 @@ import { fatallyLogAndExit } from '../util'
 import Client from '../../server'
 import { removeAwsDefaultUncaughtExceptionListener } from '../aws_lambda'
 
+let isReporting = false
 let count = 0
 
 function removeAwsLambdaListener() {
@@ -45,8 +46,10 @@ export default function (): Types.Plugin {
 
         // report only the first error - prevent reporting recursive errors
         if (count < 1) {
+          isReporting = true
           client.notify(uncaughtError, {
             afterNotify: (_err, _notice) => {
+              isReporting = false
               count++
               client.config.afterUncaught(uncaughtError)
               if (!hasOtherListeners) {
@@ -56,11 +59,10 @@ export default function (): Types.Plugin {
           })
         }
         else {
-          if (!hasOtherListeners) {
+          if (!hasOtherListeners && !isReporting) {
             fatallyLogAndExit(uncaughtError)
           }
         }
-
       })
     }
   }
