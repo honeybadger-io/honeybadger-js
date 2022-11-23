@@ -127,7 +127,6 @@ export type TransportOptions = {
   endpoint: string,
   maxObjectDepth?: number,
   logger: Logger
-  async?: boolean // don't like this here because it's only for browser
 }
 
 export type NoticeTransportPayload = {

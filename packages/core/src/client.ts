@@ -12,7 +12,7 @@ import {
   filterUrl,
   formatCGIData,
   getSourceForBacktrace,
-  runAfterNotifyHandlers, endpoint, isBrowserConfig, getCauses
+  runAfterNotifyHandlers, endpoint, getCauses
 } from './util'
 import {
   Config,
@@ -206,7 +206,6 @@ export abstract class Client {
             endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
             maxObjectDepth: this.config.maxObjectDepth,
             logger: this.logger,
-            async: isBrowserConfig(this.config) ? this.config.async : undefined,
           }, payload)
           .then(res => {
             if (res.statusCode !== 201) {

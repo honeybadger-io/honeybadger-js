@@ -1,11 +1,12 @@
 /* eslint-disable prefer-rest-params */
 import { Types, Util } from '@honeybadger-io/core'
 import Client from '../../browser'
+import { globalThisOrWindow } from '../util'
 
 const { instrument } = Util
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function (_window: any = window): Types.Plugin {
+export default function (_window: any = globalThisOrWindow()): Types.Plugin {
   return {
     load: (client: typeof Client) => {
       if (!client.config.enableUnhandledRejection) { return }

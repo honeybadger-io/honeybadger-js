@@ -1,27 +1,42 @@
 import { Types, Util } from '@honeybadger-io/core'
+import { globalThisOrWindow } from './util'
 
 const { sanitize } = Util
 
+/**
+ * Helper function to get typesafe Object.entries()
+ * https://twitter.com/mattpocockuk/status/1502264005251018754?lang=en
+ */
+function objectEntries<T, U extends keyof T> (obj: T): Array<[U, T[U]]> {
+  return Object.entries(obj) as Array<[U, T[U]]>
+}
+
 export class BrowserTransport implements Types.Transport {
-  send(options: Types.TransportOptions, payload?: Types.NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }> {
-    return new Promise((resolve, reject) => {
-      try {
-        const x = new XMLHttpRequest()
-        x.open(options.method, options.endpoint, options.async)
+  async send (options: Types.TransportOptions, payload?: Types.NoticeTransportPayload | undefined): Promise<{ statusCode: number, body: string }> {
+    const headerArray = options.headers ? objectEntries(options.headers) : []
 
-        if (Object.keys(options.headers || []).length) {
-          for (const i in options.headers) {
-            if (typeof options.headers[i] !== 'undefined') {
-              x.setRequestHeader(i, String(options.headers[i]))
-            }
-          }
-        }
+    const headers: HeadersInit = {}
 
-        x.send(payload ? JSON.stringify(sanitize(payload, options.maxObjectDepth)) : undefined)
-        x.onload = () => resolve({ statusCode: x.status, body: x.response })
-      } catch (err) {
-        reject(err)
+    headerArray.forEach(([key, value]) => {
+      if (key != null && value != null) {
+        headers[String(key)] = String(value)
       }
     })
+
+    const requestInit: RequestInit = {
+      method: options.method,
+      headers
+    }
+
+    // GET methods cannot have a body.
+    if (options.method === 'POST') {
+      requestInit.body = payload ? JSON.stringify(sanitize(payload, options.maxObjectDepth)) : undefined
+    }
+
+    const response = await globalThisOrWindow().fetch(options.endpoint, requestInit)
+
+    const body = await response.text()
+
+    return Promise.resolve({ statusCode: response.status, body })
   }
 }

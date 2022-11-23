@@ -1,11 +1,11 @@
 /* eslint-disable prefer-rest-params */
 import { Types, Util } from '@honeybadger-io/core'
-import { stringNameOfElement, stringSelectorOfElement, stringTextOfElement, localURLPathname, nativeFetch } from '../util'
+import { stringNameOfElement, stringSelectorOfElement, stringTextOfElement, localURLPathname, nativeFetch, globalThisOrWindow } from '../util'
 import Client from '../../browser'
 
 const { sanitize, instrument } = Util
 
-export default function (_window = window): Types.Plugin {
+export default function (_window = globalThisOrWindow()): Types.Plugin {
   return {
     load: (client: typeof Client) => {
       function breadcrumbsEnabled(type) {
@@ -38,7 +38,7 @@ export default function (_window = window): Types.Plugin {
               const opts = {
                 category: 'log',
                 metadata: {
-                  level: level,
+                  level,
                   arguments: sanitize(args, 3)
                 }
               }
@@ -70,7 +70,7 @@ export default function (_window = window): Types.Plugin {
           }
 
           // There's nothing to display
-          if (message.length === 0) { return}
+          if (message.length === 0) { return }
 
           client.addBreadcrumb(message, {
             category: 'ui.click',
@@ -80,12 +80,15 @@ export default function (_window = window): Types.Plugin {
               event
             }
           })
-        }, true)
+        }, _window.location ? true : false) // In CloudFlare workers useCapture must be false. window.locaiton is a hacky way to detect it.
       })();
 
       // Breadcrumbs: instrument XMLHttpRequest
       (function () {
         if (!breadcrumbsEnabled('network')) { return }
+
+        // Some environments may not support XMLHttpRequest.
+        if (typeof XMLHttpRequest === 'undefined') return
 
         // -- On xhr.open: capture initial metadata
         instrument(XMLHttpRequest.prototype, 'open', function (original) {
@@ -191,7 +194,8 @@ export default function (_window = window): Types.Plugin {
               method = method.toUpperCase()
             }
 
-            const message = `${method} ${localURLPathname(url)}`
+            // localURLPathname cant be constructed for CF workers due to reliance on "document".
+            const message = `${method} ${typeof document === 'undefined' ? url : localURLPathname(url)}`
             const metadata = {
               type: 'fetch',
               method,
@@ -223,6 +227,11 @@ export default function (_window = window): Types.Plugin {
       // Breadcrumbs: instrument navigation
       (function () {
         if (!breadcrumbsEnabled('navigation')) { return }
+
+        if (_window.location == null) {
+          // Most likely in a CF worker, we should be listening to fetch requests instead.
+          return
+        }
 
         // The last known href of the current page
         let lastHref = _window.location.href

@@ -1,6 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import { Types, Util } from '@honeybadger-io/core'
 import Client from '../../browser'
+import { globalThisOrWindow } from '../util'
 const { instrument, makeNotice } = Util
 
 let ignoreOnError = 0
@@ -15,7 +16,7 @@ export function ignoreNextOnError(): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function onError(_window: any = window): Types.Plugin {
+export function onError(_window: any = globalThisOrWindow()): Types.Plugin {
   return {
     load: (client: typeof Client) => {
       instrument(_window, 'onerror', function (original) {
@@ -65,7 +66,7 @@ export function onError(_window: any = window): Types.Plugin {
         return function (msg, url, line, col, err) {
           onerror(msg, url, line, col, err)
           if (typeof original === 'function') {
-            return original.apply(window, arguments)
+            return original.apply(_window, arguments)
           }
           return false
         }

@@ -1,10 +1,11 @@
 /* eslint-disable prefer-rest-params */
 import { Types, Util } from '@honeybadger-io/core'
 import Client from '../../browser'
+import { globalThisOrWindow } from '../util'
 
 const { instrument } = Util
 
-export default function (_window = window): Types.Plugin {
+export default function (_window = globalThisOrWindow()): Types.Plugin {
   return {
     load: (client: typeof Client) => {
       // Wrap timers
