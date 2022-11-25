@@ -4,7 +4,7 @@ import Client from '../../server'
 import { removeAwsDefaultUncaughtExceptionListener } from '../aws_lambda'
 
 let isReporting = false
-let count = 0
+let reportedOnce = false
 
 function removeAwsLambdaListener() {
   const isLambda = !!process.env.LAMBDA_TASK_ROOT
@@ -21,8 +21,8 @@ function removeAwsLambdaListener() {
  * mimic the default behavior of NodeJs,
  * which is to exit the process with code 1
  */
-function hasUncaughtExceptionListeners() {
-  return process.listeners('uncaughtException').length !== 0
+function hasOtherUncaughtExceptionListeners() {
+  return process.listeners('uncaughtException').length > 1
 }
 
 export default function (): Types.Plugin {
@@ -34,32 +34,32 @@ export default function (): Types.Plugin {
 
       removeAwsLambdaListener()
 
-      const hasOtherListeners = hasUncaughtExceptionListeners();
+
       process.on('uncaughtException', function honeybadgerUncaughtExceptionListener(uncaughtError) {
         if (!client.config.enableUncaught) {
           client.config.afterUncaught(uncaughtError)
-          if (!hasOtherListeners) {
+          if (!hasOtherUncaughtExceptionListeners()) {
             fatallyLogAndExit(uncaughtError)
           }
           return
         }
 
         // report only the first error - prevent reporting recursive errors
-        if (count < 1) {
+        if (!reportedOnce) {
           isReporting = true
           client.notify(uncaughtError, {
             afterNotify: (_err, _notice) => {
               isReporting = false
-              count++
+              reportedOnce = true
               client.config.afterUncaught(uncaughtError)
-              if (!hasOtherListeners) {
+              if (!hasOtherUncaughtExceptionListeners()) {
                 fatallyLogAndExit(uncaughtError)
               }
             }
           })
         }
         else {
-          if (!hasOtherListeners && !isReporting) {
+          if (!hasOtherUncaughtExceptionListeners() && !isReporting) {
             fatallyLogAndExit(uncaughtError)
           }
         }

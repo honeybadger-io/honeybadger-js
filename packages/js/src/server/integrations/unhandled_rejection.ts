@@ -8,8 +8,8 @@ import { fatallyLogAndExit } from '../util'
  * mimic the default behavior of NodeJs,
  * which is to exit the process with code 1
  */
-function hasUnhandledRejectionListeners() {
-  return process.listeners('unhandledRejection').length !== 0
+function hasOtherUnhandledRejectionListeners() {
+  return process.listeners('unhandledRejection').length > 1
 }
 
 export default function (): Types.Plugin {
@@ -19,10 +19,9 @@ export default function (): Types.Plugin {
         return
       }
 
-      const hasOtherListeners = hasUnhandledRejectionListeners();
       process.on('unhandledRejection', function honeybadgerUnhandledRejectionListener(reason, _promise) {
         if (!client.config.enableUnhandledRejection) {
-          if (!hasOtherListeners) {
+          if (!hasOtherUnhandledRejectionListeners()) {
             fatallyLogAndExit(reason as Error)
           }
           return
@@ -30,7 +29,7 @@ export default function (): Types.Plugin {
 
         client.notify(reason as Types.Noticeable, { component: 'unhandledRejection' }, {
           afterNotify: () => {
-            if (!hasOtherListeners) {
+            if (!hasOtherUnhandledRejectionListeners()) {
               fatallyLogAndExit(reason as Error)
             }
           }
