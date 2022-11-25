@@ -2,6 +2,8 @@ import { Types } from '@honeybadger-io/core'
 import Client from '../../server'
 import { fatallyLogAndExit } from '../util'
 
+let isReporting = false
+
 /**
  * If there are no other unhandledRejection listeners,
  * we want to report the exception to Honeybadger and
@@ -21,14 +23,16 @@ export default function (): Types.Plugin {
 
       process.on('unhandledRejection', function honeybadgerUnhandledRejectionListener(reason, _promise) {
         if (!client.config.enableUnhandledRejection) {
-          if (!hasOtherUnhandledRejectionListeners()) {
+          if (!hasOtherUnhandledRejectionListeners() && !isReporting) {
             fatallyLogAndExit(reason as Error)
           }
           return
         }
 
+        isReporting = true;
         client.notify(reason as Types.Noticeable, { component: 'unhandledRejection' }, {
           afterNotify: () => {
+            isReporting = false;
             if (!hasOtherUnhandledRejectionListeners()) {
               fatallyLogAndExit(reason as Error)
             }
