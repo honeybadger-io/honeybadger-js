@@ -4,7 +4,7 @@ import Client from '../../server'
 import { removeAwsDefaultUncaughtExceptionListener } from '../aws_lambda'
 
 let isReporting = false
-let reportedOnce = false
+let handlerAlreadyCalled = false
 
 function removeAwsLambdaListener() {
   const isLambda = !!process.env.LAMBDA_TASK_ROOT
@@ -45,24 +45,28 @@ export default function (): Types.Plugin {
         }
 
         // report only the first error - prevent reporting recursive errors
-        if (!reportedOnce) {
-          isReporting = true
-          client.notify(uncaughtError, {
-            afterNotify: (_err, _notice) => {
-              isReporting = false
-              reportedOnce = true
-              client.config.afterUncaught(uncaughtError)
-              if (!hasOtherUncaughtExceptionListeners()) {
-                fatallyLogAndExit(uncaughtError)
-              }
-            }
-          })
-        }
-        else {
-          if (!hasOtherUncaughtExceptionListeners() && !isReporting) {
+        if (handlerAlreadyCalled) {
+          if (!hasOtherUncaughtExceptionListeners()) {
             fatallyLogAndExit(uncaughtError)
           }
+          return
         }
+
+        if (isReporting) {
+          return
+        }
+
+        isReporting = true
+        client.notify(uncaughtError, {
+          afterNotify: (_err, _notice) => {
+            isReporting = false
+            handlerAlreadyCalled = true
+            client.config.afterUncaught(uncaughtError)
+            if (!hasOtherUncaughtExceptionListeners()) {
+              fatallyLogAndExit(uncaughtError)
+            }
+          }
+        })
       })
     }
   }
