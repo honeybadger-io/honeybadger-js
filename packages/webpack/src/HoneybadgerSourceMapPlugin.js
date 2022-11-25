@@ -24,7 +24,7 @@ class HoneybadgerSourceMapPlugin {
     apiKey,
     assetsUrl,
     endpoint = ENDPOINT,
-    revision = 'master',
+    revision = 'main',
     silent = false,
     ignoreErrors = false,
     retries = 3,
