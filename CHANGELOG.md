@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.7.4](https://github.com/honeybadger-io/honeybadger-js/compare/v4.7.3...v4.7.4) (2022-11-26)
+
+
+### Bug Fixes
+
+* exit process on unhandledRejection ([#950](https://github.com/honeybadger-io/honeybadger-js/issues/950)) ([ffff051](https://github.com/honeybadger-io/honeybadger-js/commit/ffff05101abf8251ff4cf1289a11a5fdedca060b))
+
+
+
+
+
 ## [4.7.3](https://github.com/honeybadger-io/honeybadger-js/compare/v4.7.2...v4.7.3) (2022-11-22)
 
 
