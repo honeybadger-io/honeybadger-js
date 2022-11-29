@@ -25,14 +25,14 @@ yarn add @honeybadger-io/webpack --dev
 
 ### Plugin parameters
 
-These plugin parameters correspond to the Honeybadger [Source Map Upload API](https://docs.honeybadger.io/guides/source-maps.html) and [Deployments API](https://docs.honeybadger.io/api/deployments.html).
+These plugin parameters correspond to the Honeybadger [Source Map Upload API](https://docs.honeybadger.io/api/reporting-source-maps/) and [Deployments API](https://docs.honeybadger.io/api/deployments.html).
 
 <dl>
   <dt><code>apiKey</code> (required)</dt>
   <dd>The API key of your Honeybadger project</dd>
 
   <dt><code>assetsUrl</code> (required)</dt>
-  <dd>The base URL to production assets (scheme://host/path)<code>*</code><a href="https://docs.honeybadger.io/guides/source-maps.html#wildcards">wildcards</a> are supported. The plugin combines <code>assetsUrl</code> with the generated minified js file name to build the API parameter <code>minified_url</code></dd>
+  <dd>The base URL to production assets (scheme://host/path)<code>*</code><a href="https://docs.honeybadger.io/api/reporting-source-maps/#wildcards">wildcards</a> are supported. The plugin combines <code>assetsUrl</code> with the generated minified js file name to build the API parameter <code>minified_url</code></dd>
 
   <dt><code>endpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/source_maps")</dt>
   <dd>Where to upload your sourcemaps to. Perhaps you have a self hosted
