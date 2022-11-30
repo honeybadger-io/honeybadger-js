@@ -29,7 +29,8 @@ class HoneybadgerSourceMapPlugin {
     ignoreErrors = false,
     retries = 3,
     workerCount = 5,
-    deploy = false
+    deploy = false, 
+    removeSourcemaps = false
   }) {
     this.apiKey = apiKey
     this.assetsUrl = assetsUrl
@@ -41,6 +42,7 @@ class HoneybadgerSourceMapPlugin {
     /** @type DeployObject|boolean */
     this.deploy = deploy
     this.retries = retries
+    this.removeSourcemaps = removeSourcemaps
 
     if (this.retries > MAX_RETRIES) {
       this.retries = MAX_RETRIES
@@ -191,6 +193,26 @@ class HoneybadgerSourceMapPlugin {
     if (!this.silent) {
       // eslint-disable-next-line no-console
       console.info(`Uploaded ${sourceMap} to Honeybadger API`)
+    }
+
+    if (this.removeSourcemaps) {
+      await this.removeSourcemap(compilation, sourceMap)
+    }
+  }
+
+  async removeSourcemap (compilation, sourceMap) {
+    const path = this.getAssetPath(compilation, sourceMap)
+    try {
+      await fs.rm(path)
+      if (!this.silent) {
+        console.info(`Removed sourcemap file ${sourceMap}`)
+      }
+    } catch (e) {
+      // Failing to remove a sourcemap file is not likely to be a huge deal, 
+      // just log it rather than throw
+      if (!this.silent) {
+        console.error(`Could not remove sourcemap file ${sourceMap}`, e)
+      }
     }
   }
 

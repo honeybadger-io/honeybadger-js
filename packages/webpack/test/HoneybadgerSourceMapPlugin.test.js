@@ -64,6 +64,10 @@ describe(PLUGIN_NAME, function () {
       expect(this.plugin).to.include({ workerCount: 5 })
     })
 
+    it('should default removeSourcemaps to false', function () {
+      expect(this.plugin).to.include({ removeSourcemaps: false })
+    })
+
     it('should default a minimum worker count', function () {
       const plugin = new HoneybadgerSourceMapPlugin({ workerCount: -1 })
       expect(plugin).to.include({ workerCount: MIN_WORKER_COUNT })
@@ -411,6 +415,60 @@ describe(PLUGIN_NAME, function () {
       await this.plugin.uploadSourceMap(compilation, chunk)
 
       expect(this.info.calledWith('Uploaded vendor.5190.js.map to Honeybadger API')).to.eq(true)
+    })
+
+    it('should not remove sourcemap file if removeSourcemaps is false', async function () {
+      const stubFsRm = sinon
+        .stub(fs, 'rm')
+        .callsFake(() => Promise.resolve(undefined))
+              
+      nock(TEST_ENDPOINT)
+        .post(SOURCEMAP_PATH)
+        .reply(201, JSON.stringify({ status: 'OK' }))
+
+      const { compilation, chunk } = this
+
+      await this.plugin.uploadSourceMap(compilation, chunk)
+
+      expect(stubFsRm.called).to.eq(false)
+    })
+    
+    it('should remove sourcemap file if removeSourcemaps is true', async function () {
+      const stubFsRm = sinon
+        .stub(fs, 'rm')
+        .callsFake(() => Promise.resolve(undefined))
+        
+      nock(TEST_ENDPOINT)
+        .post(SOURCEMAP_PATH)
+        .reply(201, JSON.stringify({ status: 'OK' }))
+
+      const { compilation, chunk } = this
+      this.plugin.removeSourcemaps = true
+
+      await this.plugin.uploadSourceMap(compilation, chunk)
+
+      expect(stubFsRm.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
+      expect(this.info.calledWith('Removed sourcemap file vendor.5190.js.map')).to.eq(true)
+    })
+
+    it('should not throw an error because of a failure to remove a sourcemap', async function () {
+      const stubFsRm = sinon
+        .stub(fs, 'rm')
+        .callsFake(() => Promise.reject(new Error("This file likes it here")))
+
+      const errorStub = sinon.stub(console, 'error')
+ 
+      nock(TEST_ENDPOINT)
+        .post(SOURCEMAP_PATH)
+        .reply(201, JSON.stringify({ status: 'OK' }))
+
+      const { compilation, chunk } = this
+      this.plugin.removeSourcemaps = true
+
+      await this.plugin.uploadSourceMap(compilation, chunk)
+
+      expect(stubFsRm.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
+      expect(errorStub.calledWith('Could not remove sourcemap file vendor.5190.js.map')).to.eq(true)
     })
 
     it('should return error message if failure response includes message', function () {
