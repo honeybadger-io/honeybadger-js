@@ -74,6 +74,8 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
     <dd>The name of the user that triggered this deploy, for example, "Jane"</dd>
   </dl>
   </dd>
+<dt><code>removeSourcemaps</code> (optional &mdash; default: false)</dt>
+<dd>To remove local sourcemap files after upload, set this to <code>true</code>.</dd>
 </dl>
 
 ### Vanilla webpack.config.js

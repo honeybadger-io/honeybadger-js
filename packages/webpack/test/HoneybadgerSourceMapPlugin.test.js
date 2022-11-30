@@ -454,7 +454,7 @@ describe(PLUGIN_NAME, function () {
     it('should not throw an error because of a failure to remove a sourcemap', async function () {
       const stubFsRm = sinon
         .stub(fs, 'rm')
-        .callsFake(() => Promise.reject(new Error("This file likes it here")))
+        .callsFake(() => Promise.reject(new Error('This file likes it here')))
 
       const errorStub = sinon.stub(console, 'error')
  
