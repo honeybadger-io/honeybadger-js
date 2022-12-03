@@ -189,8 +189,6 @@ export type StoreContents = {
   breadcrumbs: BreadcrumbRecord[]
 }
 
-
-// todo
 export type UserFeedbackForOptions = {
   onLoad?: () => void;
   messages?: {

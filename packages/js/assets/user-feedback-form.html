@@ -26,7 +26,16 @@
     #honeybadger-feedback-name, #honeybadger-feedback-email, #honeybadger-feedback-comment { width: 100%; padding: 0.5em; }
     #honeybadger-feedback-comment { height: 10em; }
     #honeybadger-feedback-submit { color: initial; padding: 0.5em 1em; }
-    #honeybadger-feedback-link { text-decoration: underline; }
+    #honeybadger-feedback-footer {
+        text-align: right;
+    }
+    #honeybadger-feedback-footer img {
+        vertical-align: middle;
+    }
+    #honeybadger-feedback-link {
+        text-decoration: underline;
+        color: #9CA3AF;
+    }
 
     @media screen and (max-height: 570px) {
         #honeybadger-feedback {
@@ -82,9 +91,10 @@
         </p>
     </form>
 
-    <p>
+    <p id="honeybadger-feedback-footer">
         <a id="honeybadger-feedback-link" href="https://www.honeybadger.io/" target="_blank" title="Exception, uptime, and performance monitoring for PHP.">
-            Powered by Honeybadger
+            Powered by
+            <img src="https://www.honeybadger.io/images/navbar_logo.svg?1670031500" width="100"/>
         </a>
     </p>
 </div>
