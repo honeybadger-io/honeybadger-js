@@ -188,3 +188,12 @@ export type StoreContents = {
   context: Record<string, unknown>,
   breadcrumbs: BreadcrumbRecord[]
 }
+
+
+// todo
+export type UserFeedbackForOptions = {
+  onLoad?: () => void;
+  headingMessage?: string;
+  thankYouMessage?: string;
+  submitLabel?: string;
+}

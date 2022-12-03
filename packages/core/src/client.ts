@@ -22,7 +22,7 @@ import {
   Notice,
   Noticeable,
   HoneybadgerStore,
-  BacktraceFrame, Transport, NoticeTransportPayload
+  BacktraceFrame, Transport, NoticeTransportPayload, UserFeedbackForOptions
 } from './types'
 import { GlobalStore } from './store';
 
@@ -86,6 +86,8 @@ export abstract class Client {
   protected abstract factory(opts: Partial<Config>): this
 
   protected abstract checkIn(id: string): Promise<void>
+
+  protected abstract showUserFeedbackForm(options: UserFeedbackForOptions): Promise<void>
 
   getVersion(): string {
     return notifier.version

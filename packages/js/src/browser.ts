@@ -6,6 +6,7 @@ import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
 import { BrowserTransport } from './browser/transport';
+import { Notice } from '@honeybadger-io/core/build/src/types';
 
 const { merge, filter, objectIsExtensible } = Util
 
@@ -19,6 +20,8 @@ class Honeybadger extends Client {
   private __errorsSent = 0
   /** @internal */
   private __lastWrapErr = undefined
+  /** @internal */
+  private __lastNoticeId = undefined
 
   config: Types.BrowserConfig
 
@@ -34,6 +37,15 @@ class Honeybadger extends Client {
 
       this.__incrementErrorsCount()
 
+      return true
+    }
+  ]
+
+  protected __afterNotifyHandlers: Types.AfterNotifyHandler[] = [
+    (_error: any, notice?: Notice) => {
+      if (notice) {
+        this.__lastNoticeId = notice.id
+      }
       return true
     }
   ]
@@ -62,6 +74,29 @@ class Honeybadger extends Client {
 
   public checkIn(_id: string): Promise<void> {
     throw new Error('Honeybadger.checkIn() is not supported on the browser')
+  }
+
+  public async showUserFeedbackForm(options: Types.UserFeedbackForOptions = {}) {
+    if (!this.config || !this.config.apiKey) {
+      this.logger.debug('Client not initialized')
+      return
+    }
+
+    if (!this.__lastNoticeId) {
+      this.logger.debug("Can't show user feedback form without a notice already reported")
+      return
+    }
+
+    const script = window.document.createElement('script')
+    script.async = true
+    // todo
+    // script.src = this.config.endpoint + '/get-feedback-form'
+    script.src = 'http://localhost:3000/feedback-form'
+    // todo: need to pass this.__lastNoticeId to the script
+    if (options.onLoad) {
+      script.onload = options.onLoad
+    }
+    (window.document.head || window.document.body).appendChild(script)
   }
 
   /** @internal */

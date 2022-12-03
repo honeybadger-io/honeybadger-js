@@ -1,0 +1,80 @@
+<style>
+    #honeybadger-feedback-wrapper {
+        display: block;
+        outline: none;
+        position: fixed;
+        z-index: 999;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        overflow: auto;
+    }
+    #honeybadger-feedback {
+        padding: 0.1em 3em 0.1em 2em;
+        max-width: 400px;
+        max-height: 80%;
+        margin: 4% auto 0;
+        text-align: left;
+        background: #1a202c;
+        color: #9CA3AF;
+        border-radius: 5px;
+    }
+    #honeybadger-feedback-form h2 { line-height: 1.5em; }
+    #honeybadger-feedback-name, #honeybadger-feedback-email, #honeybadger-feedback-comment { width: 100%; padding: 0.5em; }
+    #honeybadger-feedback-comment { height: 10em; }
+    #honeybadger-feedback-submit { color: initial; padding: 0.5em 1em; }
+    #honeybadger-feedback-link { text-decoration: underline; }
+
+    @media screen and (max-height: 570px) {
+        #honeybadger-feedback {
+            max-height: none;
+            margin-top: 0;
+        }
+    }
+
+    @media screen and (max-height: 660px) {
+        #honeybadger-feedback {
+            max-width: none;
+        }
+    }
+</style>
+
+<div id="honeybadger-feedback">
+    <div id="honeybadger-feedback-success" style="display:none;">
+        <p><strong>Thanks for the feedback!</strong></p>
+    </div>
+
+    <form id="honeybadger-feedback-form">
+        <h2>Care to help us fix this?</h2>
+        <p>Any information you can provide will help our technical team get to the bottom of this issue.</p>
+
+        <p>
+            <label for="honeybadger-feedback-name">Name</label><br>
+            <input type="text" name="name" id="honeybadger-feedback-name">
+        </p>
+
+        <p>
+            <label for="honeybadger-feedback-email">Your email address</label><br>
+            <input type="email" name="email" id="honeybadger-feedback-email" value="">
+        </p>
+
+        <p>
+            <label for="honeybadger-feedback-comment">Comment (required)</label><br>
+            <textarea name="comment" id="honeybadger-feedback-comment" cols="50" rows="6" required></textarea>
+        </p>
+
+        <p>
+            <input type="submit" id="honeybadger-feedback-submit" value="Send">
+            <input type="button" id="honeybadger-feedback-cancel" value="Cancel">
+        </p>
+    </form>
+
+    <p>
+        <a id="honeybadger-feedback-link" href="https://www.honeybadger.io/" target="_blank" title="Exception, uptime, and performance monitoring for PHP.">
+            Powered by Honeybadger
+        </a>
+    </p>
+</div>
