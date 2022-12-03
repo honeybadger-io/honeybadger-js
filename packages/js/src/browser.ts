@@ -87,12 +87,15 @@ class Honeybadger extends Client {
       return
     }
 
+    window['honeybadgerUserFeedbackOptions'] = {
+      ...options,
+      noticeId: this.__lastNoticeId
+    }
     const script = window.document.createElement('script')
     script.async = true
     // todo
     // script.src = this.config.endpoint + '/get-feedback-form'
     script.src = 'http://localhost:3000/feedback-form'
-    // todo: need to pass this.__lastNoticeId to the script
     if (options.onLoad) {
       script.onload = options.onLoad
     }

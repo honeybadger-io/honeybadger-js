@@ -43,26 +43,36 @@
 </style>
 
 <div id="honeybadger-feedback">
-    <div id="honeybadger-feedback-success" style="display:none;">
+    <div id="honeybadger-feedback-thanks" style="display:none;">
         <p><strong>Thanks for the feedback!</strong></p>
     </div>
 
     <form id="honeybadger-feedback-form">
-        <h2>Care to help us fix this?</h2>
-        <p>Any information you can provide will help our technical team get to the bottom of this issue.</p>
+        <h2 id="honeybadger-feedback-heading">
+            Care to help us fix this?
+        </h2>
+        <p id="honeybadger-feedback-explanation">
+            Any information you can provide will help our technical team get to the bottom of this issue.
+        </p>
 
         <p>
-            <label for="honeybadger-feedback-name">Name</label><br>
+            <label for="honeybadger-feedback-name" id="honeybadger-feedback-label-name">
+                Name
+            </label><br>
             <input type="text" name="name" id="honeybadger-feedback-name">
         </p>
 
         <p>
-            <label for="honeybadger-feedback-email">Your email address</label><br>
+            <label for="honeybadger-feedback-email" id="honeybadger-feedback-label-email">
+                Your email address
+            </label><br>
             <input type="email" name="email" id="honeybadger-feedback-email" value="">
         </p>
 
         <p>
-            <label for="honeybadger-feedback-comment">Comment (required)</label><br>
+            <label for="honeybadger-feedback-comment" id="honeybadger-feedback-label-comment">
+                Comment (required)
+            </label><br>
             <textarea name="comment" id="honeybadger-feedback-comment" cols="50" rows="6" required></textarea>
         </p>
 

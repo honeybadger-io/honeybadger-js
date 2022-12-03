@@ -193,7 +193,18 @@ export type StoreContents = {
 // todo
 export type UserFeedbackForOptions = {
   onLoad?: () => void;
-  headingMessage?: string;
-  thankYouMessage?: string;
-  submitLabel?: string;
+  messages?: {
+    heading?: string;
+    explanation?: string;
+    thanks?: string;
+  }
+  buttons?: {
+    submit?: string;
+    cancel?: string;
+  };
+  labels?: {
+    name?: string;
+    email?: string;
+    comment?: string;
+  };
 }

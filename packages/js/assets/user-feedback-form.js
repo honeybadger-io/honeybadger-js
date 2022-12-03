@@ -7,6 +7,7 @@
   // eslint-disable-next-line quotes
   const TEMPLATE = `$$TEMPLATE$$`
   const ENDPOINT = 'https://api.honeybadger.io/v1/feedback'
+  const OPTIONS_KEY = 'honeybadgerUserFeedbackOptions'
 
   const HoneybadgerUserFeedbackForm = function () {};
   HoneybadgerUserFeedbackForm.prototype.build = function () {
@@ -28,6 +29,27 @@
     cancelButton.onclick = (e) => {
       e.preventDefault()
       self.close()
+    }
+
+    const formOptions = self.getOptions()
+    const { messages = {}, buttons = {}, labels = {} } = formOptions
+    for (let i in messages) {
+      const element = document.getElementById(`honeybadger-feedback-${i}`)
+      if (element) {
+        element.innerText = messages[i]
+      }
+    }
+    for (let i in labels) {
+      const element = document.getElementById(`honeybadger-feedback-label-${i}`)
+      if (element) {
+        element.innerText = labels[i]
+      }
+    }
+    for (let i in buttons) {
+      const element = document.getElementById(`honeybadger-feedback-${i}`)
+      if (element) {
+        element.value = buttons[i]
+      }
     }
   };
 
@@ -74,16 +96,23 @@
 
   HoneybadgerUserFeedbackForm.prototype.onSuccess = function () {
     document.getElementById('honeybadger-feedback-success').style.display = 'block'
+    document.getElementById('honeybadger-feedback-form').style.display = 'none'
   };
 
   HoneybadgerUserFeedbackForm.prototype.onFormError = function (message) {
     console.error('error, todo', message)
   };
 
-  HoneybadgerUserFeedbackForm.prototype.getLastNoticeId = function () {
-    // todo
-    return 'ae4bd6aa-999d-4d8c-bd8b-08b6fd09285c';
+  HoneybadgerUserFeedbackForm.prototype.getOptions = function () {
+    return window[OPTIONS_KEY]
   }
 
-  new HoneybadgerUserFeedbackForm().build()
+  HoneybadgerUserFeedbackForm.prototype.getLastNoticeId = function () {
+    return this.getOptions().noticeId
+  }
+
+  const form = new HoneybadgerUserFeedbackForm()
+  form.build()
+  // todo: remove - this is for debugging
+  window['honeybadgerUserFeedbackForm'] = form
 })(window, document)
