@@ -16,6 +16,10 @@
     self.element = document.createElement('div')
     self.element.id = 'honeybadger-feedback-wrapper'
     self.element.innerHTML = TEMPLATE
+    self.element.onclick = function (e) {
+      if (e.target !== self.element) return;
+      self.close();
+    }
 
     document.body.appendChild(self.element)
 
@@ -27,6 +31,11 @@
 
     const cancelButton = document.getElementById('honeybadger-feedback-cancel')
     cancelButton.onclick = (e) => {
+      e.preventDefault()
+      self.close()
+    }
+    const closeButton = document.getElementById('honeybadger-feedback-close')
+    closeButton.onclick = (e) => {
       e.preventDefault()
       self.close()
     }
@@ -65,6 +74,7 @@
     if (self.loading) return
     self.loading = true
 
+    document.getElementById('honeybadger-feedback-error').style.display = 'none'
     window.fetch(ENDPOINT +
         '?format=js' +
         `&token=${self.getLastNoticeId()}` +
@@ -73,34 +83,37 @@
         `&comment=${encodeURIComponent(self.form.comment.value)}`,
     {
       method: 'GET',
-      // todo: this should not be here
-      // server should respond with header "Access-Control-Allow-Origin: CALLER_HOST"
-      mode: 'no-cors'
+      // todo: server should respond with header "Access-Control-Allow-Origin: CALLER_HOST"
     })
       .then(response => {
         self.loading = false
         if (!response.ok) {
-          console.error('Error in HoneybadgerFeedbackForm')
-          self.onFormError(response.body.toString())
+          response.json()
+            .then(data => {
+              self.onFormError(data.error)
+            })
+            .catch(_err => {
+              self.onFormError('')
+            })
           return
         }
         self.onSuccess()
       })
       .catch(err => {
         self.loading = false
-        console.error('Error in HoneybadgerFeedbackForm')
-        console.error(err)
         self.onFormError(err.message)
       })
   };
 
   HoneybadgerUserFeedbackForm.prototype.onSuccess = function () {
-    document.getElementById('honeybadger-feedback-success').style.display = 'block'
+    document.getElementById('honeybadger-feedback-thanks').style.display = 'block'
     document.getElementById('honeybadger-feedback-form').style.display = 'none'
   };
 
   HoneybadgerUserFeedbackForm.prototype.onFormError = function (message) {
     console.error('error, todo', message)
+    document.getElementById('honeybadger-feedback-error').style.display = 'block'
+    document.getElementById('honeybadger-feedback-error-detail').innerText = message
   };
 
   HoneybadgerUserFeedbackForm.prototype.getOptions = function () {

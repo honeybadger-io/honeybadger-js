@@ -13,7 +13,7 @@
         overflow: auto;
     }
     #honeybadger-feedback {
-        padding: 0.1em 3em 0.1em 2em;
+        padding: 1em 3em 1em 2em;
         max-width: 400px;
         max-height: 80%;
         margin: 4% auto 0;
@@ -22,10 +22,34 @@
         color: #9CA3AF;
         border-radius: 5px;
     }
-    #honeybadger-feedback-form h2 { line-height: 1.5em; }
     #honeybadger-feedback-name, #honeybadger-feedback-email, #honeybadger-feedback-comment { width: 100%; padding: 0.5em; }
     #honeybadger-feedback-comment { height: 10em; }
-    #honeybadger-feedback-submit { color: initial; padding: 0.5em 1em; }
+
+    #honeybadger-feedback-error {
+        color: #cc0000;
+    }
+
+    #honeybadger-feedback-error-detail {
+        font-size: small;
+    }
+
+    .honeybadger-feedback-button {
+        color: initial;
+        padding: 0.5em 1em;
+        cursor: pointer;
+    }
+
+    .honeybadger-feedback-button.plain {
+        text-decoration: underline;
+        border: none;
+        background: none;
+        color: #9CA3AF;
+    }
+
+    #honeybadger-feedback-close {
+        padding-left: 0;
+    }
+
     #honeybadger-feedback-footer {
         text-align: right;
     }
@@ -52,18 +76,21 @@
 </style>
 
 <div id="honeybadger-feedback">
+
+    <h2 id="honeybadger-feedback-heading">
+        Care to help us fix this?
+    </h2>
+
+    <p id="honeybadger-feedback-explanation">
+        Any information you can provide will help our technical team get to the bottom of this issue.
+    </p>
+
     <div id="honeybadger-feedback-thanks" style="display:none;">
         <p><strong>Thanks for the feedback!</strong></p>
+        <input type="button" class="honeybadger-feedback-button plain" id="honeybadger-feedback-close" value="Close">
     </div>
 
     <form id="honeybadger-feedback-form">
-        <h2 id="honeybadger-feedback-heading">
-            Care to help us fix this?
-        </h2>
-        <p id="honeybadger-feedback-explanation">
-            Any information you can provide will help our technical team get to the bottom of this issue.
-        </p>
-
         <p>
             <label for="honeybadger-feedback-name" id="honeybadger-feedback-label-name">
                 Name
@@ -85,9 +112,15 @@
             <textarea name="comment" id="honeybadger-feedback-comment" cols="50" rows="6" required></textarea>
         </p>
 
+        <p id="honeybadger-feedback-error" style="display: none">
+            There was an error. Please try again later.
+            <br/>
+            <span id="honeybadger-feedback-error-detail"></span>
+        </p>
+
         <p>
-            <input type="submit" id="honeybadger-feedback-submit" value="Send">
-            <input type="button" id="honeybadger-feedback-cancel" value="Cancel">
+            <input type="submit" class="honeybadger-feedback-button" id="honeybadger-feedback-submit" value="Send">
+            <input type="button" class="honeybadger-feedback-button plain" id="honeybadger-feedback-cancel" value="Cancel">
         </p>
     </form>
 
