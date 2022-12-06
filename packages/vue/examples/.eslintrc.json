@@ -1,0 +1,8 @@
+{
+    "rules": {
+      // Since these are just examples, the monorepo's linting should not
+      // fail just because we didn't run `npm install` in the example folders
+        "import/no-unresolved": ["off"],
+        "import/default": ["off"]
+      }
+}
