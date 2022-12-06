@@ -191,7 +191,6 @@ class HoneybadgerSourceMapPlugin {
 
     // Success
     if (!this.silent) {
-      // eslint-disable-next-line no-console
       console.info(`Uploaded ${sourceMap} to Honeybadger API`)
     }
 
@@ -203,7 +202,7 @@ class HoneybadgerSourceMapPlugin {
   async removeSourcemap (compilation, sourceMap) {
     const path = this.getAssetPath(compilation, sourceMap)
     try {
-      await fs.rm(path)
+      await fs.unlink(path)
       if (!this.silent) {
         console.info(`Removed sourcemap file ${sourceMap}`)
       }

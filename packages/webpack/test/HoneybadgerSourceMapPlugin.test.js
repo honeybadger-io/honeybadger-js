@@ -418,8 +418,8 @@ describe(PLUGIN_NAME, function () {
     })
 
     it('should not remove sourcemap file if removeSourcemaps is false', async function () {
-      const stubFsRm = sinon
-        .stub(fs, 'rm')
+      const stubFsUnlink = sinon
+        .stub(fs, 'unlink')
         .callsFake(() => Promise.resolve(undefined))
               
       nock(TEST_ENDPOINT)
@@ -430,12 +430,12 @@ describe(PLUGIN_NAME, function () {
 
       await this.plugin.uploadSourceMap(compilation, chunk)
 
-      expect(stubFsRm.called).to.eq(false)
+      expect(stubFsUnlink.called).to.eq(false)
     })
     
     it('should remove sourcemap file if removeSourcemaps is true', async function () {
-      const stubFsRm = sinon
-        .stub(fs, 'rm')
+      const stubFsUnlink = sinon
+        .stub(fs, 'unlink')
         .callsFake(() => Promise.resolve(undefined))
         
       nock(TEST_ENDPOINT)
@@ -447,13 +447,13 @@ describe(PLUGIN_NAME, function () {
 
       await this.plugin.uploadSourceMap(compilation, chunk)
 
-      expect(stubFsRm.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
+      expect(stubFsUnlink.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
       expect(this.info.calledWith('Removed sourcemap file vendor.5190.js.map')).to.eq(true)
     })
 
     it('should not throw an error because of a failure to remove a sourcemap', async function () {
-      const stubFsRm = sinon
-        .stub(fs, 'rm')
+      const stubFsUnlink = sinon
+        .stub(fs, 'unlink')
         .callsFake(() => Promise.reject(new Error('This file likes it here')))
 
       const errorStub = sinon.stub(console, 'error')
@@ -467,7 +467,7 @@ describe(PLUGIN_NAME, function () {
 
       await this.plugin.uploadSourceMap(compilation, chunk)
 
-      expect(stubFsRm.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
+      expect(stubFsUnlink.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
       expect(errorStub.calledWith('Could not remove sourcemap file vendor.5190.js.map')).to.eq(true)
     })
 
