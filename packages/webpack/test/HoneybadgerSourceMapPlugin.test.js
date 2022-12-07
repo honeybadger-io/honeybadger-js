@@ -21,6 +21,9 @@ describe(PLUGIN_NAME, function () {
       hooks: {
         afterEmit: {
           tapPromise: sinon.spy()
+        }, 
+        done: {
+          tapPromise: sinon.spy()
         }
       }
     }
@@ -91,20 +94,21 @@ describe(PLUGIN_NAME, function () {
   })
 
   describe('apply', function () {
-    it('should hook into "after-emit"', function () {
+    it('should hook into "after-emit" and "done"', function () {
       this.compiler.plugin = sinon.stub()
       this.plugin.apply(this.compiler)
 
-      const tapPromise = this.compiler.hooks.afterEmit.tapPromise
-      expect(tapPromise.callCount).to.eq(1)
+      const tapAfterEmit = this.compiler.hooks.afterEmit.tapPromise
+      expect(tapAfterEmit.callCount).to.eq(1)
+      const afterEmitArgs = tapAfterEmit.getCall(0).args
+      expect(afterEmitArgs[0]).to.equal(PLUGIN_NAME)
+      expect(afterEmitArgs[1]).to.be.a('function').with.property('name', 'bound afterEmit');
 
-      const compilerArgs = tapPromise.getCall(0).args
-      compilerArgs[1] = compilerArgs[1].toString()
-
-      expect(compilerArgs).to.include.members([
-        PLUGIN_NAME,
-        compilerArgs[1]
-      ])
+      const tapDone = this.compiler.hooks.done.tapPromise
+      expect(tapDone.callCount).to.eq(1)
+      const doneArgs = tapDone.getCall(0).args
+      expect(doneArgs[0]).to.equal(PLUGIN_NAME)
+      expect(doneArgs[1]).to.be.a('function').with.property('name', 'bound onDone'); 
     })
   })
 
@@ -205,6 +209,87 @@ describe(PLUGIN_NAME, function () {
 
       expect(this.plugin.uploadSourceMaps.callCount).to.eq(0)
       expect(compilation.errors.length).to.eq(1)
+    })
+  })
+
+  describe('onDone', function () {
+    afterEach(function () {
+      sinon.restore()
+    })
+
+    it('should do nothing if removeSourcemaps is false', async function () {
+      sinon.stub(this.plugin, 'removeSourcemapFile')
+
+      await this.plugin.onDone({ compilation: {} })
+
+      expect(this.plugin.removeSourcemapFile.callCount).to.eq(0)
+    })
+
+    it('should call removeSourcemap for each sourcemap file if removeSourcemaps is true', async function () {
+      this.plugin.removeSourcemaps = true
+      const stub = sinon.stub(this.plugin, 'removeSourcemapFile')
+      stub.resolves()
+
+      const compilation = {
+        assets: {
+        "foo.bar.js": {}, 
+        "foo.bar.js.map": {}, 
+        "baz.js": {}, 
+        "baz.js.map": {}, 
+        "1234.png": {}
+        }
+      }
+      await this.plugin.onDone({ compilation })
+
+      expect(this.plugin.removeSourcemapFile.callCount).to.eq(2)
+      expect(this.plugin.removeSourcemapFile.calledWith(compilation, 'foo.bar.js.map')).to.equal(true)
+      expect(this.plugin.removeSourcemapFile.calledWith(compilation, 'baz.js.map')).to.equal(true)
+    })
+  })
+
+  describe('removeSourcemapFile', function () {
+    beforeEach(function () {
+      this.outputPath = '/fake/output/path'
+      this.info = sinon.stub(console, 'info')
+      this.compilation = {
+        assets: {
+          'vendor.5190.js.map': { source: () => '{"version":3,"sources":[]' },
+          'app.81c1.js.map': { source: () => '{"version":3,"sources":[]' }
+        },
+        compiler: {
+          outputPath: this.outputPath
+        },
+        errors: [],
+        getPath: () => this.outputPath
+      }
+    })
+
+    afterEach(function () {
+      sinon.restore()
+    })
+    
+    it('should remove sourcemap file', async function () {
+      const stubFsUnlink = sinon
+        .stub(fs, 'unlink')
+        .callsFake(() => Promise.resolve(undefined))
+
+      await this.plugin.removeSourcemapFile(this.compilation, 'vendor.5190.js.map')
+
+      expect(stubFsUnlink.calledWith('/fake/output/path/vendor.5190.js.map')).to.equal(true)
+      expect(this.info.calledWith('Removed sourcemap file vendor.5190.js.map')).to.equal(true)
+    })
+
+    it('should not throw an error because of a failure to remove a sourcemap', async function () {
+      const stubFsUnlink = sinon
+        .stub(fs, 'unlink')
+        .callsFake(() => Promise.reject(new Error('This file likes it here')))
+
+      const errorStub = sinon.stub(console, 'error')
+
+      await this.plugin.removeSourcemapFile(this.compilation, 'vendor.5190.js.map')
+
+      expect(stubFsUnlink.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
+      expect(errorStub.calledWith('Could not remove sourcemap file vendor.5190.js.map')).to.eq(true)
     })
   })
 
@@ -417,59 +502,7 @@ describe(PLUGIN_NAME, function () {
       expect(this.info.calledWith('Uploaded vendor.5190.js.map to Honeybadger API')).to.eq(true)
     })
 
-    it('should not remove sourcemap file if removeSourcemaps is false', async function () {
-      const stubFsUnlink = sinon
-        .stub(fs, 'unlink')
-        .callsFake(() => Promise.resolve(undefined))
-              
-      nock(TEST_ENDPOINT)
-        .post(SOURCEMAP_PATH)
-        .reply(201, JSON.stringify({ status: 'OK' }))
-
-      const { compilation, chunk } = this
-
-      await this.plugin.uploadSourceMap(compilation, chunk)
-
-      expect(stubFsUnlink.called).to.eq(false)
-    })
     
-    it('should remove sourcemap file if removeSourcemaps is true', async function () {
-      const stubFsUnlink = sinon
-        .stub(fs, 'unlink')
-        .callsFake(() => Promise.resolve(undefined))
-        
-      nock(TEST_ENDPOINT)
-        .post(SOURCEMAP_PATH)
-        .reply(201, JSON.stringify({ status: 'OK' }))
-
-      const { compilation, chunk } = this
-      this.plugin.removeSourcemaps = true
-
-      await this.plugin.uploadSourceMap(compilation, chunk)
-
-      expect(stubFsUnlink.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
-      expect(this.info.calledWith('Removed sourcemap file vendor.5190.js.map')).to.eq(true)
-    })
-
-    it('should not throw an error because of a failure to remove a sourcemap', async function () {
-      const stubFsUnlink = sinon
-        .stub(fs, 'unlink')
-        .callsFake(() => Promise.reject(new Error('This file likes it here')))
-
-      const errorStub = sinon.stub(console, 'error')
- 
-      nock(TEST_ENDPOINT)
-        .post(SOURCEMAP_PATH)
-        .reply(201, JSON.stringify({ status: 'OK' }))
-
-      const { compilation, chunk } = this
-      this.plugin.removeSourcemaps = true
-
-      await this.plugin.uploadSourceMap(compilation, chunk)
-
-      expect(stubFsUnlink.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
-      expect(errorStub.calledWith('Could not remove sourcemap file vendor.5190.js.map')).to.eq(true)
-    })
 
     it('should return error message if failure response includes message', function () {
       nock(TEST_ENDPOINT)

@@ -83,6 +83,29 @@ class HoneybadgerSourceMapPlugin {
 
   apply (compiler) {
     compiler.hooks.afterEmit.tapPromise(PLUGIN_NAME, this.afterEmit.bind(this))
+    compiler.hooks.done.tapPromise(PLUGIN_NAME, this.onDone.bind(this))
+  }
+
+  async onDone({ compilation }) {
+    if (!this.removeSourcemaps) { return }
+    const sourceMaps = Object.keys(compilation.assets).filter(fileName => fileName.endsWith('.js.map'))
+    await Promise.all(sourceMaps.map(sourceMap => this.removeSourcemapFile(compilation, sourceMap)))
+  }
+
+  async removeSourcemapFile (compilation, sourceMap) {
+    const path = this.getAssetPath(compilation, sourceMap)
+    try {
+      await fs.unlink(path)
+      if (!this.silent) {
+        console.info(`Removed sourcemap file ${sourceMap}`)
+      }
+    } catch (e) {
+      // Failing to remove a sourcemap file is not likely to be a huge deal, 
+      // just log it rather than throw
+      if (!this.silent) {
+        console.error(`Could not remove sourcemap file ${sourceMap}`, e)
+      }
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -192,26 +215,6 @@ class HoneybadgerSourceMapPlugin {
     // Success
     if (!this.silent) {
       console.info(`Uploaded ${sourceMap} to Honeybadger API`)
-    }
-
-    if (this.removeSourcemaps) {
-      await this.removeSourcemap(compilation, sourceMap)
-    }
-  }
-
-  async removeSourcemap (compilation, sourceMap) {
-    const path = this.getAssetPath(compilation, sourceMap)
-    try {
-      await fs.unlink(path)
-      if (!this.silent) {
-        console.info(`Removed sourcemap file ${sourceMap}`)
-      }
-    } catch (e) {
-      // Failing to remove a sourcemap file is not likely to be a huge deal, 
-      // just log it rather than throw
-      if (!this.silent) {
-        console.error(`Could not remove sourcemap file ${sourceMap}`, e)
-      }
     }
   }
 
