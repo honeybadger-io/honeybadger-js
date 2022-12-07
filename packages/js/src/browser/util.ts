@@ -3,7 +3,7 @@
  * @param {!HTMLElement} element
  * @return {string}
  */
-export function stringNameOfElement(element: HTMLElement): string {
+export function stringNameOfElement (element: HTMLElement): string {
   if (!element || !element.tagName) { return '' }
 
   let name = element.tagName.toLowerCase()
@@ -56,9 +56,11 @@ export function stringTextOfElement(element) {
   return truncate(text.trim(), 300)
 }
 
-export function nativeFetch() {
-  if (!window.fetch) { return false }
-  if (isNative(window.fetch)) { return true }
+export function nativeFetch () {
+  const global = globalThisOrWindow()
+
+  if (!global.fetch) { return false }
+  if (isNative(global.fetch)) { return true }
 
   // If fetch isn't native, it may be wrapped by someone else. Try to get
   // a pristine function from an iframe.
@@ -98,7 +100,9 @@ export function localURLPathname(url) {
   const parsedDocURL = parseURL(document.URL)
 
   // URL must be relative
-  if (!parsed.host || !parsed.protocol) { return parsed.pathname }
+  if (!parsed.host || !parsed.protocol) {
+    return parsed.pathname
+  }
 
   // Same domain
   if (parsed.protocol === parsedDocURL.protocol && parsed.host === parsedDocURL.host) {
@@ -109,7 +113,7 @@ export function localURLPathname(url) {
   return `${parsed.protocol}://${parsed.host}${parsed.pathname}`
 }
 
-export function decodeCookie(string:string): Record<string, unknown> {
+export function decodeCookie(string: string): Record<string, unknown> {
   const result = {}
   string.split(/[;,]\s?/).forEach((pair) => {
     const [key, value] = pair.split('=', 2)
@@ -119,7 +123,7 @@ export function decodeCookie(string:string): Record<string, unknown> {
   return result
 }
 
-export function encodeCookie(object) {
+export function encodeCookie (object) {
   if (typeof object !== 'object') {
     return undefined
   }
@@ -163,8 +167,13 @@ function truncate(string, length) {
 // will provide more information in modern browsers.
 export const preferCatch = (function() {
   let preferCatch = true
+
+  // In case we're in an environment without access to "window", lets make sure theres a window.
+  if (typeof window === 'undefined') return preferCatch
+
   // IE < 10
   if (!window.atob) { preferCatch = false }
+
   // Modern browsers support the full ErrorEvent API
   // See https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
   if (window.ErrorEvent) {
@@ -177,3 +186,18 @@ export const preferCatch = (function() {
   }
   return preferCatch
 })()
+
+/** globalThis has fairly good support. But just in case, lets check its defined.
+ * @see {https://caniuse.com/?search=globalThis}
+ */
+export function globalThisOrWindow () {
+  if (typeof globalThis !== 'undefined') {
+    return globalThis
+  }
+
+  if (typeof self !== 'undefined') {
+    return self
+  }
+
+  return window
+}

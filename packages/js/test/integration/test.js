@@ -383,4 +383,37 @@ describe('browser integration', function () {
       })
       .catch(done);
   });
-});
+})
+
+describe("Web Worker", function () {
+  it('works within a web worker', function (done) {
+    let results = []
+
+    if (!window.Worker) {
+      console.warn("This browser does not support web workers")
+      return done()
+    }
+
+    const MyWorker = new Worker("/base/test/integration/worker.js")
+
+    MyWorker.onmessage = (e) => {
+      results = e.data
+
+      expect(results.notices.length).toEqual(1);
+      expect(results.notices[0].breadcrumbs.trail.length).toEqual(1);
+      expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('Honeybadger Notice');
+      expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('notice');
+      expect(results.notices[0].breadcrumbs.trail[0].metadata).toEqual(jasmine.objectContaining({
+        name: 'expected name',
+        message: 'expected message',
+        stack: jasmine.any(String)
+      }));
+      expect(results.notices[0].breadcrumbs.trail[0].metadata).not.toEqual(jasmine.objectContaining({
+        context: jasmine.anything()
+      }));
+      done()
+    }
+
+    MyWorker.postMessage("")
+  })
+})
