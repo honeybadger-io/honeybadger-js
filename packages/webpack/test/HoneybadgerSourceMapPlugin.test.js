@@ -232,11 +232,11 @@ describe(PLUGIN_NAME, function () {
 
       const compilation = {
         assets: {
-        "foo.bar.js": {}, 
-        "foo.bar.js.map": {}, 
-        "baz.js": {}, 
-        "baz.js.map": {}, 
-        "1234.png": {}
+          'foo.bar.js': {}, 
+          'foo.bar.js.map': {}, 
+          'baz.js': {}, 
+          'baz.js.map': {}, 
+          '1234.png': {}
         }
       }
       await this.plugin.onDone({ compilation })
