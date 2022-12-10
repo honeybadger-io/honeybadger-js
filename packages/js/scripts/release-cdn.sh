@@ -33,6 +33,7 @@ aws s3 sync dist/browser/ s3://$HONEYBADGER_JS_S3_BUCKET/$PREFIX \
   --include 'honeybadger.js' \
   --include 'honeybadger.js.map'\
   --include 'honeybadger.min.js' \
-  --include 'honeybadger.min.js.map'
+  --include 'honeybadger.min.js.map' \
+  --include 'honeybadger-feedback-form.js'
 
 aws cloudfront create-invalidation --distribution-id $HONEYBADGER_DISTRIBUTION_ID --paths "/$PREFIX/*"

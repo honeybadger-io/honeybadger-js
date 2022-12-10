@@ -1,8 +1,3 @@
-/**
- * todo: this js file (bundled with the html file) should either:
- * - come from the server (through a GET request)
- * - or bundled in the js package as a post-build step (? - not yet explored)
- */
 (function (window, document) {
   // eslint-disable-next-line quotes
   const TEMPLATE = `$$TEMPLATE$$`

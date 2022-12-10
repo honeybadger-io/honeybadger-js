@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/js",
-  "version": "4.7.4",
+  "version": "4.7.5-943",
   "license": "MIT",
   "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js",
   "author": {
@@ -47,7 +47,8 @@
     "test:integration:browserstack": "npm run test:integration",
     "test:integration:headless": "HEADLESS=1 npm run test:integration",
     "tsd": "tsd",
-    "postpublish": "./scripts/release-cdn.sh"
+    "generate-feedback-form-assets": "node ./scripts/generate-feedback-form-assets.js",
+    "postpublish": "npm run generate-feedback-form-assets && ./scripts/release-cdn.sh"
   },
   "dependencies": {
     "@honeybadger-io/core": "^4.6.0",
