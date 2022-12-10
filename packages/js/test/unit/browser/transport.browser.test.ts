@@ -1,55 +1,47 @@
-import { useFakeXMLHttpRequest } from 'sinon'
-import { BrowserTransport } from '../../../src/browser/transport';
+import { BrowserTransport } from '../../../src/browser/transport'
+import fetch from 'jest-fetch-mock'
+import { NoticeTransportPayload } from '@honeybadger-io/core/build/src/types'
 
 describe('BrowserTransport', function () {
   let transport: BrowserTransport
-  let requests, request, xhr
   beforeAll(() => {
     transport = new BrowserTransport()
   })
 
   beforeEach(() => {
-    // Stub HTTP requests.
-    request = undefined
-    requests = []
-    xhr = useFakeXMLHttpRequest()
-    xhr.onCreate = function (xhr) {
-      request = xhr
-      return requests.push(xhr)
-    }
+    fetch.resetMocks()
   })
 
   it('sends GET request over the network', () => {
+    fetch.mockResponseOnce(JSON.stringify({}), { status: 201 })
+
     const promise = transport.send({
       method: 'GET',
       endpoint: 'my-endpoint',
-      async: true,
-      logger: console,
-    }).then(resp => {
+      logger: console
+    }).then((resp) => {
       expect(resp.statusCode).toEqual(201)
       return Promise.resolve()
     })
 
-    expect(requests).toHaveLength(1)
-    request.respond(201)
+    expect(fetch.mock.calls.length).toEqual(1)
 
     return promise
   })
 
   it('sends POST request over the network', () => {
+    fetch.mockResponseOnce(JSON.stringify({}), { status: 201 })
+
     const promise = transport.send({
       method: 'POST',
       endpoint: 'my-endpoint',
-      async: true,
-      logger: console,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }, <any>{ test: 1 }).then(resp => {
+      logger: console
+    }, { test: 1 } as unknown as NoticeTransportPayload).then((resp) => {
       expect(resp.statusCode).toEqual(201)
       return Promise.resolve()
     })
 
-    expect(requests).toHaveLength(1)
-    request.respond(201)
+    expect(fetch.mock.calls.length).toEqual(1)
 
     return promise
   })
@@ -58,30 +50,24 @@ describe('BrowserTransport', function () {
     const headers = {
       'X-API-Key': '123',
       'Content-Type': 'application/json;charset=utf-8',
-      'Accept': 'text/json, application/json'
+      Accept: 'text/json, application/json'
     }
+
+    fetch.mockResponseOnce(JSON.stringify({}), { status: 201, headers })
+
     const promise = transport.send({
       method: 'POST',
       endpoint: 'my-endpoint',
       headers,
-      async: true,
-      logger: console,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }, <any>{ test: 1 }).then(resp => {
+      logger: console
+    }, { test: 1 } as unknown as NoticeTransportPayload).then((resp) => {
       expect(resp.statusCode).toEqual(201)
       return Promise.resolve()
     })
 
-    expect(requests).toHaveLength(1)
-    expect(request.requestHeaders).toEqual(headers)
-    request.respond(201)
-
+    expect(fetch.mock.lastCall[1].headers).toEqual(headers)
+    expect(fetch.mock.calls.length).toEqual(1)
 
     return promise
   })
-
-  afterEach(function () {
-    xhr.restore()
-  })
-
-});
+})

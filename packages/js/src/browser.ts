@@ -1,12 +1,12 @@
 import { Types, Util, Client } from '@honeybadger-io/core'
-import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
+import { encodeCookie, decodeCookie, preferCatch, globalThisOrWindow } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
-import { BrowserTransport } from './browser/transport';
-import { Notice } from '@honeybadger-io/core/build/src/types';
+import { BrowserTransport } from './browser/transport'
+import { Notice } from '@honeybadger-io/core/build/src/types'
 
 const { merge, filter, objectIsExtensible } = Util
 
@@ -33,7 +33,9 @@ class Honeybadger extends Client {
         return false
       }
 
-      if (notice && !notice.url) { notice.url = document.URL }
+      if (notice && !notice.url && typeof document !== 'undefined') {
+        notice.url = document.URL
+      }
 
       this.__incrementErrorsCount()
 
@@ -50,11 +52,19 @@ class Honeybadger extends Client {
     }
   ]
 
-  constructor(opts: Partial<Types.BrowserConfig> = {}) {
+  constructor (opts: Partial<Types.BrowserConfig> = {}) {
+    const global = globalThisOrWindow()
+    let projectRoot = ''
+
+    // Cloudflare workers do not have access to location API.
+    if (global.location != null) {
+      projectRoot = global.location.protocol + '//' + global.location.host
+    }
+
     super({
       async: true,
       maxErrors: null,
-      projectRoot: window.location.protocol + '//' + window.location.host,
+      projectRoot,
       ...opts
     }, new BrowserTransport())
   }
@@ -111,7 +121,7 @@ class Honeybadger extends Client {
     }
 
     cgiData.HTTP_USER_AGENT = navigator.userAgent
-    if (document.referrer.match(/\S/)) {
+    if (typeof document !== 'undefined' && document.referrer.match(/\S/)) {
       cgiData.HTTP_REFERER = document.referrer
     }
 

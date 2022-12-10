@@ -41,4 +41,3 @@ describe('window.onunhandledrejection integration', function () {
     }))
   })
 })
-

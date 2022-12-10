@@ -29,6 +29,9 @@ module.exports = function (config) {
       // The test file
       'test/integration/test.js',
 
+      // Web Worker
+      { pattern: 'test/integration/worker.js', included: false },
+
       // File being tested
       { pattern: 'dist/browser/honeybadger.js', included: false },
 
