@@ -16,10 +16,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Deps
-        # we only need the js package
-        run: |
-          rm -r packages/!(js)/
-          npm ci
+        run: npm ci
 
       - name: Publish to CDN
         run: |
