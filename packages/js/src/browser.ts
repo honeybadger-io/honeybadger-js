@@ -10,6 +10,18 @@ import { Notice } from '@honeybadger-io/core/build/src/types'
 
 const { merge, filter, objectIsExtensible } = Util
 
+const getProjectRoot = () => {
+  const global = globalThisOrWindow()
+  let projectRoot = ''
+
+  // Cloudflare workers do not have access to location API.
+  if (global.location != null) {
+    projectRoot = global.location.protocol + '//' + global.location.host
+  }
+
+  return projectRoot
+}
+
 interface WrappedFunc {
   (): (...args: unknown[]) => unknown
   ___hb: WrappedFunc
@@ -53,18 +65,10 @@ class Honeybadger extends Client {
   ]
 
   constructor (opts: Partial<Types.BrowserConfig> = {}) {
-    const global = globalThisOrWindow()
-    let projectRoot = ''
-
-    // Cloudflare workers do not have access to location API.
-    if (global.location != null) {
-      projectRoot = global.location.protocol + '//' + global.location.host
-    }
-
     super({
       async: true,
       maxErrors: null,
-      projectRoot,
+      projectRoot: getProjectRoot(),
       ...opts
     }, new BrowserTransport())
   }
