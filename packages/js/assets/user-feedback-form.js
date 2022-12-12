@@ -67,48 +67,33 @@
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this
     if (self.loading) return
-    self.loading = true
 
+    self.loading = true
     document.getElementById('honeybadger-feedback-error').style.display = 'none'
-    window.fetch(ENDPOINT +
+    document.getElementById('honeybadger-feedback-submit').disabled = true
+
+    const script = document.createElement('script')
+    const form = document.getElementById('honeybadger-feedback-form')
+    script.src = ENDPOINT +
         '?format=js' +
         `&token=${self.getLastNoticeId()}` +
         `&name=${encodeURIComponent(self.form.name.value)}` +
         `&email=${encodeURIComponent(self.form.email.value)}` +
-        `&comment=${encodeURIComponent(self.form.comment.value)}`,
-    {
-      method: 'GET',
-      // todo: server should respond with header "Access-Control-Allow-Origin: CALLER_HOST"
-    })
-      .then(response => {
-        self.loading = false
-        if (!response.ok) {
-          response.json()
-            .then(data => {
-              self.onFormError(data.error)
-            })
-            .catch(_err => {
-              self.onFormError('')
-            })
-          return
-        }
-        self.onSuccess()
-      })
-      .catch(err => {
-        self.loading = false
-        self.onFormError(err.message)
-      })
+        `&comment=${encodeURIComponent(self.form.comment.value)}`
+    form.appendChild(script);
   };
 
   HoneybadgerUserFeedbackForm.prototype.onSuccess = function () {
     document.getElementById('honeybadger-feedback-thanks').style.display = 'block'
     document.getElementById('honeybadger-feedback-form').style.display = 'none'
+    document.getElementById('honeybadger-feedback-submit').disabled = false
   };
 
   HoneybadgerUserFeedbackForm.prototype.onFormError = function (message) {
     console.error('error, todo', message)
     document.getElementById('honeybadger-feedback-error').style.display = 'block'
     document.getElementById('honeybadger-feedback-error-detail').innerText = message
+    document.getElementById('honeybadger-feedback-submit').disabled = false
   };
 
   HoneybadgerUserFeedbackForm.prototype.getOptions = function () {
@@ -121,6 +106,18 @@
 
   const form = new HoneybadgerUserFeedbackForm()
   form.build()
-  // todo: remove - this is for debugging
-  window['honeybadgerUserFeedbackForm'] = form
+
+  // this function needs to be defined and will be called from the feedback script submission
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  window['honeybadgerFeedbackResponse'] = function honeybadgerFeedbackResponse(data) {
+    form.loading = false
+
+    if (data['result'] === 'OK') {
+      form.onSuccess()
+
+      return
+    }
+
+    form.onFormError(data['error'] || 'An unknown error occurred. Please try again.')
+  }
 })(window, document)

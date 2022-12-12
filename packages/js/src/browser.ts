@@ -107,9 +107,7 @@ class Honeybadger extends Client {
     }
     const script = window.document.createElement('script')
     script.async = true
-    // todo
-    // script.src = this.config.endpoint + '/get-feedback-form'
-    script.src = 'http://localhost:3000/feedback-form'
+    script.src = `https://js.honeybadger.io/v${this.getVersion()}/honeybadger-feedback-form.js`
     if (options.onLoad) {
       script.onload = options.onLoad
     }
