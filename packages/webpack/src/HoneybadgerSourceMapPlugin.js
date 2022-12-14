@@ -103,7 +103,7 @@ class HoneybadgerSourceMapPlugin {
       // Failing to remove a sourcemap file is not likely to be a huge deal, 
       // just log it rather than throw
       if (!this.silent) {
-        console.error(`Could not remove sourcemap file ${sourceMap}`, e)
+        console.warn(`Could not remove sourcemap file ${sourceMap}`, e)
       }
     }
   }

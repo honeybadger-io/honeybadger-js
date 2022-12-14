@@ -248,19 +248,16 @@ describe(PLUGIN_NAME, function () {
   })
 
   describe('removeSourcemapFile', function () {
+    let outputPath
+    let sourcemapFilename 
+    let compilation
+
     beforeEach(function () {
-      this.outputPath = '/fake/output/path'
-      this.info = sinon.stub(console, 'info')
-      this.compilation = {
-        assets: {
-          'vendor.5190.js.map': { source: () => '{"version":3,"sources":[]' },
-          'app.81c1.js.map': { source: () => '{"version":3,"sources":[]' }
-        },
-        compiler: {
-          outputPath: this.outputPath
-        },
-        errors: [],
-        getPath: () => this.outputPath
+      outputPath = '/fake/output/path'
+      sourcemapFilename = 'vendor.5190.js.map'
+      compilation = {
+        getPath: () => outputPath,
+        compiler: { outputPath }
       }
     })
 
@@ -272,24 +269,24 @@ describe(PLUGIN_NAME, function () {
       const stubFsUnlink = sinon
         .stub(fs, 'unlink')
         .callsFake(() => Promise.resolve(undefined))
+      const infoStub = sinon.stub(console, 'info')
 
-      await this.plugin.removeSourcemapFile(this.compilation, 'vendor.5190.js.map')
+      await this.plugin.removeSourcemapFile(compilation, sourcemapFilename)
 
-      expect(stubFsUnlink.calledWith('/fake/output/path/vendor.5190.js.map')).to.equal(true)
-      expect(this.info.calledWith('Removed sourcemap file vendor.5190.js.map')).to.equal(true)
+      expect(stubFsUnlink.calledWith(`${outputPath}/${sourcemapFilename}`)).to.equal(true)
+      expect(infoStub.calledWith(`Removed sourcemap file ${sourcemapFilename}`)).to.equal(true)
     })
 
     it('should not throw an error because of a failure to remove a sourcemap', async function () {
       const stubFsUnlink = sinon
         .stub(fs, 'unlink')
         .callsFake(() => Promise.reject(new Error('This file likes it here')))
+      const warnStub = sinon.stub(console, 'warn')
 
-      const errorStub = sinon.stub(console, 'error')
+      await this.plugin.removeSourcemapFile(compilation, sourcemapFilename)
 
-      await this.plugin.removeSourcemapFile(this.compilation, 'vendor.5190.js.map')
-
-      expect(stubFsUnlink.calledWith('/fake/output/path/vendor.5190.js.map')).to.eq(true)
-      expect(errorStub.calledWith('Could not remove sourcemap file vendor.5190.js.map')).to.eq(true)
+      expect(stubFsUnlink.calledWith(`${outputPath}/${sourcemapFilename}`)).to.eq(true)
+      expect(warnStub.calledWith(`Could not remove sourcemap file ${sourcemapFilename}`)).to.eq(true)
     })
   })
 
