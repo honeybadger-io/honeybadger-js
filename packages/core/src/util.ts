@@ -94,7 +94,7 @@ export function calculateBacktraceShift(backtrace: BacktraceFrame[]) {
       continue
     }
 
-    if (frame.file || frame.file === '<anonymous>') {
+    if (!frame.file || frame.file === '<anonymous>') {
       const nextFrame = backtrace[i + 1]
       if (nextFrame && isFrameFromHbSourceCode(nextFrame)) {
         shift++
