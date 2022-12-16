@@ -1,4 +1,3 @@
-import { join } from 'path'
 import { Client as BaseClient } from '@honeybadger-io/core'
 import nock from 'nock'
 import Singleton from '../../src/server'
@@ -8,11 +7,9 @@ describe('server client', function () {
   let client: typeof Singleton
 
   beforeEach(function () {
-    const MONOREPO_ROOT = join(__dirname, '../../../..')
     client = Singleton.factory({
       logger: nullLogger(),
       environment: null,
-      projectRoot: MONOREPO_ROOT
     })
   })
 

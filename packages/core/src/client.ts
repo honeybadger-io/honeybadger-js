@@ -312,13 +312,13 @@ export abstract class Client {
       tags: uniqueTags,
     })
 
-    let backtraceShift = 0
     if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
       notice.stack = generateStackTrace()
-      backtraceShift = 2
+      notice.backtrace = makeBacktrace(notice.stack, true)
     }
-
-    notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
+    else {
+      notice.backtrace = makeBacktrace(notice.stack)
+    }
 
     return notice as Notice
   }
