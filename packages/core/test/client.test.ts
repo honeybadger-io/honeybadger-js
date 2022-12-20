@@ -1,6 +1,7 @@
+import * as stackTraceParser from 'stacktrace-parser'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 import { Notice } from '../src/types'
-import { makeBacktrace,  } from '../src/util'
+import { makeBacktrace, DEFAULT_BACKTRACE_SHIFT } from '../src/util'
 
 class MyError extends Error {
   context = null
@@ -398,6 +399,19 @@ describe('client', function () {
         method: 'HTMLButtonElement.<anonymous>',
         number: 2139,
         column: 10
+      })
+    })
+
+    it('filters out default number of frames if no honeybadger source code is found', function () {
+      const error = new Error('This is an error from the test file. Tests are not under @honeybadger-io node_modules so the default backtrace shift will be applied.')
+      const originalBacktrace = stackTraceParser.parse(error.stack)
+      const shiftedBacktrace = makeBacktrace(error.stack, true)
+      expect(originalBacktrace.length).toEqual(shiftedBacktrace.length + DEFAULT_BACKTRACE_SHIFT)
+      expect(originalBacktrace[DEFAULT_BACKTRACE_SHIFT]).toMatchObject({
+        file: shiftedBacktrace[0].file,
+        methodName: shiftedBacktrace[0].method,
+        lineNumber: shiftedBacktrace[0].number,
+        column: shiftedBacktrace[0].column
       })
     })
   })

@@ -39,7 +39,7 @@ export function objectIsExtensible(obj): boolean {
   return Object.isExtensible(obj)
 }
 
-export function makeBacktrace(stack: string, filterHbSourceCode = false): BacktraceFrame[] {
+export function makeBacktrace(stack: string, filterHbSourceCode = false, logger: Logger = console): BacktraceFrame[] {
   try {
     const backtrace = stackTraceParser
       .parse(stack)
@@ -56,17 +56,26 @@ export function makeBacktrace(stack: string, filterHbSourceCode = false): Backtr
     }
 
     return backtrace
-  } catch (_err) {
-    // TODO: log error
+  } catch (err) {
+    logger.debug(err)
     return []
   }
 }
 
-const DEFAULT_BACKTRACE_SHIFT = 3
-
 function isFrameFromHbSourceCode(frame: BacktraceFrame) {
-  return frame.file.indexOf('@honeybadger-io') > -1 || frame.method.indexOf('@honeybadger-io') > -1
+  let hasHbFile = false
+  let hasHbMethod = false
+  if (frame.file) {
+    hasHbFile = frame.file.toLowerCase().indexOf('@honeybadger-io') > -1
+  }
+  if (frame.method) {
+    hasHbMethod = frame.method.toLowerCase().indexOf('@honeybadger-io') > -1
+  }
+
+  return hasHbFile || hasHbMethod
 }
+
+export const DEFAULT_BACKTRACE_SHIFT = 3
 
 /**
  * If {@link generateStackTrace} is used, we want to exclude frames that come from
@@ -108,7 +117,7 @@ export function calculateBacktraceShift(backtrace: BacktraceFrame[]) {
   return shift || DEFAULT_BACKTRACE_SHIFT
 }
 
-export function getCauses(notice: Partial<Notice>) {
+export function getCauses(notice: Partial<Notice>, logger: Logger) {
   if (notice.cause) {
     const causes =[]
     let cause = notice as Error
@@ -116,7 +125,7 @@ export function getCauses(notice: Partial<Notice>) {
       causes.push({
         class: cause.name,
         message: cause.message,
-        backtrace: typeof cause.stack == 'string' ? makeBacktrace(cause.stack) : null
+        backtrace: typeof cause.stack == 'string' ? makeBacktrace(cause.stack, false, logger) : null
       })
     }
     return causes
