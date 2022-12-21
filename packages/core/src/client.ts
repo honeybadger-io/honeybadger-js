@@ -312,13 +312,13 @@ export abstract class Client {
       tags: uniqueTags,
     })
 
-    let backtraceShift = 0
     if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
       notice.stack = generateStackTrace()
-      backtraceShift = 2
+      notice.backtrace = makeBacktrace(notice.stack, true, this.logger)
     }
-
-    notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
+    else {
+      notice.backtrace = makeBacktrace(notice.stack, false, this.logger)
+    }
 
     return notice as Notice
   }
@@ -376,7 +376,7 @@ export abstract class Client {
         backtrace: notice.backtrace,
         fingerprint: notice.fingerprint,
         tags: notice.tags,
-        causes: getCauses(notice),
+        causes: getCauses(notice, this.logger),
       },
       request: {
         url: filterUrl(notice.url, this.config.filters),
