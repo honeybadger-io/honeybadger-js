@@ -597,6 +597,56 @@ describe('client', function () {
         client.notify('should not report')
       })
     })
+
+    it('modifies the notice when an async function is provided', function () {
+      const funkyName = "My funky name"
+
+      client.beforeNotify(async (notice) => {
+        const modifyName = () => new Promise<void>((resolve) => {
+          setTimeout(() => {
+            notice.name = funkyName
+            resolve()
+          })
+        })
+
+
+        await modifyName()
+      })
+
+      return new Promise<void>((resolve) => {
+        client.afterNotify((_err, notice) => {
+          expect(notice.name).toEqual(funkyName)
+          resolve()
+        })
+
+        expect(client.notify("Should report and modify notice")).toEqual(true)
+      })
+    })
+
+    it('modifies the notice when an async function is provided', function () {
+      const funkyName = "My funky name"
+
+      client.beforeNotify(async (notice) => {
+        const modifyName = () => new Promise<void>((resolve) => {
+          setTimeout(() => {
+            notice.name = funkyName
+            resolve()
+          })
+        })
+
+
+        await modifyName()
+      })
+
+      return new Promise<void>((resolve) => {
+        client.afterNotify((_err, notice) => {
+          expect(notice.name).toEqual(funkyName)
+          resolve()
+        })
+
+        client.notify("Should report and modify notice")
+      })
+    })
   })
 
   describe('afterNotify', function () {
