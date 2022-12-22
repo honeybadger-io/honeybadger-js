@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.8.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.0...v4.8.1) (2022-12-22)
+
+
+### Bug Fixes
+
+* filter out honeybadger source code from stack trace ([#982](https://github.com/honeybadger-io/honeybadger-js/issues/982)) ([e647b75](https://github.com/honeybadger-io/honeybadger-js/commit/e647b75a58bce6a98da6bcc418dd77ecabe0fae1))
+
+
+
+
+
 # [4.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.7.5...v4.8.0) (2022-12-12)
 
 
