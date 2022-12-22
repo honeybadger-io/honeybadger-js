@@ -1,4 +1,4 @@
-import Singleton from '../../src/browser'
+import Singleton, { getUserFeedbackScriptUrl } from '../../src/browser'
 import { nullLogger } from './helpers'
 import fetch from 'jest-fetch-mock'
 
@@ -163,6 +163,98 @@ describe('browser client', function () {
           expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
           resolve()
         })
+      })
+    })
+  })
+
+  describe('showUserFeedbackForm', function () {
+    it('should do nothing if client is not properly initialized', function () {
+      client.configure({
+        apiKey: undefined
+      })
+      client.showUserFeedbackForm()
+      expect(window['honeybadgerUserFeedbackOptions']).toBeUndefined()
+    })
+
+    it('should remember id of last reported notice', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+      const id1 = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      const id2 = '48b98609-dd3b-48ee-bffc-d51f309a2dfb'
+      fetch.mockResponses(
+        [JSON.stringify({ id: id1 }), { status: 201 }],
+        [JSON.stringify({ id: id2 }), { status: 201 }]
+      )
+
+      return new Promise<void>((resolve) => {
+        client.afterNotify(function (err, notice) {
+          expect(err).toBeUndefined()
+
+          if (notice.message === 'testing') {
+            expect(notice.id).toBe(id1)
+            // @ts-expect-error __lastNoticeId is private
+            expect(client.__lastNoticeId).toBe(id1)
+          }
+
+          if (notice.message === 'testing 2') {
+            expect(notice.id).toBe(id2)
+            console.log(notice.id)
+            // @ts-expect-error
+            console.log(client.__lastNoticeId)
+            // @ts-expect-error __lastNoticeId is private
+            expect(client.__lastNoticeId).not.toBe(id1)
+            // @ts-expect-error __lastNoticeId is private
+            expect(client.__lastNoticeId).toBe(id2)
+
+            resolve()
+          }
+        })
+
+        client.notify('testing')
+        client.notify('testing 2')
+      })
+    })
+
+    it('should do nothing if no notice has been reported yet', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+      client.showUserFeedbackForm()
+      expect(window['honeybadgerUserFeedbackOptions']).toBeUndefined()
+
+    })
+
+    it('should add user feedback script tag on document.head', function () {
+      const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      client.configure({
+        apiKey: 'testing'
+      })
+      // @ts-expect-error
+      client.__lastNoticeId = id
+      client.showUserFeedbackForm()
+      expect(window['honeybadgerUserFeedbackOptions']).toMatchObject({
+        noticeId: id
+      })
+      expect(window.document.head.innerHTML).toMatch(`<script src="${getUserFeedbackScriptUrl(client.getVersion())}" async="true"></script>`)
+    })
+
+    it('should add user feedback options in window object', function () {
+      const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      client.configure({
+        apiKey: 'testing'
+      })
+      // @ts-expect-error
+      client.__lastNoticeId = id
+      const options = {
+        labels: { name: 'Your Name ???' },
+        buttons: { cancel: 'Stop!' },
+        messages: { thanks: 'Your feedback is greatly appreciated!' }
+      }
+      client.showUserFeedbackForm(options)
+      expect(window['honeybadgerUserFeedbackOptions']).toEqual({
+        noticeId: id,
+        ...options
       })
     })
   })

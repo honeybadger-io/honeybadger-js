@@ -22,6 +22,10 @@ const getProjectRoot = () => {
   return projectRoot
 }
 
+export const getUserFeedbackScriptUrl = (version: string) => {
+  return `https://js.honeybadger.io/v${version}/honeybadger-feedback-form.js`
+}
+
 interface WrappedFunc {
   (): (...args: unknown[]) => unknown
   ___hb: WrappedFunc
@@ -106,8 +110,8 @@ class Honeybadger extends Client {
       noticeId: this.__lastNoticeId
     }
     const script = window.document.createElement('script')
-    script.async = true
-    script.src = `https://js.honeybadger.io/v${this.getVersion()}/honeybadger-feedback-form.js`
+    script.setAttribute('src', getUserFeedbackScriptUrl(this.getVersion()))
+    script.setAttribute('async', 'true')
     if (options.onLoad) {
       script.onload = options.onLoad
     }
