@@ -191,44 +191,43 @@ export abstract class Client {
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs : []
 
     getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler)
-      .then((sourcePerTrace) => {
+      .then(async (sourcePerTrace) => {
         sourcePerTrace.forEach((source, index) => {
           notice.backtrace[index].source = source
         })
 
         // Make sure all of our promises have finished before sending the payload.
-        Promise.allSettled(beforeNotifyResult.results).then(() => {
-          const payload = this.__buildPayload(notice)
-          this.__transport
-            .send({
-              headers: {
-                'X-API-Key': this.config.apiKey,
-                'Content-Type': 'application/json',
-                'Accept': 'text/json, application/json'
-              },
-              method: 'POST',
-              endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
-              maxObjectDepth: this.config.maxObjectDepth,
-              logger: this.logger,
-            }, payload)
-            .then(res => {
-              if (res.statusCode !== 201) {
-                runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${res.statusCode}`))
-                this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
-                return
-              }
-              const uuid = JSON.parse(res.body).id
-              runAfterNotifyHandlers(merge(notice, {
-                id: uuid
-              }), this.__afterNotifyHandlers)
-              this.logger.info(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
-            })
-            .catch(err => {
-              this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
-              runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
-            })
+        await Promise.allSettled(beforeNotifyResult.results)
+        const payload = this.__buildPayload(notice)
+        this.__transport
+          .send({
+            headers: {
+              'X-API-Key': this.config.apiKey,
+              'Content-Type': 'application/json',
+              'Accept': 'text/json, application/json'
+            },
+            method: 'POST',
+            endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
+            maxObjectDepth: this.config.maxObjectDepth,
+            logger: this.logger,
+          }, payload)
+          .then(res => {
+            if (res.statusCode !== 201) {
+              runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${res.statusCode}`))
+              this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
+              return
+            }
+            const uuid = JSON.parse(res.body).id
+            runAfterNotifyHandlers(merge(notice, {
+              id: uuid
+            }), this.__afterNotifyHandlers)
+            this.logger.info(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
+          })
+          .catch(err => {
+            this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
+            runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
+          })
         })
-      })
 
     return true
   }
