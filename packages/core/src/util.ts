@@ -39,7 +39,7 @@ export function objectIsExtensible(obj): boolean {
   return Object.isExtensible(obj)
 }
 
-export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
+export function makeBacktrace(stack: string, filterHbSourceCode = false, logger: Logger = console): BacktraceFrame[] {
   try {
     const backtrace = stackTraceParser
       .parse(stack)
@@ -51,15 +51,73 @@ export function makeBacktrace(stack: string, shift = 0): BacktraceFrame[] {
           column: line.column
         }
       })
-    backtrace.splice(0, shift)
+    if (filterHbSourceCode) {
+      backtrace.splice(0, calculateBacktraceShift(backtrace))
+    }
+
     return backtrace
-  } catch (_err) {
-    // TODO: log error
+  } catch (err) {
+    logger.debug(err)
     return []
   }
 }
 
-export function getCauses(notice: Partial<Notice>) {
+function isFrameFromHbSourceCode(frame: BacktraceFrame) {
+  let hasHbFile = false
+  let hasHbMethod = false
+  if (frame.file) {
+    hasHbFile = frame.file.toLowerCase().indexOf('@honeybadger-io') > -1
+  }
+  if (frame.method) {
+    hasHbMethod = frame.method.toLowerCase().indexOf('@honeybadger-io') > -1
+  }
+
+  return hasHbFile || hasHbMethod
+}
+
+export const DEFAULT_BACKTRACE_SHIFT = 3
+
+/**
+ * If {@link generateStackTrace} is used, we want to exclude frames that come from
+ * Honeybadger's source code.
+ *
+ * Logic:
+ * - For each frame, increment the shift if source code is from Honeybadger
+ * - If a frame from an <anonymous> file is encountered increment the shift ONLY if between Honeybadger source code
+ *   (i.e. previous and next frames are from Honeybadger)
+ * - Exit when frame encountered is not from Honeybadger source code
+ *
+ * Note: this will not always work, especially in browser versions where code
+ *       is minified, uglified and bundled.
+ *       For those cases we default to 3:
+ *       - generateStackTrace
+ *       - makeNotice
+ *       - notify
+ */
+export function calculateBacktraceShift(backtrace: BacktraceFrame[]) {
+  let shift = 0
+  for (let i = 0; i < backtrace.length; i++) {
+    const frame = backtrace[i]
+    if (isFrameFromHbSourceCode(frame)) {
+      shift++
+      continue
+    }
+
+    if (!frame.file || frame.file === '<anonymous>') {
+      const nextFrame = backtrace[i + 1]
+      if (nextFrame && isFrameFromHbSourceCode(nextFrame)) {
+        shift++
+        continue
+      }
+    }
+
+    break
+  }
+
+  return shift || DEFAULT_BACKTRACE_SHIFT
+}
+
+export function getCauses(notice: Partial<Notice>, logger: Logger) {
   if (notice.cause) {
     const causes =[]
     let cause = notice as Error
@@ -67,7 +125,7 @@ export function getCauses(notice: Partial<Notice>) {
       causes.push({
         class: cause.name,
         message: cause.message,
-        backtrace: typeof cause.stack == 'string' ? makeBacktrace(cause.stack) : null
+        backtrace: typeof cause.stack == 'string' ? makeBacktrace(cause.stack, false, logger) : null
       })
     }
     return causes

@@ -100,7 +100,7 @@ describe('Express Middleware', function () {
       const initialContext = client.__getContext();
       client.setContext({ reqId: req.params.reqId });
       setTimeout(() => {
-        res.json({
+        res.status(200).json({
           initial: initialContext,
           final: client.__getContext()
         });
@@ -137,7 +137,7 @@ describe('Express Middleware', function () {
     app.use(client.errorHandler)
 
     app.use(function(_err, _req, res, _next) {
-      res.json(client.__getContext(), 500);
+      res.status(500).json(client.__getContext());
     })
 
     return Promise.all([80, 90].map((i) => {

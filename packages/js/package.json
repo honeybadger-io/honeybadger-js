@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/js",
-  "version": "4.7.4",
+  "version": "4.8.1",
   "license": "MIT",
   "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js",
   "author": {
@@ -51,7 +51,7 @@
     "postpublish": "npm run generate-feedback-form-assets && ./scripts/release-cdn.sh"
   },
   "dependencies": {
-    "@honeybadger-io/core": "^4.6.0",
+    "@honeybadger-io/core": "^4.8.1",
     "@types/aws-lambda": "^8.10.89",
     "@types/express": "^4.17.13"
   },
