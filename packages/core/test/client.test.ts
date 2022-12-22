@@ -599,7 +599,7 @@ describe('client', function () {
     })
 
     it('modifies the notice when an async function is provided', function () {
-      const funkyName = "My funky name"
+      const funkyName = 'My funky name'
 
       client.beforeNotify(async (notice) => {
         const modifyName = () => new Promise<void>((resolve) => {
@@ -619,12 +619,12 @@ describe('client', function () {
           resolve()
         })
 
-        expect(client.notify("Should report and modify notice")).toEqual(true)
+        expect(client.notify('Should report and modify notice')).toEqual(true)
       })
     })
 
     it('modifies the notice when an async function is provided', function () {
-      const funkyName = "My funky name"
+      const funkyName = 'My funky name'
 
       client.beforeNotify(async (notice) => {
         const modifyName = () => new Promise<void>((resolve) => {
@@ -644,7 +644,7 @@ describe('client', function () {
           resolve()
         })
 
-        client.notify("Should report and modify notice")
+        client.notify('Should report and modify notice')
       })
     })
   })

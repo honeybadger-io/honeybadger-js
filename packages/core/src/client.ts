@@ -196,7 +196,7 @@ export abstract class Client {
           notice.backtrace[index].source = source
         })
 
-				// Make sure all of our promises have finished before sending the payload.
+        // Make sure all of our promises have finished before sending the payload.
         await Promise.allSettled(beforeNotifyResult.results)
 
         const payload = this.__buildPayload(notice)
