@@ -38,7 +38,7 @@ export interface ServerlessConfig extends Config {
 }
 
 export interface BeforeNotifyHandler {
-  (notice?: Notice): boolean | void
+  (notice?: Notice): boolean | void | Promise<boolean | void>
 }
 
 export interface AfterNotifyHandler {

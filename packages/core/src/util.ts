@@ -95,15 +95,25 @@ export async function getSourceForBacktrace(backtrace: BacktraceFrame[],
   return result
 }
 
-export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeNotifyHandler[]): boolean {
-  let result = true
+export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeNotifyHandler[]): { results: ReturnType<BeforeNotifyHandler>[], result: boolean } {
+	const results: ReturnType<BeforeNotifyHandler>[] = []
+	let result = true
   for (let i = 0, len = handlers.length; i < len; i++) {
     const handler = handlers[i]
-    if (handler(notice) === false) {
-      result = false
-    }
+
+		const handlerResult = handler(notice)
+
+		if (handlerResult === false) {
+			result = false
+		}
+
+    results.push(handlerResult)
   }
-  return result
+
+  return {
+  	results,
+  	result
+  }
 }
 
 export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNotifyHandler[], error?: Error): boolean {

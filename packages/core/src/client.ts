@@ -166,8 +166,10 @@ export abstract class Client {
     // in case they modify them
     const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
     const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
-    if (!preConditionError && !beforeNotifyResult) {
-      this.logger.debug('skipping error report: beforeNotify handlers returned false', notice)
+
+
+    if (!preConditionError && !beforeNotifyResult.result) {
+      this.logger.debug('skipping error report: one or more beforeNotify handlers returned false', notice)
       preConditionError = new Error('beforeNotify handlers returned false')
     }
 
@@ -189,10 +191,13 @@ export abstract class Client {
     notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs : []
 
     getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler)
-      .then(sourcePerTrace => {
+      .then(async (sourcePerTrace) => {
         sourcePerTrace.forEach((source, index) => {
           notice.backtrace[index].source = source
         })
+
+				// Make sure all of our promises have finished before sending the payload.
+        await Promise.allSettled(beforeNotifyResult.results)
 
         const payload = this.__buildPayload(notice)
         this.__transport
