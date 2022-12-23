@@ -39,7 +39,7 @@
     }
   },
   "scripts": {
-    "build": "tsc --build tsconfig.json && rollup -c && node ./scripts/copy-typedefs.js",
+    "build": "tsc --build tsconfig.json && rollup -c && node ./scripts/copy-typedefs.js && node ./scripts/generate-feedback-form-assets.js",
     "test": "npm run test:browser && npm run test:server && npm run tsd",
     "test:browser": "jest --env=jsdom --setupFiles=\"<rootDir>/test/unit/jest-browser-setup.js\" --testPathPattern=\"test/unit/.*(?<![\\./]server)\\.test\\.(js|ts)\"",
     "test:server": "jest --env=node --testPathPattern=\"test/unit/.*(?<![\\./]browser)\\.test\\.(js|ts)\"",
@@ -47,8 +47,7 @@
     "test:integration:browserstack": "npm run test:integration",
     "test:integration:headless": "HEADLESS=1 npm run test:integration",
     "tsd": "tsd",
-    "generate-feedback-form-assets": "node ./scripts/generate-feedback-form-assets.js",
-    "postpublish": "npm run generate-feedback-form-assets && ./scripts/release-cdn.sh"
+    "postpublish": "./scripts/release-cdn.sh"
   },
   "dependencies": {
     "@honeybadger-io/core": "^4.8.1",

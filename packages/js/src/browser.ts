@@ -110,12 +110,16 @@ class Honeybadger extends Client {
       noticeId: this.__lastNoticeId
     }
     const script = window.document.createElement('script')
-    script.setAttribute('src', getUserFeedbackScriptUrl(this.getVersion()))
+    script.setAttribute('src', this.getUserFeedbackSubmitUrl())
     script.setAttribute('async', 'true')
     if (options.onLoad) {
       script.onload = options.onLoad
     }
     (window.document.head || window.document.body).appendChild(script)
+  }
+
+  private getUserFeedbackSubmitUrl() {
+    return getUserFeedbackScriptUrl(this.getVersion())
   }
 
   /** @internal */

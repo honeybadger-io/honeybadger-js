@@ -1,6 +1,4 @@
 /* eslint-disable */
-const isIE = window.document.documentMode;
-
 /**
  * Creates a new integration sandbox.
  * @param {function} callback Invoked when the sandbox is ready.
@@ -383,6 +381,136 @@ describe('browser integration', function () {
       })
       .catch(done);
   });
+
+  it('shows user feedback form', function (done) {
+    sandbox
+        .run(function () {
+          Honeybadger.getUserFeedbackSubmitUrl = () => '/base/dist/browser/honeybadger-feedback-form.js'
+
+          Honeybadger.afterNotify(() => {
+            Honeybadger.showUserFeedbackForm()
+          })
+
+          Honeybadger.notify('an error message')
+        })
+        .then(function (results) {
+          expect(results.notices.length).toEqual(1)
+          expect(sandbox.contentWindow['honeybadgerUserFeedbackOptions'].noticeId).toEqual('test')
+          expect(sandbox.contentWindow.document.head.innerHTML).toMatch('<script src="/base/dist/browser/honeybadger-feedback-form.js" async="true"></script>')
+          setTimeout(() => {
+            const feedbackForm = sandbox.contentWindow.document.getElementById('honeybadger-feedback')
+            expect(feedbackForm).not.toBeNull()
+            const feedbackHeading = sandbox.contentWindow.document.getElementById('honeybadger-feedback-heading')
+            expect(feedbackHeading.innerHTML.trim()).toEqual('Care to help us fix this?')
+
+            done()
+          }, 500)
+        })
+        .catch(done)
+  })
+
+  it('shows user feedback form with custom labels', function (done) {
+    sandbox
+        .run(function () {
+          Honeybadger.getUserFeedbackSubmitUrl = () => '/base/dist/browser/honeybadger-feedback-form.js'
+
+          Honeybadger.afterNotify(() => {
+            Honeybadger.showUserFeedbackForm({
+              messages: {
+                heading: 'Help, Error!'
+              }
+            })
+          })
+
+          Honeybadger.notify('an error message')
+        })
+        .then(function (results) {
+          expect(results.notices.length).toEqual(1)
+          expect(sandbox.contentWindow['honeybadgerUserFeedbackOptions'].noticeId).toEqual('test')
+          expect(sandbox.contentWindow.document.head.innerHTML).toMatch('<script src="/base/dist/browser/honeybadger-feedback-form.js" async="true"></script>')
+          setTimeout(() => {
+            const feedbackForm = sandbox.contentWindow.document.getElementById('honeybadger-feedback')
+            expect(feedbackForm).not.toBeNull()
+            const feedbackHeading = sandbox.contentWindow.document.getElementById('honeybadger-feedback-heading')
+            expect(feedbackHeading.innerHTML.trim()).toEqual('Help, Error!')
+
+            done()
+          }, 500)
+        })
+        .catch(done)
+  })
+
+  it('sends user feedback for notice on submit', function (done) {
+    sandbox
+        .run(function () {
+          Honeybadger.getUserFeedbackSubmitUrl = () => '/base/dist/browser/honeybadger-feedback-form.js'
+
+          Honeybadger.afterNotify(() => {
+            Honeybadger.showUserFeedbackForm()
+          })
+
+          Honeybadger.notify('an error message')
+        })
+        .then(function (results) {
+          expect(results.notices.length).toEqual(1)
+          expect(sandbox.contentWindow['honeybadgerUserFeedbackOptions'].noticeId).toEqual('test')
+          expect(sandbox.contentWindow.document.head.innerHTML).toMatch('<script src="/base/dist/browser/honeybadger-feedback-form.js" async="true"></script>')
+          setTimeout(() => {
+            const name = sandbox.contentWindow.document.getElementById('honeybadger-feedback-name')
+            name.value = 'integration test'
+
+            const email = sandbox.contentWindow.document.getElementById('honeybadger-feedback-email')
+            email.value = 'integration-test@honeybadger.io'
+
+            const comment = sandbox.contentWindow.document.getElementById('honeybadger-feedback-comment')
+            comment.value = 'ci integration comment'
+
+            const button = sandbox.contentWindow.document.getElementById('honeybadger-feedback-submit')
+            button.click()
+
+            const feedbackSubmitUrl = 'https://api.honeybadger.io/v1/feedback' +
+                '?format=js' +
+                `&amp;token=test` +
+                `&amp;name=${encodeURIComponent(name.value)}` +
+                `&amp;email=${encodeURIComponent(email.value)}` +
+                `&amp;comment=${encodeURIComponent(comment.value)}`
+            const form = sandbox.contentWindow.document.getElementById('honeybadger-feedback-form')
+            expect(form.innerHTML).toContain(`<script src="${feedbackSubmitUrl}"></script>`)
+            done()
+          }, 500)
+        })
+        .catch(done)
+  })
+
+  it('closes user feedback form on cancel', function (done) {
+    sandbox
+        .run(function () {
+          Honeybadger.getUserFeedbackSubmitUrl = () => '/base/dist/browser/honeybadger-feedback-form.js'
+
+          Honeybadger.afterNotify(() => {
+            Honeybadger.showUserFeedbackForm()
+          })
+
+          Honeybadger.notify('an error message')
+        })
+        .then(function (results) {
+          expect(results.notices.length).toEqual(1)
+          expect(sandbox.contentWindow.document.head.innerHTML).toMatch('<script src="/base/dist/browser/honeybadger-feedback-form.js" async="true"></script>')
+          setTimeout(() => {
+            let feedbackFormWrapper = sandbox.contentWindow.document.getElementById('honeybadger-feedback-wrapper')
+            expect(feedbackFormWrapper).not.toBeNull()
+
+            const button = sandbox.contentWindow.document.getElementById('honeybadger-feedback-cancel')
+            button.click()
+
+            feedbackFormWrapper = sandbox.contentWindow.document.getElementById('honeybadger-feedback-wrapper')
+            expect(feedbackFormWrapper).toBeNull()
+
+            done()
+          }, 500)
+        })
+        .catch(done)
+  })
 })
 
 describe("Web Worker", function () {
