@@ -1,4 +1,6 @@
 /* eslint-disable */
+const isIE = window.document.documentMode;
+
 /**
  * Creates a new integration sandbox.
  * @param {function} callback Invoked when the sandbox is ready.
