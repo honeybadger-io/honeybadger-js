@@ -469,17 +469,18 @@ describe('browser integration', function () {
 
             const button = sandbox.contentWindow.document.getElementById('honeybadger-feedback-submit')
             button.click()
-            button.click()
 
-            const feedbackSubmitUrl = 'https://api.honeybadger.io/v1/feedback' +
-                '?format=js' +
-                `&amp;token=test` +
-                `&amp;name=${encodeURIComponent(name.value)}` +
-                `&amp;email=${encodeURIComponent(email.value)}` +
-                `&amp;comment=${encodeURIComponent(comment.value)}`
-            const form = sandbox.contentWindow.document.getElementById('honeybadger-feedback-form')
-            expect(form.innerHTML).toContain(`<script src="${feedbackSubmitUrl}"></script>`)
-            done()
+            setTimeout(() => {
+              const feedbackSubmitUrl = 'https://api.honeybadger.io/v1/feedback' +
+                  '?format=js' +
+                  `&amp;token=test` +
+                  `&amp;name=${encodeURIComponent(name.value)}` +
+                  `&amp;email=${encodeURIComponent(email.value)}` +
+                  `&amp;comment=${encodeURIComponent(comment.value)}`
+              const form = sandbox.contentWindow.document.getElementById('honeybadger-feedback-form')
+              expect(form.innerHTML).toContain(`<script src="${feedbackSubmitUrl}"></script>`)
+              done()
+            }, 100)
           }, 500)
         })
         .catch(done)
