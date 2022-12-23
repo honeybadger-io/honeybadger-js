@@ -469,6 +469,7 @@ describe('browser integration', function () {
 
             const button = sandbox.contentWindow.document.getElementById('honeybadger-feedback-submit')
             button.click()
+            button.click()
 
             const feedbackSubmitUrl = 'https://api.honeybadger.io/v1/feedback' +
                 '?format=js' +
