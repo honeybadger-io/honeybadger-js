@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react'
 import TestRenderer from 'react-test-renderer'
 import { Honeybadger, HoneybadgerErrorBoundary } from './'
 import { SinonSpy, assert, createSandbox } from 'sinon'
+import fetch from 'jest-fetch-mock'
 
 describe('HoneybadgerReact', () => {
   const config = { apiKey: 'FFAACCCC00' }
@@ -19,28 +20,22 @@ describe('HoneybadgerReact', () => {
     }
   }
 
-  let requests, xhr
-
   const sandbox = createSandbox()
   beforeEach(function () {
-    // Stub HTTP requests.
-    requests = []
-    xhr = sandbox.useFakeXMLHttpRequest()
-
-    xhr.onCreate = function (xhr) {
-      return requests.push(xhr)
-    }
+    fetch.enableMocks()
+    fetch.resetMocks()
+    fetch.mockResponseOnce(JSON.stringify({ id: '12345' }), { status: 201 })
   })
 
   afterEach(function () {
     sandbox.restore()
   })
 
-  function afterNotify (done: () => void, run: () => void) {
+  function afterNotify (done: () => void, run: () => void, timeout = 50) {
     setTimeout(function () {
       run()
       done()
-    }, 50)
+    }, timeout)
   }
 
   it('should render the default component when there are no errors', () => {
@@ -79,6 +74,27 @@ describe('HoneybadgerReact', () => {
       // Still want to ensure notify is only called once. The MyError component will be created twice by React.
       afterNotify(done, function () {
         assert.calledOnce(honeybadger.notify as SinonSpy)
+        assert.notCalled(honeybadger.showUserFeedbackForm as SinonSpy)
+      })
+    })
+  })
+
+  describe('user feedback', () => {
+    it('should show the user feedback form when an error occurs', (done) => {
+      sandbox.spy(honeybadger, 'notify')
+      sandbox.spy(honeybadger, 'showUserFeedbackForm')
+
+      const MyError = jest.fn(() => 'custom error view')
+      TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} showUserFeedbackFormOnError={true} ErrorComponent={MyError}><Broken /></HoneybadgerErrorBoundary>)
+      expect(MyError).toBeCalledWith({
+        error: expect.any(Error),
+        info: { componentStack: expect.any(String) },
+        errorOccurred: expect.any(Boolean)
+      }, {})
+      // Still want to ensure notify is only called once. The MyError component will be created twice by React.
+      afterNotify(done, function () {
+        assert.calledOnce(honeybadger.notify as SinonSpy)
+        assert.calledOnce(honeybadger.showUserFeedbackForm as SinonSpy)
       })
     })
   })
