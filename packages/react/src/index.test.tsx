@@ -63,6 +63,7 @@ describe('HoneybadgerReact', () => {
   describe('when a custom error component is available', () => {
     it('should render a custom error message when a component errors', (done) => {
       sandbox.spy(honeybadger, 'notify')
+      sandbox.spy(honeybadger, 'showUserFeedbackForm')
 
       const MyError = jest.fn(() => 'custom error view')
       TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} ErrorComponent={MyError}><Broken /></HoneybadgerErrorBoundary>)
