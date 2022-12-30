@@ -90,7 +90,6 @@
   };
 
   HoneybadgerUserFeedbackForm.prototype.onFormError = function (message) {
-    console.error('error, todo', message)
     document.getElementById('honeybadger-feedback-error').style.display = 'block'
     document.getElementById('honeybadger-feedback-error-detail').innerText = message
     document.getElementById('honeybadger-feedback-submit').disabled = false
