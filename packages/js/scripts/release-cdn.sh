@@ -37,3 +37,9 @@ aws s3 sync dist/browser/ s3://$HONEYBADGER_JS_S3_BUCKET/$PREFIX \
   --include 'honeybadger-feedback-form.js'
 
 aws cloudfront create-invalidation --distribution-id $HONEYBADGER_DISTRIBUTION_ID --paths "/$PREFIX/*"
+
+# purge bunny.net cache
+curl --request GET \
+     --url "https://api.bunny.net/purge?url=https%3A%2F%2Fjs.honeybadger.io%2F$PREFIX%2F%2A&async=false" \
+     --header "AccessKey: $BUNNY_API_KEY" \
+     --header 'accept: application/json'
