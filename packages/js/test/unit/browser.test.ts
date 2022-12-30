@@ -225,6 +225,12 @@ describe('browser client', function () {
 
     })
 
+    it('should build a feedback script url only with major.minor version', function () {
+      const version = '4.8.1'
+      const url = getUserFeedbackScriptUrl(version)
+      expect(url).toMatch('/v4.8/')
+    })
+
     it('should add user feedback script tag on document.head', function () {
       const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
       client.configure({

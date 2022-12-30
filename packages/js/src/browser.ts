@@ -23,7 +23,8 @@ const getProjectRoot = () => {
 }
 
 export const getUserFeedbackScriptUrl = (version: string) => {
-  return `https://js.honeybadger.io/v${version}/honeybadger-feedback-form.js`
+  const majorMinorVersion = version.split('.').slice(0,2).join('.')
+  return `https://js.honeybadger.io/v${majorMinorVersion}/honeybadger-feedback-form.js`
 }
 
 interface WrappedFunc {
