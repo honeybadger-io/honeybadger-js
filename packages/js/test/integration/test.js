@@ -443,6 +443,9 @@ describe('browser integration', function () {
   })
 
   it('sends user feedback for notice on submit', function (done) {
+    sandbox.style.display = 'block';
+    sandbox.style.width = '800px';
+    sandbox.style.height = '800px';
     sandbox
         .run(function () {
           Honeybadger.getUserFeedbackSubmitUrl = () => '/base/dist/browser/honeybadger-feedback-form.js'
