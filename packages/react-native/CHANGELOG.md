@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.8.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.1...v4.8.2) (2023-01-02)
+
+**Note:** Version bump only for package @honeybadger-io/react-native
+
+
+
+
+
 # [4.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.7.5...v4.8.0) (2022-12-12)
 
 **Note:** Version bump only for package @honeybadger-io/react-native
