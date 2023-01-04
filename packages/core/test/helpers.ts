@@ -1,5 +1,5 @@
 import { Client as BaseClient } from '../src/client'
-import { Config, Logger, Notice, Noticeable, Transport, TransportOptions, NoticeTransportPayload, UserFeedbackForOptions } from '../src/types'
+import { Config, Logger, Notice, Noticeable, Transport, TransportOptions, NoticeTransportPayload, UserFeedbackFormOptions } from '../src/types'
 import { runAfterNotifyHandlers } from '../src/util'
 
 export function nullLogger(): Logger {
@@ -27,7 +27,7 @@ export class TestClient extends BaseClient {
     throw new Error('Method not implemented.');
   }
 
-  protected showUserFeedbackForm(_options: UserFeedbackForOptions): Promise<void> {
+  protected showUserFeedbackForm(_options: UserFeedbackFormOptions): Promise<void> {
     throw new Error('Method not implemented.');
   }
 

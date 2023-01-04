@@ -188,7 +188,7 @@ export type StoreContents = {
   breadcrumbs: BreadcrumbRecord[]
 }
 
-export type UserFeedbackForOptions = {
+export type UserFeedbackFormOptions = {
   onLoad?: () => void;
   messages?: {
     heading?: string;

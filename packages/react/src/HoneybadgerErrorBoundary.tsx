@@ -33,6 +33,11 @@ export default class HoneybadgerErrorBoundary extends Component<HoneybadgerError
       info: null,
       errorOccurred: false
     }
+    this.props.honeybadger.afterNotify((error, _notice) => {
+      if (!error && this.props.showUserFeedbackFormOnError) {
+        this.props.honeybadger.showUserFeedbackForm()
+      }
+    })
   }
 
   public static getDerivedStateFromError(error: Error): HoneybadgerErrorBoundaryState {
@@ -41,14 +46,7 @@ export default class HoneybadgerErrorBoundary extends Component<HoneybadgerError
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.setState({ errorOccurred: true, error: error, info: errorInfo })
-    this.props.honeybadger.notify(error, {
-      context: errorInfo as never,
-      afterNotify: (error, _notice) => {
-        if (!error && this.props.showUserFeedbackFormOnError) {
-          this.props.honeybadger.showUserFeedbackForm()
-        }
-      }
-    })
+    this.props.honeybadger.notify(error, { context: errorInfo as never })
   }
 
   private getErrorComponent(): ReactNode {

@@ -199,9 +199,6 @@ describe('browser client', function () {
 
           if (notice.message === 'testing 2') {
             expect(notice.id).toBe(id2)
-            console.log(notice.id)
-            // @ts-expect-error
-            console.log(client.__lastNoticeId)
             // @ts-expect-error __lastNoticeId is private
             expect(client.__lastNoticeId).not.toBe(id1)
             // @ts-expect-error __lastNoticeId is private

@@ -27,7 +27,7 @@ export class TestClient extends BaseClient {
     throw new Error('Method not implemented.')
   }
 
-  protected showUserFeedbackForm(_options: Types.UserFeedbackForOptions): Promise<void> {
+  protected showUserFeedbackForm(_options: Types.UserFeedbackFormOptions): Promise<void> {
     throw new Error('Method not implemented.')
   }
 

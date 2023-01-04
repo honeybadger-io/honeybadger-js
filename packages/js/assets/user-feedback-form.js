@@ -6,7 +6,6 @@
 
   const HoneybadgerUserFeedbackForm = function () {};
   HoneybadgerUserFeedbackForm.prototype.build = function () {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this
     self.element = document.createElement('div')
     self.element.id = 'honeybadger-feedback-wrapper'
@@ -35,36 +34,40 @@
       self.close()
     }
 
+    self.applyLabelsFromOptions()
+  };
+
+  HoneybadgerUserFeedbackForm.prototype.applyLabelsFromOptions = function () {
+    const self = this
+
     const formOptions = self.getOptions()
     const { messages = {}, buttons = {}, labels = {} } = formOptions
-    for (let i in messages) {
-      const element = document.getElementById(`honeybadger-feedback-${i}`)
+    for (let key in messages) {
+      const element = document.getElementById(`honeybadger-feedback-${key}`)
       if (element) {
-        element.innerText = messages[i]
+        element.innerText = messages[key]
       }
     }
-    for (let i in labels) {
-      const element = document.getElementById(`honeybadger-feedback-label-${i}`)
+    for (let key in labels) {
+      const element = document.getElementById(`honeybadger-feedback-label-${key}`)
       if (element) {
-        element.innerText = labels[i]
+        element.innerText = labels[key]
       }
     }
-    for (let i in buttons) {
-      const element = document.getElementById(`honeybadger-feedback-${i}`)
+    for (let key in buttons) {
+      const element = document.getElementById(`honeybadger-feedback-${key}`)
       if (element) {
-        element.value = buttons[i]
+        element.value = buttons[key]
       }
     }
   };
 
   HoneybadgerUserFeedbackForm.prototype.close = function () {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this
     self.element.parentNode.removeChild(self.element);
   };
 
   HoneybadgerUserFeedbackForm.prototype.submit = function () {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this
     if (self.loading) return
 

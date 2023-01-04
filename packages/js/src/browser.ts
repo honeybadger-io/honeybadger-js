@@ -95,7 +95,7 @@ class Honeybadger extends Client {
     throw new Error('Honeybadger.checkIn() is not supported on the browser')
   }
 
-  public async showUserFeedbackForm(options: Types.UserFeedbackForOptions = {}) {
+  public async showUserFeedbackForm(options: Types.UserFeedbackFormOptions = {}) {
     if (!this.config || !this.config.apiKey) {
       this.logger.debug('Client not initialized')
       return
