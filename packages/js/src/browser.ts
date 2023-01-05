@@ -6,7 +6,6 @@ import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
 import { BrowserTransport } from './browser/transport'
-import { Notice } from '@honeybadger-io/core/build/src/types'
 
 const { merge, filter, objectIsExtensible } = Util
 
@@ -61,7 +60,7 @@ class Honeybadger extends Client {
   ]
 
   protected __afterNotifyHandlers: Types.AfterNotifyHandler[] = [
-    (_error: any, notice?: Notice) => {
+    (_error: any, notice?: Types.Notice) => {
       if (notice) {
         this.__lastNoticeId = notice.id
       }
@@ -106,17 +105,41 @@ class Honeybadger extends Client {
       return
     }
 
-    window['honeybadgerUserFeedbackOptions'] = {
+    const global = globalThisOrWindow()
+    if (typeof global.document === 'undefined') {
+      this.logger.debug('global.document is undefined. Cannot attach script')
+      return
+    }
+
+    if (this.isUserFeedbackScriptUrlAlreadyVisible()) {
+      this.logger.debug('User feedback form is already visible')
+      return
+    }
+
+    global['honeybadgerUserFeedbackOptions'] = {
       ...options,
       noticeId: this.__lastNoticeId
     }
-    const script = window.document.createElement('script')
+    const script = global.document.createElement('script')
     script.setAttribute('src', this.getUserFeedbackSubmitUrl())
     script.setAttribute('async', 'true')
     if (options.onLoad) {
       script.onload = options.onLoad
     }
-    (window.document.head || window.document.body).appendChild(script)
+    (global.document.head || global.document.body).appendChild(script)
+  }
+
+  private isUserFeedbackScriptUrlAlreadyVisible() {
+    const global = globalThisOrWindow()
+    const feedbackScriptUrl =this.getUserFeedbackSubmitUrl()
+    for (let i = 0; i < global.document.scripts.length; i++) {
+      const script = global.document.scripts[i]
+      if (script.src === feedbackScriptUrl) {
+        return true
+      }
+    }
+
+    return false
   }
 
   private getUserFeedbackSubmitUrl() {

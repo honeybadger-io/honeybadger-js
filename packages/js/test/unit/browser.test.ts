@@ -168,6 +168,16 @@ describe('browser client', function () {
   })
 
   describe('showUserFeedbackForm', function () {
+    beforeEach(function () {
+      window['honeybadgerUserFeedbackOptions'] = undefined
+
+      for (let i = window.document.scripts.length - 1; i >= 0; i--) {
+        if (window.document.scripts[i].src.indexOf('https://js.honeybadger.io') > -1) {
+          window.document.scripts[i].parentNode.removeChild(window.document.scripts[i])
+        }
+      }
+    })
+
     it('should do nothing if client is not properly initialized', function () {
       client.configure({
         apiKey: undefined
@@ -259,6 +269,20 @@ describe('browser client', function () {
         noticeId: id,
         ...options
       })
+    })
+
+    it('should not load feedback script more than once', function () {
+      const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+      client.configure({
+        apiKey: 'testing'
+      })
+      // @ts-expect-error
+      client.__lastNoticeId = id
+      const scriptsCount = window.document.scripts.length
+      client.showUserFeedbackForm()
+      expect(window.document.scripts.length).toEqual(scriptsCount + 1)
+      client.showUserFeedbackForm()
+      expect(window.document.scripts.length).toEqual(scriptsCount + 1)
     })
   })
 })
