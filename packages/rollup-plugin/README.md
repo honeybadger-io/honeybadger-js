@@ -1,24 +1,16 @@
-# Honeybadger's Webpack Source Map Plugin
+# Honeybadger's Rollup Source Map Plugin
 
-![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
-[![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)
-[![npm dm](https://img.shields.io/npm/dm/@honeybadger-io/webpack)](https://www.npmjs.com/package/@honeybadger-io/webpack)
-[![npm dt](https://img.shields.io/npm/dt/@honeybadger-io/webpack)](https://www.npmjs.com/package/@honeybadger-io/webpack)
-
-[Webpack](https://webpack.js.org/) plugin to upload JavaScript
+[Rollup](https://rollupjs.org/) plugin to upload JavaScript
 sourcemaps to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). You can also send [deployment notifications](https://docs.honeybadger.io/api/deployments.html).
-
-Word Up! to the [thredUP](https://github.com/thredup) development team for a
-similar webpack plugin they have authored.
 
 ## Installation
 
 ```
 # npm
-npm install @honeybadger-io/webpack --save-dev
+npm install @honeybadger-io/rollup-plugin --save-dev
 
 # yarn
-yarn add @honeybadger-io/webpack --dev
+yarn add @honeybadger-io/rollup-plugin --dev
 ```
 
 ## Configuration
@@ -76,46 +68,16 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   </dd>
 </dl>
 
-### Vanilla webpack.config.js
+### rollup.config.js
 
 ```javascript
-const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
-const ASSETS_URL = 'https://cdn.example.com/assets';
-const webpackConfig = {
-  plugins: [new HoneybadgerSourceMapPlugin({
-    apiKey: 'abc123',
-    assetsUrl: ASSETS_URL,
-    revision: 'master',
-    // You can also enable deployment notifications:
-    deploy: {
-       environment: process.env.NODE_ENV,
-       repository: "https://github.com/yourusername/yourrepo"
-    }
-  })]
-}
+//TODO
 ```
 
-### Rails Webpacker config/webpack/environment.js
+### Using Vite
 
 ```javascript
-const { environment } = require('@rails/webpacker')
-const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
-
-// Assumes Heroku / 12-factor application style ENV variables
-// named GIT_COMMIT, HONEYBADGER_API_KEY, ASSETS_URL
-const revision = process.env.GIT_COMMIT || 'master'
-
-environment.plugins.append(
-  'HoneybadgerSourceMap',
-  new HoneybadgerSourceMapPlugin({
-    apiKey: process.env.HONEYBADGER_API_KEY,
-    assetsUrl: process.env.ASSETS_URL,
-    silent: false,
-    ignoreErrors: false,
-    revision: revision
-  }))
-
-module.exports = environment
+//TODO
 ```
 
 ## Development

@@ -1,0 +1,37 @@
+{
+  "name": "@honeybadger-io/rollup-plugin",
+  "version": "1.0.0",
+  "description": "A rollup plugin to upload sourcemaps to Honeybadger",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "\"echo \\\"TODO: no test specified\\\" && exit 1\"",
+    "build": "rollup -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/honeybadger-io/honeybadger-js.git"
+  },
+  "keywords": [
+    "rollup",
+    "honeybadger",
+    "javascript"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
+  },
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/rollup-plugin",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "rollup": "^3.9.1"
+  },
+  "dependencies": {
+    "fetch-retry": "^5.0.3",
+    "isomorphic-fetch": "^3.0.0",
+    "node-fetch": "^3.3.0"
+  }
+}
