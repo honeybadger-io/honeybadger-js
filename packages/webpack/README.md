@@ -6,7 +6,7 @@
 [![npm dt](https://img.shields.io/npm/dt/@honeybadger-io/webpack)](https://www.npmjs.com/package/@honeybadger-io/webpack)
 
 [Webpack](https://webpack.js.org/) plugin to upload JavaScript
-sourcemaps to [Honeybadger](https://docs.honeybadger.io/guides/source-maps.html). You can also send [deployment notifications](https://docs.honeybadger.io/api/deployments.html).
+sourcemaps to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). You can also send [deployment notifications](https://docs.honeybadger.io/api/deployments.html).
 
 Word Up! to the [thredUP](https://github.com/thredup) development team for a
 similar webpack plugin they have authored.
