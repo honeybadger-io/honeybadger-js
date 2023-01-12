@@ -1,25 +1,34 @@
-import { uploadSourcemap, extractSourcemapDataFromBundle } from "./utils"
+import { uploadSourcemap } from "./utils"
+import path from 'node:path'
 
-// TODO
-const API_KEY = 'XXX'
-const ASSETS_URL = 'https://localhost:3000'
-const RETRIES = 1
-const REVISION = 'testingMultiFile'
-const HB_ENDPOINT = 'https://api.honeybadger.io/v1/source_maps'
-
-export default async function writeBundle(outputOptions, bundle) {
+export default async function onWriteBundle({ outputOptions, bundle, hbOptions }) {
   const sourcemapData = extractSourcemapDataFromBundle({ dir: outputOptions.dir, bundle })
   
   const sourcemapUploadPromises = sourcemapData.map(data => {
     return uploadSourcemap({ 
-      hbEndpoint: HB_ENDPOINT,
-      assetsUrl: ASSETS_URL, 
-      apiKey: API_KEY, 
-      bundle, 
-      retries: RETRIES, 
-      revision: REVISION, 
+      ...hbOptions,
       ...data
     })
   })
   await Promise.all(sourcemapUploadPromises)
+}
+
+/* 
+ * The bundle object looks like { [fileName: string]: AssetInfo | ChunkInfo })
+ * See https://rollupjs.org/guide/en/#writebundle 
+ * 
+**/
+function extractSourcemapDataFromBundle ({ dir = '', bundle }) {
+  const sourceMaps = Object.values(bundle)
+    .filter(file => file.type === 'asset' && file.fileName.endsWith('.js.map'))
+  
+  return sourceMaps.map(sourcemap => {
+    const sourcemapFilename = sourcemap.fileName
+    const sourcemapFilePath = path.resolve(dir, sourcemapFilename)
+    // TODO: It's probably safe to assume that rollup will name the map with 
+    // the same name as the js file... however we should maybe be more careful than this
+    const jsFilename = sourcemapFilename.replace('.map', '')
+    const jsFilePath = path.resolve(dir, jsFilename)
+    return { sourcemapFilename, sourcemapFilePath, jsFilename, jsFilePath }
+  })
 }

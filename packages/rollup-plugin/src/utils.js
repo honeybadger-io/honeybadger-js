@@ -1,9 +1,13 @@
 import originalFetch, { FormData, fileFrom } from 'node-fetch'
 import fetchRetry from 'fetch-retry';
 const fetch = fetchRetry(originalFetch)
-import path from 'node:path'
 
-// This could be shared w webpack plugin
+/******************************
+ * Everything in this file is designed to be shared with the webpack plugin
+ * e.g. by removing specifics about how the bundle is formatted 
+ * In a follow-up, we can extract this into a module to share among the plugins
+*******************************/
+
 async function buildBodyForSourcemapUpload({ 
     assetsUrl, 
     apiKey, 
@@ -24,32 +28,13 @@ async function buildBodyForSourcemapUpload({
   return form
 }
 
-/* 
- * The bundle object looks like { [fileName: string]: AssetInfo | ChunkInfo })
- * See https://rollupjs.org/guide/en/#writebundle for details 
-**/
-export function extractSourcemapDataFromBundle ({ dir = '', bundle }) {
-  const sourceMaps = Object.values(bundle)
-    .filter(file => file.type === 'asset' && file.fileName.endsWith('.js.map'))
-  
-  return sourceMaps.map(sourcemap => {
-    const sourcemapFilename = sourcemap.fileName
-    const sourcemapFilePath = path.resolve(dir, sourcemapFilename)
-    // TODO: It's probably safe to assume that rollup will name the map with 
-    // the same name as the js file... however we should maybe be more careful than this
-    const jsFilename = sourcemapFilename.replace('.map', '')
-    const jsFilePath = path.resolve(dir, jsFilename)
-    return { sourcemapFilename, sourcemapFilePath, jsFilename, jsFilePath }
-  })
-}
-
-// This could be shared with webpack plugin with minor changes
 export async function uploadSourcemap ({ 
-  hbEndpoint, 
+  endpoint, 
   assetsUrl, 
   apiKey, 
   retries, 
   revision, 
+  silent,
   sourcemapFilename,
   sourcemapFilePath, 
   jsFilename, 
@@ -59,7 +44,7 @@ export async function uploadSourcemap ({
 
   let res
   try {
-    res = await fetch(hbEndpoint, {
+    res = await fetch(endpoint, {
       method: 'POST',
       body,
       redirect: 'follow',
@@ -72,7 +57,9 @@ export async function uploadSourcemap ({
   }
 
   if (res.ok) {
-    console.info(`Successfully uploaded ${sourcemapFilename} to Honeybadger`) 
+    if (!silent) {
+      console.info(`Successfully uploaded ${sourcemapFilename} to Honeybadger`) 
+    }
   } else {
     // Attempt to parse error details from response
     let details

@@ -4,11 +4,14 @@
   "description": "Example of using rollup plugin in simple rollup project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1", 
+    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c"
   },
   "license": "MIT",
   "devDependencies": {
     "rollup": "^3.9.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3"
   }
 }
