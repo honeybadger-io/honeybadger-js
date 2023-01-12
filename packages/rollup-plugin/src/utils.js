@@ -1,7 +1,9 @@
 import originalFetch, { FormData, fileFrom } from 'node-fetch'
 import fetchRetry from 'fetch-retry';
 const fetch = fetchRetry(originalFetch)
+import path from 'node:path'
 
+// This could be shared w webpack plugin
 async function buildBodyForSourcemapUpload({ 
     assetsUrl, 
     apiKey, 
@@ -22,35 +24,56 @@ async function buildBodyForSourcemapUpload({
   return form
 }
 
-// TODO -- find the right item from bundle dynamically (currently hard-coded for testing)
-// Also check what the bundle can look like with multiple JS files
-// And can other files be in the bundle besides JS and maps? eg html, css, assets, etc
-async function pullDataFromBundle (bundle) {
-  const jsFilename = bundle['index.js'].fileName
-  const sourcemapFilename = bundle['index.js.map'].fileName
-  const jsFilePath = '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/dist/index.js'
-  const sourcemapFilePath = '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/dist/index.js.map'
-
-  return { jsFilename, jsFilePath, sourcemapFilename, sourcemapFilePath }
+/* 
+ * The bundle object looks like { [fileName: string]: AssetInfo | ChunkInfo })
+ * See https://rollupjs.org/guide/en/#writebundle for details 
+**/
+export function extractSourcemapDataFromBundle ({ dir = '', bundle }) {
+  const sourceMaps = Object.values(bundle)
+    .filter(file => file.type === 'asset' && file.fileName.endsWith('.js.map'))
+  
+  return sourceMaps.map(sourcemap => {
+    const sourcemapFilename = sourcemap.fileName
+    const sourcemapFilePath = path.resolve(dir, sourcemapFilename)
+    // TODO: It's probably safe to assume that rollup will name the map with 
+    // the same name as the js file... however we should maybe be more careful than this
+    const jsFilename = sourcemapFilename.replace('.map', '')
+    const jsFilePath = path.resolve(dir, jsFilename)
+    return { sourcemapFilename, sourcemapFilePath, jsFilename, jsFilePath }
+  })
 }
 
-export async function uploadSourcemap ({ hbEndpoint, assetsUrl, apiKey, bundle, retries, revision }) {
-  const bundleData = await pullDataFromBundle(bundle)
+// This could be shared with webpack plugin with minor changes
+export async function uploadSourcemap ({ 
+  hbEndpoint, 
+  assetsUrl, 
+  apiKey, 
+  retries, 
+  revision, 
+  sourcemapFilename,
+  sourcemapFilePath, 
+  jsFilename, 
+  jsFilePath 
+}) {
+  const body = await buildBodyForSourcemapUpload({ assetsUrl, apiKey, revision, sourcemapFilePath, jsFilename, jsFilePath })
+
   let res
   try {
     res = await fetch(hbEndpoint, {
       method: 'POST',
-      body: await buildBodyForSourcemapUpload({ assetsUrl, apiKey, revision, ...bundleData }),
+      body,
       redirect: 'follow',
       retries,
       retryDelay: 1000
     })
   } catch (err) {
     // network / operational errors. Does not include 404 / 500 errors
-    throw new Error(err, `Failed to upload sourcemap to Honeybadger`)
+    throw new Error(err, `Failed to upload sourcemap ${sourcemapFilename} to Honeybadger`)
   }
 
-  if (!res.ok) {
+  if (res.ok) {
+    console.info(`Successfully uploaded ${sourcemapFilename} to Honeybadger`) 
+  } else {
     // Attempt to parse error details from response
     let details
     try {
@@ -65,6 +88,6 @@ export async function uploadSourcemap ({ hbEndpoint, assetsUrl, apiKey, bundle, 
       details = `${res.status} - ${res.statusText}`
     }
 
-    throw new Error(`Failed to upload sourcemap to Honeybadger: ${details}`)
+    throw new Error(`Failed to upload sourcemap ${sourcemapFilename} to Honeybadger: ${details}`)
   }
 }

@@ -7,5 +7,5 @@ export default {
     dir: 'dist',
     format: 'cjs'
   },
-  plugins: [ nodeResolve(), commonjs() ]
+  plugins: [ nodeResolve({ preferBuiltins: true }), commonjs() ]
 };

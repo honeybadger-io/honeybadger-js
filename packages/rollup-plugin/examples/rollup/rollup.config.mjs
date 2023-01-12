@@ -1,4 +1,4 @@
-// Using the built version of our plugin to test
+// Using the local built version of our plugin to test
 import honeybadgerRollupPlugin from "../../dist/index.js";
 
 export default {
@@ -6,7 +6,11 @@ export default {
   output: {
     dir: 'dist',
     format: 'cjs', 
-    sourcemap: true
+    sourcemap: true, 
+    // This keeps the file structure intact
+    // Normally wouldn't do this, but useful for testing what the bundle
+    // looks like when there are multiple js files and subfolders
+    preserveModules: true
   }, 
-  plugins: [honeybadgerRollupPlugin()]
+  plugins: [ honeybadgerRollupPlugin() ], 
 };
