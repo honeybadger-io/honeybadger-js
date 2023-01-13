@@ -266,6 +266,8 @@ describe('browser client', function () {
       }
       client.showUserFeedbackForm(options)
       expect(window['honeybadgerUserFeedbackOptions']).toEqual({
+        apiKey: client.config.apiKey,
+        endpoint: client.config.userFeedbackEndpoint,
         noticeId: id,
         ...options
       })

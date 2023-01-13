@@ -1,7 +1,6 @@
 (function (window, document) {
   // eslint-disable-next-line quotes
   const TEMPLATE = `$$TEMPLATE$$`
-  const ENDPOINT = 'https://api.honeybadger.io/v1/feedback'
   const OPTIONS_KEY = 'honeybadgerUserFeedbackOptions'
 
   const HoneybadgerUserFeedbackForm = function () {};
@@ -77,12 +76,20 @@
 
     const script = document.createElement('script')
     const form = document.getElementById('honeybadger-feedback-form')
-    script.src = ENDPOINT +
+    script.src = self.getEndpoint() +
         '?format=js' +
+        `&api_key=${self.getApiKey()}` +
         `&token=${self.getLastNoticeId()}` +
         `&name=${encodeURIComponent(self.form.name.value)}` +
         `&email=${encodeURIComponent(self.form.email.value)}` +
         `&comment=${encodeURIComponent(self.form.comment.value)}`
+    script.onerror = function () {
+      self.loading = false
+      // unfortunately we don't get any info here about the error (i.e. HTTP 403)
+      self.onFormError('')
+      // remove script so that user can try again
+      form.removeChild(script)
+    }
     form.appendChild(script);
   };
 
@@ -102,8 +109,16 @@
     return window[OPTIONS_KEY]
   }
 
+  HoneybadgerUserFeedbackForm.prototype.getApiKey = function () {
+    return this.getOptions().apiKey
+  }
+
   HoneybadgerUserFeedbackForm.prototype.getLastNoticeId = function () {
     return this.getOptions().noticeId
+  }
+
+  HoneybadgerUserFeedbackForm.prototype.getEndpoint = function () {
+    return this.getOptions().endpoint
   }
 
   const form = new HoneybadgerUserFeedbackForm()
@@ -120,6 +135,6 @@
       return
     }
 
-    form.onFormError(data['error'] || 'An unknown error occurred. Please try again.')
+    form.onFormError(data['error'] || 'An unknown error occurred.')
   }
 })(window, document)

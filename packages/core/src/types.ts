@@ -78,6 +78,7 @@ export interface Notice {
 }
 
 export interface BrowserConfig extends Config {
+  userFeedbackEndpoint: string,
   async: boolean
   maxErrors: number
 }

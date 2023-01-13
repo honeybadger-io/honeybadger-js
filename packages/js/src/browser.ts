@@ -70,6 +70,7 @@ class Honeybadger extends Client {
 
   constructor (opts: Partial<Types.BrowserConfig> = {}) {
     super({
+      userFeedbackEndpoint: 'https://api.honeybadger.io/v2/feedback',
       async: true,
       maxErrors: null,
       projectRoot: getProjectRoot(),
@@ -118,6 +119,8 @@ class Honeybadger extends Client {
 
     global['honeybadgerUserFeedbackOptions'] = {
       ...options,
+      apiKey: this.config.apiKey,
+      endpoint: this.config.userFeedbackEndpoint,
       noticeId: this.__lastNoticeId
     }
     const script = global.document.createElement('script')
