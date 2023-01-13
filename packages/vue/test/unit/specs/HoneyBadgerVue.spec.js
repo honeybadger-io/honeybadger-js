@@ -7,7 +7,6 @@ import fetch from 'jest-fetch-mock'
 import { mount } from '@vue/test-utils'
 
 describe('HoneybadgerVue', () => {
-  let requests, xhr
   let sandbox
 
   const DUMMY_API_KEY = 'FFAACCCC00'
