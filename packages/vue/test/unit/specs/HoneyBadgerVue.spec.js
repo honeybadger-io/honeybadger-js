@@ -3,6 +3,7 @@ import Honeybadger from '@honeybadger-io/js'
 import Miniwolf from '../Miniwolf.vue'
 import TestCanvasForProps from '../TestCanvasForProps.vue'
 import { createSandbox } from 'sinon'
+import fetch from 'jest-fetch-mock'
 import { mount } from '@vue/test-utils'
 
 describe('HoneybadgerVue', () => {
@@ -53,13 +54,7 @@ describe('HoneybadgerVue', () => {
     // Refresh singleton state.
     // Honeybadger.reset()
 
-    // Stub HTTP requests.
-    requests = []
-    xhr = sandbox.useFakeXMLHttpRequest()
-
-    xhr.onCreate = function (xhr) {
-      return requests.push(xhr)
-    }
+    fetch.resetMocks()
   })
 
   afterEach(function () {
@@ -132,7 +127,7 @@ describe('HoneybadgerVue', () => {
   })
 
   it("should invoke Honeybadger's notify and log error in console", (done) => {
-    const wrapper = factory({}, { debug: true })
+    const wrapper = factory(Miniwolf, { debug: true })
     const app = getAppInstance(wrapper)
     sandbox.spy(app.$honeybadger, 'notify')
     const err = new Error('oops')
