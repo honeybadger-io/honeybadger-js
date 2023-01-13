@@ -474,9 +474,9 @@ describe('browser integration', function () {
             button.click()
 
             setTimeout(() => {
-              const feedbackSubmitUrl = Honeybadger.config.userFeedbackEndpoint +
+              const feedbackSubmitUrl = 'https://api.honeybadger.io/v2/feedback' +
                   '?format=js' +
-                  `&amp;api_key=${Honeybadger.config.apiKey}` +
+                  `&amp;api_key=integration_sandbox` +
                   `&amp;token=test` +
                   `&amp;name=${encodeURIComponent(name.value)}` +
                   `&amp;email=${encodeURIComponent(email.value)}` +
