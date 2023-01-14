@@ -42,6 +42,7 @@
     "cross-env": "^7.0.0",
     "gh-pages": "^4.0.0",
     "husky": "^8.0.0",
+    "jest-fetch-mock": "^3.0.3",
     "react": "^18.1.0",
     "react-scripts": "^5.0.1",
     "react-test-renderer": "^18.1.0",

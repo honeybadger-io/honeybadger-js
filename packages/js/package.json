@@ -39,7 +39,7 @@
     }
   },
   "scripts": {
-    "build": "tsc --build tsconfig.json && rollup -c && node ./scripts/copy-typedefs.js",
+    "build": "tsc --build tsconfig.json && rollup -c && node ./scripts/copy-typedefs.js && node ./scripts/generate-feedback-form-assets.js",
     "test": "npm run test:browser && npm run test:server && npm run tsd",
     "test:browser": "jest --env=jsdom --setupFiles=\"<rootDir>/test/unit/jest-browser-setup.js\" --testPathPattern=\"test/unit/.*(?<![\\./]server)\\.test\\.(js|ts)\"",
     "test:server": "jest --env=node --testPathPattern=\"test/unit/.*(?<![\\./]browser)\\.test\\.(js|ts)\"",
