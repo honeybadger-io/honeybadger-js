@@ -1,5 +1,5 @@
 /**
- * This was taken from https://github.com/vuejs/vue/blob/master/src/core/util/debug.js.
+ * This was originally taken from https://github.com/vuejs/vue/blob/master/src/core/util/debug.js.
  * The method generateStackTrace is used to log errors the same way as Vue logs them when errorHandler is not set.
  */
 
@@ -8,15 +8,23 @@ const classify = str => str
   .replace(classifyRE, c => c.toUpperCase())
   .replace(/[-_]/g, '')
 
+const ANONYMOUS_COMPONENT = '<Anonymous>'
+const ROOT_COMPONENT = '<Root>'
+
 const formatComponentName = (vm, includeFile) => {
-  if (vm.$root === vm) {
-    return '<Root>'
+  if (!vm) {
+    return ANONYMOUS_COMPONENT
   }
-  const options = typeof vm === 'function' && vm.cid != null
-    ? vm.options
-    : vm._isVue
-      ? vm.$options || vm.constructor.options
-      : vm || {}
+
+  if (vm.$root === vm) {
+    return ROOT_COMPONENT
+  }
+
+  const options = vm.$options
+  if (!options) {
+    return ANONYMOUS_COMPONENT
+  }
+
   let name = options.name || options._componentTag
   const file = options.__file
   if (!name && file) {
@@ -25,7 +33,7 @@ const formatComponentName = (vm, includeFile) => {
   }
 
   return (
-    (name ? `<${classify(name)}>` : '<Anonymous>') +
+    (name ? `<${classify(name)}>` : ANONYMOUS_COMPONENT) +
     (file && includeFile !== false ? ` at ${file}` : '')
   )
 }
@@ -41,7 +49,7 @@ const repeat = (str, n) => {
 }
 
 export const generateComponentTrace = vm => {
-  if (vm._isVue && vm.$parent) {
+  if (vm && (vm.__isVue || vm._isVue) && vm.$parent) {
     const tree = []
     let currentRecursiveSequence = 0
     while (vm) {
