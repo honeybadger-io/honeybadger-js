@@ -20,15 +20,19 @@ export class TestTransport implements Types.Transport {
 
 export class TestClient extends BaseClient {
   protected factory(_opts: Partial<Types.Config>): this {
-    throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.')
   }
 
   public checkIn(_id: string): Promise<void> {
-    throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.')
+  }
+
+  protected showUserFeedbackForm(_options: Types.UserFeedbackFormOptions): Promise<void> {
+    throw new Error('Method not implemented.')
   }
 
   constructor(opts: Partial<Types.Config>, transport: Types.Transport) {
-    super(opts, transport);
+    super(opts, transport)
   }
 
   public getPayload(noticeable: Types.Noticeable, name: string | Partial<Types.Notice> = undefined, extra: Partial<Types.Notice> = undefined) {

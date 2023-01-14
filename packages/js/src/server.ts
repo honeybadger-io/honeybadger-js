@@ -69,6 +69,10 @@ class Honeybadger extends Client {
     this.__store = new StackedStore(this.config.maxBreadcrumbs);
   }
 
+  public showUserFeedbackForm(): Promise<void> {
+    throw new Error('Honeybadger.showUserFeedbackForm() is not supported on the server-side')
+  }
+
   checkIn(id: string): Promise<void> {
     return this.__transport
       .send({
