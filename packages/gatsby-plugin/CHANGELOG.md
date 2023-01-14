@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.9.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.2...v4.9.0) (2023-01-14)
+
+
+### Features
+
+* collect user feedback ([#965](https://github.com/honeybadger-io/honeybadger-js/issues/965)) ([0842f0a](https://github.com/honeybadger-io/honeybadger-js/commit/0842f0afeb65dc28045809cae4ebc94e461aeb4b))
+
+
+
+
+
 ## [4.8.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.1...v4.8.2) (2023-01-02)
 
 **Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
