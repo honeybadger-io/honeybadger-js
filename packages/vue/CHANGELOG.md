@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.9.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.0...v4.9.1) (2023-01-14)
+
+
+### Bug Fixes
+
+* improve generateStackTrace function to hide vue warn message ([#1000](https://github.com/honeybadger-io/honeybadger-js/issues/1000)) ([45c6ad6](https://github.com/honeybadger-io/honeybadger-js/commit/45c6ad6bc30a3680ddb402bd3598fda4d57f8ec9))
+
+
+
+
+
 # [4.9.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.2...v4.9.0) (2023-01-14)
 
 
