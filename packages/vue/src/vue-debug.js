@@ -20,10 +20,6 @@ const formatComponentName = (vm, includeFile) => {
     return ROOT_COMPONENT
   }
 
-  if (!vm.$options) {
-    return ANONYMOUS_COMPONENT
-  }
-
   const options = vm.$options
   if (!options) {
     return ANONYMOUS_COMPONENT
