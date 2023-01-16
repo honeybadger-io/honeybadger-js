@@ -25,7 +25,9 @@ export function cleanOptions(options) {
   })
   // Don't allow excessive retries
   if (options.retries > MAX_RETRIES) {
-    console.warn(`Using max retries: ${MAX_RETRIES}`)
+    if (!options.silent) {
+      console.warn(`Using max retries: ${MAX_RETRIES}`)
+    }
     options.retries = MAX_RETRIES
   }
   // Merge in our defaults

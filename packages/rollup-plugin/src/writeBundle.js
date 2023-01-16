@@ -4,6 +4,10 @@ import path from 'node:path'
 export default async function onWriteBundle({ outputOptions, bundle, hbOptions }) {
   const sourcemapData = extractSourcemapDataFromBundle({ dir: outputOptions.dir, bundle })
   
+  if (sourcemapData.length === 0 && !hbOptions.silent) {
+    console.warn('Could not find any sourcemaps in the bundle. Nothing will be uploaded.')
+  }
+
   const sourcemapUploadPromises = sourcemapData.map(data => {
     return uploadSourcemap({ 
       ...hbOptions,
