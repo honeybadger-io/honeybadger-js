@@ -4,6 +4,11 @@ const DEFAULT_ENDPOINT = 'https://api.honeybadger.io/v1/source_maps'
 const DEFAULT_REVISION = 'master'
 const DEFAULT_SILENT = false
 
+/******************************
+ * Everything in this file is designed to be shared with the webpack plugin
+ * In a follow-up, we can extract this into a module to share among the plugins
+*******************************/
+
 const required = [
   'apiKey',
   'assetsUrl'

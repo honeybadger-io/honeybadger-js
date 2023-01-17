@@ -33,5 +33,9 @@
     "fetch-retry": "^5.0.3",
     "isomorphic-fetch": "^3.0.0",
     "node-fetch": "^3.3.0"
+  }, 
+  "exports": {
+    "import": "./dist/es/index.js",
+    "default": "./dist/cjs/index.js"
   }
 }
