@@ -8,26 +8,6 @@ const fetch = fetchRetry(originalFetch)
  * In a follow-up, we can extract this into a module to share among the plugins
 *******************************/
 
-async function buildBodyForSourcemapUpload({ 
-    assetsUrl, 
-    apiKey, 
-    revision, 
-    jsFilename, 
-    jsFilePath,
-    sourcemapFilePath, 
-  }) {
-  const form = new FormData()
-  const jsFile = await fileFrom(jsFilePath, 'application/javascript')
-  const sourcemapFile = await fileFrom(sourcemapFilePath, 'application/octet-stream')
-
-  form.append('api_key', apiKey)
-  form.append('minified_url', `${assetsUrl}/${jsFilename}`)
-  form.append('minified_file', jsFile)
-  form.append('source_map', sourcemapFile)
-  form.append('revision', revision)
-  return form
-}
-
 export async function uploadSourcemap ({ 
   endpoint, 
   assetsUrl, 
@@ -77,4 +57,26 @@ export async function uploadSourcemap ({
 
     throw new Error(`Failed to upload sourcemap ${sourcemapFilename} to Honeybadger: ${details}`)
   }
+}
+
+export async function buildBodyForSourcemapUpload({ 
+  assetsUrl, 
+  apiKey, 
+  revision, 
+  jsFilename, 
+  jsFilePath,
+  sourcemapFilePath, 
+}) {
+  const form = new FormData()
+  
+  const jsFile = await fileFrom(jsFilePath, 'application/javascript')
+  const sourcemapFile = await fileFrom(sourcemapFilePath, 'application/octet-stream')
+
+  form.append('api_key', apiKey)
+  form.append('minified_url', `${assetsUrl}/${jsFilename}`)
+  form.append('minified_file', jsFile)
+  form.append('source_map', sourcemapFile)
+  form.append('revision', revision)
+  
+  return form
 }

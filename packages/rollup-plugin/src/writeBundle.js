@@ -1,4 +1,4 @@
-import { uploadSourcemap } from "./utils"
+import { uploadSourcemap } from './utils.js'
 import path from 'node:path'
 
 export default async function onWriteBundle({ outputOptions, bundle, hbOptions }) {

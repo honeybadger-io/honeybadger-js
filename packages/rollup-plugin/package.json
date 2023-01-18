@@ -7,7 +7,7 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "\"echo \\\"TODO: no test specified\\\" && exit 1\"",
+    "test": "mocha",
     "build": "rollup -c"
   },
   "repository": {
@@ -27,15 +27,18 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
-    "rollup": "^3.9.1"
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "rollup": "^3.9.1",
+    "sinon": "^15.0.1"
   },
   "dependencies": {
     "fetch-retry": "^5.0.3",
-    "isomorphic-fetch": "^3.0.0",
     "node-fetch": "^3.3.0"
-  }, 
+  },
   "exports": {
     "import": "./dist/es/index.js",
     "default": "./dist/cjs/index.js"
-  }
+  },
+  "type": "module"
 }
