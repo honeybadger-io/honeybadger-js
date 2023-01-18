@@ -337,17 +337,18 @@ export function instrument(object: Record<string, any>, name: string, replacemen
   if (!object || !name || !replacement || !(name in object)) {
     return
   }
-
-  let original = object[name]
-  while (original && original.__hb_original) {
-    original = original.__hb_original
-  }
-
   try {
+    let original = object[name]
+    while (original && original.__hb_original) {
+      original = original.__hb_original
+    }
     object[name] = replacement(original)
     object[name].__hb_original = original
   } catch (_e) {
-    // Ignores errors like this one:
+    // Ignores errors where "original" is a restricted object (see #1001)
+    // Uncaught Error: Permission denied to access property "__hb_original"
+
+    // Also ignores:
     //   Error: TypeError: Cannot set property onunhandledrejection of [object Object] which has only a getter
     //   User-Agent: Mozilla/5.0 (Linux; Android 10; SAMSUNG SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/12.1 Chrome/79.0.3945.136 Mobile Safari/537.36
   }

@@ -247,15 +247,11 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
           })
         }
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-        instrument(_window, 'onpopstate', function (original) {
-          return function () {
+        if (typeof addEventListener === 'function') {
+          addEventListener('popstate', (_event) => {
             recordUrlChange(lastHref, _window.location.href)
-            if (original) {
-              return original.apply(this, arguments)
-            }
-          }
-        })
+          })
+        }
 
         // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
         // https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
