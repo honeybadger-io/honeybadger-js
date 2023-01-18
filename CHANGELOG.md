@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.9.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.1...v4.9.2) (2023-01-18)
+
+
+### Bug Fixes
+
+* replace instrument with safer alternative addEventListener ([#1002](https://github.com/honeybadger-io/honeybadger-js/issues/1002)) ([8569f09](https://github.com/honeybadger-io/honeybadger-js/commit/8569f096788b55beb26a6290f4b481035455adbb))
+
+
+
+
+
 ## [4.9.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.0...v4.9.1) (2023-01-14)
 
 
