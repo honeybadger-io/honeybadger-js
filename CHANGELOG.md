@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.9.3](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.2...v4.9.3) (2023-01-20)
+
+
+### Bug Fixes
+
+* **vue3:** constructor was accessed during render warning in ([40568c9](https://github.com/honeybadger-io/honeybadger-js/commit/40568c949f6dda402db472e41d41e5d0d3e1ac1f)), closes [#996](https://github.com/honeybadger-io/honeybadger-js/issues/996)
+
+
+
+
+
 ## [4.9.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.1...v4.9.2) (2023-01-18)
 
 
