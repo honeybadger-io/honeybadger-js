@@ -61,7 +61,7 @@ export const generateComponentTrace = vm => {
     while (vm) {
       if (!vue3Vm && tree.length > 0) {
         const last = tree[tree.length - 1]
-        if (last?.constructor === vm?.constructor) {
+        if (last.constructor === vm.constructor) {
           currentRecursiveSequence++
           vm = vm.$parent
           continue
