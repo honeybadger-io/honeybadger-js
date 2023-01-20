@@ -11,12 +11,13 @@ const classify = str => str
 const ANONYMOUS_COMPONENT = '<Anonymous>'
 const ROOT_COMPONENT = '<Root>'
 
-const formatComponentName = (vm, includeFile) => {
+const formatComponentName = (vm, includeFile, isVue3Vm) => {
   if (!vm) {
     return ANONYMOUS_COMPONENT
   }
 
-  if (vm.$root === vm) {
+  // no need to check for root in vue3, better to show name of component, even if $root
+  if (!isVue3Vm && vm.$root === vm) {
     return ROOT_COMPONENT
   }
 
@@ -25,7 +26,8 @@ const formatComponentName = (vm, includeFile) => {
     return ANONYMOUS_COMPONENT
   }
 
-  let name = options.name || options._componentTag
+  // __name found in vue3
+  let name = options.name || options._componentTag || options.__name
   const file = options.__file
   if (!name && file) {
     const match = file.match(/([^/\\]+)\.vue$/)
@@ -48,14 +50,18 @@ const repeat = (str, n) => {
   return res
 }
 
+const isVue3Vm = vm => !!(vm && vm.__isVue)
+const isVue2Vm = vm => !!(vm && vm._isVue)
+
 export const generateComponentTrace = vm => {
-  if (vm && (vm.__isVue || vm._isVue) && vm.$parent) {
+  const vue3Vm = isVue3Vm(vm)
+  if ((vue3Vm || isVue2Vm(vm)) && vm.$parent) {
     const tree = []
     let currentRecursiveSequence = 0
     while (vm) {
-      if (tree.length > 0) {
+      if (!vue3Vm && tree.length > 0) {
         const last = tree[tree.length - 1]
-        if (last.constructor === vm.constructor) {
+        if (last?.constructor === vm?.constructor) {
           currentRecursiveSequence++
           vm = vm.$parent
           continue
@@ -72,11 +78,11 @@ export const generateComponentTrace = vm => {
         i === 0 ? '---> ' : repeat(' ', 5 + i * 2)
       }${
         Array.isArray(vm)
-          ? `${formatComponentName(vm[0])}... (${vm[1]} recursive calls)`
-          : formatComponentName(vm)
+          ? `${formatComponentName(vm[0], true, vue3Vm)}... (${vm[1]} recursive calls)`
+          : formatComponentName(vm, true, vue3Vm)
       }`)
       .join('\n')
   } else {
-    return `\n\n(found in ${formatComponentName(vm)})`
+    return `\n\n(found in ${formatComponentName(vm, true, vue3Vm)})`
   }
 }
