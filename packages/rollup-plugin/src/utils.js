@@ -33,13 +33,14 @@ export async function uploadSourcemap ({
     })
   } catch (err) {
     // network / operational errors. Does not include 404 / 500 errors
-    throw new Error(err, `Failed to upload sourcemap ${sourcemapFilename} to Honeybadger`)
+    throw new Error(`Failed to upload sourcemap ${sourcemapFilename} to Honeybadger`, { cause: err })
   }
 
   if (res.ok) {
     if (!silent) {
       console.info(`Successfully uploaded ${sourcemapFilename} to Honeybadger`) 
     }
+    return res
   } else {
     // Attempt to parse error details from response
     let details
@@ -47,7 +48,7 @@ export async function uploadSourcemap ({
       const body = await res.json()
 
       if (body && body.error) {
-        details = body.error
+        details = `${res.status} - ${body.error}`
       } else {
         details = `${res.status} - ${res.statusText}`
       }
@@ -74,9 +75,9 @@ export async function buildBodyForSourcemapUpload({
 
   form.append('api_key', apiKey)
   form.append('minified_url', `${assetsUrl}/${jsFilename}`)
+  form.append('revision', revision)
   form.append('minified_file', jsFile)
   form.append('source_map', sourcemapFile)
-  form.append('revision', revision)
-  
+
   return form
 }

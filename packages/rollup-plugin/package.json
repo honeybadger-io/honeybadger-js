@@ -7,7 +7,7 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --loader=testdouble",
     "build": "rollup -c"
   },
   "repository": {
@@ -30,7 +30,8 @@
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
     "rollup": "^3.9.1",
-    "sinon": "^15.0.1"
+    "sinon": "^15.0.1",
+    "testdouble": "^3.16.8"
   },
   "dependencies": {
     "fetch-retry": "^5.0.3",
