@@ -4,17 +4,20 @@ import { FormData, File, Response, FetchError } from 'node-fetch';
 
 describe('Utils', () => {
   const fetchMock = td.func()  
-  const testData = {
+  const hbOptions = {
     endpoint: 'https://honeybadger.io/api/sourcemaps/test',
     assetsUrl: 'https://foo.bar', 
     apiKey: 'test_key', 
     retries: 0,
     revision: '12345', 
     silent: false, 
-    sourcemapFilename: 'sourcemapfile.map.js',
-    sourcemapFilePath: 'path/to/sourcemapfile.map.js', 
+  }
+  const testData = {
+    ...hbOptions,
+    sourcemapFilename: 'index.map.js',
+    sourcemapFilePath: 'path/to/index.map.js', 
     jsFilename: 'index.js', 
-    jsFilePath: 'path/to/jsfile.js',   
+    jsFilePath: 'path/to/index.js',   
   }
   // Mock accessing the files via node-fetch's async fileFrom
   async function fileFromMock(filePath, type) {
@@ -32,36 +35,52 @@ describe('Utils', () => {
     utils = await import('../src/utils.js')
   })
 
-  describe('buildBodyForSourcemapUpload', () => {
-    it('should return an instance of FormData with expected entries', async () => {
-      const result = await utils.buildBodyForSourcemapUpload(testData)
-
-      expect(result).to.be.an.instanceOf(FormData)
-
-      const expectedFields = [
-        ['api_key', 'test_key'], 
-        ['minified_url', 'https://foo.bar/index.js'], 
-        ['revision', '12345'],    
-      ]
-      const expectedFiles = [
-        ['minified_file', 'path/to/jsfile.js', 'application/javascript'], 
-        ['source_map', 'path/to/sourcemapfile.map.js', 'application/octet-stream']
-      ]
-      expectedFields.forEach(([key, value]) => {
-        expect(result.get(key)).to.equal(value)
-      })  
-      expectedFiles.forEach(([key, filePath, type]) => {
-        const file = result.get(key)
-        expect(file).to.be.an.instanceOf(File)
-        expect(file.name).to.equal(filePath)
-        expect(file.type).to.equal(type)
-      }) 
+  describe('uploadSourcemaps', () => {
+    it('should warn if no sourcemaps are passed in and silent is false', async () => {
+      const warnMock = td.replace(console, 'warn')
+      await utils.uploadSourcemaps({ 
+        sourcemapData: [], 
+        hbOptions: { silent: false }
+      })
+      td.verify(warnMock('Could not find any sourcemaps in the bundle. Nothing will be uploaded.'))
     })
-  });
+
+    it('should resolve with responses if all files are uploaded', async () => {
+      const sourcemapData = [1, 2, 3].map(i => ({ 
+        sourcemapFilename: `index-${i}.map.js`, 
+        sourcemapFilePath: `path/to/index-${i}.map.js`, 
+        jsFilename: `index-${i}.js`, 
+        jsFilePath: `path/to/index-${i}.js`,
+      }))
+
+      // Return jsFilename in the mock response so we can easily check that fetch
+      // was called for all 3 files
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
+        .thenDo(async ( endpoint, { body }) => {
+          const jsFilename = body.get('minified_url').replace(`${hbOptions.assetsUrl}/`, '')
+          return new Response(JSON.stringify({ jsFilename }), { status: 200 })
+        })
+
+      const responses = await utils.uploadSourcemaps({ sourcemapData, hbOptions })
+      expect(responses).to.have.length(3)
+
+      const responseBodies = await Promise.all(responses.map(res => res.json()))
+      sourcemapData.forEach(({ jsFilename }) => {
+        expect(responseBodies).to.deep.include({ jsFilename })
+      })
+    })
+  })
 
   describe('uploadSourcemap', () => {
     it('should resolve with the response if the response is ok', async () => {
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()))
+      // Check we called fetch with the expected arguments
+      td.when(fetchMock(testData.endpoint, {
+        method: "POST",
+        body: td.matchers.isA(Object),
+        redirect: "follow",
+        retries: testData.retries,
+        retryDelay: 1000
+      }))
         .thenResolve(new Response({}, { status: 200 }))
 
       const res = await utils.uploadSourcemap(testData)
@@ -75,7 +94,7 @@ describe('Utils', () => {
       try {
         await utils.uploadSourcemap(testData)
       } catch (err) {
-        expect(err.message).to.equal('Failed to upload sourcemap sourcemapfile.map.js to Honeybadger')
+        expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger')
         expect(err.cause).to.be.an.instanceOf(FetchError)
       }
     })
@@ -88,7 +107,7 @@ describe('Utils', () => {
       try {
         await utils.uploadSourcemap(testData)
       } catch (err) {
-        expect(err.message).to.equal('Failed to upload sourcemap sourcemapfile.map.js to Honeybadger: 500 - Internal server error')
+        expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 500 - Internal server error')
       }
       
       // No body at all
@@ -98,7 +117,7 @@ describe('Utils', () => {
       try {
         await utils.uploadSourcemap(testData)
       } catch (err) {
-        expect(err.message).to.equal('Failed to upload sourcemap sourcemapfile.map.js to Honeybadger: 404 - Not found')
+        expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 404 - Not found')
       }
 
       // Body contains error data
@@ -108,7 +127,7 @@ describe('Utils', () => {
       try {
         await utils.uploadSourcemap(testData)
       } catch (err) {
-        expect(err.message).to.equal('Failed to upload sourcemap sourcemapfile.map.js to Honeybadger: 500 - Server has the hiccups')
+        expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 500 - Server has the hiccups')
       }
     })
 
@@ -141,6 +160,33 @@ describe('Utils', () => {
       expect(res.status).to.equal(201)
     })
   })
+
+  describe('buildBodyForSourcemapUpload', () => {
+    it('should return an instance of FormData with expected entries', async () => {
+      const result = await utils.buildBodyForSourcemapUpload(testData)
+
+      expect(result).to.be.an.instanceOf(FormData)
+
+      const expectedFields = [
+        ['api_key', 'test_key'], 
+        ['minified_url', 'https://foo.bar/index.js'], 
+        ['revision', '12345'],    
+      ]
+      const expectedFiles = [
+        ['minified_file', 'path/to/index.js', 'application/javascript'], 
+        ['source_map', 'path/to/index.map.js', 'application/octet-stream']
+      ]
+      expectedFields.forEach(([key, value]) => {
+        expect(result.get(key)).to.equal(value)
+      })  
+      expectedFiles.forEach(([key, filePath, type]) => {
+        const file = result.get(key)
+        expect(file).to.be.an.instanceOf(File)
+        expect(file.name).to.equal(filePath)
+        expect(file.type).to.equal(type)
+      }) 
+    })
+  });
 
   afterEach(() => {
     td.reset()

@@ -1,5 +1,5 @@
 import { cleanOptions } from './options.js'
-import onWriteBundle from './writeBundle'
+import onWriteBundle from './onWriteBundle'
 
 export default function honeybadgerRollupPlugin(options) {
   const hbOptions = cleanOptions(options)

@@ -8,6 +8,43 @@ const fetch = fetchRetry(originalFetch)
  * In a follow-up, we can extract this into a module to share among the plugins
 *******************************/
 
+/**
+ * Uploads sourcemaps to API endpoint
+ *
+ * @param {Array} sourcemapData An array of sourcemap data, each entry
+ *   should look like { sourcemapFilename, sourcemapFilePath, jsFilename, jsFilePath }
+ * @param {Object} hbOptions See ./options.js 
+ * @returns {Promise} Resolves if all sourcemaps are uploaded
+ */
+export async function uploadSourcemaps({ sourcemapData = [], hbOptions }) {
+  if (sourcemapData.length === 0 && !hbOptions.silent) {
+    console.warn('Could not find any sourcemaps in the bundle. Nothing will be uploaded.')
+  }
+
+  const sourcemapUploadPromises = sourcemapData.map(data => {
+    return uploadSourcemap({ 
+      ...hbOptions,
+      ...data
+    })
+  })
+  
+  return Promise.all(sourcemapUploadPromises)
+}
+
+/**
+ * Executes an API call to upload a single sourcemap
+ *
+ * @param {String} endpoint
+ * @param {String} assetsUrl
+ * @param {String} apiKey 
+ * @param {String} revision
+ * @param {Boolean} silent
+ * @param {String} jsFilename
+ * @param {String} jsFilePath
+ * @param {String} sourcemapFilePath
+ * @returns {Promise} Resolves to an instance of FormData
+ *   Rejects with an error if we don't get an ok response
+ */
 export async function uploadSourcemap ({ 
   endpoint, 
   assetsUrl, 
@@ -15,13 +52,13 @@ export async function uploadSourcemap ({
   retries, 
   revision, 
   silent,
-  sourcemapFilename,
-  sourcemapFilePath, 
   jsFilename, 
-  jsFilePath 
+  jsFilePath, 
+  sourcemapFilename,
+  sourcemapFilePath,
 }) {
   const body = await buildBodyForSourcemapUpload({ assetsUrl, apiKey, revision, sourcemapFilePath, jsFilename, jsFilePath })
-
+  
   let res
   try {
     res = await fetch(endpoint, {
@@ -60,6 +97,17 @@ export async function uploadSourcemap ({
   }
 }
 
+/**
+ * Builds the form data for the API call
+ *
+ * @param {String} assetsUrl
+ * @param {String} apiKey 
+ * @param {String} revision
+ * @param {String} jsFilename
+ * @param {String} jsFilePath
+ * @param {String} sourcemapFilePath
+ * @returns {Promise} Resolves to an instance of FormData
+ */
 export async function buildBodyForSourcemapUpload({ 
   assetsUrl, 
   apiKey, 
