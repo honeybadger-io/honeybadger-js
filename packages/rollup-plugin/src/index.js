@@ -1,5 +1,6 @@
 import { cleanOptions } from './options.js'
-import onWriteBundle from './onWriteBundle'
+import { extractSourcemapDataFromBundle } from './rollupUtils.js'
+import { uploadSourcemaps } from './hbUtils.js'
 
 export default function honeybadgerRollupPlugin(options) {
   const hbOptions = cleanOptions(options)
@@ -7,7 +8,8 @@ export default function honeybadgerRollupPlugin(options) {
   return {
     name: 'honeybadger', 
     writeBundle: async (outputOptions, bundle) => {
-      await onWriteBundle({ outputOptions, bundle, hbOptions })
+      const sourcemapData = extractSourcemapDataFromBundle({ outputOptions, bundle })
+      await uploadSourcemaps({ sourcemapData, hbOptions })
     }
   }
 }

@@ -32,7 +32,11 @@ describe('Utils', () => {
       { FormData, fileFrom: fileFromMock }, 
       fetchMock
     );
-    utils = await import('../src/utils.js')
+    utils = await import('../src/hbUtils.js')
+  })
+
+  afterEach(() => {
+    td.reset()
   })
 
   describe('uploadSourcemaps', () => {
@@ -187,8 +191,4 @@ describe('Utils', () => {
       }) 
     })
   });
-
-  afterEach(() => {
-    td.reset()
-  })
 });

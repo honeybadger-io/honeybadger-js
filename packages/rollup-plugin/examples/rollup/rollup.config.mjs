@@ -14,7 +14,7 @@ export default {
   output: {
     dir: 'dist',
     format: 'cjs', 
-    sourcemap: true, 
+    sourcemap: 'hidden', 
     // This keeps the file structure intact
     // Normally wouldn't do this, but useful for testing what the bundle
     // looks like when there are multiple js files and subfolders
