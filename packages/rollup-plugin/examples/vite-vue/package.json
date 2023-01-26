@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --port 8080"
   },
   "dependencies": {
+    "@honeybadger-io/js": "^4.9.3",
+    "@honeybadger-io/vue": "^4.9.3",
     "vue": "^3.2.45"
   },
   "devDependencies": {

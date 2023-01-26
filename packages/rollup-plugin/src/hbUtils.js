@@ -120,9 +120,10 @@ export async function buildBodyForSourcemapUpload({
   
   const jsFile = await fileFrom(jsFilePath, 'application/javascript')
   const sourcemapFile = await fileFrom(sourcemapFilePath, 'application/octet-stream')
+  const minifiedUrl = new URL(jsFilename, assetsUrl).href
 
   form.append('api_key', apiKey)
-  form.append('minified_url', `${assetsUrl}/${jsFilename}`)
+  form.append('minified_url', minifiedUrl)
   form.append('revision', revision)
   form.append('minified_file', jsFile)
   form.append('source_map', sourcemapFile)

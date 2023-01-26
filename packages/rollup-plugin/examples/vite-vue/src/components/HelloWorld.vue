@@ -6,6 +6,12 @@ defineProps({
 })
 
 const count = ref(0)
+
+function err(message) {
+  throw new Error(message)
+}
+
+
 </script>
 
 <template>
@@ -13,6 +19,7 @@ const count = ref(0)
 
   <div class="card">
     <button type="button" @click="count++">count is {{ count }}</button>
+    <button type="button" @click="err('Testing err from vue app')">Throw an error</button>
     <p>
       Edit
       <code>components/HelloWorld.vue</code> to test HMR
