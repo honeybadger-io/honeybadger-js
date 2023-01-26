@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 // Using the local built version of our plugin to test
 import honeybadgerRollupPlugin from '../../dist/es/index.js';
 import * as dotenv from 'dotenv' 
-dotenv.config({ path: `.env.local` })
+dotenv.config({ path: '.env.local' })
 
 // Put your API_KEY etc in a .env.local file
 const hbPluginOptions = {

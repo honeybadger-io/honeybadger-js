@@ -79,9 +79,9 @@ describe('Utils', () => {
     it('should resolve with the response if the response is ok', async () => {
       // Check we called fetch with the expected arguments
       td.when(fetchMock(testData.endpoint, {
-        method: "POST",
+        method: 'POST',
         body: td.matchers.isA(Object),
-        redirect: "follow",
+        redirect: 'follow',
         retries: testData.retries,
         retryDelay: 1000
       }))

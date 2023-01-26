@@ -109,19 +109,19 @@ export default {
   'index.js.map': {
     fileName: 'index.js.map',
     name: undefined,
-    source: `{"version":3,"file":"index.js","sources":["../src/index.js"],"sourcesContent":["import foo from './foo.js';\\nimport bar from './subfolder/bar.js'\\n\\nexport default function () {\\n  console.log(foo)\\n  console.log(bar)\\n}"],"names":[],"mappings":";;;;;AAGe,cAAQ,IAAI;AAC3B,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB;;;;"}`,
+    source: '{"version":3,"file":"index.js","sources":["../src/index.js"],"sourcesContent":["import foo from \'./foo.js\';\\nimport bar from \'./subfolder/bar.js\'\\n\\nexport default function () {\\n  console.log(foo)\\n  console.log(bar)\\n}"],"names":[],"mappings":";;;;;AAGe,cAAQ,IAAI;AAC3B,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB;;;;"}',
     type: 'asset'
   },
   'subfolder/bar.js.map': {
     fileName: 'subfolder/bar.js.map',
     name: undefined,
-    source: `{"version":3,"file":"bar.js","sources":["../../src/subfolder/bar.js"],"sourcesContent":["export default 'This is in a subfolder!'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}`,
+    source: '{"version":3,"file":"bar.js","sources":["../../src/subfolder/bar.js"],"sourcesContent":["export default \'This is in a subfolder!\'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}',
     type: 'asset'
   },
   'foo.js.map': {
     fileName: 'foo.js.map',
     name: undefined,
-    source: `{"version":3,"file":"foo.js","sources":["../src/foo.js"],"sourcesContent":["export default 'hello world!'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}`,
+    source: '{"version":3,"file":"foo.js","sources":["../src/foo.js"],"sourcesContent":["export default \'hello world!\'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}',
     type: 'asset'
   }
 }

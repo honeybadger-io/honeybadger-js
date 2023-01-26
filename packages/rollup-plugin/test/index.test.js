@@ -1,13 +1,12 @@
 import { expect } from 'chai'
 import * as td from 'testdouble'
-import { cleanOptions } from '../src/options.js'
 
 describe('Index', () => {
   let honeybadgerRollupPlugin
   let cleanOptionsMock
   let extractSourcemapDataFromBundleMock
   let uploadSourcemapsMock
-  const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar'}
+  const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
 
   beforeEach(async () => {
     const optionsModule = await td.replaceEsm('../src/options.js');
@@ -25,7 +24,7 @@ describe('Index', () => {
   })
 
   it('cleans the options, returns the expected format for a plugin', () => {
-    const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar'}
+    const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
     const plugin = honeybadgerRollupPlugin(options)
 
     td.verify(cleanOptionsMock(options))
