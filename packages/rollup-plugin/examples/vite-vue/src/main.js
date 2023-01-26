@@ -5,7 +5,6 @@ import HoneybadgerVue from '@honeybadger-io/vue'
 
 const app = createApp(App)
 
-console.log(import.meta.env)
 const config = {
   apiKey: import.meta.env.VITE_HONEYBADGER_API_KEY, 
   revision: import.meta.env.VITE_HONEYBADGER_REVISION,
