@@ -1,7 +1,7 @@
 export const MAX_RETRIES = 10
 export const DEFAULT_RETRIES = 3
 export const DEFAULT_ENDPOINT = 'https://api.honeybadger.io/v1/source_maps'
-export const DEFAULT_REVISION = 'master'
+export const DEFAULT_REVISION = 'main'
 export const DEFAULT_SILENT = false
 
 /******************************

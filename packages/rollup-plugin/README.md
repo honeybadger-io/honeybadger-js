@@ -13,52 +13,6 @@ npm install @honeybadger-io/rollup-plugin --save-dev
 yarn add @honeybadger-io/rollup-plugin --dev
 ```
 
-### rollup.config.js
-Set `output.sourcemap` to true or 'hidden'. Add the honeybadger plugin to the plugins array.
-```javascript
-import honeybadgerRollupPlugin from '@honeybadger-io/rollup-plugin'
-
-// See Configuration section below
-const hbPluginOptions = {
-  apiKey: 'your_key_here', 
-  assetsUrl: 'https://yoursite.foo'
-}
-
-export default {
-  input: 'src/index.js', 
-  output: { 
-    dir: 'dist', 
-    sourcemap: true // Must be true or 'hidden'
-  }, 
-  plugins: [ honeybadgerRollupPlugin(hbPluginOptions) ],
-}
-```
-
-### Using Vite: vite.config.js
-If you're using Vite, you'll set up vite.config.js instead of rollup.config.js. 
-
-Set `build.sourcemap` to true or 'hidden'. Add the honeybadger 
-plugin to `rollupOptions.plugins`. Be careful not to add it to the top-level vite plugins without additional config, or it will upload sourcemaps on `serve` rather than just on `build`. 
-```javascript
-import honeybadgerRollupPlugin from '@honeybadger-io/rollup-plugin'
-import { defineConfig } from 'vite'
-
-// See Configuration section below
-const hbPluginOptions = {
-  apiKey: 'your_key_here', 
-  assetsUrl: 'https://yoursite.foo'
-}
-
-export default defineConfig({
-  plugins: [], // Not here
-  build: {
-    sourcemap: true, // Must be true or 'hidden'
-    rollupOptions: {
-      plugins: [ honeybadgerRollupPlugin(hbPluginOptions) ]
-    }
-  }
-})
-```
 
 ## Configuration
 
@@ -78,7 +32,7 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   sourcemap server you would like to upload your sourcemaps to instead
   of Honeybadger.</dd>
 
-  <dt><code>revision</code> (optional &mdash; default: "master")</dt>
+  <dt><code>revision</code> (optional &mdash; default: "main")</dt>
   <dd>The deploy revision (i.e. commit hash) that your source map applies to. This could also be a code version. For best results, set it to something unique every time your code changes. <a href="https://docs.honeybadger.io/lib/javascript/guides/using-source-maps.html#versioning-your-project">See the Honeybadger docs for examples</a>.</dd>
 
   <dt><code>silent</code> (optional &mdash; default: false)</dt>
@@ -88,6 +42,56 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   <dd>This package implements fetch retry functionality via the <a href="https://github.com/vercel/fetch-retry">fetch-retry</a> package. Retrying helps fix issues like `ECONNRESET` and `SOCKETTIMEOUT` errors.
   </dd>
 </dl>
+
+### rollup.config.js
+Set `output.sourcemap` to `true` or `'hidden'`. Add the honeybadger plugin to the plugins array.
+```javascript
+import honeybadgerRollupPlugin from '@honeybadger-io/rollup-plugin'
+
+// See plugin params above
+const hbPluginOptions = {
+  apiKey: 'your_key_here', 
+  assetsUrl: 'https://yoursite.foo'
+}
+
+export default {
+  input: 'src/index.js', 
+  output: { 
+    dir: 'dist', 
+    sourcemap: true // Must be true or 'hidden'
+  }, 
+  plugins: [ honeybadgerRollupPlugin(hbPluginOptions) ],
+}
+```
+
+### Using Vite: vite.config.js
+If you're using Vite, you'll set up `vite.config.js` instead of `rollup.config.js`. 
+
+Set `build.sourcemap` to `true` or `'hidden'`. Add the honeybadger 
+plugin to `rollupOptions.plugins`. 
+
+**Note:** Be careful not to add it to the top-level vite plugins without additional config, or it will upload sourcemaps on `serve` rather than just on `build`. 
+
+```javascript
+import honeybadgerRollupPlugin from '@honeybadger-io/rollup-plugin'
+import { defineConfig } from 'vite'
+
+// See plugin params above
+const hbPluginOptions = {
+  apiKey: 'your_key_here', 
+  assetsUrl: 'https://yoursite.foo'
+}
+
+export default defineConfig({
+  plugins: [], // Not here
+  build: {
+    sourcemap: true, // Must be true or 'hidden'
+    rollupOptions: {
+      plugins: [ honeybadgerRollupPlugin(hbPluginOptions) ]
+    }
+  }
+})
+```
 
 ## Development
 
