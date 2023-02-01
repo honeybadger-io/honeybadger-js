@@ -28,3 +28,15 @@ export function extractSourcemapDataFromBundle ({ outputOptions, bundle }) {
     return { sourcemapFilename, sourcemapFilePath, jsFilename, jsFilePath }
   })
 }
+
+/**
+ * Determines if we are in a non-production environment
+ * Note that in Vite setups, NODE_ENV should definitely be available
+ * In Rollup without Vite, it may or may not be available, 
+ * so if it's missing we'll assume prod
+ *
+ * @returns {Boolean} 
+ */
+export function isNonProdEnv() {
+  return !!process.env.NODE_ENV && process.env.NODE_ENV !== "production"
+}

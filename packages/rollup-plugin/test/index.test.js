@@ -4,6 +4,7 @@ import * as td from 'testdouble'
 describe('Index', () => {
   let honeybadgerRollupPlugin
   let cleanOptionsMock
+  let isNonProdEnvMock
   let extractSourcemapDataFromBundleMock
   let uploadSourcemapsMock
   const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
@@ -13,6 +14,7 @@ describe('Index', () => {
     cleanOptionsMock = optionsModule.cleanOptions
     const rollupUtilsModule = await td.replaceEsm('../src/rollupUtils.js')
     extractSourcemapDataFromBundleMock = rollupUtilsModule.extractSourcemapDataFromBundle
+    isNonProdEnvMock = rollupUtilsModule.isNonProdEnv
     const hbUtilsModule = await td.replaceEsm('../src/hbUtils.js')
     uploadSourcemapsMock = hbUtilsModule.uploadSourcemaps
     const indexModule = await import('../src/index.js')
@@ -36,6 +38,7 @@ describe('Index', () => {
     const outputOptions = { dir: 'dist' }
     const bundle = { 'index.map.js': {} }
     const sourcemapData = [{ sourcemapFilename: 'index.map.js' }]
+    td.when(isNonProdEnvMock()).thenReturn(false)
     td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
     td.when(cleanOptionsMock(options)).thenReturn(options)
 
@@ -43,5 +46,19 @@ describe('Index', () => {
     await plugin.writeBundle(outputOptions, bundle)
 
     td.verify(uploadSourcemapsMock({ sourcemapData, hbOptions: options }))
+  })
+
+  it('writeBundle does nothing in non-prod environments', async () => {
+    const outputOptions = { dir: 'dist' }
+    const bundle = { 'index.map.js': {} }
+    td.when(isNonProdEnvMock()).thenReturn(true)
+    td.when(cleanOptionsMock(options)).thenReturn(options)
+
+    const plugin = honeybadgerRollupPlugin(options)
+    await plugin.writeBundle(outputOptions, bundle)
+
+    // Verify these were not called
+    td.verify(extractSourcemapDataFromBundleMock(), {times: 0, ignoreExtraArgs: true})
+    td.verify(uploadSourcemapsMock(), {times: 0, ignoreExtraArgs: true})
   })
 })
