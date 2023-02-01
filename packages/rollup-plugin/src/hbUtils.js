@@ -14,7 +14,8 @@ const fetch = fetchRetry(originalFetch)
  * @param {Array} sourcemapData An array of sourcemap data, each entry
  *   should look like { sourcemapFilename, sourcemapFilePath, jsFilename, jsFilePath }
  * @param {Object} hbOptions See ./options.js 
- * @returns {Promise} Resolves if all sourcemaps are uploaded
+ * @returns {Promise} Resolves to an array of Responses if all sourcemaps are uploaded
+ * @throws {Error} if any of the sourcemaps fail to upload
  */
 export async function uploadSourcemaps({ sourcemapData = [], hbOptions }) {
   if (sourcemapData.length === 0 && !hbOptions.silent) {
@@ -28,7 +29,19 @@ export async function uploadSourcemaps({ sourcemapData = [], hbOptions }) {
     })
   })
   
-  return Promise.all(sourcemapUploadPromises)
+  const results = await Promise.allSettled(sourcemapUploadPromises)
+  const fulfilled = results.filter(p => p.status === 'fulfilled')
+  const rejected = results.filter(p => p.status === 'rejected')
+
+  if (!hbOptions.silent && fulfilled.length > 0) {
+    console.info(`${fulfilled.length} sourcemap file(s) successfully uploaded to Honeybadger.`)
+  }
+  if (rejected.length > 0) {
+    const errorsStr = rejected.map(p => p.reason).join('\n')
+    throw new Error(`Failed to upload ${rejected.length} sourcemap file(s) to Honeybadger\n${errorsStr}`)
+  }
+  
+  return fulfilled.map(p => p.value)
 }
 
 /**

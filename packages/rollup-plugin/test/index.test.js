@@ -58,7 +58,7 @@ describe('Index', () => {
     await plugin.writeBundle(outputOptions, bundle)
 
     // Verify these were not called
-    td.verify(extractSourcemapDataFromBundleMock(), {times: 0, ignoreExtraArgs: true})
-    td.verify(uploadSourcemapsMock(), {times: 0, ignoreExtraArgs: true})
+    td.verify(extractSourcemapDataFromBundleMock(), { times: 0, ignoreExtraArgs: true })
+    td.verify(uploadSourcemapsMock(), { times: 0, ignoreExtraArgs: true })
   })
 })

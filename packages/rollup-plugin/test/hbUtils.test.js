@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as td from 'testdouble'
 import { FormData, File, Response, FetchError } from 'node-fetch';
 
-describe('Utils', () => {
+describe('hbUtils', () => {
   const fetchMock = td.func()  
   const hbOptions = {
     endpoint: 'https://honeybadger.io/api/sourcemaps/test',
@@ -57,6 +57,7 @@ describe('Utils', () => {
         jsFilePath: `path/to/index-${i}.js`,
       }))
 
+      const infoMock = td.replace(console, 'info')
       // Return jsFilename in the mock response so we can easily check that fetch
       // was called for all 3 files
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
@@ -72,6 +73,28 @@ describe('Utils', () => {
       sourcemapData.forEach(({ jsFilename }) => {
         expect(responseBodies).to.deep.include({ jsFilename })
       })
+      td.verify(infoMock('3 sourcemap file(s) successfully uploaded to Honeybadger.'))
+    })
+
+    it('should reject with an error if there are failures', async () => {
+      const sourcemapData = [1, 2, 3].map(i => ({ 
+        sourcemapFilename: `index-${i}.map.js`, 
+        sourcemapFilePath: `path/to/index-${i}.map.js`, 
+        jsFilename: `index-${i}.js`, 
+        jsFilePath: `path/to/index-${i}.js`,
+      }))
+
+      // Two rejections, one fulfilled promise
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
+        .thenResolve(new Response('', { status: 200 }))
+      td.when(fetchMock(testData.endpoint, td.matchers.anything()), { times: 2 })
+        .thenReject(new FetchError())
+
+      try {
+        await utils.uploadSourcemaps({ sourcemapData, hbOptions })
+      } catch (err) {
+        expect(err.message).to.include('Failed to upload 2 sourcemap file(s)')
+      }
     })
   })
 

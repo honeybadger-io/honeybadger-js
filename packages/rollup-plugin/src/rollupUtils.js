@@ -38,5 +38,5 @@ export function extractSourcemapDataFromBundle ({ outputOptions, bundle }) {
  * @returns {Boolean} 
  */
 export function isNonProdEnv() {
-  return !!process.env.NODE_ENV && process.env.NODE_ENV !== "production"
+  return !!process.env.NODE_ENV && process.env.NODE_ENV !== 'production'
 }
