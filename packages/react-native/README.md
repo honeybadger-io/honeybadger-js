@@ -25,7 +25,7 @@ Add the following to your **App.js** file to initialize the Honeybadger library.
 import Honeybadger from "@honeybadger-io/react-native";
 
 export default function App() {
-  Honeybadger.configure("Your Honeybadger API key");
+  Honeybadger.configure("{{PROJECT_API_KEY}}");
   // ...
 }
 ```
