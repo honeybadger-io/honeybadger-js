@@ -116,13 +116,12 @@ describe('hbUtils', () => {
 
     it('should reject with an error if fetch rejects', async () => {
       td.when(fetchMock(testData.endpoint, td.matchers.anything()))
-        .thenReject(new FetchError())
+        .thenReject(new FetchError('Go fetch it yourself'))
 
       try {
         await utils.uploadSourcemap(testData)
       } catch (err) {
-        expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger')
-        expect(err.cause).to.be.an.instanceOf(FetchError)
+        expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: FetchError - Go fetch it yourself')
       }
     })
 
@@ -170,7 +169,7 @@ describe('hbUtils', () => {
       try {
         await utils.uploadSourcemap(testData)
       } catch (err) {
-        expect(err.cause).to.be.an.instanceOf(FetchError)
+        expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: FetchError')
       }
     })
 

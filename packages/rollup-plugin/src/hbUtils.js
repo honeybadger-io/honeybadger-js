@@ -83,7 +83,7 @@ export async function uploadSourcemap ({
     })
   } catch (err) {
     // network / operational errors. Does not include 404 / 500 errors
-    throw new Error(`Failed to upload sourcemap ${sourcemapFilename} to Honeybadger`, { cause: err })
+    throw new Error(`Failed to upload sourcemap ${sourcemapFilename} to Honeybadger: ${err.name}${err.message ? ` - ${err.message}` : ''}`)
   }
 
   if (res.ok) {
