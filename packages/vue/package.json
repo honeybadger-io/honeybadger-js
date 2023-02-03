@@ -66,10 +66,6 @@
     "@honeybadger-io/js": "3.x || 4.x",
     "vue": "2.x || 3.x"
   },
-  "engines": {
-    "node": ">= 6.0.0",
-    "npm": ">= 3.0.0"
-  },
   "browserslist": [
     "> 1%",
     "last 2 versions",
@@ -82,5 +78,8 @@
         "DOM"
       ]
     }
+  },
+  "engines": {
+    "node": ">=14"
   }
 }
