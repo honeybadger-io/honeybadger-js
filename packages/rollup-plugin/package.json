@@ -8,8 +8,8 @@
   "files": [ "./dist" ],
   "scripts": {
     "test": "mocha --loader=testdouble",
-    "build": "rollup -c", 
-    "clean": "rm -r dist", 
+    "build": "rollup -c",
+    "clean": "rm -r dist",
     "build:clean": "npm run clean && npm run build"
   },
   "repository": {
@@ -42,5 +42,8 @@
     "import": "./dist/es/index.js",
     "default": "./dist/cjs/index.js"
   },
-  "type": "module"
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  }
 }
