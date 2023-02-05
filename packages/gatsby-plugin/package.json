@@ -17,5 +17,8 @@
   "dependencies": {
     "@honeybadger-io/js": "^4.9.3",
     "@honeybadger-io/webpack": "^4.8.2"
+  },
+  "engines": {
+    "node": ">=14"
   }
 }

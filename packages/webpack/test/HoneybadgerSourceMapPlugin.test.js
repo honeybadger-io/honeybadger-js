@@ -52,8 +52,8 @@ describe(PLUGIN_NAME, function () {
       expect(this.plugin).to.include({ silent: false })
     })
 
-    it('should default revision to "master"', function () {
-      expect(this.plugin).to.include({ revision: 'master' })
+    it('should default revision to "main"', function () {
+      expect(this.plugin).to.include({ revision: 'main' })
     })
 
     it('should default retries to 3', function () {
