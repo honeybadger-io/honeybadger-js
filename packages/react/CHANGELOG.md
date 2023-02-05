@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.10.0...v5.0.0) (2023-02-05)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
 ## [4.9.3](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.2...v4.9.3) (2023-01-20)
 
 **Note:** Version bump only for package @honeybadger-io/react
