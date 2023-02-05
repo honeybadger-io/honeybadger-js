@@ -17,6 +17,6 @@
     "test": "lerna run test --stream",
     "install": "lerna bootstrap",
     "lint": "npx eslint .",
-    "release": "lerna publish --conventional-commits --yes --create-release github --loglevel silly"
+    "release": "lerna publish --conventional-commits --changelog-preset conventional-changelog-conventionalcommits --yes --create-release github --loglevel silly"
   }
 }
