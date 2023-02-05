@@ -1,17 +1,15 @@
 {
   "name": "@honeybadger-io/rollup-plugin",
-  "version": "4.10.0",
+  "version": "1.0.0",
   "description": "A rollup plugin to upload sourcemaps to Honeybadger",
   "directories": {
     "example": "examples"
   },
-  "files": [
-    "./dist"
-  ],
+  "files": [ "./dist" ],
   "scripts": {
     "test": "mocha --loader=testdouble",
-    "build": "rollup -c",
-    "clean": "rm -r dist",
+    "build": "rollup -c", 
+    "clean": "rm -r dist", 
     "build:clean": "npm run clean && npm run build"
   },
   "repository": {
