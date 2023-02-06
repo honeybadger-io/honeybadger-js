@@ -92,20 +92,7 @@ export async function uploadSourcemap ({
     }
     return res
   } else {
-    // Attempt to parse error details from response
-    let details
-    try {
-      const body = await res.json()
-
-      if (body && body.error) {
-        details = `${res.status} - ${body.error}`
-      } else {
-        details = `${res.status} - ${res.statusText}`
-      }
-    } catch (parseErr) {
-      details = `${res.status} - ${res.statusText}`
-    }
-
+    const details = await parseResErrorDetails(res)
     throw new Error(`Failed to upload sourcemap ${sourcemapFilename} to Honeybadger: ${details}`)
   }
 }
@@ -142,4 +129,77 @@ export async function buildBodyForSourcemapUpload({
   form.append('source_map', sourcemapFile)
 
   return form
+}
+
+export async function sendDeployNotification({
+  deployEndpoint,
+  deploy, 
+  apiKey,
+  revision, 
+  retries, 
+  silent
+}) {
+  const body = buildBodyForDeployNotification({ deploy, revision })
+
+  let res
+  try {
+    res = await fetch(deployEndpoint, {
+      method: 'POST',
+      headers: {
+        'X-API-KEY': apiKey,
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body,
+      redirect: 'follow',
+      retries,
+      retryDelay: 1000
+    })
+  } catch (err) {
+    // network / operational errors. Does not include 404 / 500 errors
+    throw new Error(`Failed to send deploy notification to Honeybadger: ${err.name}${err.message ? ` - ${err.message}` : ''}`)
+  }
+
+  if (res.ok) {
+    if (!silent) {
+      console.info(`Successfully sent deploy notification to Honeybadger`) 
+    }
+    return res
+  } else {
+    const details = await parseResErrorDetails(res)
+    throw new Error(`Failed to send deploy notification to Honeybadger: ${details}`)
+  }
+}
+
+export function buildBodyForDeployNotification({
+  deploy, 
+  revision
+}) {
+  let body = {
+    deploy: { revision }
+  }
+  
+  if (typeof deploy === 'object') {
+    body.deploy.repository = deploy.repository
+    body.deploy.local_username = deploy.localUsername
+    body.deploy.environment = deploy.environment
+  }
+
+  return JSON.stringify(body)
+}
+
+export async function parseResErrorDetails(res) {
+  let details
+  try {
+    const body = await res.json()
+    if (body && body.error) {
+      details = `${res.status} - ${body.error}`
+    } else {
+      details = `${res.status} - ${res.statusText}`
+    }
+  } catch (parseErr) {
+    details = `${res.status} - ${res.statusText}`
+  }
+
+  return details
 }

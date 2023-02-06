@@ -3,6 +3,7 @@ export const DEFAULT_RETRIES = 3
 export const DEFAULT_ENDPOINT = 'https://api.honeybadger.io/v1/source_maps'
 export const DEFAULT_REVISION = 'main'
 export const DEFAULT_SILENT = false
+export const DEPLOY_ENDPOINT = 'https://api.honeybadger.io/v1/deploys'
 
 /******************************
  * Everything in this file is designed to be shared with the webpack plugin
@@ -18,7 +19,8 @@ const defaultOptions = {
   endpoint: DEFAULT_ENDPOINT, 
   retries: DEFAULT_RETRIES, 
   revision: DEFAULT_REVISION, 
-  silent: DEFAULT_SILENT
+  silent: DEFAULT_SILENT, 
+  deployEndpoint: DEPLOY_ENDPOINT,
 }
 
 export function cleanOptions(options) {

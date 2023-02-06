@@ -4,7 +4,8 @@ import {
   DEFAULT_ENDPOINT, 
   DEFAULT_REVISION, 
   DEFAULT_SILENT,
-  cleanOptions 
+  DEPLOY_ENDPOINT,
+  cleanOptions, 
 } from '../src/options.js';
 
 describe('Options', () => {
@@ -34,7 +35,8 @@ describe('Options', () => {
         retries: 0, 
         endpoint: DEFAULT_ENDPOINT, 
         revision: DEFAULT_REVISION, 
-        silent: DEFAULT_SILENT
+        silent: DEFAULT_SILENT, 
+        deployEndpoint: DEPLOY_ENDPOINT
       })
     })
   });
