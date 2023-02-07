@@ -1,6 +1,6 @@
 import { cleanOptions } from './options.js'
 import { extractSourcemapDataFromBundle, isNonProdEnv } from './rollupUtils.js'
-import { uploadSourcemaps } from './hbUtils.js'
+import { sendDeployNotification, uploadSourcemaps } from './hbUtils.js'
 
 export default function honeybadgerRollupPlugin(options) {
   const hbOptions = cleanOptions(options)
@@ -14,8 +14,13 @@ export default function honeybadgerRollupPlugin(options) {
         }
         return
       }
+
       const sourcemapData = extractSourcemapDataFromBundle({ outputOptions, bundle })
       await uploadSourcemaps({ sourcemapData, hbOptions })
+
+      if (hbOptions.deploy) {
+        await sendDeployNotification({ ...hbOptions })
+      }
     }
   }
 }

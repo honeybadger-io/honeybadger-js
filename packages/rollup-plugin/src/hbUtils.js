@@ -34,7 +34,7 @@ export async function uploadSourcemaps({ sourcemapData = [], hbOptions }) {
   const rejected = results.filter(p => p.status === 'rejected')
 
   if (!hbOptions.silent && fulfilled.length > 0) {
-    console.info(`${fulfilled.length} sourcemap file(s) successfully uploaded to Honeybadger.`)
+    console.info(`${fulfilled.length} sourcemap file(s) successfully uploaded to Honeybadger`)
   }
   if (rejected.length > 0) {
     const errorsStr = rejected.map(p => p.reason).join('\n')

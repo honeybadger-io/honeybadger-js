@@ -10,6 +10,7 @@ const hbPluginOptions = {
   apiKey: process.env.VITE_HONEYBADGER_API_KEY, 
   assetsUrl: process.env.VITE_HONEYBADGER_ASSETS_URL,
   revision: process.env.VITE_HONEYBADGER_REVISION,
+  deploy: true,
 }
 
 // https://vitejs.dev/config/

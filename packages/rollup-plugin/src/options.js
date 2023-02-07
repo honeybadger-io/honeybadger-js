@@ -3,6 +3,7 @@ export const DEFAULT_RETRIES = 3
 export const DEFAULT_ENDPOINT = 'https://api.honeybadger.io/v1/source_maps'
 export const DEFAULT_REVISION = 'main'
 export const DEFAULT_SILENT = false
+export const DEFAULT_DEPLOY = false
 export const DEPLOY_ENDPOINT = 'https://api.honeybadger.io/v1/deploys'
 
 /******************************
@@ -20,6 +21,7 @@ const defaultOptions = {
   retries: DEFAULT_RETRIES, 
   revision: DEFAULT_REVISION, 
   silent: DEFAULT_SILENT, 
+  deploy: DEFAULT_DEPLOY,
   deployEndpoint: DEPLOY_ENDPOINT,
 }
 

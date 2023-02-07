@@ -67,7 +67,7 @@ describe('hbUtils', () => {
       sourcemapData.forEach(({ jsFilename }) => {
         expect(responseBodies).to.deep.include({ jsFilename })
       })
-      td.verify(infoMock('3 sourcemap file(s) successfully uploaded to Honeybadger.'))
+      td.verify(infoMock('3 sourcemap file(s) successfully uploaded to Honeybadger'))
     })
 
     it('should reject with an error if there are failures', async () => {

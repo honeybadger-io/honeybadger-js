@@ -27,7 +27,8 @@ describe('Options', () => {
       const result = cleanOptions({ 
         apiKey: 'test_key', 
         assetsUrl: 'https://foo.bar',
-        retries: 0 
+        retries: 0, 
+        deploy: { localUsername: 'BethanyBerkowitz' },
       })
       expect(result).to.deep.equal({
         apiKey: 'test_key', 
@@ -36,7 +37,8 @@ describe('Options', () => {
         endpoint: DEFAULT_ENDPOINT, 
         revision: DEFAULT_REVISION, 
         silent: DEFAULT_SILENT, 
-        deployEndpoint: DEPLOY_ENDPOINT
+        deploy: { localUsername: 'BethanyBerkowitz' },
+        deployEndpoint: DEPLOY_ENDPOINT,
       })
     })
   });
