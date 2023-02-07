@@ -50,12 +50,13 @@ export async function uploadSourcemaps({ sourcemapData = [], hbOptions }) {
  * @param {String} endpoint
  * @param {String} assetsUrl
  * @param {String} apiKey 
+ * @param {Number} retries
  * @param {String} revision
  * @param {Boolean} silent
  * @param {String} jsFilename
  * @param {String} jsFilePath
  * @param {String} sourcemapFilePath
- * @returns {Promise} Resolves to an instance of FormData
+ * @returns {Promise} Resolves to the response object
  *   Rejects with an error if we don't get an ok response
  */
 export async function uploadSourcemap ({ 
@@ -98,7 +99,7 @@ export async function uploadSourcemap ({
 }
 
 /**
- * Builds the form data for the API call
+ * Builds the form data for the sourcemap API call
  *
  * @param {String} assetsUrl
  * @param {String} apiKey 
@@ -131,6 +132,18 @@ export async function buildBodyForSourcemapUpload({
   return form
 }
 
+/**
+ * Executes an API call to send a deploy notification
+ *
+ * @param {String} deployEndpoint
+ * @param {Boolean | Object} deploy
+ * @param {String} apiKey 
+ * @param {String} revision
+ * @param {Number} retries
+ * @param {Boolean} silent
+ * @returns {Promise} Resolves to the response object
+ *   Rejects with an error if we don't get an ok response
+ */
 export async function sendDeployNotification({
   deployEndpoint,
   deploy, 
@@ -162,7 +175,7 @@ export async function sendDeployNotification({
 
   if (res.ok) {
     if (!silent) {
-      console.info(`Successfully sent deploy notification to Honeybadger`) 
+      console.info('Successfully sent deploy notification to Honeybadger') 
     }
     return res
   } else {
@@ -171,6 +184,13 @@ export async function sendDeployNotification({
   }
 }
 
+/**
+ * Builds the JSON body for the deploy notification
+ *
+ * @param {Boolean | Object} deploy
+ * @param {String} revision
+ * @returns {String} JSON string
+ */
 export function buildBodyForDeployNotification({
   deploy, 
   revision
@@ -188,6 +208,12 @@ export function buildBodyForDeployNotification({
   return JSON.stringify(body)
 }
 
+/**
+ * Attempts to parse error details from a non-ok Response
+ *
+ * @param {Response} res
+ * @returns {String} Error details
+ */
 export async function parseResErrorDetails(res) {
   let details
   try {
