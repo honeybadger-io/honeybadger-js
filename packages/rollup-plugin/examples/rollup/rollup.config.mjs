@@ -6,7 +6,12 @@ dotenv.config({ path: `.env.local` })
 
 const hbPluginOptions = {
   apiKey: process.env.HONEYBADGER_API_KEY, 
-  assetsUrl: process.env.HONEYBADGER_ASSETS_URL
+  assetsUrl: process.env.HONEYBADGER_ASSETS_URL, 
+  deploy: {
+    repository: 'https://github.com/honeybadger-io/honeybadger-js', 
+    localUsername: 'BethanyBerkowitz', 
+    environment: 'production'
+  }
 }
 
 export default {

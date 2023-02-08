@@ -4,7 +4,8 @@ import {
   DEFAULT_ENDPOINT, 
   DEFAULT_REVISION, 
   DEFAULT_SILENT,
-  cleanOptions 
+  DEPLOY_ENDPOINT,
+  cleanOptions, 
 } from '../src/options.js';
 
 describe('Options', () => {
@@ -26,7 +27,8 @@ describe('Options', () => {
       const result = cleanOptions({ 
         apiKey: 'test_key', 
         assetsUrl: 'https://foo.bar',
-        retries: 0 
+        retries: 0, 
+        deploy: { localUsername: 'BethanyBerkowitz' },
       })
       expect(result).to.deep.equal({
         apiKey: 'test_key', 
@@ -34,7 +36,9 @@ describe('Options', () => {
         retries: 0, 
         endpoint: DEFAULT_ENDPOINT, 
         revision: DEFAULT_REVISION, 
-        silent: DEFAULT_SILENT
+        silent: DEFAULT_SILENT, 
+        deploy: { localUsername: 'BethanyBerkowitz' },
+        deployEndpoint: DEPLOY_ENDPOINT,
       })
     })
   });

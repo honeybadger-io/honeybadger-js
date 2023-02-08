@@ -25,7 +25,7 @@ yarn add @honeybadger-io/webpack --dev
 
 ### Plugin parameters
 
-These plugin parameters correspond to the Honeybadger [Source Map Upload API](https://docs.honeybadger.io/api/reporting-source-maps/) and [Deployments API](https://docs.honeybadger.io/api/deployments.html).
+These plugin parameters correspond to the Honeybadger [Source Map Upload API](https://docs.honeybadger.io/api/reporting-source-maps/) and [Deployments API](https://docs.honeybadger.io/api/reporting-deployments/).
 
 <dl>
   <dt><code>apiKey</code> (required)</dt>
@@ -63,7 +63,7 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
 
   <dt><code>deploy</code> (optional &mdash; default: false)</dt>
   <dd>
-  Configuration for deployment notifications. To disable deployment notifications, ignore this option. To enable deployment notifications, set this to <code>true</code>, or to an object containing any of these fields (see the <a href="https://docs.honeybadger.io/api/deployments.html">API reference</a>):</br>
+  Configuration for deployment notifications. To disable deployment notifications, ignore this option. To enable deployment notifications, set this to <code>true</code>, or to an object containing any of these fields (see the <a href="https://docs.honeybadger.io/api/reporting-deployments/">API reference</a>):</br>
 
   <dl>
     <dt><code>environment</code></dt>

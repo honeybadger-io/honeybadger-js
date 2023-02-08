@@ -1,7 +1,7 @@
 # Honeybadger's Rollup Source Map Plugin
 
 [Rollup](https://rollupjs.org/) plugin to upload JavaScript
-sourcemaps to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/).
+sourcemaps and optionally send deployment notifications to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). 
 
 ## Installation
 
@@ -18,7 +18,7 @@ yarn add @honeybadger-io/rollup-plugin --dev
 
 ### Plugin parameters
 
-These plugin parameters correspond to the Honeybadger [Source Map Upload API](https://docs.honeybadger.io/api/reporting-source-maps/) and [Deployments API](https://docs.honeybadger.io/api/deployments.html).
+These plugin parameters correspond to the Honeybadger [Source Map Upload API](https://docs.honeybadger.io/api/reporting-source-maps/) and [Deployments API](https://docs.honeybadger.io/api/reporting-deployments/).
 
 <dl>
   <dt><code>apiKey</code> (required)</dt>
@@ -40,6 +40,20 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
 
   <dt><code>retries</code> (optional &mdash; default: 3, max: 10)</dt>
   <dd>This package implements fetch retry functionality via the <a href="https://github.com/vercel/fetch-retry">fetch-retry</a> package. Retrying helps fix issues like `ECONNRESET` and `SOCKETTIMEOUT` errors.
+  </dd>
+
+  <dt><code>deploy</code> (optional &mdash; default: false)</dt>
+  <dd>
+  Configuration for <a href="https://docs.honeybadger.io/api/reporting-deployments/">deployment notifications</a>. To disable deployment notifications, ignore this option. To enable deployment notifications, set this to <code>true</code>, or to an object containing any of the fields below. Your deploy's <code>revision</code> will be set to the same value as for your sourcemaps (see above). 
+
+  <dl>
+    <dt><code>environment</code></dt>
+    <dd>The environment name, for example, "production"</dd>
+    <dt><code>repository</code></dt>
+    <dd>The base URL of the VCS repository (HTTPS-style), for example, "https://github.com/yourusername/yourrepo"</dd>
+    <dt><code>localUsername</code></dt>
+    <dd>The name of the user that triggered this deploy, for example, "Jane"</dd>
+  </dl>
   </dd>
 </dl>
 

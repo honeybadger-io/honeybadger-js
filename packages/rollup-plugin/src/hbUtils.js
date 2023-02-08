@@ -34,7 +34,7 @@ export async function uploadSourcemaps({ sourcemapData = [], hbOptions }) {
   const rejected = results.filter(p => p.status === 'rejected')
 
   if (!hbOptions.silent && fulfilled.length > 0) {
-    console.info(`${fulfilled.length} sourcemap file(s) successfully uploaded to Honeybadger.`)
+    console.info(`${fulfilled.length} sourcemap file(s) successfully uploaded to Honeybadger`)
   }
   if (rejected.length > 0) {
     const errorsStr = rejected.map(p => p.reason).join('\n')
@@ -50,12 +50,13 @@ export async function uploadSourcemaps({ sourcemapData = [], hbOptions }) {
  * @param {String} endpoint
  * @param {String} assetsUrl
  * @param {String} apiKey 
+ * @param {Number} retries
  * @param {String} revision
  * @param {Boolean} silent
  * @param {String} jsFilename
  * @param {String} jsFilePath
  * @param {String} sourcemapFilePath
- * @returns {Promise} Resolves to an instance of FormData
+ * @returns {Promise} Resolves to the response object
  *   Rejects with an error if we don't get an ok response
  */
 export async function uploadSourcemap ({ 
@@ -92,26 +93,13 @@ export async function uploadSourcemap ({
     }
     return res
   } else {
-    // Attempt to parse error details from response
-    let details
-    try {
-      const body = await res.json()
-
-      if (body && body.error) {
-        details = `${res.status} - ${body.error}`
-      } else {
-        details = `${res.status} - ${res.statusText}`
-      }
-    } catch (parseErr) {
-      details = `${res.status} - ${res.statusText}`
-    }
-
+    const details = await parseResErrorDetails(res)
     throw new Error(`Failed to upload sourcemap ${sourcemapFilename} to Honeybadger: ${details}`)
   }
 }
 
 /**
- * Builds the form data for the API call
+ * Builds the form data for the sourcemap API call
  *
  * @param {String} assetsUrl
  * @param {String} apiKey 
@@ -142,4 +130,102 @@ export async function buildBodyForSourcemapUpload({
   form.append('source_map', sourcemapFile)
 
   return form
+}
+
+/**
+ * Executes an API call to send a deploy notification
+ *
+ * @param {String} deployEndpoint
+ * @param {Boolean | Object} deploy
+ * @param {String} apiKey 
+ * @param {String} revision
+ * @param {Number} retries
+ * @param {Boolean} silent
+ * @returns {Promise} Resolves to the response object
+ *   Rejects with an error if we don't get an ok response
+ */
+export async function sendDeployNotification({
+  deployEndpoint,
+  deploy, 
+  apiKey,
+  revision, 
+  retries, 
+  silent
+}) {
+  const body = buildBodyForDeployNotification({ deploy, revision })
+
+  let res
+  try {
+    res = await fetch(deployEndpoint, {
+      method: 'POST',
+      headers: {
+        'X-API-KEY': apiKey,
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body,
+      redirect: 'follow',
+      retries,
+      retryDelay: 1000
+    })
+  } catch (err) {
+    // network / operational errors. Does not include 404 / 500 errors
+    throw new Error(`Failed to send deploy notification to Honeybadger: ${err.name}${err.message ? ` - ${err.message}` : ''}`)
+  }
+
+  if (res.ok) {
+    if (!silent) {
+      console.info('Successfully sent deploy notification to Honeybadger') 
+    }
+    return res
+  } else {
+    const details = await parseResErrorDetails(res)
+    throw new Error(`Failed to send deploy notification to Honeybadger: ${details}`)
+  }
+}
+
+/**
+ * Builds the JSON body for the deploy notification
+ *
+ * @param {Boolean | Object} deploy
+ * @param {String} revision
+ * @returns {String} JSON string
+ */
+export function buildBodyForDeployNotification({
+  deploy, 
+  revision
+}) {
+  let body = {
+    deploy: { revision }
+  }
+  
+  if (typeof deploy === 'object') {
+    body.deploy.repository = deploy.repository
+    body.deploy.local_username = deploy.localUsername
+    body.deploy.environment = deploy.environment
+  }
+
+  return JSON.stringify(body)
+}
+
+/**
+ * Attempts to parse error details from a non-ok Response
+ *
+ * @param {Response} res
+ * @returns {String} Error details
+ */
+export async function parseResErrorDetails(res) {
+  let details
+  try {
+    const body = await res.json()
+    if (body && body.error) {
+      details = `${res.status} - ${body.error}`
+    } else {
+      details = `${res.status} - ${res.statusText}`
+    }
+  } catch (parseErr) {
+    details = `${res.status} - ${res.statusText}`
+  }
+
+  return details
 }
