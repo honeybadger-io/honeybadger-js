@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.0.0...v5.1.0) (2023-02-08)
+
+
+### Features
+
+* **rollup:** add deployment notification to Rollup plugin ([2b3abf3](https://github.com/honeybadger-io/honeybadger-js/commit/2b3abf3cc7e11066db7f8a0dc2d20c442ff89673)), closes [#1012](https://github.com/honeybadger-io/honeybadger-js/issues/1012)
+
+
+
 ## [5.0.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.10.0...v5.0.0) (2023-02-05)
 
 
