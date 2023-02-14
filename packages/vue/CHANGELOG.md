@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.2](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.1...v5.1.2) (2023-02-14)
+
+
+### Bug Fixes
+
+* update peer deps ([#1021](https://github.com/honeybadger-io/honeybadger-js/issues/1021)) ([2c34f0c](https://github.com/honeybadger-io/honeybadger-js/commit/2c34f0cbea92ff60af37345a107b8b7c6c3d96e5))
+
+
+
 ## [5.1.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.0...v5.1.1) (2023-02-13)
 
 **Note:** Version bump only for package @honeybadger-io/vue
