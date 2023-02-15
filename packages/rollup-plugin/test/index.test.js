@@ -11,12 +11,12 @@ describe('Index', () => {
   const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
 
   beforeEach(async () => {
-    const optionsModule = await td.replaceEsm('../src/options.js');
+    const optionsModule = td.replace('../src/options.js');
     cleanOptionsMock = optionsModule.cleanOptions
-    const rollupUtilsModule = await td.replaceEsm('../src/rollupUtils.js')
+    const rollupUtilsModule = td.replace('../src/rollupUtils.js')
     extractSourcemapDataFromBundleMock = rollupUtilsModule.extractSourcemapDataFromBundle
     isNonProdEnvMock = rollupUtilsModule.isNonProdEnv
-    const hbUtilsModule = await td.replaceEsm('../src/hbUtils.js')
+    const hbUtilsModule = td.replace('../src/hbUtils.js')
     uploadSourcemapsMock = hbUtilsModule.uploadSourcemaps
     sendDeployNotificationMock = hbUtilsModule.sendDeployNotification
     const indexModule = await import('../src/index.js')

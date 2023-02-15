@@ -9,7 +9,7 @@
     "./dist"
   ],
   "scripts": {
-    "test": "mocha --loader=testdouble",
+    "test": "mocha --require @babel/register",
     "build": "rollup -c",
     "clean": "rm -r dist",
     "build:clean": "npm run clean && npm run build"
@@ -29,7 +29,11 @@
   },
   "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/rollup-plugin",
   "devDependencies": {
+    "@babel/core": "^7.20.12",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/register": "^7.18.9",
     "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
@@ -38,13 +42,11 @@
   },
   "dependencies": {
     "fetch-retry": "^5.0.3",
-    "node-fetch": "^3.3.0"
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.6.9"
   },
-  "exports": {
-    "import": "./dist/es/index.js",
-    "default": "./dist/cjs/index.js"
-  },
-  "type": "module",
+  "main": "dist/cjs/index.js",
+  "module": "dist/es/index.js",
   "publishConfig": {
     "access": "public"
   }

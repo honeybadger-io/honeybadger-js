@@ -1,5 +1,7 @@
-import originalFetch, { FormData, fileFrom } from 'node-fetch'
-import fetchRetry from 'fetch-retry';
+import originalFetch from 'node-fetch'
+import FormData from 'form-data'
+import { promises as fs } from 'fs'
+import fetchRetry from 'fetch-retry'
 const fetch = fetchRetry(originalFetch)
 
 /******************************
@@ -118,16 +120,20 @@ export async function buildBodyForSourcemapUpload({
   sourcemapFilePath, 
 }) {
   const form = new FormData()
-  
-  const jsFile = await fileFrom(jsFilePath, 'application/javascript')
-  const sourcemapFile = await fileFrom(sourcemapFilePath, 'application/octet-stream')
+
   const minifiedUrl = new URL(jsFilename, assetsUrl).href
 
   form.append('api_key', apiKey)
   form.append('minified_url', minifiedUrl)
   form.append('revision', revision)
-  form.append('minified_file', jsFile)
-  form.append('source_map', sourcemapFile)
+  form.append('minified_file', await fs.readFile(jsFilePath), {
+    filename: jsFilename,
+    contentType: 'application/javascript'
+  })
+  form.append('source_map', await fs.readFile(sourcemapFilePath), {
+    filename: sourcemapFilePath,
+    contentType: 'application/octet-stream'
+  })
 
   return form
 }

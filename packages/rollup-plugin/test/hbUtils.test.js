@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import * as td from 'testdouble'
-import { FormData, File, Response, FetchError } from 'node-fetch';
+import FormData from 'form-data'
+import { Buffer } from 'buffer'
+import { Response, FetchError } from 'node-fetch'
 
 describe('hbUtils', () => {
   const fetchMock = td.func()  
@@ -13,19 +15,17 @@ describe('hbUtils', () => {
     silent: false, 
   }
   
-  // Mock accessing the files via node-fetch's async fileFrom
-  async function fileFromMock(filePath, type) {
-    return new File([filePath, type], filePath, { type })
+  // Mock accessing the files 
+  async function readFileMock(filePath) {
+    return new Buffer.from([filePath], filePath)
   }
+
   let utils
 
   beforeEach(async () => {
     // Replace node-fetch with a mock before importing 
-    await td.replaceEsm(
-      'node-fetch', 
-      { FormData, fileFrom: fileFromMock }, 
-      fetchMock
-    );
+    td.replace('node-fetch', fetchMock);
+    td.replace('fs', {promises: { readFile: readFileMock }})
     utils = await import('../src/hbUtils.js')
   })
 
@@ -56,7 +56,8 @@ describe('hbUtils', () => {
       // was called for all 3 files
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenDo(async ( endpoint, { body }) => {
-          const jsFilename = body.get('minified_url').replace(`${hbOptions.assetsUrl}/`, '')
+          const match = body.getBuffer().toString().match(/name="minified_file"; filename=".*"/)
+          const jsFilename = match[0].slice(32, -1)
           return new Response(JSON.stringify({ jsFilename }), { status: 200 })
         })
 
@@ -203,23 +204,26 @@ describe('hbUtils', () => {
 
       expect(result).to.be.an.instanceOf(FormData)
 
+      const buf = result.getBuffer()
+      const str = buf.toString()
+
       const expectedFields = [
         ['api_key', 'test_key'], 
         ['minified_url', 'https://foo.bar/index.js'], 
         ['revision', '12345'],    
       ]
       const expectedFiles = [
-        ['minified_file', 'path/to/index.js', 'application/javascript'], 
-        ['source_map', 'path/to/index.map.js', 'application/octet-stream']
+        ['minified_file', 'index.js', 'application/javascript'], 
+        ['source_map', 'index.map.js', 'application/octet-stream']
       ]
+
       expectedFields.forEach(([key, value]) => {
-        expect(result.get(key)).to.equal(value)
+        const pattern = new RegExp(`Content-Disposition: form-data; name="${key}"\\s*${value}`)
+        expect(str.match(pattern)).to.have.length(1)
       })  
-      expectedFiles.forEach(([key, filePath, type]) => {
-        const file = result.get(key)
-        expect(file).to.be.an.instanceOf(File)
-        expect(file.name).to.equal(filePath)
-        expect(file.type).to.equal(type)
+      expectedFiles.forEach(([key, fileName, type]) => {
+        const pattern = new RegExp(`Content-Disposition: form-data; name="${key}"; filename="${fileName}"\\s*Content-Type: ${type}`)
+        expect(str.match(pattern)).to.have.length(1)
       }) 
     })
   });
