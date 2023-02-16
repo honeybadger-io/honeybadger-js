@@ -1,3 +1,5 @@
+import type { HbPluginOptions } from "./types"
+
 export const MAX_RETRIES = 10
 export const DEFAULT_RETRIES = 3
 export const DEFAULT_ENDPOINT = 'https://api.honeybadger.io/v1/source_maps'
@@ -25,7 +27,9 @@ const defaultOptions = {
   deployEndpoint: DEPLOY_ENDPOINT,
 }
 
-export function cleanOptions(options) {
+export function cleanOptions(
+    options:Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
+  ): HbPluginOptions {
   // Validate presence of required fields
   required.forEach(field => {
     if (!options || !options[field]) {
@@ -33,7 +37,7 @@ export function cleanOptions(options) {
     }
   })
   // Don't allow excessive retries
-  if (options.retries > MAX_RETRIES) {
+  if (options.retries && options.retries > MAX_RETRIES) {
     if (!options.silent) {
       console.warn(`Using max retries: ${MAX_RETRIES}`)
     }
