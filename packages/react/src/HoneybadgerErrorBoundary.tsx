@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react'
-import Honeybadger from '@honeybadger-io/js/dist/browser/honeybadger'
+import Honeybadger from '@honeybadger-io/js'
 import DefaultErrorComponent, { DefaultErrorComponentProps } from './DefaultErrorComponent'
 import PropTypes from 'prop-types';
 

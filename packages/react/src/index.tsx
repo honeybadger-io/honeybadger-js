@@ -1,4 +1,4 @@
-import Honeybadger from '@honeybadger-io/js/dist/browser/honeybadger'
+import Honeybadger from '@honeybadger-io/js'
 import HoneybadgerErrorBoundary from './HoneybadgerErrorBoundary'
 
 export {
