@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.3](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.2...v5.1.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* **react:** import correctly @honeybadger-io/js ([#1024](https://github.com/honeybadger-io/honeybadger-js/issues/1024)) ([10b4a5f](https://github.com/honeybadger-io/honeybadger-js/commit/10b4a5f566ebeca372a163ed34c7971050a920aa))
+
+
+
 ## [5.1.2](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.1...v5.1.2) (2023-02-14)
 
 
