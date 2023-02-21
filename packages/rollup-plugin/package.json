@@ -9,7 +9,7 @@
     "./dist"
   ],
   "scripts": {
-    "test": "mocha --require @babel/register",
+    "test": "mocha",
     "build": "rollup -c",
     "clean": "rm -r dist",
     "build:clean": "npm run clean && npm run build"
@@ -29,9 +29,6 @@
   },
   "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/rollup-plugin",
   "devDependencies": {
-    "@babel/core": "^7.20.12",
-    "@babel/preset-env": "^7.20.2",
-    "@babel/register": "^7.18.9",
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",

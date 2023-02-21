@@ -2,24 +2,35 @@ import { expect } from 'chai'
 import * as td from 'testdouble'
 
 describe('Index', () => {
-  let honeybadgerRollupPlugin
-  let cleanOptionsMock
-  let isNonProdEnvMock
-  let extractSourcemapDataFromBundleMock
-  let uploadSourcemapsMock
-  let sendDeployNotificationMock
+  let honeybadgerRollupPlugin:Function
+  let cleanOptionsMock:Function
+  let isNonProdEnvMock:Function
+  let extractSourcemapDataFromBundleMock:Function
+  let uploadSourcemapsMock:Function
+  let sendDeployNotificationMock:Function
   const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
 
   beforeEach(async () => {
-    const optionsModule = td.replace('../src/options.js');
-    cleanOptionsMock = optionsModule.cleanOptions
-    const rollupUtilsModule = td.replace('../src/rollupUtils.js')
-    extractSourcemapDataFromBundleMock = rollupUtilsModule.extractSourcemapDataFromBundle
-    isNonProdEnvMock = rollupUtilsModule.isNonProdEnv
-    const hbUtilsModule = td.replace('../src/hbUtils.js')
-    uploadSourcemapsMock = hbUtilsModule.uploadSourcemaps
-    sendDeployNotificationMock = hbUtilsModule.sendDeployNotification
-    const indexModule = await import('../src/index.js')
+    cleanOptionsMock = td.func()
+    td.replace('../src/options.js', { cleanOptions: cleanOptionsMock });
+    // cleanOptionsMock = optionsModule.cleanOptions
+    extractSourcemapDataFromBundleMock = td.func()
+    isNonProdEnvMock = td.func()
+    td.replace('../src/rollupUtils.js', {
+      extractSourcemapDataFromBundle: extractSourcemapDataFromBundleMock,
+      isNonProdEnv: isNonProdEnvMock
+    })
+    // extractSourcemapDataFromBundleMock = rollupUtilsModule.extractSourcemapDataFromBundle
+    // isNonProdEnvMock = rollupUtilsModule.isNonProdEnv
+    uploadSourcemapsMock = td.func()
+    sendDeployNotificationMock = td.func()
+    td.replace('../src/hbUtils.js', {
+      uploadSourcemaps: uploadSourcemapsMock, 
+      sendDeployNotification: sendDeployNotificationMock
+    })
+    // uploadSourcemapsMock = hbUtilsModule.uploadSourcemaps
+    // sendDeployNotificationMock = hbUtilsModule.sendDeployNotification
+    const indexModule = await import('../src/index')
     honeybadgerRollupPlugin = indexModule.default
   })
 
@@ -43,13 +54,13 @@ describe('Index', () => {
 
     it('should upload sourcemaps', async () => {
       td.when(isNonProdEnvMock()).thenReturn(false)
-      td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
+      td.when(extractSourcemapDataFromBundleMock(outputOptions, bundle)).thenReturn(sourcemapData)
       td.when(cleanOptionsMock(options)).thenReturn(options)
   
       const plugin = honeybadgerRollupPlugin(options)
       await plugin.writeBundle(outputOptions, bundle)
   
-      td.verify(uploadSourcemapsMock({ sourcemapData, hbOptions: options }))
+      td.verify(uploadSourcemapsMock(sourcemapData, options))
     })
 
     it('should send deploy notification if deploy is true', async () => {
