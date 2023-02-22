@@ -1,4 +1,4 @@
-import type { HbPluginOptions } from "./types"
+import type { HbPluginOptions } from './types'
 
 export const MAX_RETRIES = 10
 export const DEFAULT_RETRIES = 3
@@ -28,8 +28,8 @@ const defaultOptions = {
 }
 
 export function cleanOptions(
-    options:Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
-  ): HbPluginOptions {
+  options:Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
+): HbPluginOptions {
   // Validate presence of required fields
   required.forEach(field => {
     if (!options || !options[field]) {

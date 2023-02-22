@@ -146,8 +146,8 @@ export async function sendDeployNotification(hbOptions: HbPluginOptions): Promis
  * @param {String} revision
  * @returns {String} JSON string
  */
-export function buildBodyForDeployNotification(hbOptions: HbPluginOptions): String {
-  let body: DeployBody = {
+export function buildBodyForDeployNotification(hbOptions: HbPluginOptions): string {
+  const body: DeployBody = {
     deploy: { revision: hbOptions.revision }
   }
   

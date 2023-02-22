@@ -25,7 +25,7 @@ describe('hbUtils', () => {
   beforeEach(async () => {
     // Replace node-fetch with a mock before importing 
     td.replace('node-fetch', fetchMock);
-    td.replace('fs', {promises: { readFile: readFileMock }})
+    td.replace('fs', { promises: { readFile: readFileMock } })
     utils = await import('../src/hbUtils')
   })
 

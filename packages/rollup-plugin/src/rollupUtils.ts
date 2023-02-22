@@ -1,13 +1,13 @@
 import path from 'node:path'
 
-import type { OutputOptions, OutputBundle, OutputAsset, OutputChunk } from 'rollup'
+import type { OutputBundle, OutputAsset, OutputChunk, NormalizedOutputOptions } from 'rollup'
 import type { SourcemapInfo } from './types'
 
 /**
  * Extracts the data we need for sourcemap upload from the bundle
  */
 export function extractSourcemapDataFromBundle ( 
-  outputOptions: OutputOptions, 
+  outputOptions: NormalizedOutputOptions, 
   bundle: OutputBundle
 ): SourcemapInfo[] {
   const sourceMaps = Object.values(bundle).filter(isSourcemap)
@@ -22,7 +22,7 @@ function isSourcemap(file: OutputAsset | OutputChunk): file is OutputAsset {
 }
 
 function formatSourcemapData(
-  outputOptions: OutputOptions, 
+  outputOptions: NormalizedOutputOptions, 
   sourcemap: OutputAsset): SourcemapInfo {
   // This fileName could include a path like 'subfolder/foo.js.map'
   const sourcemapFilename = sourcemap.fileName
@@ -50,6 +50,6 @@ function formatSourcemapData(
  * In Rollup without Vite, it may or may not be available, 
  * so if it's missing we'll assume prod
  */
-export function isNonProdEnv(): Boolean {
+export function isNonProdEnv(): boolean {
   return !!process.env.NODE_ENV && process.env.NODE_ENV !== 'production'
 }

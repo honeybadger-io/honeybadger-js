@@ -20,11 +20,11 @@ const chunks = {
     imports: [ 'foo.js', 'subfolder/bar.js' ],
     modules: {
       '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/index.js': {
-        "code": "function index () {\n  console.log(foo);\n  console.log(bar);\n}",
-        "originalLength": 134,
-        "removedExports": [],
-        "renderedExports": ["default"],
-        "renderedLength": 61
+        'code': 'function index () {\n  console.log(foo);\n  console.log(bar);\n}',
+        'originalLength': 134,
+        'removedExports': [],
+        'renderedExports': ['default'],
+        'renderedLength': 61
       }
     },
     referencedFiles: [],
@@ -58,12 +58,12 @@ const chunks = {
     importedBindings: {},
     imports: [],
     modules: {
-      "/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/foo.js": {
-        "code": "var foo = 'hello world!';",
-        "originalLength": 29,
-        "removedExports": [],
-        "renderedExports": ["default"],
-        "renderedLength": 25
+      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/foo.js': {
+        'code': "var foo = 'hello world!';",
+        'originalLength': 29,
+        'removedExports': [],
+        'renderedExports': ['default'],
+        'renderedLength': 25
       }
     },
     referencedFiles: [],
@@ -87,12 +87,12 @@ const chunks = {
     importedBindings: {},
     imports: [],
     modules: {
-      "/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/subfolder/bar.js": {
-        "code": "var bar = 'This is in a subfolder!';",
-        "originalLength": 40,
-        "removedExports": [],
-        "renderedExports": ["default"],
-        "renderedLength": 36
+      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/subfolder/bar.js': {
+        'code': "var bar = 'This is in a subfolder!';",
+        'originalLength': 40,
+        'removedExports': [],
+        'renderedExports': ['default'],
+        'renderedLength': 36
       }
     },
     referencedFiles: [],
