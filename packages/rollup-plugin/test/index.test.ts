@@ -5,20 +5,28 @@ import { HbPluginOptions } from '../src/types'
 
 describe('Index', () => {
   let honeybadgerRollupPlugin:(opts: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>) => Plugin
-  const cleanOptionsMock = td.func()
-  const isNonProdEnvMock = td.func()
-  const extractSourcemapDataFromBundleMock = td.func()
-  const uploadSourcemapsMock = td.func()
-  const sendDeployNotificationMock = td.func()
+  let cleanOptionsMock, 
+    isNonProdEnvMock, 
+    extractSourcemapDataFromBundleMock, 
+    uploadSourcemapsMock, 
+    sendDeployNotificationMock
   const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
 
   beforeEach(async () => {
-    td.replace('../src/options.js', { cleanOptions: cleanOptionsMock });
-    td.replace('../src/rollupUtils.js', {
+    cleanOptionsMock = td.func()
+    isNonProdEnvMock = td.func()
+    extractSourcemapDataFromBundleMock = td.func()
+    uploadSourcemapsMock = td.func()
+    sendDeployNotificationMock = td.func()
+
+    td.replace('../src/options', { 
+      cleanOptions: cleanOptionsMock 
+    })
+    td.replace('../src/rollupUtils', {
       extractSourcemapDataFromBundle: extractSourcemapDataFromBundleMock,
       isNonProdEnv: isNonProdEnvMock
     })
-    td.replace('../src/hbUtils.js', {
+    td.replace('../src/hbUtils', {
       uploadSourcemaps: uploadSourcemapsMock, 
       sendDeployNotification: sendDeployNotificationMock
     })
@@ -32,7 +40,6 @@ describe('Index', () => {
   })
 
   it('cleans the options, returns the expected format for a plugin', () => {
-    const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
     const plugin = honeybadgerRollupPlugin(options)
 
     td.verify(cleanOptionsMock(options))

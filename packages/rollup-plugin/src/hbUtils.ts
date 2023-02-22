@@ -141,10 +141,6 @@ export async function sendDeployNotification(hbOptions: HbPluginOptions): Promis
 
 /**
  * Builds the JSON body for the deploy notification
- *
- * @param {Boolean | Object} deploy
- * @param {String} revision
- * @returns {String} JSON string
  */
 export function buildBodyForDeployNotification(hbOptions: HbPluginOptions): string {
   const body: DeployBody = {
@@ -162,12 +158,9 @@ export function buildBodyForDeployNotification(hbOptions: HbPluginOptions): stri
 
 /**
  * Attempts to parse error details from a non-ok Response
- *
- * @param {Response} res
- * @returns {String} Error details
  */
-export async function parseResErrorDetails(res) {
-  let details
+export async function parseResErrorDetails(res: Response): Promise<string> {
+  let details: string
   try {
     const body = await res.json()
     if (body && body.error) {
