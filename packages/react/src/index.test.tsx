@@ -1,12 +1,19 @@
 import React, { ReactNode } from 'react'
 import TestRenderer from 'react-test-renderer'
-import { Honeybadger, HoneybadgerErrorBoundary } from './'
+
+// Need to import like this because react-scripts does not support jest's {@link https://jestjs.io/docs/configuration#resolver-string resolver} option.
+// We need "resolver" to ask jest to respect the "browser" field in the package.json.
+// Since we do not have that, we import here manually. The alternative would be to do "react-scripts eject", but that would be an overkill.
+import Honeybadger from '@honeybadger-io/js/dist/browser/honeybadger'
+import { Honeybadger as HoneybadgerUniversalType, HoneybadgerErrorBoundary } from './'
 import { SinonSpy, assert, createSandbox } from 'sinon'
 import fetch from 'jest-fetch-mock'
 
 describe('HoneybadgerReact', () => {
   const config = { apiKey: 'FFAACCCC00' }
-  const honeybadger = Honeybadger.configure(config)
+  // need to type cast to the universal type (both Server and Client) because that's what the component expects
+  // in a real world scenario, the correct implementation is imported: Server in the case of SSR and Client in the browser
+  const honeybadger = Honeybadger.configure(config) as HoneybadgerUniversalType
 
   class Clean extends React.Component {
     render() {
