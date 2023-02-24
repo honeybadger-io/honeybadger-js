@@ -3,7 +3,7 @@ import { StyleSheet, View, Button, TextInput } from 'react-native';
 import Honeybadger from '@honeybadger-io/react-native';
 
 export default function App() {
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useState('');
   
   function onConfigureButtonPress() {
     console.log('Configuring HB with API key:', apiKey)
@@ -16,9 +16,9 @@ export default function App() {
   return (
     <View style={styles.container}>
       <TextInput
-          placeholder="enter your API key"
-          value={apiKey}
-          onChangeText={(text) => setApiKey(text)}
+        placeholder="enter your API key"
+        value={apiKey}
+        onChangeText={(text) => setApiKey(text)}
       />
       <Button onPress={ onConfigureButtonPress } title="Configure HB" />
       <Button onPress={ onErrButtonPress } title="Throw an error!" />
