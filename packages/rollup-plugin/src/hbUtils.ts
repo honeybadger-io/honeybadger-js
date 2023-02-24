@@ -2,7 +2,7 @@ import originalFetch from 'node-fetch'
 import FormData from 'form-data'
 import { promises as fs } from 'fs'
 import fetchRetry from 'fetch-retry'
-// @ts-ignore
+// @ts-expect-error
 const fetch = fetchRetry(originalFetch)
 
 import type { DeployBody, HbPluginOptions, SourcemapInfo } from './types';
@@ -117,7 +117,6 @@ export async function sendDeployNotification(hbOptions: HbPluginOptions): Promis
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
-      // @ts-ignore
       body,
       redirect: 'follow',
       retries: hbOptions.retries,
