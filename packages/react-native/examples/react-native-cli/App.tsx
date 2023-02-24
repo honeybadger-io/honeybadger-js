@@ -5,8 +5,8 @@
  * @format
  */
 
-import React, {useState} from 'react';
-import {SafeAreaView, Button, TextInput} from 'react-native';
+import React, { useState } from 'react';
+import { SafeAreaView, Button, TextInput } from 'react-native';
 import Honeybadger from '@honeybadger-io/react-native';
 
 export default function App() {
