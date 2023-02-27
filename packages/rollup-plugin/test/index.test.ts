@@ -1,25 +1,37 @@
 import { expect } from 'chai'
+import { NormalizedOutputOptions, Plugin } from 'rollup'
 import * as td from 'testdouble'
+import { HbPluginOptions } from '../src/types'
 
 describe('Index', () => {
-  let honeybadgerRollupPlugin
-  let cleanOptionsMock
-  let isNonProdEnvMock
-  let extractSourcemapDataFromBundleMock
-  let uploadSourcemapsMock
-  let sendDeployNotificationMock
+  let honeybadgerRollupPlugin:(opts: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>) => Plugin
+  let cleanOptionsMock, 
+    isNonProdEnvMock, 
+    extractSourcemapDataFromBundleMock, 
+    uploadSourcemapsMock, 
+    sendDeployNotificationMock
   const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
 
   beforeEach(async () => {
-    const optionsModule = await td.replaceEsm('../src/options.js');
-    cleanOptionsMock = optionsModule.cleanOptions
-    const rollupUtilsModule = await td.replaceEsm('../src/rollupUtils.js')
-    extractSourcemapDataFromBundleMock = rollupUtilsModule.extractSourcemapDataFromBundle
-    isNonProdEnvMock = rollupUtilsModule.isNonProdEnv
-    const hbUtilsModule = await td.replaceEsm('../src/hbUtils.js')
-    uploadSourcemapsMock = hbUtilsModule.uploadSourcemaps
-    sendDeployNotificationMock = hbUtilsModule.sendDeployNotification
-    const indexModule = await import('../src/index.js')
+    cleanOptionsMock = td.func()
+    isNonProdEnvMock = td.func()
+    extractSourcemapDataFromBundleMock = td.func()
+    uploadSourcemapsMock = td.func()
+    sendDeployNotificationMock = td.func()
+
+    td.replace('../src/options', { 
+      cleanOptions: cleanOptionsMock 
+    })
+    td.replace('../src/rollupUtils', {
+      extractSourcemapDataFromBundle: extractSourcemapDataFromBundleMock,
+      isNonProdEnv: isNonProdEnvMock
+    })
+    td.replace('../src/hbUtils', {
+      uploadSourcemaps: uploadSourcemapsMock, 
+      sendDeployNotification: sendDeployNotificationMock
+    })
+    
+    const indexModule = await import('../src/index')
     honeybadgerRollupPlugin = indexModule.default
   })
 
@@ -28,7 +40,6 @@ describe('Index', () => {
   })
 
   it('cleans the options, returns the expected format for a plugin', () => {
-    const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
     const plugin = honeybadgerRollupPlugin(options)
 
     td.verify(cleanOptionsMock(options))
@@ -37,19 +48,21 @@ describe('Index', () => {
   })
 
   describe('writeBundle', () => {
-    const outputOptions = { dir: 'dist' }
+    const outputOptions = td.object<NormalizedOutputOptions>()
+    outputOptions.dir = 'dist'
     const bundle = { 'index.map.js': {} }
     const sourcemapData = [{ sourcemapFilename: 'index.map.js' }]
 
     it('should upload sourcemaps', async () => {
       td.when(isNonProdEnvMock()).thenReturn(false)
-      td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
+      td.when(extractSourcemapDataFromBundleMock(outputOptions, bundle)).thenReturn(sourcemapData)
       td.when(cleanOptionsMock(options)).thenReturn(options)
   
       const plugin = honeybadgerRollupPlugin(options)
+      //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
   
-      td.verify(uploadSourcemapsMock({ sourcemapData, hbOptions: options }))
+      td.verify(uploadSourcemapsMock(sourcemapData, options))
     })
 
     it('should send deploy notification if deploy is true', async () => {
@@ -59,6 +72,7 @@ describe('Index', () => {
       td.when(cleanOptionsMock(deployTrueOpt)).thenReturn(deployTrueOpt)
   
       const plugin = honeybadgerRollupPlugin(deployTrueOpt)
+      //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
   
       td.verify(sendDeployNotificationMock(deployTrueOpt))
@@ -71,6 +85,7 @@ describe('Index', () => {
       td.when(cleanOptionsMock(deployObjOpt)).thenReturn(deployObjOpt)
   
       const plugin = honeybadgerRollupPlugin(deployObjOpt)
+      //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
   
       td.verify(sendDeployNotificationMock(deployObjOpt))
@@ -83,6 +98,7 @@ describe('Index', () => {
       td.when(cleanOptionsMock(deployFalseOpt)).thenReturn(deployFalseOpt)
   
       const plugin = honeybadgerRollupPlugin(deployFalseOpt)
+      //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
       
       // Verify not called
@@ -94,6 +110,7 @@ describe('Index', () => {
       td.when(cleanOptionsMock(options)).thenReturn(options)
   
       const plugin = honeybadgerRollupPlugin(options)
+      //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
   
       // Verify these were not called

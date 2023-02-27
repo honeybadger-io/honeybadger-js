@@ -6,7 +6,7 @@ import {
   DEFAULT_SILENT,
   DEPLOY_ENDPOINT,
   cleanOptions, 
-} from '../src/options.js';
+} from '../src/options';
 
 describe('Options', () => {
   describe('cleanOptions', () => {
