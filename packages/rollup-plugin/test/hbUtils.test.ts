@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import * as td from 'testdouble'
-import { FormData, File, Response, FetchError } from 'node-fetch';
+import FormData from 'form-data'
+import { Buffer } from 'buffer'
+import { Response, FetchError } from 'node-fetch'
 
 describe('hbUtils', () => {
   const fetchMock = td.func()  
@@ -13,20 +15,18 @@ describe('hbUtils', () => {
     silent: false, 
   }
   
-  // Mock accessing the files via node-fetch's async fileFrom
-  async function fileFromMock(filePath, type) {
-    return new File([filePath, type], filePath, { type })
+  // Mock accessing the files 
+  async function readFileMock(filePath: string) {
+    return Buffer.from(filePath)
   }
+
   let utils
 
   beforeEach(async () => {
     // Replace node-fetch with a mock before importing 
-    await td.replaceEsm(
-      'node-fetch', 
-      { FormData, fileFrom: fileFromMock }, 
-      fetchMock
-    );
-    utils = await import('../src/hbUtils.js')
+    td.replace('node-fetch', fetchMock);
+    td.replace('fs', { promises: { readFile: readFileMock } })
+    utils = await import('../src/hbUtils')
   })
 
   afterEach(() => {
@@ -36,10 +36,10 @@ describe('hbUtils', () => {
   describe('uploadSourcemaps', () => {
     it('should warn if no sourcemaps are passed in and silent is false', async () => {
       const warnMock = td.replace(console, 'warn')
-      await utils.uploadSourcemaps({ 
-        sourcemapData: [], 
-        hbOptions: { silent: false }
-      })
+      await utils.uploadSourcemaps( 
+        [], 
+        { silent: false }
+      )
       td.verify(warnMock('Could not find any sourcemaps in the bundle. Nothing will be uploaded.'))
     })
 
@@ -56,11 +56,12 @@ describe('hbUtils', () => {
       // was called for all 3 files
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenDo(async ( endpoint, { body }) => {
-          const jsFilename = body.get('minified_url').replace(`${hbOptions.assetsUrl}/`, '')
+          const match = body.getBuffer().toString().match(/name="minified_file"; filename=".*"/)
+          const jsFilename = match[0].slice(32, -1)
           return new Response(JSON.stringify({ jsFilename }), { status: 200 })
         })
 
-      const responses = await utils.uploadSourcemaps({ sourcemapData, hbOptions })
+      const responses = await utils.uploadSourcemaps(sourcemapData, hbOptions)
       expect(responses).to.have.length(3)
 
       const responseBodies = await Promise.all(responses.map(res => res.json()))
@@ -82,10 +83,10 @@ describe('hbUtils', () => {
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(new Response('', { status: 200 }))
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()), { times: 2 })
-        .thenReject(new FetchError())
+        .thenReject(new FetchError('Nope', 'Fail'))
 
       try {
-        await utils.uploadSourcemaps({ sourcemapData, hbOptions })
+        await utils.uploadSourcemaps(sourcemapData, hbOptions)
       } catch (err) {
         expect(err.message).to.include('Failed to upload 2 sourcemap file(s)')
       }
@@ -94,7 +95,6 @@ describe('hbUtils', () => {
 
   describe('uploadSourcemap', () => {
     const testData = {
-      ...hbOptions,
       sourcemapFilename: 'index.map.js',
       sourcemapFilePath: 'path/to/index.map.js', 
       jsFilename: 'index.js', 
@@ -103,25 +103,25 @@ describe('hbUtils', () => {
 
     it('should resolve with the response if the response is ok', async () => {
       // Check we called fetch with the expected arguments
-      td.when(fetchMock(testData.endpoint, {
+      td.when(fetchMock(hbOptions.endpoint, {
         method: 'POST',
         body: td.matchers.isA(Object),
         redirect: 'follow',
-        retries: testData.retries,
+        retries: hbOptions.retries,
         retryDelay: 1000
       }))
-        .thenResolve(new Response({}, { status: 200 }))
+        .thenResolve(new Response('Ok', { status: 200 }))
 
-      const res = await utils.uploadSourcemap(testData)
+      const res = await utils.uploadSourcemap(testData, hbOptions)
       expect(res.status).to.equal(200)
     })
 
     it('should reject with an error if fetch rejects', async () => {
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()))
-        .thenReject(new FetchError('Go fetch it yourself'))
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
+        .thenReject(new FetchError('Go fetch it yourself', 'Grrr'))
 
       try {
-        await utils.uploadSourcemap(testData)
+        await utils.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: FetchError - Go fetch it yourself')
       }
@@ -130,30 +130,30 @@ describe('hbUtils', () => {
     it('should reject with a useful error if response is not ok', async () => {
       // Nothing useful in the body
       let res = new Response(JSON.stringify({ foo: 'bar' }), { status: 500, statusText: 'Internal server error' })
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()))
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(res)
       try {
-        await utils.uploadSourcemap(testData)
+        await utils.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 500 - Internal server error')
       }
       
       // No body at all
       res = new Response('', { status: 404, statusText: 'Not found' })
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()))
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(res)
       try {
-        await utils.uploadSourcemap(testData)
+        await utils.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 404 - Not found')
       }
 
       // Body contains error data
       res = new Response(JSON.stringify({ error: 'Server has the hiccups' }), { status: 500 })
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()))
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(res)
       try {
-        await utils.uploadSourcemap(testData)
+        await utils.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 500 - Server has the hiccups')
       }
@@ -163,13 +163,13 @@ describe('hbUtils', () => {
       const okRes = new Response('', { status: 201 })
 
       // Reject once, then resolve
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()))
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(okRes)
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()), { times: 1 })
-        .thenReject(new FetchError())
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()), { times: 1 })
+        .thenReject(new FetchError('', ''))
 
       try {
-        await utils.uploadSourcemap(testData)
+        await utils.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: FetchError')
       }
@@ -179,19 +179,18 @@ describe('hbUtils', () => {
       const okRes = new Response('', { status: 201 })
 
       // Reject once, then resolve
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()))
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(okRes)
-      td.when(fetchMock(testData.endpoint, td.matchers.anything()), { times: 1 })
-        .thenReject(new FetchError())
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()), { times: 1 })
+        .thenReject(new FetchError('', ''))
       
-      const res = await utils.uploadSourcemap({ ...testData, retries: 3 })
+      const res = await utils.uploadSourcemap(testData, { ...hbOptions, retries: 3 })
       expect(res.status).to.equal(201)
     })
   })
 
   describe('buildBodyForSourcemapUpload', () => {
     const testData = {
-      ...hbOptions,
       sourcemapFilename: 'index.map.js',
       sourcemapFilePath: 'path/to/index.map.js', 
       jsFilename: 'index.js', 
@@ -199,9 +198,12 @@ describe('hbUtils', () => {
     }
 
     it('should return an instance of FormData with expected entries', async () => {
-      const result = await utils.buildBodyForSourcemapUpload(testData)
+      const result = await utils.buildBodyForSourcemapUpload(testData, hbOptions)
 
       expect(result).to.be.an.instanceOf(FormData)
+
+      const buf = result.getBuffer()
+      const str = buf.toString()
 
       const expectedFields = [
         ['api_key', 'test_key'], 
@@ -209,17 +211,17 @@ describe('hbUtils', () => {
         ['revision', '12345'],    
       ]
       const expectedFiles = [
-        ['minified_file', 'path/to/index.js', 'application/javascript'], 
-        ['source_map', 'path/to/index.map.js', 'application/octet-stream']
+        ['minified_file', 'index.js', 'application/javascript'], 
+        ['source_map', 'index.map.js', 'application/octet-stream']
       ]
+
       expectedFields.forEach(([key, value]) => {
-        expect(result.get(key)).to.equal(value)
+        const pattern = new RegExp(`Content-Disposition: form-data; name="${key}"\\s*${value}`)
+        expect(str.match(pattern)).to.have.length(1)
       })  
-      expectedFiles.forEach(([key, filePath, type]) => {
-        const file = result.get(key)
-        expect(file).to.be.an.instanceOf(File)
-        expect(file.name).to.equal(filePath)
-        expect(file.type).to.equal(type)
+      expectedFiles.forEach(([key, fileName, type]) => {
+        const pattern = new RegExp(`Content-Disposition: form-data; name="${key}"; filename="${fileName}"\\s*Content-Type: ${type}`)
+        expect(str.match(pattern)).to.have.length(1)
       }) 
     })
   });
@@ -247,7 +249,7 @@ describe('hbUtils', () => {
         retries: testData.retries,
         retryDelay: 1000
       }))
-        .thenResolve(new Response({}, { status: 200 }))
+        .thenResolve(new Response('Ok', { status: 200 }))
 
       const res = await utils.sendDeployNotification(testData)
       expect(res.status).to.equal(200)
@@ -255,7 +257,7 @@ describe('hbUtils', () => {
 
     it('should reject with an error if fetch rejects', async () => {
       td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
-        .thenReject(new FetchError('Go fetch it yourself'))
+        .thenReject(new FetchError('Go fetch it yourself', 'Yeah'))
 
       try {
         await utils.sendDeployNotification(testData)
@@ -303,7 +305,7 @@ describe('hbUtils', () => {
       td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
         .thenResolve(okRes)
       td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()), { times: 1 })
-        .thenReject(new FetchError())
+        .thenReject(new FetchError('', ''))
 
       try {
         await utils.sendDeployNotification(testData)
@@ -319,7 +321,7 @@ describe('hbUtils', () => {
       td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
         .thenResolve(okRes)
       td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()), { times: 1 })
-        .thenReject(new FetchError())
+        .thenReject(new FetchError('No fetch', 'Nope'))
       
       const res = await utils.sendDeployNotification({ ...testData, retries: 3 })
       expect(res.status).to.equal(201)

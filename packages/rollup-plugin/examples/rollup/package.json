@@ -9,6 +9,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@honeybadger-io/rollup-plugin": "file:../..",
     "rollup": "^3.9.1"
   },
   "dependencies": {

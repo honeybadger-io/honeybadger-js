@@ -1,13 +1,16 @@
 import { expect } from 'chai'
-import { extractSourcemapDataFromBundle, isNonProdEnv } from '../src/rollupUtils.js';
-import bundle from './fixtures/bundle.js'
+import { extractSourcemapDataFromBundle, isNonProdEnv } from '../src/rollupUtils';
+import bundle from './fixtures/bundle'
 import path from 'node:path'
+import { NormalizedOutputOptions } from 'rollup';
+import * as td from 'testdouble'
 
 describe('extractSourcemapDataFromBundle', () => {
-  const outputOptions = { dir: 'dist' }
+  const outputOptions = td.object<NormalizedOutputOptions>()
+  outputOptions.dir = 'dist' 
 
   it('should return an array with sourcemap file data', () => {
-    const data = extractSourcemapDataFromBundle({ outputOptions, bundle })
+    const data = extractSourcemapDataFromBundle(outputOptions, bundle)
     expect(data).to.be.an('array').lengthOf(3)
     expect(data).to.have.deep.members([
       {
