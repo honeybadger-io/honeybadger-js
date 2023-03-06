@@ -1,0 +1,50 @@
+{
+  "name": "@honeybadger-io/nextjs",
+  "version": "5.1.4",
+  "description": "Next.js integration for Honeybadger",
+  "keywords": [
+    "nextjs",
+    "honeybadger",
+    "vercel",
+    "react"
+  ],
+  "author": {
+    "name": "Pangratios Cosma",
+    "email": "pangratios.cosma@honeybadger.io"
+  },
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/packages/nextjs#readme",
+  "license": "ISC",
+  "main": "dist/honeybadger-nextjs.cjs.js",
+  "types": "./dist/index.d.ts",
+  "module": "dist/honeybadger-nextjs.esm.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/honeybadger-io/honeybadger-js.git"
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.json && rollup -c && tsc --build tsconfig.types.json"
+  },
+  "bugs": {
+    "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
+  },
+  "peerDependencies": {
+    "next": "13.x"
+  },
+  "dependencies": {
+    "@honeybadger-io/js": "^5.1.1",
+    "@honeybadger-io/react": "^5.1.3"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "rollup": "^2.70.2",
+    "typescript": "^4.6.3",
+    "next": "^13.2.3"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
