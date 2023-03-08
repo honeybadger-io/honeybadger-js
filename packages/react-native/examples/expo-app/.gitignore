@@ -12,3 +12,9 @@ web-build/
 
 # macOS
 .DS_Store
+
+# outputs of honeybadger-generate-sourcemaps
+sourcemap-android
+sourcemap-ios
+main.jsbundle-android
+main.jsbundle-ios
