@@ -21,6 +21,7 @@ DerivedData
 *.ipa
 *.xcuserstate
 ios/.xcode.env.local
+ios/.xcode.env.local
 
 # Android/IntelliJ
 #
@@ -29,6 +30,10 @@ build/
 .gradle
 local.properties
 *.iml
+*.hprof
+.cxx/
+*.keystore
+!debug.keystore
 *.hprof
 .cxx/
 *.keystore
@@ -51,10 +56,15 @@ yarn-error.log
 **/fastlane/Preview.html
 **/fastlane/screenshots
 **/fastlane/test_output
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
 
 # Bundle artifact
 *.jsbundle
 
+# Ruby / CocoaPods
 # Ruby / CocoaPods
 /ios/Pods/
 /vendor/bundle/
