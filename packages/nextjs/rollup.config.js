@@ -31,8 +31,6 @@ export default {
     'fs',
     'path',
     'next',
-    '@honeybadger-io/js',
-    '@honeybadger-io/react'
   ],
   plugins: [
     commonjs()

@@ -3,8 +3,6 @@ import path from 'path'
 import { NextConfig } from 'next'
 import { NextJsWebpackConfig, WebpackConfigContext } from 'next/dist/server/config-shared'
 
-export { Honeybadger } from '@honeybadger-io/react'
-
 let _silent = true
 function log(type: 'error' | 'debug', msg: string) {
   if (type === 'error' || !_silent) {
@@ -31,19 +29,14 @@ function mergeWithExistingWebpackConfig(nextJsWebpackConfig: NextJsWebpackConfig
     const { isServer, dir: projectDir, nextRuntime } = context
     const configType: NextJsRuntime = isServer ? (nextRuntime === 'edge' ? 'edge' : 'server') : 'browser'
     log('debug', `reached webpackFunctionMergedWithHb isServer[${isServer}] configType[${configType}]`)
-    log('debug', 'webpackConfig.entry: ' + (webpackConfig.entry as object).toString())
 
     let result = { ...webpackConfig }
-    log('debug', 'result.entry: ' + (result.entry as object).toString())
     if (typeof nextJsWebpackConfig === 'function') {
       result = nextJsWebpackConfig(result, context)
     }
 
-    // fixme: original entry is an async function
-    const originalEntry = result.entry as Record<string, unknown>
-    log('debug', `original entry point: ${JSON.stringify(originalEntry, null, 2)}`)
-
-    result.entry = injectHoneybadgerConfigToEntry(originalEntry, projectDir, configType)
+    const originalEntry = result.entry as () => Promise<Record<string, unknown>>
+    result.entry = async () => injectHoneybadgerConfigToEntry(originalEntry, projectDir, configType)
 
     // todo: should attach Honeybadger's webpack plugin here to upload source maps by default (on production environments)
 
@@ -51,14 +44,17 @@ function mergeWithExistingWebpackConfig(nextJsWebpackConfig: NextJsWebpackConfig
   }
 }
 
-function injectHoneybadgerConfigToEntry(originalEntry: Record<string, unknown>, projectDir: string, configType: NextJsRuntime) {
+async function injectHoneybadgerConfigToEntry(originalEntry: Record<string, unknown> | (() => Promise<Record<string, unknown>>), projectDir: string, configType: NextJsRuntime) {
   const hbConfigFile = getHoneybadgerConfigFile(projectDir, configType)
   if (!hbConfigFile) {
     return originalEntry
   }
 
   const hbConfigFileRelativePath = `./${hbConfigFile}`
-  const result = { ...originalEntry }
+  const result = typeof originalEntry === 'function' ? await originalEntry() : { ...originalEntry }
+  if (!Object.keys(result).length) {
+    log('debug', `no entry points for configType[${configType}]`)
+  }
   for (const entryName in result) {
     addHoneybadgerConfigToEntry(result, entryName, hbConfigFileRelativePath, configType)
   }
