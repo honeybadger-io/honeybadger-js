@@ -157,7 +157,10 @@ class Honeybadger extends Client {
       HTTP_COOKIE: undefined
     }
 
-    cgiData.HTTP_USER_AGENT = navigator.userAgent
+    if (typeof navigator !== 'undefined' && navigator.userAgent) {
+      cgiData.HTTP_USER_AGENT = navigator.userAgent
+    }
+
     if (typeof document !== 'undefined' && document.referrer.match(/\S/)) {
       cgiData.HTTP_REFERER = document.referrer
     }
