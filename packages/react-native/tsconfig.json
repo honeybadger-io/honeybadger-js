@@ -1,13 +1,17 @@
 {
-	"include": ["index.js"],
+	// TODO: we are getting /src folder within /dist
+	// because of importing package.json
+	"include": ["./src/**/*"],
 	"compilerOptions": {
 		// Read .js files
 		"allowJs": true,
 		// Generate d.ts files
 		"declaration": true,
-		// Only generate d.ts files
-		"emitDeclarationOnly": true,
+		// Output files to /dist
+		"outDir": "dist",
 		// Don't complain about conflicting types in our dependencies
 		"skipLibCheck": true,
+		// Allow importing JSON
+		"resolveJsonModule": true,
 	}
 }

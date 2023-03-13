@@ -9,19 +9,17 @@ import React, { useState } from 'react';
 import { SafeAreaView, Button, TextInput } from 'react-native';
 import Honeybadger from '@honeybadger-io/react-native';
 
-Honeybadger.setLogLevel('debug')
-
 export default function App() {
   const [apiKey, setApiKey] = useState('');
   const [revision, setRevision] = useState('testRevisionCli123');
 
   function onConfigureButtonPress() {
     console.log('Configuring HB with API key:', apiKey);
-    Honeybadger.configure(
+    Honeybadger.configure({
       apiKey, 
-      true,
       revision,
-    )
+      debug: true,
+    })
   }
   function onErrButtonPress() {
     throw new Error(
