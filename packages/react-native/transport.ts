@@ -1,6 +1,6 @@
 import { Types, Util } from '@honeybadger-io/core'
 import { Platform  } from 'react-native';
-import * as pkg from '../package.json'
+import * as pkg from './package.json'
 
 export class Transport implements Types.Transport {
   
@@ -15,8 +15,6 @@ export class Transport implements Types.Transport {
       version: pkg.version,
     }
 
-    options.logger.debug(`\n\nPAYLOAD NOTIFIER`, payload.notifier)
-
     const params = {
       method: options.method,
       headers: {
@@ -26,9 +24,6 @@ export class Transport implements Types.Transport {
       // TODO: is this sanitize helpful?
       body: JSON.stringify(Util.sanitize(payload, options.maxObjectDepth))
     };
-
-    
-    options.logger.debug(`\n\n HEADERS`, params.headers)
 
     // react-native provides a fetch API
     const res = await fetch(options.endpoint, params)

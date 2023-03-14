@@ -1,16 +1,11 @@
 {
-	// TODO: we are getting /src folder within /dist
-	// because of importing package.json
-	"include": ["./src/**/*"],
+	"extends": "../../tsconfig.base.json",
+	"include": ["index.ts"],
 	"compilerOptions": {
-		// Read .js files
-		"allowJs": true,
 		// Generate d.ts files
 		"declaration": true,
 		// Output files to /dist
 		"outDir": "dist",
-		// Don't complain about conflicting types in our dependencies
-		"skipLibCheck": true,
 		// Allow importing JSON
 		"resolveJsonModule": true,
 	}
