@@ -1,6 +1,11 @@
 .DS_Store
-node_modules/
-dist/
-local.log
+node_modules
+.idea
+*/**/*.tsbuildinfo
+*/**/build
+*/**/dist
+*/**/.DS_Store
+*/**/node_modules
+
+lerna-debug.log
 browserstack.err
-.idea/

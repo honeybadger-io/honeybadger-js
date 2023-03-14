@@ -1,0 +1,60 @@
+name: Publish New Release
+on:
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      NPM_AUTH_TOKEN:
+        required: true
+      HONEYBADGER_DISTRIBUTION_ID:
+        required: true
+      HONEYBADGER_JS_S3_BUCKET:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+      LERNA_PUBLISH_PAT:
+        required: true
+      BUNNY_API_KEY:
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.LERNA_PUBLISH_PAT }}
+          fetch-depth: 0
+          ref: master
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+
+      - name: Install Deps
+        run: npm ci
+
+      - name: Git Config
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: NPM Login
+        run: npm config set "//registry.npmjs.org/:_authToken" "${{ secrets.NPM_AUTH_TOKEN }}"
+
+      - name: Publish Release
+        run: npm run release
+        env:
+          # for lerna
+          GH_TOKEN: ${{ secrets.LERNA_PUBLISH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.LERNA_PUBLISH_PAT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-east-1"
+          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
+          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
+          BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}

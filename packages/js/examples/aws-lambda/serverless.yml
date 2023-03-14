@@ -1,0 +1,60 @@
+org: hiteqsoftware
+service: aws-lambda
+app: honeybadger-io
+frameworkVersion: '2'
+
+plugins:
+  - serverless-plugin-include-dependencies
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  stage: dev
+  region: us-east-1
+  environment:
+    HONEYBADGER_API_KEY: ${param:HONEYBADGER_API_KEY}
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /hello
+          method: get
+  helloWrapped:
+    handler: handler.helloWrapped
+    events:
+      - httpApi:
+          path: /hello-wrapped
+          method: get
+  syncError:
+    handler: handler.syncError
+    events:
+      - httpApi:
+          path: /sync-error
+          method: post
+  asyncError:
+    handler: handler.asyncError
+    events:
+      - httpApi:
+          path: /async-error
+          method: post
+  callbackError:
+    handler: handler.callbackError
+    events:
+      - httpApi:
+          path: /callback-error
+          method: post
+  setTimeoutError:
+    handler: handler.setTimeoutError
+    events:
+      - httpApi:
+          path: /set-timeout-error
+          method: post
+  timeoutWarning:
+    handler: handler.timeoutWarning
+    events:
+      - httpApi:
+          path: /timeout-warning
+          method: post

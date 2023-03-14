@@ -1,12 +1,33 @@
 # Honeybadger for JavaScript
 
 ![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
-[![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)
-[![deploy](https://img.shields.io/badge/deploy-🛳%20Ship.js-blue?style=flat)](https://github.com/algolia/shipjs)
 
-Universal JavaScript library for integrating apps with the :zap: [Honeybadger Error Notifier](http://honeybadger.io).
-
-❗*Note: The NPM package has been moved to [**@honeybadger-io/js**](https://www.npmjs.com/package/@honeybadger-io/js) starting with v3.0.0. See the [v2-stable](https://github.com/honeybadger-io/honeybadger-js/tree/v2-stable) branch for the [**honeybadger-js**](https://www.npmjs.com/package/honeybadger-js) 2.x package. [Upgrade instructions](https://docs.honeybadger.io/lib/javascript/support/upgrading-to-v3.html)*
+Welcome! This is the monorepo which holds all [Honeybadger](https://honeybadger.io) packages for JavaScript.
+You can refer to the README of each package for more information and instructions:
+- [@honeybadger-io/core](./packages/core)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fcore.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fcore)  
+  The core package that integrates with Honeybadger API
+- [@honeybadger-io/js](./packages/js)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)
+  SDK for browser, nodejs and AWS Lambda 
+- [@honeybadger-io/webpack](./packages/webpack)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)  
+  Webpack plugin to upload source maps to Honeybadger
+- [@honeybadger-io/vue](./packages/vue)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fvue.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fvue)  
+  SDK for vue.js integration
+- [@honeybadger-io/react](./packages/react)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact)  
+  SDK for React integration
+- [@honeybadger-io/gatsby-plugin-honeybadger](./packages/gatsby-plugin)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger)  
+  [Gatsby](https://www.gatsbyjs.com) plugin
+- [@honeybadger-io/react-native](./packages/react-native)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact-native.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact-native)  
+  SDK for React Native integration
+- [@honeybadger-io/rollup-plugin](./packages/rollup-plugin)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin.svg)](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin)  
+  Rollup/Vite plugin to upload source maps to Honeybadger
 
 ## Documentation and Support
 
@@ -14,93 +35,66 @@ For comprehensive documentation and support, [check out our documentation site](
 
 ## Changelog
 
-[Conventional Commits](https://www.conventionalcommits.org/) are enforced with a git hook ([husky](https://typicode.github.io/husky) + [commitlint](https://commitlint.js.org/)) in order to automate changelog generation.
-[CHANGELOG.md](CHANGELOG.md) is updated when a new version is released (npm run release) with [shipjs](https://community.algolia.com/shipjs/reference/all-config.html#updatechangelog).
+- [CHANGELOG.md](CHANGELOG.md) is updated when a new version is released (`npm run release`).
+  The root `CHANGELOG.md` has a collective changelog from changes in all the packages of the monorepo. Each package also has its own `CHANGELOG.md` with changes related only to itself.
+
+- [Conventional Commits](https://www.conventionalcommits.org/) are enforced with a Git hook (via [husky](https://typicode.github.io/husky) + [commitlint](https://commitlint.js.org/)) in order to automate changelog generation.
 
 ## Contributing
 
-1. Fork it.
+1. Fork the repo.
 2. Create a topic branch `git checkout -b my_branch`
-3. Commit your changes `git commit -am "Boom"`
+3. Commit your changes `git commit -am "chore: boom"` 
 4. Push to your branch `git push origin my_branch`
 5. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)
 
 ## Development
 
-1. Run `npm install`.
-2. To run unit tests for both browser and server builds: `npm test`. Or separately: `npm run test:browser`, `npm run test:server`.
-3. To run integration tests across all supported platforms, set up a [BrowserStack](https://www.browserstack.com/)
-account and use `BROWSERSTACK_USERNAME=your_username BROWSERSTACK_ACCESS_KEY=your-access-key npm run test:integration`.
-4. To test the TypeScript type definitions: `npm run tsd`.
-   
-### Bundling and types
-This project is _isomorphic_, meaning it's a single library which contains both browser and server builds. It's written in TypeScript, and transpiled and bundled with Rollup. Our Rollup config generates three main files:
-1. The server build, which transpiles `src/server.ts` and its dependencies into `dist/server/honeybadger.js`.
-2. The browser build, which transpiles `src/browser.ts` and its dependencies into `dist/browser/honeybadger.js`.
-3. The minified browser build, which transpiles `src/browser.ts` and its dependencies into `dist/browser/honeybadger.min.js` (+ source maps).
-4. The browser ESM build, which transpiles `src/browser.ts` and its dependencies into `dist/browser/honeybadger.js`, as ES6 modules.
+We use [Lerna](https://lerna.js.org/) to manage the monorepo. It helps us:
+- link between packages,
+- generate changelogs and bump versions (based on conventional commits) and
+- publish to NPM
 
-In addition, the TypeScript type declaration for each build is generated into its `types/` directory (ie `dist/browser/types/browser.d.ts` and `dist/server/types/server.d.ts`).
+1. Run `npm install` from the monorepo root.
+2. Run `npm test` from the monorepo root to run unit tests for all packages.
 
-However, since the package is isomorphic, TypeScript users will likely be writing `import * as Honeybadger from '@honeybadger-io/js'` or `import Honeybadger = require('@honeybadger-io/js')` in their IDE. Our `package.json` has ` main` and `browser` fields that determine which build they get, but [there can only be a single type declaration file](https://github.com/Microsoft/TypeScript/issues/29128). So we use an extra file in the project root, `honeybadger.d.ts`, that combines the types from both builds.
+
+### Lerna Tips
+
+- Always install from the root, i.e. `npm install` only from the root folder, otherwise you may get unexpected issues with the linked packages.
+- Use `lerna add my-pkg --scope="@honeybadger-io/js"` to add `my-pkg` in the `@honeybadger-io/js` project. Or you can manually add to the target project's `package.json` file. You still need to run `npm install` from the root.
+- Use `lerna run` to execute commands for all projects. If the command is not found it will not be executed. You can filter the packages using `--scope`. For example, `lerna run test` will execute `npm run test` to all packages that have this script available.
+
+For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
+
+
+### Troubleshooting TypeScript
+
+- Not seeing changes when working in `.ts` files? Make sure that you rebuild every time you make a change. Or enable "compile on save" with your IDE - [WebStorm(Jetbrains)](https://www.jetbrains.com/help/webstorm/compiling-typescript-to-javascript.html#ts_compiler_compile_code_automatically) / [VS Code](https://code.visualstudio.com/docs/typescript/typescript-compiling#_step-2-run-the-typescript-build).
+- If you are getting errors with Typescript, make sure that you do `npm run build`.
+  It's a prerequisite for [Typescript Project References](https://www.typescriptlang.org/docs/handbook/project-references.html#caveats-for-project-references).
 
 ## Releasing
 
-Releasing is done with two commands: `npm version` and `npm publish`. **Both
-commands should be used with care.** The `npm publish` command publishes to NPM
-**and** to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront).
+All packages in the monorepo are released in [fixed mode](https://lerna.js.org/docs/features/version-and-publish#fixedlocked-mode-default), meaning that releasing a new version of one package also creates a release in that version for the other packages.
+Releasing is done using `npm run release`. This command calls `lerna publish`, which does the following:
+- generates changelog based on the commit messages (see [Changelog](#changelog) above)
+- `npm version`
+- `npm publish`
 
-For the CDN release, make sure you have the following environment variable
-available in your shell:
-
-```
-export HONEYBADGER_JS_S3_BUCKET=honeybadger-js
-export HONEYBADGER_DISTRIBUTION_ID=cloudfront-id
-```
-
-AWS credentials are read from *~/.aws/credentials*, using the default profile.
-
-To perform a full release:
-
-1. With a clean working tree, use `npm version [new version]` to bump the version, commit the
-   changes, tag the release, and push to GitHub. See `npm help version` for
-   documentation.
-
-2. To publish the release, use `npm publish`. See `npm help publish` for
-   documentation.
-
-If the CDN release fails for some reason (bad AWS credentials, for instance),
-re-run the release manually with `npm run release-cdn`.
+*Note*: some packages may have a `postpublish` script, for example `@honeybadger-io/js` (found in `packages/js`) has a script to also publish to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront). 
 
 ### Release Automation
 
-We use [Ship.js](https://github.com/algolia/shipjs) to automate releasing. Our [custom Ship.js config](https://github.com/honeybadger-io/honeybadger-js/blob/master/ship.config.js) determines the next release version based on the unreleased section of our [changelog](https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md) ([Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format).
+The repository automatically releases new packages every week (see `lerna-scheduled-publish.yml`).
+You can manually trigger a new release using the `Publish New Release` (`lerna-publish.yml`) workflow.
 
-Ship.js creates a PR once per week when unreleased changes are present. You can also trigger a release PR by saying "@shipjs prepare" in any issue or pull request comment on GitHub.
+*Note*: only users with _write_ permissions can trigger this workflow (i.e. Collaborators).
 
 #### Available Commands
 
-- `npm run release` - Calculates the next version and creates a PR via `shipjs prepare`. This can run locally or in CI
-- `npx shipjs trigger` - Publish to NPM (usually happens in CI, but can also run locally)
-
-#### GitHub Workflows
-
-- [shipjs-manual-prepare](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/shipjs-manual-prepare.yml)
-- [shipjs-schedule-prepare](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/shipjs-schedule-prepare.yml)
-- [shipjs-trigger](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/shipjs-trigger.yml)
-
-#### Related Links
-
-- [Our Ship.js config file](https://github.com/honeybadger-io/honeybadger-js/blob/master/ship.config.js)
-- [Our Changelog file](https://github.com/honeybadger-io/honeybadger-js/blob/master/CHANGELOG.md)
-- [Ship.js on GitHub](https://github.com/algolia/shipjs)
-- [Ship.js docs](https://community.algolia.com/shipjs/guide/)
-- [More about our unique setup](https://www.joshuawood.net/notes/release-automation-with-ship-js-and-keep-a-changelog)
+- `npm run release` - Calculates the next version, commits and publishes to NPM (and to our CDN). This command is executed from the [Publish New Release](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/lerna-publish.yml) workflow. 
 
 ## License
 
-The Honeybadger gem is MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
-
----
-<p><a href="https://www.browserstack.com/"><img src="/browserstack-logo.png" width="150"></a><br>
- <small>We use <a href="https://www.browserstack.com/">BrowserStack</a> to run our automated integration tests on multiple platforms in CI.</small></p>
+This Honeybadger repository and published packages are MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.

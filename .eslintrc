@@ -3,7 +3,6 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:jest/recommended",
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript"
@@ -23,6 +22,8 @@
       "error",
       "always"
     ],
+    "@typescript-eslint/no-this-alias": 0,
+    "@typescript-eslint/no-empty-function": 0,
     "@typescript-eslint/no-var-requires": 0,
     "@typescript-eslint/ban-ts-comment": 0,
     "@typescript-eslint/no-unused-vars": [
@@ -32,16 +33,17 @@
       }
     ]
   },
-  "ignorePatterns": [
-    "test/integration/",
-    "dist"
-  ],
+  "settings": {
+    "import/ignore": [
+      "node_modules/react-native/index\\.js$"
+    ]
+  },
   "plugins": [
-    "@typescript-eslint",
-    "jest"
+    "@typescript-eslint"
   ],
   "env":
   {
+    "jest": true,
     "browser": true,
     "node": true,
     "es6": true,

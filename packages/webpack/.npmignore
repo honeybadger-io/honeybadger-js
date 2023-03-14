@@ -1,0 +1,10 @@
+.*rc
+.eslintignore
+.travis.yml
+test
+examples
+docs
+tmp
+coverage.lcov
+.nyc_output
+.dummy

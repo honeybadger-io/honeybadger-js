@@ -1,0 +1,24 @@
+{
+  "name": "@honeybadger-io/gatsby-plugin-honeybadger",
+  "description": "Gatsby plugin to add Honeybadger error tracking to your site.",
+  "version": "5.1.1",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/gatsby-plugin",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:honeybadger-io/honeybadger-js.git"
+  },
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "honeybadger"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "@honeybadger-io/js": "^5.1.1",
+    "@honeybadger-io/webpack": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
