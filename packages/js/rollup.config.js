@@ -39,6 +39,18 @@ export default [
     plugins: [...sharedPlugins, terser()]
   },
 
+  // Browser ESM build
+  {
+    input: 'build/src/browser.js',
+    output: {
+      name: 'Honeybadger',
+      file: pkg.module,
+      format: 'es',
+      sourcemap: true
+    },
+    plugins: sharedPlugins
+  },
+
   // Server build
   {
     input: 'build/src/server.js',
