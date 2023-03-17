@@ -52,10 +52,10 @@ declare namespace honeybadger {
        * Sets the logging level for the Honeybadger library.
        * @param {('debug'|'warning'|'error')} [level=warning] - The logging level.
        */
-    function setLogLevel(level?: "error" | "warning" | "debug"): void;
+    function setLogLevel(level?: "warning" | "debug" | "error"): void;
     /**
        * Sets the logging level for the Honeybadger library.
        * @param {('debug'|'warning'|'error')} [level=warning] - The logging level.
        */
-    function setLogLevel(level?: "error" | "warning" | "debug"): void;
+    function setLogLevel(level?: "warning" | "debug" | "error"): void;
 }
