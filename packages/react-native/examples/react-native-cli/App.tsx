@@ -6,8 +6,9 @@
  */
 
 import React, { useState } from 'react';
-import { SafeAreaView, Button, TextInput } from 'react-native';
+import { SafeAreaView, Button, TextInput, NativeModules } from 'react-native';
 import Honeybadger from '@honeybadger-io/react-native';
+const { ThrowErrModule } = NativeModules
 
 export default function App() {
   const [apiKey, setApiKey] = useState('');
@@ -21,13 +22,20 @@ export default function App() {
       debug: true,
     })
   }
+
   function onErrButtonPress() {
     throw new Error(
       'This is a test error from the react-native-cli example project!',
     );
   }
+
   function onNotifyButtonPress() {
     Honeybadger.notify(new Error('This is a test notify() from the react-native-cli example project'), {})
+  }
+
+  function onNativeErrPress() {
+    console.log('should throw a native error')
+    ThrowErrModule.throwErr('testName', 'testLocation')
   }
 
   return (
@@ -43,8 +51,9 @@ export default function App() {
         onChangeText={(text) => setRevision(text)}
       />
       <Button onPress={onConfigureButtonPress} title="Configure HB" />
-      <Button onPress={onErrButtonPress} title="Throw an error!" />
+      <Button onPress={onErrButtonPress} title="Throw a JS error!" />
       <Button onPress={onNotifyButtonPress} title="Honeybader.notify()" />
+      <Button onPress={onNativeErrPress} title="Throw a native error" />
     </SafeAreaView>
   );
 }

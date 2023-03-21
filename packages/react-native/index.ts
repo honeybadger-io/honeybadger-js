@@ -1,18 +1,35 @@
-import { Client, Util, Types } from '@honeybadger-io/core'
+import { Platform, NativeModules, NativeEventEmitter } from 'react-native';
+import { Client, Types } from '@honeybadger-io/core'
 import { Transport } from './transport'
+
+interface NativeExceptionData {
+  type: string;
+  architecture?: string;
+  name?: string;
+  reason?: string;
+  userInfo?: object;
+  callStackSymbols?: string[];
+  initialHandler?: Function;
+  reactNativeStackTrace?: string[];
+  localizedDescription?: string;
+  errorDomain?: string;
+}
 
 class Honeybadger extends Client {
   protected __jsHandlerInitialized:boolean
+  protected __nativeHandlerInitialized:boolean
   protected __originalJsHandler:Function
 
   constructor(opts: Partial<Types.Config> = {}) {
     super(opts, new Transport())
     
     this.__jsHandlerInitialized = false
+    this.__nativeHandlerInitialized = false
   }
 
   configure(opts: Partial<Types.Config> = {}): this {
     this.setJavascriptErrorHandler()
+    this.setNativeExceptionHandler()
     return super.configure(opts)
   }
 
@@ -52,6 +69,86 @@ class Honeybadger extends Client {
     })
 
     this.__jsHandlerInitialized = true
+  }
+
+  private setNativeExceptionHandler() {
+    if (this.__nativeHandlerInitialized) { return }
+
+    const HoneybadgerNativeModule = NativeModules.HoneybadgerReactNative;
+    if (!HoneybadgerNativeModule) {
+      this.logger.error('The native module was not found. Please review the installation instructions.')
+      return
+    }
+  
+    HoneybadgerNativeModule.start()
+  
+    const nativeEventEmitter = new NativeEventEmitter(HoneybadgerNativeModule)
+    nativeEventEmitter.addListener(
+      'native-exception-event', 
+      this.onNativeException.bind(this)
+    )
+
+    this.__nativeHandlerInitialized = true
+  }
+
+  private onNativeException(data:NativeExceptionData) {
+    switch ( Platform.OS ) {
+      case 'ios': 
+        this.onNativeIOSException(data)
+      break
+      case 'android': 
+        this.onNativeAndroidException(data)
+      break
+    }
+  }
+
+  /*******************************************************
+   * iOS
+   *******************************************************/
+  private onNativeIOSException(data:NativeExceptionData) {
+    // TODO add backtrace
+    this.logger.debug('\n\nNATIVE IOS EXCEPTION\n', data)
+    const notice = {
+      name: `React Native iOS ${data.type}`,
+      message: this.errorMessageFromIOSException(data),
+      details: {
+        errorDomain: data.errorDomain || '',
+        initialHandler: data.initialHandler || '',
+        userInfo: data.userInfo || {},
+        architecture: data.architecture || '',
+      },
+    }
+    this.logger.debug('\n\nNOTICE\n', notice)
+    this.notify(notice)
+  }
+
+  private errorMessageFromIOSException(data:NativeExceptionData) {
+    if ( !data ) {
+      return '';
+    }
+  
+    if (data.localizedDescription) {
+      const localizedDescription = data.localizedDescription;
+      const startOfNativeIOSCallStack = localizedDescription.indexOf('callstack: (\n');
+      if ( startOfNativeIOSCallStack === -1 ) {
+        const lines = localizedDescription.split('\n');
+        return lines.length === 0 ? localizedDescription : lines[0].trim();
+      } else {
+        return localizedDescription.substr(0, startOfNativeIOSCallStack).trim();
+      }
+    } else if (data.name || data.reason) {
+      return `${data.name} : ${data.reason}`.trim();
+    } else {
+      return ''
+    }
+  }
+
+  /*
+   * Android
+  **/
+  private onNativeAndroidException(data) {
+    // TODO
+    this.logger.debug('NATIVE ANDROID EXCEPTION', data)
   }
 }
 
