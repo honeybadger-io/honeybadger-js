@@ -5,6 +5,7 @@ import { Transport } from './transport'
 interface NativeExceptionData {
   type: string;
   architecture?: string;
+  message?: string;
   name?: string;
   reason?: string;
   userInfo?: object;
@@ -13,6 +14,12 @@ interface NativeExceptionData {
   reactNativeStackTrace?: string[];
   localizedDescription?: string;
   errorDomain?: string;
+  stackTrace?: {
+    method?: string, 
+    class?: string, 
+    line?: string, 
+    file?: string
+  }[];
 }
 
 class Honeybadger extends Client {
@@ -91,7 +98,12 @@ class Honeybadger extends Client {
     this.__nativeHandlerInitialized = true
   }
 
+  // TODO: The delayed android exception is correctly collected
+  // however the immediate exception is not. This appears to be the 
+  // same in the currently published package... so not an issue I
+  // created here but still concerning. 
   private onNativeException(data:NativeExceptionData) {
+    this.logger.debug(`Native exception on ${Platform.OS}:`, data)
     switch ( Platform.OS ) {
       case 'ios': 
         this.onNativeIOSException(data)
@@ -144,8 +156,40 @@ class Honeybadger extends Client {
    * Android
    *******************************************************/
   private onNativeAndroidException(data:NativeExceptionData) {
-    // TODO
-    this.logger.debug('NATIVE ANDROID EXCEPTION', data)
+    const notice = {
+      name: `React Native Android ${data.type}`,
+      message: data.message || '',
+      details: {
+        errorDomain: data.errorDomain || '',
+        initialHandler: data.initialHandler || '',
+        userInfo: data.userInfo || {},
+        architecture: data.architecture || '',
+      },
+      // TODO - the client is using makeNotice, which
+      // makes a backtrace array from a stack string. 
+      // we want to pass backtrace array directly
+      backtrace: this.backTraceFromAndroidException(data)
+    }
+    this.notify(notice)
+  }
+
+  private backTraceFromAndroidException(data:NativeExceptionData) {
+    if ( !data || !data.stackTrace ) return []
+
+    function isStringWithValue(val:unknown):Boolean {
+      return typeof val === 'string' && val.trim().length > 0;
+    }
+
+    return data.stackTrace.map((frame) => {
+      const method = (isStringWithValue(frame.class) && isStringWithValue(frame.method)) 
+        ? `${frame.class}.${frame.method}` 
+        : frame.method;
+      return {
+        method: method || '',
+        file: frame.file || '',
+        number: frame.line || ''
+      }
+    })
   }
 }
 
