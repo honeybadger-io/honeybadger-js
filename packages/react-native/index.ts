@@ -106,8 +106,6 @@ class Honeybadger extends Client {
    * iOS
    *******************************************************/
   private onNativeIOSException(data:NativeExceptionData) {
-    // TODO add backtrace
-    this.logger.debug('\n\nNATIVE IOS EXCEPTION\n', data)
     const notice = {
       name: `React Native iOS ${data.type}`,
       message: this.errorMessageFromIOSException(data),
@@ -118,7 +116,6 @@ class Honeybadger extends Client {
         architecture: data.architecture || '',
       },
     }
-    this.logger.debug('\n\nNOTICE\n', notice)
     this.notify(notice)
   }
 
@@ -134,7 +131,7 @@ class Honeybadger extends Client {
         const lines = localizedDescription.split('\n');
         return lines.length === 0 ? localizedDescription : lines[0].trim();
       } else {
-        return localizedDescription.substr(0, startOfNativeIOSCallStack).trim();
+        return localizedDescription.substring(0, startOfNativeIOSCallStack).trim();
       }
     } else if (data.name || data.reason) {
       return `${data.name} : ${data.reason}`.trim();
@@ -143,10 +140,10 @@ class Honeybadger extends Client {
     }
   }
 
-  /*
+  /*******************************************************
    * Android
-  **/
-  private onNativeAndroidException(data) {
+   *******************************************************/
+  private onNativeAndroidException(data:NativeExceptionData) {
     // TODO
     this.logger.debug('NATIVE ANDROID EXCEPTION', data)
   }

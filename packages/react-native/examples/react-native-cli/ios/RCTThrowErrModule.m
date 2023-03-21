@@ -15,12 +15,9 @@
 // To export a module named RCTThrowErrModule
 RCT_EXPORT_MODULE();
 
-RCT_EXPORT_METHOD(throwErr:(NSString *)name location:(NSString *)location)
+RCT_EXPORT_METHOD(throwErr)
 {
-  RCTLogInfo(@"Throwing an error %@ at %@", name, location);
-//  This causes an error
-  NSArray *array = @[];
-  array[1];
+    @throw [NSException exceptionWithName:@"Sample_iOS_Exception" reason:@"Testing native iOS exception" userInfo:nil];
 }
 
 

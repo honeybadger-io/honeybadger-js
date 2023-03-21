@@ -35,7 +35,7 @@ export default function App() {
 
   function onNativeErrPress() {
     console.log('should throw a native error')
-    ThrowErrModule.throwErr('testName', 'testLocation')
+    ThrowErrModule.throwErr()
   }
 
   return (
