@@ -23,6 +23,9 @@ public class ThrowErrModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void throwErr() {
+//        This delayed error ends up caught and sent to Honeybadger
+//        in my current version of the code, as well as the existing
+//        published package.
         final Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(new Runnable() {
             public void run() {
@@ -31,6 +34,12 @@ public class ThrowErrModule extends ReactContextBaseJavaModule {
             }
         }, 5000);
 
+//        ****************************
+//        TODO: This direct throw does not get captured by either my current code
+//        or the existing published package. Why?
+//        The error shows up in the android simulator UI, however
+//        the javascript listener for 'native-exception-event' is not triggered
+//        ***************************
 //         throw new RuntimeException("Sample_Android_Exception");
     }
 
