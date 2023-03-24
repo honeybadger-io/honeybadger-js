@@ -314,12 +314,15 @@ export abstract class Client {
       tags: uniqueTags,
     })
 
-    if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
-      notice.stack = generateStackTrace()
-      notice.backtrace = makeBacktrace(notice.stack, true, this.logger)
-    }
-    else {
-      notice.backtrace = makeBacktrace(notice.stack, false, this.logger)
+    // If we're passed a custom backtrace array, use it
+    // Otherwise we make one. 
+    if (!Array.isArray(notice.backtrace) || !notice.backtrace.length) {
+      if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
+        notice.stack = generateStackTrace()
+        notice.backtrace = makeBacktrace(notice.stack, true, this.logger)
+      } else {
+        notice.backtrace = makeBacktrace(notice.stack, false, this.logger)
+      }
     }
 
     return notice as Notice

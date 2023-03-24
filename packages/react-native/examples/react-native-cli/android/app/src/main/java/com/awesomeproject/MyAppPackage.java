@@ -27,4 +27,3 @@ public class MyAppPackage implements ReactPackage {
 
 }
 
-

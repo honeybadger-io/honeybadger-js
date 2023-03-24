@@ -330,6 +330,48 @@ describe('client', function () {
   })
 
   describe('backtrace', function () {
+    it('uses the passed-in backtrace if there is one', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const payload = client.getPayload({
+        name: 'TestError', 
+        message: 'I have a custom backtrace', 
+        backtrace: [{
+          file: 'foo.js', 
+          method: 'doStuff', 
+          number: 3, 
+          column: 23,
+        }]
+      })
+
+      expect(payload.error.backtrace.length).toBe(1)
+      expect(payload.error.backtrace[0].file).toBe('foo.js')
+    })
+
+    it('generates a backtrace when existing one is not an array or empty', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const stringBacktracePayload = client.getPayload({
+        name: 'TestError', 
+        message: 'I have a custom backtrace', 
+        // @ts-expect-error
+        backtrace: 'oops this should not be a string',
+      })
+
+      const emptyBacktracePayload = client.getPayload({
+        name: 'TestError', 
+        message: 'I have a custom backtrace', 
+        backtrace: [],
+      })
+
+      expect(stringBacktracePayload.error.backtrace[0].file).toMatch('client.test.ts')
+      expect(emptyBacktracePayload.error.backtrace[0].file).toMatch('client.test.ts')
+    })
+
     it('generates a backtrace when there isn\'t one', function () {
       client.configure({
         apiKey: 'testing'
