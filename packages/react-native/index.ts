@@ -1,26 +1,8 @@
 import { Platform, NativeModules, NativeEventEmitter } from 'react-native';
 import { Client, Types } from '@honeybadger-io/core'
 import { Transport } from './transport'
-
-interface NativeExceptionData {
-  type: string;
-  architecture?: string;
-  message?: string;
-  name?: string;
-  reason?: string;
-  userInfo?: object;
-  callStackSymbols?: string[];
-  initialHandler?: Function;
-  reactNativeStackTrace?: string[];
-  localizedDescription?: string;
-  errorDomain?: string;
-  stackTrace?: {
-    method?: string, 
-    class?: string, 
-    line?: string, 
-    file?: string
-  }[];
-}
+import { backtraceAndDetailsFromIosException, errorMessageFromIosException } from './iosUtils'
+import { NativeExceptionData } from './types'
 
 class Honeybadger extends Client {
   protected __jsHandlerInitialized:boolean
@@ -98,10 +80,6 @@ class Honeybadger extends Client {
     this.__nativeHandlerInitialized = true
   }
 
-  // TODO: The delayed android exception is correctly collected
-  // however the immediate exception is not. This appears to be the 
-  // same in the currently published package... so not an issue I
-  // created here but still concerning. 
   private onNativeException(data:NativeExceptionData) {
     this.logger.debug(`Native exception on ${Platform.OS}:`, data)
     switch ( Platform.OS ) {
@@ -118,38 +96,20 @@ class Honeybadger extends Client {
    * iOS
    *******************************************************/
   private onNativeIOSException(data:NativeExceptionData) {
+    const { backtrace, backtraceDetails } = backtraceAndDetailsFromIosException(data)
     const notice = {
       name: `React Native iOS ${data.type}`,
-      message: this.errorMessageFromIOSException(data),
+      message: errorMessageFromIosException(data),
+      backtrace,
       details: {
         errorDomain: data.errorDomain || '',
         initialHandler: data.initialHandler || '',
         userInfo: data.userInfo || {},
         architecture: data.architecture || '',
+        ...backtraceDetails
       },
     }
     this.notify(notice)
-  }
-
-  private errorMessageFromIOSException(data:NativeExceptionData) {
-    if ( !data ) {
-      return '';
-    }
-  
-    if (data.localizedDescription) {
-      const localizedDescription = data.localizedDescription;
-      const startOfNativeIOSCallStack = localizedDescription.indexOf('callstack: (\n');
-      if ( startOfNativeIOSCallStack === -1 ) {
-        const lines = localizedDescription.split('\n');
-        return lines.length === 0 ? localizedDescription : lines[0].trim();
-      } else {
-        return localizedDescription.substring(0, startOfNativeIOSCallStack).trim();
-      }
-    } else if (data.name || data.reason) {
-      return `${data.name} : ${data.reason}`.trim();
-    } else {
-      return ''
-    }
   }
 
   /*******************************************************
@@ -165,15 +125,12 @@ class Honeybadger extends Client {
         userInfo: data.userInfo || {},
         architecture: data.architecture || '',
       },
-      // TODO - the client is using makeNotice, which
-      // makes a backtrace array from a stack string. 
-      // we want to pass backtrace array directly
-      backtrace: this.backTraceFromAndroidException(data)
+      backtrace: this.backtraceFromAndroidException(data)
     }
     this.notify(notice)
   }
 
-  private backTraceFromAndroidException(data:NativeExceptionData) {
+  private backtraceFromAndroidException(data:NativeExceptionData) {
     if ( !data || !data.stackTrace ) return []
 
     function isStringWithValue(val:unknown):Boolean {
