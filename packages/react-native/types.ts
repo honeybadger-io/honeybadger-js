@@ -1,3 +1,4 @@
+// TODO: This could probably be split into Android and IOS data types
 export interface NativeExceptionData {
   type: string;
   architecture?: string;

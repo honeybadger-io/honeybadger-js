@@ -2,6 +2,7 @@ import { Platform, NativeModules, NativeEventEmitter } from 'react-native';
 import { Client, Types } from '@honeybadger-io/core'
 import { Transport } from './transport'
 import { backtraceAndDetailsFromIosException, errorMessageFromIosException } from './iosUtils'
+import { backtraceFromAndroidException } from './androidUtils'
 import { NativeExceptionData } from './types'
 
 class Honeybadger extends Client {
@@ -43,15 +44,11 @@ class Honeybadger extends Client {
 
     ErrorUtils.setGlobalHandler((err, isFatal) => {
       this.logger.debug('JavaScript global error handler triggered.')
-      // TODO: original version added some info in onJavascriptError
-      // check if we are losing anything important in formatting the error
-      // eg do we want the errorClass to look like "React Native iOs Error"
-      // (I'd lean toward leaving it this way)
       this.notify(err)
 
       // Allowing the default error handler to process the error after
       // we're done with it will show the useful RN red info box in dev.
-      if ( this.__originalJsHandler ) {
+      if (this.__originalJsHandler) {
         this.logger.debug('Passing error to previous error handler.')
         this.__originalJsHandler(err, isFatal)
       }
@@ -81,7 +78,6 @@ class Honeybadger extends Client {
   }
 
   private onNativeException(data:NativeExceptionData) {
-    this.logger.debug(`Native exception on ${Platform.OS}:`, data)
     switch ( Platform.OS ) {
       case 'ios': 
         this.onNativeIOSException(data)
@@ -92,9 +88,6 @@ class Honeybadger extends Client {
     }
   }
 
-  /*******************************************************
-   * iOS
-   *******************************************************/
   private onNativeIOSException(data:NativeExceptionData) {
     const { backtrace, backtraceDetails } = backtraceAndDetailsFromIosException(data)
     const notice = {
@@ -112,9 +105,6 @@ class Honeybadger extends Client {
     this.notify(notice)
   }
 
-  /*******************************************************
-   * Android
-   *******************************************************/
   private onNativeAndroidException(data:NativeExceptionData) {
     const notice = {
       name: `React Native Android ${data.type}`,
@@ -125,28 +115,9 @@ class Honeybadger extends Client {
         userInfo: data.userInfo || {},
         architecture: data.architecture || '',
       },
-      backtrace: this.backtraceFromAndroidException(data)
+      backtrace: backtraceFromAndroidException(data)
     }
     this.notify(notice)
-  }
-
-  private backtraceFromAndroidException(data:NativeExceptionData) {
-    if ( !data || !data.stackTrace ) return []
-
-    function isStringWithValue(val:unknown):Boolean {
-      return typeof val === 'string' && val.trim().length > 0;
-    }
-
-    return data.stackTrace.map((frame) => {
-      const method = (isStringWithValue(frame.class) && isStringWithValue(frame.method)) 
-        ? `${frame.class}.${frame.method}` 
-        : frame.method;
-      return {
-        method: method || '',
-        file: frame.file || '',
-        number: frame.line || ''
-      }
-    })
   }
 }
 
