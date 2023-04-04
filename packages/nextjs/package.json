@@ -13,7 +13,7 @@
     "email": "pangratios.cosma@honeybadger.io"
   },
   "homepage": "https://github.com/honeybadger-io/honeybadger-js/packages/nextjs#readme",
-  "license": "ISC",
+  "license": "MIT",
   "main": "dist/honeybadger-nextjs.cjs.js",
   "module": "dist/honeybadger-nextjs.esm.js",
   "types": "./dist/index.d.ts",
@@ -34,7 +34,8 @@
   "peerDependencies": {
     "next": "13.x",
     "@honeybadger-io/js": "5.x",
-    "@honeybadger-io/react": "5.x"
+    "@honeybadger-io/react": "5.x",
+    "@honeybadger-io/webpack": "5.x"
   },
   "dependencies": {
   },
