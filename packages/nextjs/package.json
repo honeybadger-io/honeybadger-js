@@ -19,7 +19,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "src"
+    "src",
+    "templates"
   ],
   "repository": {
     "type": "git",
@@ -33,11 +34,11 @@
   },
   "peerDependencies": {
     "next": "13.x",
-    "@honeybadger-io/js": "5.x",
-    "@honeybadger-io/react": "5.x",
-    "@honeybadger-io/webpack": "5.x"
+    "@honeybadger-io/react": "5.x"
   },
   "dependencies": {
+    "@honeybadger-io/js": "5.2.0",
+    "@honeybadger-io/webpack": "5.1.7"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.0",
