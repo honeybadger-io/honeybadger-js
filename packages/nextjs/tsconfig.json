@@ -19,8 +19,7 @@
     ],
     "allowJs": true,
     "noFallthroughCasesInSwitch": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "resolveJsonModule": true
   },
   "exclude": [
     "node_modules"

@@ -22,6 +22,9 @@
     "src",
     "templates"
   ],
+  "bin": {
+    "honeybadger-copy-config-files": "dist/copy-config-files.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/honeybadger-io/honeybadger-js.git"
@@ -42,6 +45,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.0",
+    "rollup-plugin-copy": "^3.4.0",
     "rollup": "^2.70.2",
     "typescript": "^4.6.3",
     "next": "^13.2.3"
