@@ -151,28 +151,19 @@ function getHoneybadgerConfigFile(projectDir: string, configType: NextJsRuntime)
 }
 
 function getWebpackPluginOptions(honeybadgerNextJsConfig: HoneybadgerNextJsConfig): HoneybadgerWebpackPluginOptions | null {
-  const apiKey = honeybadgerNextJsConfig.apiKey || process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY
+  const apiKey = honeybadgerNextJsConfig.webpackPluginOptions?.apiKey || process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY
   const assetsUrl = honeybadgerNextJsConfig.webpackPluginOptions?.assetsUrl || process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL
   if (!apiKey || !assetsUrl) {
     log('error', 'Missing Honeybadger required configuration for webpack plugin. Source maps will not be uploaded to Honeybadger.')
-    
+
     return null
   }
 
-  const { endpoint, ignoreErrors, retries, workerCount, deploy } = honeybadgerNextJsConfig.webpackPluginOptions || {}
-
   return {
+    ...honeybadgerNextJsConfig.webpackPluginOptions,
     apiKey,
     assetsUrl,
-    revision: honeybadgerNextJsConfig.revision || process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
+    revision: honeybadgerNextJsConfig.webpackPluginOptions?.revision || process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
     silent: _silent,
-    endpoint,
-    ignoreErrors,
-    retries,
-    workerCount,
-    deploy: deploy ? {
-      ...deploy,
-      environment: honeybadgerNextJsConfig.environment || process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || process.env.NODE_ENV
-    } : false,
   }
 }
