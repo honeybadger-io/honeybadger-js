@@ -23,6 +23,7 @@ This version is considered suitable for preview.
 ## Features
 
 - Automatic reporting of uncaught exceptions (see [Limitations](#limitations))
+- Breadcrumbs
 - Source map upload to Honeybadger
 - CLI command to generate Honeybadger configuration files for Next.js runtimes
 
