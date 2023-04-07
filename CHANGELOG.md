@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.7...v5.2.0) (2023-03-27)
+
+
+### Features
+
+* **core:** accept a backtrace passed in the notice ([#1049](https://github.com/honeybadger-io/honeybadger-js/issues/1049)) ([9c56a9f](https://github.com/honeybadger-io/honeybadger-js/commit/9c56a9f41deec7d8a655c770b4a8ca03ca56b177))
+
+
+
+## [5.1.7](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.6...v5.1.7) (2023-03-20)
+
+**Note:** Version bump only for package root
+
+
+
+
+
 ## [5.1.6](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.5...v5.1.6) (2023-03-14)
 
 **Note:** Version bump only for package root
