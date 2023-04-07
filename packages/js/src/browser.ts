@@ -60,7 +60,7 @@ class Honeybadger extends Client {
   ]
 
   protected __afterNotifyHandlers: Types.AfterNotifyHandler[] = [
-    (_error: any, notice?: Types.Notice) => {
+    (_error?: unknown, notice?: Types.Notice) => {
       if (notice) {
         this.__lastNoticeId = notice.id
       }

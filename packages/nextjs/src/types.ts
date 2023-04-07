@@ -1,16 +1,8 @@
 export type NextJsRuntime = 'server' | 'browser' | 'edge'
 export type HoneybadgerNextJsConfig = {
-    apiKey: string
     disableSourceMapUpload: boolean
     silent: boolean
-    environment?: string
-    revision?: string
-    webpackPluginOptions: Pick<HoneybadgerWebpackPluginOptions, 'assetsUrl' | 'endpoint' | 'ignoreErrors' | 'retries' | 'workerCount'> & {
-        deploy?: false | {
-            repository?: string,
-            localUsername?: string,
-        }
-    }
+    webpackPluginOptions: Omit<HoneybadgerWebpackPluginOptions, 'silent'>
 }
 
 // this should be in @honeybadger-io/webpack
