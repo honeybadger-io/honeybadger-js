@@ -37,7 +37,7 @@ The following limitations are known to exist and will be tackled in future relea
   This is a limitation of Next.js, not Honeybadger's Next.js integration.
   Errors thrown in middlewares or API routes will not be reported to Honeybadger, since when they reach _error.js, the response status code is 404 and no error information is available.
   Additionally, there is an open [issue](https://github.com/vercel/next.js/issues/45535) about 404 being reported with Next.js apps deployed on Vercel, when they should be reported as 500.
-- [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1056):Source maps for [Vercel's Edge runtime](https://vercel.com/docs/concepts/functions/edge-functions/edge-runtime) are not supported yet.
+- [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1056):Source maps for the [Edge runtime](https://vercel.com/docs/concepts/functions/edge-functions/edge-runtime) are not supported yet.
 
 ## Example app
 
