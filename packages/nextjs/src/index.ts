@@ -1,8 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import Honeybadger from '@honeybadger-io/js';
 import HoneybadgerSourceMapPlugin from '@honeybadger-io/webpack'
-import type { WebpackConfigContext } from 'next/dist/server/config-shared';
+import type { WebpackConfigContext } from 'next/dist/server/config-shared'
 import { HoneybadgerNextJsConfig, NextJsRuntime, HoneybadgerWebpackPluginOptions } from './types'
 
 let _silent = true
