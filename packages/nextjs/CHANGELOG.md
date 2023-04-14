@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.3.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.0...v5.3.1) (2023-04-14)
+
+
+### Bug Fixes
+
+* **nextjs:** copy _error.js component ([2fa5c7d](https://github.com/honeybadger-io/honeybadger-js/commit/2fa5c7dcb98cebd71998459b55d9cd59778c72c1))
+
+
+
 ## [5.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.2.0...v5.3.0) (2023-04-14)
 
 
