@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.3.2](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.1...v5.3.2) (2023-04-14)
+
+
+### Bug Fixes
+
+* **nextjs:** move notify logic in _error.js ([0179ec4](https://github.com/honeybadger-io/honeybadger-js/commit/0179ec48db25760378342411bb3271272701a435))
+
+
+
 ## [5.3.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.0...v5.3.1) (2023-04-14)
 
 
