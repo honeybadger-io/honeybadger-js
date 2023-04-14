@@ -12,7 +12,7 @@
     "name": "Pangratios Cosma",
     "email": "pangratios.cosma@honeybadger.io"
   },
-  "homepage": "https://github.com/honeybadger-io/honeybadger-js/packages/nextjs#readme",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/nextjs",
   "license": "MIT",
   "main": "dist/honeybadger-nextjs.cjs.js",
   "module": "dist/honeybadger-nextjs.esm.js",
