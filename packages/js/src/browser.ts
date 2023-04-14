@@ -60,7 +60,7 @@ class Honeybadger extends Client {
   ]
 
   protected __afterNotifyHandlers: Types.AfterNotifyHandler[] = [
-    (_error: any, notice?: Types.Notice) => {
+    (_error?: unknown, notice?: Types.Notice) => {
       if (notice) {
         this.__lastNoticeId = notice.id
       }
@@ -157,7 +157,10 @@ class Honeybadger extends Client {
       HTTP_COOKIE: undefined
     }
 
-    cgiData.HTTP_USER_AGENT = navigator.userAgent
+    if (typeof navigator !== 'undefined' && navigator.userAgent) {
+      cgiData.HTTP_USER_AGENT = navigator.userAgent
+    }
+
     if (typeof document !== 'undefined' && document.referrer.match(/\S/)) {
       cgiData.HTTP_REFERER = document.referrer
     }
