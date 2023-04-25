@@ -10,9 +10,9 @@ export default function honeybadgerRollupPlugin(
   const hbOptions = cleanOptions(options)
 
   return {
-    name: 'honeybadger', 
+    name: 'honeybadger',
     writeBundle: async (
-      outputOptions: NormalizedOutputOptions, 
+      outputOptions: NormalizedOutputOptions,
       bundle: OutputBundle
     ) => {
       if (isNonProdEnv()) {
@@ -22,7 +22,7 @@ export default function honeybadgerRollupPlugin(
         return
       }
 
-      const sourcemapData = extractSourcemapDataFromBundle(outputOptions, bundle)
+      const sourcemapData = extractSourcemapDataFromBundle(outputOptions, bundle, hbOptions.ignorePaths)
       await uploadSourcemaps(sourcemapData, hbOptions)
 
       if (hbOptions.deploy) {

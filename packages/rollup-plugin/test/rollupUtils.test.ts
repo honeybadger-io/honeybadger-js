@@ -7,33 +7,55 @@ import * as td from 'testdouble'
 
 describe('extractSourcemapDataFromBundle', () => {
   const outputOptions = td.object<NormalizedOutputOptions>()
-  outputOptions.dir = 'dist' 
+  outputOptions.dir = 'dist'
 
   it('should return an array with sourcemap file data', () => {
-    const data = extractSourcemapDataFromBundle(outputOptions, bundle)
+    const data = extractSourcemapDataFromBundle(outputOptions, bundle, [])
     expect(data).to.be.an('array').lengthOf(3)
     expect(data).to.have.deep.members([
       {
-        sourcemapFilename: 'index.js.map', 
-        sourcemapFilePath: path.resolve('dist/index.js.map'), 
-        jsFilename: 'index.js', 
+        sourcemapFilename: 'index.js.map',
+        sourcemapFilePath: path.resolve('dist/index.js.map'),
+        jsFilename: 'index.js',
         jsFilePath: path.resolve('dist/index.js')
-      }, 
+      },
       {
-        sourcemapFilename: 'foo.js.map', 
-        sourcemapFilePath: path.resolve('dist/foo.js.map'), 
-        jsFilename: 'foo.js', 
+        sourcemapFilename: 'foo.js.map',
+        sourcemapFilePath: path.resolve('dist/foo.js.map'),
+        jsFilename: 'foo.js',
         jsFilePath: path.resolve('dist/foo.js')
       },
       {
-        sourcemapFilename: 'subfolder/bar.js.map', 
-        sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'), 
-        jsFilename: 'subfolder/bar.js', 
+        sourcemapFilename: 'subfolder/bar.js.map',
+        sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'),
+        jsFilename: 'subfolder/bar.js',
         jsFilePath: path.resolve('dist/subfolder/bar.js')
       },
     ])
   })
-});
+
+  const itEach = ['foo.js', /foo.js/, 'foo.*', /foo.*/]
+  for (const ignorePath of itEach) {
+    it(`should ignore files that match the ignorePaths ${ignorePath}`, () => {
+      const data = extractSourcemapDataFromBundle(outputOptions, bundle, [ignorePath])
+      expect(data).to.be.an('array').lengthOf(2)
+      expect(data).to.have.deep.members([
+        {
+          sourcemapFilename: 'index.js.map',
+          sourcemapFilePath: path.resolve('dist/index.js.map'),
+          jsFilename: 'index.js',
+          jsFilePath: path.resolve('dist/index.js')
+        },
+        {
+          sourcemapFilename: 'subfolder/bar.js.map',
+          sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'),
+          jsFilename: 'subfolder/bar.js',
+          jsFilePath: path.resolve('dist/subfolder/bar.js')
+        },
+      ])
+    })
+  }
+})
 
 describe('isNonProdEnv', () => {
   let restore

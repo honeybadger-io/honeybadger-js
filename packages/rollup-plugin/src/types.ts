@@ -6,7 +6,8 @@ export interface HbPluginOptions {
   revision: string;
   silent: boolean;
   deployEndpoint: string;
-  deploy: boolean | Deploy
+  deploy: boolean | Deploy;
+  ignorePaths: Array<string | RegExp>;
 }
 
 export interface Deploy {
