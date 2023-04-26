@@ -11,7 +11,7 @@ class Honeybadger extends Client {
   protected __originalJsHandler:Function
 
   constructor(opts: Partial<Types.Config> = {}) {
-    super(opts, new Transport())
+    super(mergeDefaultOpts(opts), new Transport())
     
     this.__jsHandlerInitialized = false
     this.__nativeHandlerInitialized = false
@@ -20,7 +20,7 @@ class Honeybadger extends Client {
   configure(opts: Partial<Types.Config> = {}): this {
     this.setJavascriptErrorHandler()
     this.setNativeExceptionHandler()
-    return super.configure(opts)
+    return super.configure(mergeDefaultOpts(opts))
   }
 
   factory(opts?: Partial<Types.BrowserConfig>): this {
@@ -118,6 +118,13 @@ class Honeybadger extends Client {
       backtrace: backtraceFromAndroidException(data)
     }
     this.notify(notice)
+  }
+}
+
+function mergeDefaultOpts(opts) {
+  return {
+    environment: __DEV__ ? "development" : "production", 
+    ...opts
   }
 }
 

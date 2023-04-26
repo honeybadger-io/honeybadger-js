@@ -20,6 +20,7 @@ export default function App() {
       apiKey, 
       revision,
       debug: true,
+      reportData: true, // report data even in dev environment
     })
   }
 
