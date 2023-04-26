@@ -36,8 +36,24 @@ jobs:
     - name: Run unit tests
       run: npm test
 
+  changes:
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      core: ${{ steps.filter.outputs.core }}
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            core:
+              - 'packages/core/**'
+              - 'packages/js/**'
+
   integration:
     # integration tests from "js" package fail if they are executed at the same time
+    needs: changes
+    if: needs.changes.outputs.core == 'true'
     concurrency: js-concurrency
     runs-on: ubuntu-latest
     steps:
