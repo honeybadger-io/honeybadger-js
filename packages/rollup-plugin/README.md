@@ -43,7 +43,7 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   </dd>
 
   <dt><code>ignorePaths</code> (optional &mdash; default: [])</dt>
-  <dd>An array of paths to ignore when uploading sourcemaps. Regex is also supported.
+  <dd>An array of paths (glob patterns) to ignore when uploading sourcemaps. Uses <a href="https://github.com/micromatch/picomatch">picomatch</a> to match against paths. 
   </dd>
 
   <dt><code>deployEndpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/deploys")</dt>

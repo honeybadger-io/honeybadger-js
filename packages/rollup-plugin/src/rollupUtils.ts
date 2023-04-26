@@ -1,4 +1,5 @@
 import path from 'node:path'
+import picomatch from 'picomatch'
 
 import type { OutputBundle, OutputAsset, OutputChunk, NormalizedOutputOptions } from 'rollup'
 import type { SourcemapInfo } from './types'
@@ -31,12 +32,8 @@ function isSourcemap(file: OutputAsset | OutputChunk): file is OutputAsset {
 
 function isNotIgnored(sourceMapInfo: SourcemapInfo, ignorePaths: Array<string | RegExp>) {
   for (const ignorePath of ignorePaths) {
-    let regex = ignorePath
-    if (!(regex instanceof RegExp)) {
-      regex = new RegExp(regex)
-    }
-
-    if (regex.test(sourceMapInfo.jsFilePath)) {
+    const isMatch = picomatch.isMatch(sourceMapInfo.jsFilePath, ignorePath, { basename: true })
+    if (isMatch) {
       return false
     }
   }

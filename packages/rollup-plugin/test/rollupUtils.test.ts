@@ -34,9 +34,9 @@ describe('extractSourcemapDataFromBundle', () => {
     ])
   })
 
-  const itEach = ['foo.js', /foo.js/, 'foo.*', /foo.*/]
+  const itEach = ['foo.js', '**/foo.js', 'foo.*', '**/foo.*', 'foo.js*', '**/foo.js*']
   for (const ignorePath of itEach) {
-    it(`should ignore files that match the ignorePaths ${ignorePath}`, () => {
+    it(`should ignore files that match the ignorePath ${ignorePath}`, () => {
       const data = extractSourcemapDataFromBundle(outputOptions, bundle, [ignorePath])
       expect(data).to.be.an('array').lengthOf(2)
       expect(data).to.have.deep.members([
@@ -61,7 +61,7 @@ describe('extractSourcemapDataFromBundle', () => {
     expect(bundle['empty.js.map']).to.deep.equal({
       fileName: 'empty.js.map',
       name: undefined,
-      source: '{"version":3,"file":"empty.js","sources":[], "sourcesContent": [], "names":[],"mappings":""}',
+      source: '{"version":3,"file":"empty.sass","sources":[], "sourcesContent": [], "names":[],"mappings":""}',
       type: 'asset' as const,
       needsCodeReference: false,
     })

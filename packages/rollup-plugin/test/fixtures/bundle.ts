@@ -103,6 +103,35 @@ const chunks = {
       'module.exports = bar;\n',
     map: null
   },
+  'empty.sass': {
+    exports: [ 'default' ],
+    facadeModuleId: '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/empty.sass',
+    isDynamicEntry: false,
+    isEntry: false,
+    isImplicitEntry: false,
+    moduleIds: [
+      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/empty.sass'
+    ],
+    name: 'empty',
+    type: 'chunk' as const,
+    dynamicImports: [],
+    fileName: 'empty.sass',
+    implicitlyLoadedBefore: [],
+    importedBindings: {},
+    imports: [],
+    modules: {
+      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/empty.sass': {
+        'code': 'color: blue;',
+        'originalLength': 12,
+        'removedExports': [],
+        'renderedExports': ['default'],
+        'renderedLength': 12
+      }
+    },
+    referencedFiles: [],
+    code: 'color: blue;',
+    map: null
+  },
 }
 
 const assets = {
@@ -130,7 +159,7 @@ const assets = {
   'empty.js.map': {
     fileName: 'empty.js.map',
     name: undefined,
-    source: '{"version":3,"file":"empty.js","sources":[], "sourcesContent": [], "names":[],"mappings":""}',
+    source: '{"version":3,"file":"empty.sass","sources":[], "sourcesContent": [], "names":[],"mappings":""}',
     type: 'asset' as const,
     needsCodeReference: false
   }
