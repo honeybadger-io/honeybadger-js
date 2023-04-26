@@ -110,7 +110,7 @@ const assets = {
     fileName: 'index.js.map',
     name: undefined,
     source: '{"version":3,"file":"index.js","sources":["../src/index.js"],"sourcesContent":["import foo from \'./foo.js\';\\nimport bar from \'./subfolder/bar.js\'\\n\\nexport default function () {\\n  console.log(foo)\\n  console.log(bar)\\n}"],"names":[],"mappings":";;;;;AAGe,cAAQ,IAAI;AAC3B,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB;;;;"}',
-    type: 'asset' as const, 
+    type: 'asset' as const,
     needsCodeReference: false
   },
   'subfolder/bar.js.map': {
@@ -126,8 +126,15 @@ const assets = {
     source: '{"version":3,"file":"foo.js","sources":["../src/foo.js"],"sourcesContent":["export default \'hello world!\'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}',
     type: 'asset' as const,
     needsCodeReference: false
+  },
+  'empty.js.map': {
+    fileName: 'empty.js.map',
+    name: undefined,
+    source: '{"version":3,"file":"empty.js","sources":[], "sourcesContent": [], "names":[],"mappings":""}',
+    type: 'asset' as const,
+    needsCodeReference: false
   }
-} 
+}
 
 
 export default { ...chunks, ...assets }

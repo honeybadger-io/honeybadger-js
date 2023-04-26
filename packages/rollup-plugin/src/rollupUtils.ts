@@ -26,7 +26,7 @@ function isSourcemap(file: OutputAsset | OutputChunk): file is OutputAsset {
   const source = typeof file.source === 'string' ? file.source : file.source.toString()
   const json = JSON.parse(source)
 
-  return json.sourcesContent && json.sourcesContent.length > 0
+  return !!json.sourcesContent && json.sourcesContent.length > 0
 }
 
 function isNotIgnored(sourceMapInfo: SourcemapInfo, ignorePaths: Array<string | RegExp>) {

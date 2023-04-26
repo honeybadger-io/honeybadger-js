@@ -55,6 +55,28 @@ describe('extractSourcemapDataFromBundle', () => {
       ])
     })
   }
+
+  it('should ignore files with empty sourcesContent', () => {
+    expect(bundle).to.include.keys(['empty.js.map'])
+    expect(bundle['empty.js.map']).to.deep.equal({
+      fileName: 'empty.js.map',
+      name: undefined,
+      source: '{"version":3,"file":"empty.js","sources":[], "sourcesContent": [], "names":[],"mappings":""}',
+      type: 'asset' as const,
+      needsCodeReference: false,
+    })
+
+    const data = extractSourcemapDataFromBundle(outputOptions, bundle, [])
+    expect(data).to.be.an('array').lengthOf(3)
+    expect(data).to.not.have.deep.members([
+      {
+        sourcemapFilename: 'empty.js.map',
+        sourcemapFilePath: path.resolve('dist/empty.js.map'),
+        jsFilename: 'empty.js',
+        jsFilePath: path.resolve('dist/empty.js')
+      },
+    ])
+  })
 })
 
 describe('isNonProdEnv', () => {
