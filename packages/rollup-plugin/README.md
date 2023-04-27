@@ -42,6 +42,13 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   <dd>This package implements fetch retry functionality via the <a href="https://github.com/vercel/fetch-retry">fetch-retry</a> package. Retrying helps fix issues like `ECONNRESET` and `SOCKETTIMEOUT` errors.
   </dd>
 
+  <dt><code>ignorePaths</code> (optional &mdash; default: [])</dt>
+  <dd>An array of paths (glob patterns) to ignore when uploading sourcemaps. Uses <a href="https://github.com/micromatch/picomatch">picomatch</a> to match against paths. 
+  </dd>
+
+  <dt><code>deployEndpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/deploys")</dt>
+  <dd>Where to send deployment notifications.</dd>
+
   <dt><code>deploy</code> (optional &mdash; default: false)</dt>
   <dd>
   Configuration for <a href="https://docs.honeybadger.io/api/reporting-deployments/">deployment notifications</a>. To disable deployment notifications, ignore this option. To enable deployment notifications, set this to <code>true</code>, or to an object containing any of the fields below. Your deploy's <code>revision</code> will be set to the same value as for your sourcemaps (see above). 

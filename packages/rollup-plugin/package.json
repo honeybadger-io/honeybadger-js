@@ -46,7 +46,8 @@
   "dependencies": {
     "fetch-retry": "^5.0.3",
     "form-data": "^4.0.0",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.9",
+    "picomatch": "^2.3.1"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
