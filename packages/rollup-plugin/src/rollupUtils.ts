@@ -10,7 +10,7 @@ import type { SourcemapInfo } from './types'
 export function extractSourcemapDataFromBundle (
   outputOptions: NormalizedOutputOptions,
   bundle: OutputBundle,
-  ignorePaths: Array<string | RegExp> = []
+  ignorePaths: Array<string> = []
 ): SourcemapInfo[] {
   const sourceMaps = Object.values(bundle).filter(isSourcemap)
 
@@ -30,15 +30,10 @@ function isSourcemap(file: OutputAsset | OutputChunk): file is OutputAsset {
   return !!json.sourcesContent && json.sourcesContent.length > 0
 }
 
-function isNotIgnored(sourceMapInfo: SourcemapInfo, ignorePaths: Array<string | RegExp>) {
-  for (const ignorePath of ignorePaths) {
-    const isMatch = picomatch.isMatch(sourceMapInfo.jsFilePath, ignorePath, { basename: true })
-    if (isMatch) {
-      return false
-    }
-  }
+function isNotIgnored(sourceMapInfo: SourcemapInfo, ignorePaths: Array<string>) {
+  const isMatch = picomatch.isMatch(sourceMapInfo.jsFilePath, ignorePaths, { basename: true })
 
-  return true
+  return !isMatch
 }
 
 function formatSourcemapData(
