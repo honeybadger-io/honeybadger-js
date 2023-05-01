@@ -49,6 +49,9 @@
     "node-fetch": "^2.6.9",
     "picomatch": "^2.3.1"
   },
+  "peerDependencies": {
+    "rollup": "^3.0.0"
+  },
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
   "publishConfig": {
