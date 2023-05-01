@@ -3,6 +3,8 @@
 [Rollup](https://rollupjs.org/) plugin to upload JavaScript
 sourcemaps and optionally send deployment notifications to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). 
 
+Supports rollup version 3. If you use rollup version 2, you can either upgrade or [send your sourcemaps to Honeybadger's API](https://docs.honeybadger.io/api/reporting-source-maps/) directly.
+
 ## Installation
 
 ```
