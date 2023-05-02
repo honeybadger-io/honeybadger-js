@@ -149,6 +149,14 @@ const assets = {
     type: 'asset' as const,
     needsCodeReference: false
   },
+  // The subfolder is included in the "file" key within "source"
+  'sub/folder/baz.js.map': {
+    fileName: 'sub/folder/baz.js.map',
+    name: undefined,
+    source: '{"version":3,"file":"sub/folder/baz.js","sources":["../../src/subfolder/baz.js"],"sourcesContent":["export default \'This is in a subfolder!\'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}',
+    type: 'asset' as const,
+    needsCodeReference: false
+  },
   'foo.js.map': {
     fileName: 'foo.js.map',
     name: undefined,

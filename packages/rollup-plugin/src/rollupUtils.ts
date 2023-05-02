@@ -46,10 +46,13 @@ function formatSourcemapData(
   // the same name as the js file... however we can pull the file name
   // from the sourcemap source just in case.
   let jsFilename: string
-  if (typeof sourcemap.source === 'string') {
+  if (sourcemap.source && typeof sourcemap.source === 'string') {
     const { file } = JSON.parse(sourcemap.source)
-    // The file in the source won't have the subfolder, need to add it
-    jsFilename = path.join(path.dirname(sourcemapFilename), file)
+    // The file in the source usually won't have the subfolder, we may need to add it
+    const subfolder = path.dirname(sourcemapFilename)
+    jsFilename = file.startsWith(subfolder) 
+      ? file
+      : path.join(subfolder, file)
   } else {
     jsFilename = sourcemapFilename.replace('.map', '')
   }
