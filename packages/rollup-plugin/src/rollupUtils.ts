@@ -50,7 +50,7 @@ function formatSourcemapData(
     const { file } = JSON.parse(sourcemap.source)
     // The file in the source usually won't have the subfolder, we may need to add it
     const subfolder = path.dirname(sourcemapFilename)
-    jsFilename = file.startsWith(subfolder) 
+    jsFilename = path.dirname(file) === subfolder 
       ? file
       : path.join(subfolder, file)
   } else {

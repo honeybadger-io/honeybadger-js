@@ -26,10 +26,10 @@ describe('extractSourcemapDataFromBundle', () => {
         jsFilePath: path.resolve('dist/foo.js')
       },
       {
-        sourcemapFilename: 'subfolder/bar.js.map',
-        sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'),
-        jsFilename: 'subfolder/bar.js',
-        jsFilePath: path.resolve('dist/subfolder/bar.js')
+        sourcemapFilename: 'bar/bar.js.map',
+        sourcemapFilePath: path.resolve('dist/bar/bar.js.map'),
+        jsFilename: 'bar/bar.js',
+        jsFilePath: path.resolve('dist/bar/bar.js')
       },
       {
         sourcemapFilename: 'sub/folder/baz.js.map',
@@ -53,10 +53,10 @@ describe('extractSourcemapDataFromBundle', () => {
           jsFilePath: path.resolve('dist/index.js')
         },
         {
-          sourcemapFilename: 'subfolder/bar.js.map',
-          sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'),
-          jsFilename: 'subfolder/bar.js',
-          jsFilePath: path.resolve('dist/subfolder/bar.js')
+          sourcemapFilename: 'bar/bar.js.map',
+          sourcemapFilePath: path.resolve('dist/bar/bar.js.map'),
+          jsFilename: 'bar/bar.js',
+          jsFilePath: path.resolve('dist/bar/bar.js')
         },
         {
           sourcemapFilename: 'sub/folder/baz.js.map',
