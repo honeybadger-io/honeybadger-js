@@ -7,33 +7,77 @@ import * as td from 'testdouble'
 
 describe('extractSourcemapDataFromBundle', () => {
   const outputOptions = td.object<NormalizedOutputOptions>()
-  outputOptions.dir = 'dist' 
+  outputOptions.dir = 'dist'
 
   it('should return an array with sourcemap file data', () => {
-    const data = extractSourcemapDataFromBundle(outputOptions, bundle)
+    const data = extractSourcemapDataFromBundle(outputOptions, bundle, [])
     expect(data).to.be.an('array').lengthOf(3)
     expect(data).to.have.deep.members([
       {
-        sourcemapFilename: 'index.js.map', 
-        sourcemapFilePath: path.resolve('dist/index.js.map'), 
-        jsFilename: 'index.js', 
+        sourcemapFilename: 'index.js.map',
+        sourcemapFilePath: path.resolve('dist/index.js.map'),
+        jsFilename: 'index.js',
         jsFilePath: path.resolve('dist/index.js')
-      }, 
+      },
       {
-        sourcemapFilename: 'foo.js.map', 
-        sourcemapFilePath: path.resolve('dist/foo.js.map'), 
-        jsFilename: 'foo.js', 
+        sourcemapFilename: 'foo.js.map',
+        sourcemapFilePath: path.resolve('dist/foo.js.map'),
+        jsFilename: 'foo.js',
         jsFilePath: path.resolve('dist/foo.js')
       },
       {
-        sourcemapFilename: 'subfolder/bar.js.map', 
-        sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'), 
-        jsFilename: 'subfolder/bar.js', 
+        sourcemapFilename: 'subfolder/bar.js.map',
+        sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'),
+        jsFilename: 'subfolder/bar.js',
         jsFilePath: path.resolve('dist/subfolder/bar.js')
       },
     ])
   })
-});
+
+  const itEach = ['foo.js', '**/foo.js', 'foo.*', '**/foo.*', 'foo.js*', '**/foo.js*']
+  for (const ignorePath of itEach) {
+    it(`should ignore files that match the ignorePath ${ignorePath}`, () => {
+      const data = extractSourcemapDataFromBundle(outputOptions, bundle, [ignorePath])
+      expect(data).to.be.an('array').lengthOf(2)
+      expect(data).to.have.deep.members([
+        {
+          sourcemapFilename: 'index.js.map',
+          sourcemapFilePath: path.resolve('dist/index.js.map'),
+          jsFilename: 'index.js',
+          jsFilePath: path.resolve('dist/index.js')
+        },
+        {
+          sourcemapFilename: 'subfolder/bar.js.map',
+          sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'),
+          jsFilename: 'subfolder/bar.js',
+          jsFilePath: path.resolve('dist/subfolder/bar.js')
+        },
+      ])
+    })
+  }
+
+  it('should ignore files with empty sourcesContent', () => {
+    expect(bundle).to.include.keys(['empty.js.map'])
+    expect(bundle['empty.js.map']).to.deep.equal({
+      fileName: 'empty.js.map',
+      name: undefined,
+      source: '{"version":3,"file":"empty.sass","sources":[], "sourcesContent": [], "names":[],"mappings":""}',
+      type: 'asset' as const,
+      needsCodeReference: false,
+    })
+
+    const data = extractSourcemapDataFromBundle(outputOptions, bundle, [])
+    expect(data).to.be.an('array').lengthOf(3)
+    expect(data).to.not.have.deep.members([
+      {
+        sourcemapFilename: 'empty.js.map',
+        sourcemapFilePath: path.resolve('dist/empty.js.map'),
+        jsFilename: 'empty.js',
+        jsFilePath: path.resolve('dist/empty.js')
+      },
+    ])
+  })
+})
 
 describe('isNonProdEnv', () => {
   let restore

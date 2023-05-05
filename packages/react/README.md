@@ -9,9 +9,9 @@
 
 ## Documentation and Support
 
-For comprehensive documentation and support, [check out our documentation site](https://docs.honeybadger.io/lib/javascript/index.html).
+For comprehensive documentation and support, [check out our documentation site](https://docs.honeybadger.io/lib/javascript).
 
-The documentation includes a detailed [React integration guide](https://docs.honeybadger.io/lib/javascript/integration/react.html)
+The documentation includes a detailed [React integration guide](https://docs.honeybadger.io/lib/javascript/integration/react)
 
 ## Project Goals
 

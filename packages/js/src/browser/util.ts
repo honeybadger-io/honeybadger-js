@@ -61,6 +61,7 @@ export function nativeFetch () {
 
   if (!global.fetch) { return false }
   if (isNative(global.fetch)) { return true }
+  if (typeof document === 'undefined') { return false }
 
   // If fetch isn't native, it may be wrapped by someone else. Try to get
   // a pristine function from an iframe.
