@@ -42,21 +42,9 @@ function formatSourcemapData(
   // This fileName could include a path like 'subfolder/foo.js.map'
   const sourcemapFilename = sourcemap.fileName
   const sourcemapFilePath = path.resolve(outputOptions.dir || '', sourcemapFilename)
-  // It should be safe to assume that rollup will name the map with
-  // the same name as the js file... however we can pull the file name
-  // from the sourcemap source just in case.
-  let jsFilename: string
-  if (sourcemap.source && typeof sourcemap.source === 'string') {
-    const { file } = JSON.parse(sourcemap.source)
-    // The file in the source usually won't have the subfolder, we may need to add it
-    const subfolder = path.dirname(sourcemapFilename)
-    jsFilename = path.dirname(file) === subfolder 
-      ? file
-      : path.join(subfolder, file)
-  } else {
-    jsFilename = sourcemapFilename.replace('.map', '')
-  }
-
+  // As far as we've seen, rollup always puts the sourcemap in the same folder as the
+  // js file and gives it the same name (plus the ".map").
+  const jsFilename = sourcemapFilename.replace('.map', '')
   const jsFilePath = path.resolve(outputOptions.dir || '', jsFilename)
 
   return { sourcemapFilename, sourcemapFilePath, jsFilename, jsFilePath }
