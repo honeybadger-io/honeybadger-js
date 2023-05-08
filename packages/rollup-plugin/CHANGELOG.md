@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.0...v5.4.1) (2023-05-08)
+
+
+### Bug Fixes
+
+* **rollup-plugin:** document rollup peer dependency ([#1061](https://github.com/honeybadger-io/honeybadger-js/issues/1061)) ([d64a681](https://github.com/honeybadger-io/honeybadger-js/commit/d64a6819e7d0a43a576387d6dd18739edd1236e2))
+
+
+
 ## [5.4.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.2...v5.4.0) (2023-04-27)
 
 
