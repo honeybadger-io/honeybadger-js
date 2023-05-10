@@ -11,7 +11,7 @@ describe('extractSourcemapDataFromBundle', () => {
 
   it('should return an array with sourcemap file data', () => {
     const data = extractSourcemapDataFromBundle(outputOptions, bundle, [])
-    expect(data).to.be.an('array').lengthOf(3)
+    expect(data).to.be.an('array').lengthOf(4)
     expect(data).to.have.deep.members([
       {
         sourcemapFilename: 'index.js.map',
@@ -26,10 +26,16 @@ describe('extractSourcemapDataFromBundle', () => {
         jsFilePath: path.resolve('dist/foo.js')
       },
       {
-        sourcemapFilename: 'subfolder/bar.js.map',
-        sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'),
-        jsFilename: 'subfolder/bar.js',
-        jsFilePath: path.resolve('dist/subfolder/bar.js')
+        sourcemapFilename: 'bar/bar.js.map',
+        sourcemapFilePath: path.resolve('dist/bar/bar.js.map'),
+        jsFilename: 'bar/bar.js',
+        jsFilePath: path.resolve('dist/bar/bar.js')
+      },
+      {
+        sourcemapFilename: 'sub/folder/baz.js.map',
+        sourcemapFilePath: path.resolve('dist/sub/folder/baz.js.map'),
+        jsFilename: 'sub/folder/baz.js',
+        jsFilePath: path.resolve('dist/sub/folder/baz.js')
       },
     ])
   })
@@ -38,7 +44,7 @@ describe('extractSourcemapDataFromBundle', () => {
   for (const ignorePath of itEach) {
     it(`should ignore files that match the ignorePath ${ignorePath}`, () => {
       const data = extractSourcemapDataFromBundle(outputOptions, bundle, [ignorePath])
-      expect(data).to.be.an('array').lengthOf(2)
+      expect(data).to.be.an('array').lengthOf(3)
       expect(data).to.have.deep.members([
         {
           sourcemapFilename: 'index.js.map',
@@ -47,10 +53,16 @@ describe('extractSourcemapDataFromBundle', () => {
           jsFilePath: path.resolve('dist/index.js')
         },
         {
-          sourcemapFilename: 'subfolder/bar.js.map',
-          sourcemapFilePath: path.resolve('dist/subfolder/bar.js.map'),
-          jsFilename: 'subfolder/bar.js',
-          jsFilePath: path.resolve('dist/subfolder/bar.js')
+          sourcemapFilename: 'bar/bar.js.map',
+          sourcemapFilePath: path.resolve('dist/bar/bar.js.map'),
+          jsFilename: 'bar/bar.js',
+          jsFilePath: path.resolve('dist/bar/bar.js')
+        },
+        {
+          sourcemapFilename: 'sub/folder/baz.js.map',
+          sourcemapFilePath: path.resolve('dist/sub/folder/baz.js.map'),
+          jsFilename: 'sub/folder/baz.js',
+          jsFilePath: path.resolve('dist/sub/folder/baz.js')
         },
       ])
     })
@@ -67,7 +79,7 @@ describe('extractSourcemapDataFromBundle', () => {
     })
 
     const data = extractSourcemapDataFromBundle(outputOptions, bundle, [])
-    expect(data).to.be.an('array').lengthOf(3)
+    expect(data).to.be.an('array').lengthOf(4)
     expect(data).to.not.have.deep.members([
       {
         sourcemapFilename: 'empty.js.map',
