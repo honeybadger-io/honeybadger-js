@@ -1,6 +1,6 @@
 import { Types, Util } from '@honeybadger-io/core'
 import { Platform  } from 'react-native';
-import * as pkg from './package.json'
+import * as pkg from '../package.json'
 
 export class Transport implements Types.Transport {
   

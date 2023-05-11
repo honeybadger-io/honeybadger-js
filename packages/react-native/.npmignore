@@ -1,6 +1,13 @@
 # Examples
 examples/
 
+# Config
+tsconfig.json
+rollup.config.mjs
+
+# Typescript source files don't need to be in the package
+src
+
 # Node
 *.log
 tmp

@@ -1,12 +1,13 @@
 {
 	"extends": "../../tsconfig.base.json",
-	"include": ["index.ts"],
+	"include": ["src/**/*.ts"],
 	"compilerOptions": {
 		// Generate d.ts files
 		"declaration": true,
-		// Output files to /dist
-		"outDir": "dist",
+		// Output declaration files to /dist
+		"declarationDir": "dist",
 		// Allow importing JSON
 		"resolveJsonModule": true,
+		"moduleResolution": "node",
 	}
 }
