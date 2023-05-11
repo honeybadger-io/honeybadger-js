@@ -15,6 +15,13 @@ class Honeybadger extends Client {
     
     this.__jsHandlerInitialized = false
     this.__nativeHandlerInitialized = false
+
+    this.setContext({ 
+      platform: {
+        os: Platform.OS, 
+        version: Platform.Version
+      }
+    })
   }
 
   configure(opts: Partial<Types.Config> = {}): this {
@@ -48,7 +55,9 @@ class Honeybadger extends Client {
 
       // Allowing the default error handler to process the error after
       // we're done with it will show the useful RN red info box in dev.
-      if (this.__originalJsHandler) {
+      // However in prod it causes duplicate errors to be reported on iOS
+      // since the default handler re-throws a native error
+      if (__DEV__ && this.__originalJsHandler) {
         this.logger.debug('Passing error to previous error handler.')
         this.__originalJsHandler(err, isFatal)
       }

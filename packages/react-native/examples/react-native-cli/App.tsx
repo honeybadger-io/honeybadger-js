@@ -13,6 +13,7 @@ const { ThrowErrModule } = NativeModules
 export default function App() {
   const [apiKey, setApiKey] = useState('');
   const [revision, setRevision] = useState('testRevisionCli123');
+  const [contextValue, setContextValue] = useState('');
 
   function onConfigureButtonPress() {
     console.log('Configuring HB with API key:', apiKey);
@@ -22,6 +23,11 @@ export default function App() {
       debug: true,
       reportData: true, // report data even in dev environment
     })
+  }
+
+  function onSetContextButtonPress() {
+    console.log('Setting context:', contextValue)
+    Honeybadger.setContext({ testContextKey: contextValue })
   }
 
   function onErrButtonPress() {
@@ -50,7 +56,13 @@ export default function App() {
         value={revision}
         onChangeText={(text) => setRevision(text)}
       />
+      <TextInput
+        placeholder="enter a test context value"
+        value={contextValue}
+        onChangeText={(text) => setContextValue(text)}
+      />
       <Button onPress={onConfigureButtonPress} title="Configure HB" />
+      <Button onPress={onSetContextButtonPress} title="Set context" />
       <Button onPress={onErrButtonPress} title="Throw a JS error!" />
       <Button onPress={onNotifyButtonPress} title="Honeybader.notify()" />
       <Button onPress={onNativeErrPress} title="Throw a native error" />
