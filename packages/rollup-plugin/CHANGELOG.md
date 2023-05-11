@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.5.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.1...v5.5.0) (2023-05-11)
+
+
+### Features
+
+* **rollup-plugin:** rely on the sourcemap and js files being in the same folder and named the same ([#1063](https://github.com/honeybadger-io/honeybadger-js/issues/1063)) ([0ea16b6](https://github.com/honeybadger-io/honeybadger-js/commit/0ea16b64f6fa901856f6a9bfdce4ba00c9db6db2))
+
+
+
 ## [5.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.0...v5.4.1) (2023-05-08)
 
 
