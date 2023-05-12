@@ -20,7 +20,7 @@ You can refer to the README of each package for more information and instruction
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact)  
   SDK for React integration
 - [@honeybadger-io/nextjs](./packages/nextjs)  
-  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2nextjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2nextjs)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2nextjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fnextjs)  
   SDK for Next.js integration
 - [@honeybadger-io/gatsby-plugin-honeybadger](./packages/gatsby-plugin)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger)  
