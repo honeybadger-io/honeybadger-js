@@ -6,7 +6,7 @@ tsconfig.json
 rollup.config.mjs
 
 # Typescript source files don't need to be in the package
-src
+/src
 
 # Tarball (used for testing)
 honeybadger-io-react-native-*.tgz
