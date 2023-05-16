@@ -8,6 +8,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rollup -c",
+    "build:clean": "rm -rf dist && npm run build",
     "test": "echo \"Error: no test specified\""
   },
   "bin": {
