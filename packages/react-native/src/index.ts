@@ -137,5 +137,4 @@ function mergeDefaultOpts(opts) {
   }
 }
 
-export { Types } from '@honeybadger-io/core'
 export default new Honeybadger()

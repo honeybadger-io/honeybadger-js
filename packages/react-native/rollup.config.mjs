@@ -8,7 +8,6 @@ export default [
     output: {
       dir: 'dist', 
       format: 'cjs',
-      exports: 'named',
       sourcemap: true,
     },
     plugins: [ 
