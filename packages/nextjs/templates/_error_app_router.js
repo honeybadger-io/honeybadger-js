@@ -1,5 +1,6 @@
 'use client'; // Error components must be Client Components
 
+// eslint-disable-next-line import/no-unresolved
 import { useEffect } from 'react'
 import { Honeybadger } from '@honeybadger-io/react'
 
