@@ -9,16 +9,24 @@ function usesTypescript() {
   return fs.existsSync('tsconfig.json')
 }
 
+function usesPagesRouter() {
+  return fs.existsSync('pages')
+}
+
 function usesAppRouter() {
   return fs.existsSync('app')
 }
 
-function getTargetPath(isGlobalErrorComponent = false) {
+function getTargetPath(isAppRouter = false, isGlobalErrorComponent = false) {
+  if (!isAppRouter && isGlobalErrorComponent) {
+    throw new Error('invalid arguments: isGlobalErrorComponent can only be true when isAppRouter is true')
+  }
+
   const extension = usesTypescript() ? 'tsx' : 'js'
-  const srcFolder = usesAppRouter() ? 'app' : 'pages'
+  const srcFolder = isAppRouter ? 'app' : 'pages'
 
   let fileName = ''
-  if (usesAppRouter()) {
+  if (isAppRouter) {
     fileName = isGlobalErrorComponent ? 'global-error' : 'error'
   }
   else {
@@ -28,22 +36,22 @@ function getTargetPath(isGlobalErrorComponent = false) {
   return path.join(srcFolder, fileName + '.' + extension)
 }
 
-function getTemplate() {
-  const templateName = usesAppRouter() ? '_error_app_router.js' : '_error.js'
+function getTemplate(isAppRouter = false) {
+  const templateName = isAppRouter ? '_error_app_router.js' : '_error.js'
 
   return path.resolve(__dirname, '../templates', templateName)
 }
 
-async function copyErrorJs() {
-  const sourcePath = getTemplate()
-  const targetPath = getTargetPath()
+async function copyErrorJs(isAppRouter = false) {
+  const sourcePath = getTemplate(isAppRouter)
+  const targetPath = getTargetPath(isAppRouter)
 
   return copyFileWithBackup(sourcePath, targetPath)
 }
 
 function copyGlobalErrorJs() {
-  const sourcePath = getTemplate()
-  const targetPath = getTargetPath(true)
+  const sourcePath = getTemplate(true)
+  const targetPath = getTargetPath(true, true)
 
   return copyFileWithBackup(sourcePath, targetPath)
 }
@@ -53,7 +61,14 @@ async function copyFileWithBackup(sourcePath, targetPath) {
   if (fileAlreadyExists) {
     // Don't overwrite an existing file without creating a backup first
     const backupPath = targetPath + '.bak'
+    if (debug) {
+      console.debug('backing up', targetPath, 'to', backupPath)
+    }
     await fs.promises.copyFile(targetPath, backupPath)
+  }
+
+  if (debug) {
+    console.debug('copying', sourcePath, 'to', targetPath)
   }
 
   return fs.promises.copyFile(sourcePath, targetPath)
@@ -77,9 +92,13 @@ async function copyConfigFiles() {
     }
     return fs.promises.copyFile(path.join(templateDir, file), file)
   })
-  copyPromises.push(copyErrorJs())
+
+  if (usesPagesRouter()) {
+    copyPromises.push(copyErrorJs(false))
+  }
 
   if (usesAppRouter()) {
+    copyPromises.push(copyErrorJs(true))
     copyPromises.push(copyGlobalErrorJs())
   }
 
