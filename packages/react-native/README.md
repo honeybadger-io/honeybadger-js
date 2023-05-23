@@ -113,19 +113,30 @@ The **examples** directory contains two minimal React Native projects, demonstra
 ### react-native-cli
 ```shell
 npm install
-cd ios && pod install && cd ..
-npx react-native start
+npm run ios:install
+npm start
 ```
 In a new shell:
 ```
-npx react-native run-ios
+npm run ios
 ```
 or
 ```
-npx react-native run-android
+npm run android
+```
+
+If you want to test a release (ie prod) build, use 
+```shell
+npm run ios:release
+```
+or
+```shell
+npm run android:release
 ```
 
 ### expo-app
+Do not use `npx expo start`, since this relies on Expo Go, which [does not support custom native code](https://docs.expo.dev/bare/using-expo-client/). Instead, use the following commands:
+
 ```shell
 npm install
 npm run ios
@@ -137,6 +148,15 @@ npm run android
 ```
 
 When the app opens, enter your API key, press "Configure", and then test your setup by using the button to throw an error. 
+
+If you want to test a release (ie prod) build, use 
+```shell
+npm run ios:release
+```
+or
+```shell
+npm run android:release
+```
 
 ## License
 

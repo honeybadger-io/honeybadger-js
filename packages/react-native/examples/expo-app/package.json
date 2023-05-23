@@ -2,11 +2,10 @@
   "name": "expo-app",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start --dev-client",
-    "start:prod": "npx expo start --no-dev --minify",
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
-    "web": "expo start --web"
+    "android:release": "npx expo run:android --variant release", 
+    "ios:release": "npx expo run:ios --configuration Release"
   },
   "dependencies": {
     "@honeybadger-io/react-native": "file:../../honeybadger-io-react-native-5.1.6_517150.tgz",

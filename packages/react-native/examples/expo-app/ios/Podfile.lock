@@ -9,7 +9,7 @@ PODS:
     - ExpoModulesCore
   - EXFont (11.0.1):
     - ExpoModulesCore
-  - Expo (47.0.13):
+  - Expo (47.0.14):
     - ExpoModulesCore
   - ExpoKeepAwake (11.0.1):
     - ExpoModulesCore
@@ -29,7 +29,7 @@ PODS:
     - ReactCommon/turbomodule/core (= 0.70.8)
   - fmt (6.2.1)
   - glog (0.3.5)
-  - HoneybadgerReactNative (5.1.6):
+  - HoneybadgerReactNative (5.1.1):
     - React
   - RCT-Folly (2021.07.22.00):
     - boost
@@ -447,7 +447,7 @@ SPEC CHECKSUMS:
   EXConstants: 3c86653c422dd77e40d10cbbabb3025003977415
   EXFileSystem: 60602b6eefa6873f97172c684b7537c9760b50d6
   EXFont: 319606bfe48c33b5b5063fb0994afdc496befe80
-  Expo: b9fa98bf260992312ee3c424400819fb9beadafe
+  Expo: 5f4240506a147162542178989696e56e3dd72924
   ExpoKeepAwake: 69b59d0a8d2b24de9f82759c39b3821fec030318
   ExpoModulesCore: 485dff3a59b036a33b6050c0a5aea3cf1037fdd1
   EXSplashScreen: 3e989924f61a8dd07ee4ea584c6ba14be9b51949
@@ -455,7 +455,7 @@ SPEC CHECKSUMS:
   FBReactNativeSpec: d8772db98ada3c2daf8f65e2105ada77bf209c02
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
-  HoneybadgerReactNative: 13614bc38bd67866f1b919da80696a32fc62c5a8
+  HoneybadgerReactNative: 6bdb8927d32f18255b431c1a24a4c4330d7aa810
   RCT-Folly: 0080d0a6ebf2577475bda044aa59e2ca1f909cda
   RCTRequired: 35a7977a5a3cb2d3830c3fef7352b7b116115829
   RCTTypeSafety: 259790fb8b16c94e57e0d3d1e2479e69a2b93f50
