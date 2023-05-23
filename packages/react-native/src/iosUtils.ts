@@ -34,7 +34,7 @@ export function backtraceAndDetailsFromIosException(data:NativeExceptionData): {
   let backtraceDetails:Record<string, any> = {}
 
   if (framesFromComponent.length) {
-    backtrace = framesFromComponent;
+    backtrace = framesFromComponent
     backtraceDetails.primaryBackTraceSource = 'ReactNativeComponentStack'
     if (framesFromReactNativeIos.length) {
       backtraceDetails.reactNativeIOSStackTrace = framesFromReactNativeIos

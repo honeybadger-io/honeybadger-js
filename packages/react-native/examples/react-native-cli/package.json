@@ -14,7 +14,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@honeybadger-io/react-native": "file:../../honeybadger-io-react-native-5.1.6_282.tgz",
+    "@honeybadger-io/react-native": "file:../../honeybadger-io-react-native-5.1.6_517150.tgz",
     "react": "18.2.0",
     "react-native": "0.71.3"
   },
