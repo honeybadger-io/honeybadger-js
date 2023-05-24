@@ -36,10 +36,15 @@ function getTargetPath(isAppRouter = false, isGlobalErrorComponent = false) {
   return path.join(srcFolder, fileName + '.' + extension)
 }
 
-function getTemplate(isAppRouter = false) {
-  const templateName = isAppRouter ? '_error_app_router.js' : '_error.js'
+function getTemplate(isAppRouter = false, isGlobalErrorComponent = false) {
+  if (!isAppRouter && isGlobalErrorComponent) {
+    throw new Error('invalid arguments: isGlobalErrorComponent can only be true when isAppRouter is true')
+  }
 
-  return path.resolve(__dirname, '../templates', templateName)
+  const extension = isGlobalErrorComponent ? 'tsx' : 'js'
+  const templateName = isAppRouter ? '_error_app_router' : '_error'
+
+  return path.resolve(__dirname, '../templates', templateName + '.' + extension)
 }
 
 async function copyErrorJs(isAppRouter = false) {
@@ -50,7 +55,7 @@ async function copyErrorJs(isAppRouter = false) {
 }
 
 function copyGlobalErrorJs() {
-  const sourcePath = getTemplate(true)
+  const sourcePath = getTemplate(true, true)
   const targetPath = getTargetPath(true, true)
 
   return copyFileWithBackup(sourcePath, targetPath)
