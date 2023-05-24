@@ -16,7 +16,9 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
 
       // Breadcrumbs: instrument console
       (function () {
-        if (!breadcrumbsEnabled('console')) { return }
+        if (!breadcrumbsEnabled('console')) {
+          return
+        }
 
         function inspectArray(obj) {
           if (!Array.isArray(obj)) { return '' }
@@ -55,7 +57,13 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
 
       // Breadcrumbs: instrument click events
       (function () {
-        if (!breadcrumbsEnabled('dom')) { return }
+        if (!breadcrumbsEnabled('dom')) {
+          return
+        }
+
+        if (typeof _window.addEventListener !== 'function') {
+          return
+        }
 
         _window.addEventListener('click', (event) => {
           let message, selector, text
@@ -80,15 +88,19 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
               event
             }
           })
-        }, _window.location ? true : false) // In CloudFlare workers useCapture must be false. window.locaiton is a hacky way to detect it.
+        }, _window.location ? true : false) // In CloudFlare workers useCapture must be false. window.location is a hacky way to detect it.
       })();
 
       // Breadcrumbs: instrument XMLHttpRequest
       (function () {
-        if (!breadcrumbsEnabled('network')) { return }
+        if (!breadcrumbsEnabled('network')) {
+          return
+        }
 
         // Some environments may not support XMLHttpRequest.
-        if (typeof XMLHttpRequest === 'undefined') return
+        if (typeof XMLHttpRequest === 'undefined') {
+          return
+        }
 
         // -- On xhr.open: capture initial metadata
         instrument(XMLHttpRequest.prototype, 'open', function (original) {
@@ -160,7 +172,9 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
 
       // Breadcrumbs: instrument fetch
       (function () {
-        if (!breadcrumbsEnabled('network')) { return }
+        if (!breadcrumbsEnabled('network')) {
+          return
+        }
 
         if (!nativeFetch()) {
           // Polyfills use XHR.
@@ -251,6 +265,10 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
           addEventListener('popstate', (_event) => {
             recordUrlChange(lastHref, _window.location.href)
           })
+        }
+
+        if (typeof _window.history === 'undefined') {
+          return
         }
 
         // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState

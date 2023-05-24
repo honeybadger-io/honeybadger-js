@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/rollup-plugin",
-  "version": "5.1.5",
+  "version": "5.5.0",
   "description": "A rollup plugin to upload sourcemaps to Honeybadger",
   "directories": {
     "example": "examples"
@@ -46,7 +46,11 @@
   "dependencies": {
     "fetch-retry": "^5.0.3",
     "form-data": "^4.0.0",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.9",
+    "picomatch": "^2.3.1"
+  },
+  "peerDependencies": {
+    "rollup": "^3.0.0"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",

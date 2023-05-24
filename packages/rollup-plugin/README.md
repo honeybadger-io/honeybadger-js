@@ -3,6 +3,8 @@
 [Rollup](https://rollupjs.org/) plugin to upload JavaScript
 sourcemaps and optionally send deployment notifications to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). 
 
+Supports rollup version 3. If you use rollup version 2, you can either upgrade or [send your sourcemaps to Honeybadger's API](https://docs.honeybadger.io/api/reporting-source-maps/) directly.
+
 ## Installation
 
 ```
@@ -41,6 +43,13 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   <dt><code>retries</code> (optional &mdash; default: 3, max: 10)</dt>
   <dd>This package implements fetch retry functionality via the <a href="https://github.com/vercel/fetch-retry">fetch-retry</a> package. Retrying helps fix issues like `ECONNRESET` and `SOCKETTIMEOUT` errors.
   </dd>
+
+  <dt><code>ignorePaths</code> (optional &mdash; default: [])</dt>
+  <dd>An array of paths (glob patterns) to ignore when uploading sourcemaps. Uses <a href="https://github.com/micromatch/picomatch">picomatch</a> to match against paths. 
+  </dd>
+
+  <dt><code>deployEndpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/deploys")</dt>
+  <dd>Where to send deployment notifications.</dd>
 
   <dt><code>deploy</code> (optional &mdash; default: false)</dt>
   <dd>

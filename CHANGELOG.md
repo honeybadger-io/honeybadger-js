@@ -3,6 +3,69 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.5.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.1...v5.5.0) (2023-05-11)
+
+
+### Features
+
+* **rollup-plugin:** rely on the sourcemap and js files being in the same folder and named the same ([#1063](https://github.com/honeybadger-io/honeybadger-js/issues/1063)) ([0ea16b6](https://github.com/honeybadger-io/honeybadger-js/commit/0ea16b64f6fa901856f6a9bfdce4ba00c9db6db2))
+
+
+
+## [5.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.0...v5.4.1) (2023-05-08)
+
+
+### Bug Fixes
+
+* **rollup-plugin:** document rollup peer dependency ([#1061](https://github.com/honeybadger-io/honeybadger-js/issues/1061)) ([d64a681](https://github.com/honeybadger-io/honeybadger-js/commit/d64a6819e7d0a43a576387d6dd18739edd1236e2))
+
+
+
+## [5.4.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.2...v5.4.0) (2023-04-27)
+
+
+### Features
+
+* add ignorePaths option ([#1059](https://github.com/honeybadger-io/honeybadger-js/issues/1059)) ([27c357e](https://github.com/honeybadger-io/honeybadger-js/commit/27c357ee02adc4f49062c4b6283c2dc3faf57546))
+
+
+
+## [5.3.2](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.1...v5.3.2) (2023-04-14)
+
+
+### Bug Fixes
+
+* **nextjs:** move notify logic in _error.js ([0179ec4](https://github.com/honeybadger-io/honeybadger-js/commit/0179ec48db25760378342411bb3271272701a435))
+
+
+
+## [5.3.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.0...v5.3.1) (2023-04-14)
+
+
+### Bug Fixes
+
+* **nextjs:** copy _error.js component ([2fa5c7d](https://github.com/honeybadger-io/honeybadger-js/commit/2fa5c7dcb98cebd71998459b55d9cd59778c72c1))
+
+
+
+## [5.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.2.0...v5.3.0) (2023-04-14)
+
+
+### Features
+
+* nextjs integration ([#1030](https://github.com/honeybadger-io/honeybadger-js/issues/1030)) ([695abec](https://github.com/honeybadger-io/honeybadger-js/commit/695abecf6753c4d37b7ead517c13385d1a64eaf6))
+
+
+
+## [5.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.7...v5.2.0) (2023-03-27)
+
+
+### Features
+
+* **core:** accept a backtrace passed in the notice ([#1049](https://github.com/honeybadger-io/honeybadger-js/issues/1049)) ([9c56a9f](https://github.com/honeybadger-io/honeybadger-js/commit/9c56a9f41deec7d8a655c770b4a8ca03ca56b177))
+
+
+
 ## [5.1.7](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.6...v5.1.7) (2023-03-20)
 
 **Note:** Version bump only for package root

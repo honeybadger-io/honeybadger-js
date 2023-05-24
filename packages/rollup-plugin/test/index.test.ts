@@ -5,10 +5,10 @@ import { HbPluginOptions } from '../src/types'
 
 describe('Index', () => {
   let honeybadgerRollupPlugin:(opts: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>) => Plugin
-  let cleanOptionsMock, 
-    isNonProdEnvMock, 
-    extractSourcemapDataFromBundleMock, 
-    uploadSourcemapsMock, 
+  let cleanOptionsMock,
+    isNonProdEnvMock,
+    extractSourcemapDataFromBundleMock,
+    uploadSourcemapsMock,
     sendDeployNotificationMock
   const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
 
@@ -19,18 +19,18 @@ describe('Index', () => {
     uploadSourcemapsMock = td.func()
     sendDeployNotificationMock = td.func()
 
-    td.replace('../src/options', { 
-      cleanOptions: cleanOptionsMock 
+    td.replace('../src/options', {
+      cleanOptions: cleanOptionsMock
     })
     td.replace('../src/rollupUtils', {
       extractSourcemapDataFromBundle: extractSourcemapDataFromBundleMock,
       isNonProdEnv: isNonProdEnvMock
     })
     td.replace('../src/hbUtils', {
-      uploadSourcemaps: uploadSourcemapsMock, 
+      uploadSourcemaps: uploadSourcemapsMock,
       sendDeployNotification: sendDeployNotificationMock
     })
-    
+
     const indexModule = await import('../src/index')
     honeybadgerRollupPlugin = indexModule.default
   })
@@ -44,7 +44,7 @@ describe('Index', () => {
 
     td.verify(cleanOptionsMock(options))
     expect(plugin.name).to.equal('honeybadger')
-    expect(plugin.writeBundle).to.be.a('function') 
+    expect(plugin.writeBundle).to.be.a('function')
   })
 
   describe('writeBundle', () => {
@@ -55,13 +55,13 @@ describe('Index', () => {
 
     it('should upload sourcemaps', async () => {
       td.when(isNonProdEnvMock()).thenReturn(false)
-      td.when(extractSourcemapDataFromBundleMock(outputOptions, bundle)).thenReturn(sourcemapData)
+      td.when(extractSourcemapDataFromBundleMock(outputOptions, bundle, undefined)).thenReturn(sourcemapData)
       td.when(cleanOptionsMock(options)).thenReturn(options)
-  
+
       const plugin = honeybadgerRollupPlugin(options)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
-  
+
       td.verify(uploadSourcemapsMock(sourcemapData, options))
     })
 
@@ -70,11 +70,11 @@ describe('Index', () => {
       td.when(isNonProdEnvMock()).thenReturn(false)
       td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
       td.when(cleanOptionsMock(deployTrueOpt)).thenReturn(deployTrueOpt)
-  
+
       const plugin = honeybadgerRollupPlugin(deployTrueOpt)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
-  
+
       td.verify(sendDeployNotificationMock(deployTrueOpt))
     })
 
@@ -83,11 +83,11 @@ describe('Index', () => {
       td.when(isNonProdEnvMock()).thenReturn(false)
       td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
       td.when(cleanOptionsMock(deployObjOpt)).thenReturn(deployObjOpt)
-  
+
       const plugin = honeybadgerRollupPlugin(deployObjOpt)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
-  
+
       td.verify(sendDeployNotificationMock(deployObjOpt))
     })
 
@@ -96,23 +96,23 @@ describe('Index', () => {
       td.when(isNonProdEnvMock()).thenReturn(false)
       td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
       td.when(cleanOptionsMock(deployFalseOpt)).thenReturn(deployFalseOpt)
-  
+
       const plugin = honeybadgerRollupPlugin(deployFalseOpt)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
-      
+
       // Verify not called
       td.verify(sendDeployNotificationMock(), { times: 0, ignoreExtraArgs: true })
     })
-  
+
     it('should do nothing in non-prod environments', async () => {
       td.when(isNonProdEnvMock()).thenReturn(true)
       td.when(cleanOptionsMock(options)).thenReturn(options)
-  
+
       const plugin = honeybadgerRollupPlugin(options)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
-  
+
       // Verify these were not called
       td.verify(extractSourcemapDataFromBundleMock(), { times: 0, ignoreExtraArgs: true })
       td.verify(uploadSourcemapsMock(), { times: 0, ignoreExtraArgs: true })
@@ -120,5 +120,5 @@ describe('Index', () => {
     })
   })
 
-  
+
 })

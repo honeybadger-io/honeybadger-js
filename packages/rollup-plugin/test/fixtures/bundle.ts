@@ -16,8 +16,8 @@ const chunks = {
     dynamicImports: [],
     fileName: 'index.js',
     implicitlyLoadedBefore: [],
-    importedBindings: { 'foo.js': [], 'subfolder/bar.js': [] },
-    imports: [ 'foo.js', 'subfolder/bar.js' ],
+    importedBindings: { 'foo.js': [], 'bar/bar.js': [] },
+    imports: [ 'foo.js', 'bar/bar.js' ],
     modules: {
       '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/index.js': {
         'code': 'function index () {\n  console.log(foo);\n  console.log(bar);\n}',
@@ -31,7 +31,7 @@ const chunks = {
     code: "'use strict';\n" +
       '\n' +
       "var foo = require('./foo.js');\n" +
-      "var bar = require('./subfolder/bar.js');\n" +
+      "var bar = require('./bar/bar.js');\n" +
       '\n' +
       'function index () {\n' +
       '  console.log(foo);\n' +
@@ -70,24 +70,24 @@ const chunks = {
     code: "'use strict';\n\nvar foo = 'hello world!';\n\nmodule.exports = foo;\n",
     map: null
   },
-  'subfolder/bar.js': {
+  'bar/bar.js': {
     exports: [ 'default' ],
-    facadeModuleId: '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/subfolder/bar.js',
+    facadeModuleId: '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/bar/bar.js',
     isDynamicEntry: false,
     isEntry: false,
     isImplicitEntry: false,
     moduleIds: [
-      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/subfolder/bar.js'
+      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/bar/bar.js'
     ],
-    name: 'subfolder/bar',
+    name: 'bar/bar',
     type: 'chunk' as const,
     dynamicImports: [],
-    fileName: 'subfolder/bar.js',
+    fileName: 'bar/bar.js',
     implicitlyLoadedBefore: [],
     importedBindings: {},
     imports: [],
     modules: {
-      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/subfolder/bar.js': {
+      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/bar/bar.js': {
         'code': "var bar = 'This is in a subfolder!';",
         'originalLength': 40,
         'removedExports': [],
@@ -103,20 +103,57 @@ const chunks = {
       'module.exports = bar;\n',
     map: null
   },
+  'empty.sass': {
+    exports: [ 'default' ],
+    facadeModuleId: '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/empty.sass',
+    isDynamicEntry: false,
+    isEntry: false,
+    isImplicitEntry: false,
+    moduleIds: [
+      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/empty.sass'
+    ],
+    name: 'empty',
+    type: 'chunk' as const,
+    dynamicImports: [],
+    fileName: 'empty.sass',
+    implicitlyLoadedBefore: [],
+    importedBindings: {},
+    imports: [],
+    modules: {
+      '/Users/bethanyberkowitz/projects/honeybadger/honeybadger-js/packages/rollup-plugin/examples/rollup/src/empty.sass': {
+        'code': 'color: blue;',
+        'originalLength': 12,
+        'removedExports': [],
+        'renderedExports': ['default'],
+        'renderedLength': 12
+      }
+    },
+    referencedFiles: [],
+    code: 'color: blue;',
+    map: null
+  },
 }
 
 const assets = {
   'index.js.map': {
     fileName: 'index.js.map',
     name: undefined,
-    source: '{"version":3,"file":"index.js","sources":["../src/index.js"],"sourcesContent":["import foo from \'./foo.js\';\\nimport bar from \'./subfolder/bar.js\'\\n\\nexport default function () {\\n  console.log(foo)\\n  console.log(bar)\\n}"],"names":[],"mappings":";;;;;AAGe,cAAQ,IAAI;AAC3B,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB;;;;"}',
-    type: 'asset' as const, 
+    source: '{"version":3,"file":"index.js","sources":["../src/index.js"],"sourcesContent":["import foo from \'./foo.js\';\\nimport bar from \'./bar/bar.js\'\\n\\nexport default function () {\\n  console.log(foo)\\n  console.log(bar)\\n}"],"names":[],"mappings":";;;;;AAGe,cAAQ,IAAI;AAC3B,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB,EAAE,OAAO,CAAC,GAAG,CAAC,GAAG,EAAC;AAClB;;;;"}',
+    type: 'asset' as const,
     needsCodeReference: false
   },
-  'subfolder/bar.js.map': {
-    fileName: 'subfolder/bar.js.map',
+  'bar/bar.js.map': {
+    fileName: 'bar/bar.js.map',
     name: undefined,
-    source: '{"version":3,"file":"bar.js","sources":["../../src/subfolder/bar.js"],"sourcesContent":["export default \'This is in a subfolder!\'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}',
+    source: '{"version":3,"file":"bar.js","sources":["../../src/bar/bar.js"],"sourcesContent":["export default \'This is in a subfolder!\'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}',
+    type: 'asset' as const,
+    needsCodeReference: false
+  },
+  // The subfolder is included in the "file" key within "source"
+  'sub/folder/baz.js.map': {
+    fileName: 'sub/folder/baz.js.map',
+    name: undefined,
+    source: '{"version":3,"file":"sub/folder/baz.js","sources":["../../src/subfolder/baz.js"],"sourcesContent":["export default \'This is in a subfolder!\'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}',
     type: 'asset' as const,
     needsCodeReference: false
   },
@@ -126,8 +163,15 @@ const assets = {
     source: '{"version":3,"file":"foo.js","sources":["../src/foo.js"],"sourcesContent":["export default \'hello world!\'"],"names":[],"mappings":";;AAAA,UAAe;;;;"}',
     type: 'asset' as const,
     needsCodeReference: false
+  },
+  'empty.js.map': {
+    fileName: 'empty.js.map',
+    name: undefined,
+    source: '{"version":3,"file":"empty.sass","sources":[], "sourcesContent": [], "names":[],"mappings":""}',
+    type: 'asset' as const,
+    needsCodeReference: false
   }
-} 
+}
 
 
 export default { ...chunks, ...assets }
