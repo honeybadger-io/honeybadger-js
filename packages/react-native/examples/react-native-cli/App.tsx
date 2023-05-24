@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { SafeAreaView, Button, TextInput, NativeModules } from 'react-native';
+import { SafeAreaView, Button, TextInput, NativeModules, Text } from 'react-native';
 import Honeybadger from '@honeybadger-io/react-native';
 const { ThrowErrModule } = NativeModules
 
@@ -14,6 +14,7 @@ export default function App() {
   const [apiKey, setApiKey] = useState('');
   const [revision, setRevision] = useState('testRevisionCli123');
   const [contextValue, setContextValue] = useState('');
+  const [lastNoticeId, setLastNoticeId] = useState('')
 
   function onConfigureButtonPress() {
     console.log('Configuring HB with API key:', apiKey);
@@ -22,6 +23,18 @@ export default function App() {
       revision,
       debug: true,
       reportData: true, // report data even in dev environment
+    })
+    Honeybadger.beforeNotify((notice) => {
+      if (notice) {
+        notice.context.beforeNotifyRan = true
+      }
+    })
+    Honeybadger.afterNotify((err, notice) => {
+      if (err) {
+        setLastNoticeId(`Error: ${err}`)
+      } else {
+        setLastNoticeId(notice?.id || '')
+      }
     })
   }
 
@@ -61,11 +74,15 @@ export default function App() {
         value={contextValue}
         onChangeText={(text) => setContextValue(text)}
       />
+
       <Button onPress={onConfigureButtonPress} title="Configure HB" />
       <Button onPress={onSetContextButtonPress} title="Set context" />
       <Button onPress={onErrButtonPress} title="Throw a JS error!" />
       <Button onPress={onNotifyButtonPress} title="Honeybader.notify()" />
       <Button onPress={onNativeErrPress} title="Throw a native error" />
+
+      <Text>Last notice ID: </Text>
+      <Text>{lastNoticeId}</Text>
     </SafeAreaView>
   );
 }
