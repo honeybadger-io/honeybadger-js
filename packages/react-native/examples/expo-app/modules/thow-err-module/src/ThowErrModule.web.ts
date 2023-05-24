@@ -1,5 +1,6 @@
 import { EventEmitter } from 'expo-modules-core';
 
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 const emitter = new EventEmitter({} as any);
 
 export default {

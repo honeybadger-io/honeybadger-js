@@ -5,9 +5,9 @@ import * as pkg from '../package.json'
 export class Transport implements Types.Transport {
   
   async send(
-      options: Types.TransportOptions, 
-      payload: Types.NoticeTransportPayload
-    ): Promise<{ statusCode: number; body: string; }> {
+    options: Types.TransportOptions, 
+    payload: Types.NoticeTransportPayload
+  ): Promise<{ statusCode: number; body: string; }> {
     
     payload.notifier = {
       name: pkg.name, 

@@ -8,7 +8,7 @@ import { NativeExceptionData } from './types'
 class Honeybadger extends Client {
   protected __jsHandlerInitialized:boolean
   protected __nativeHandlerInitialized:boolean
-  protected __originalJsHandler:Function
+  protected __originalJsHandler:(error: Error, isFatal: boolean) => void
 
   constructor(opts: Partial<Types.Config> = {}) {
     super(mergeDefaultOpts(opts), new Transport())
@@ -88,11 +88,11 @@ class Honeybadger extends Client {
 
   private onNativeException(data:NativeExceptionData) {
     switch ( Platform.OS ) {
-      case 'ios': 
-        this.onNativeIOSException(data)
+    case 'ios': 
+      this.onNativeIOSException(data)
       break
-      case 'android': 
-        this.onNativeAndroidException(data)
+    case 'android': 
+      this.onNativeAndroidException(data)
       break
     }
   }
@@ -132,7 +132,7 @@ class Honeybadger extends Client {
 
 function mergeDefaultOpts(opts) {
   return {
-    environment: __DEV__ ? "development" : "production", 
+    environment: __DEV__ ? 'development' : 'production', 
     ...opts
   }
 }

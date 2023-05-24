@@ -3,7 +3,7 @@ import { NativeExceptionData } from './types'
 export function backtraceFromAndroidException(data:NativeExceptionData) {
   if ( !data || !data.stackTrace ) return []
 
-  function isStringWithValue(val:unknown):Boolean {
+  function isStringWithValue(val:unknown):boolean {
     return typeof val === 'string' && val.trim().length > 0;
   }
 

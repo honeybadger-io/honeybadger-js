@@ -24,14 +24,14 @@ export function errorMessageFromIosException(data:NativeExceptionData):string {
 
 export function backtraceAndDetailsFromIosException(data:NativeExceptionData): {
     backtrace: Types.BacktraceFrame[];
-    backtraceDetails: Record<string, any>
+    backtraceDetails: Record<string, string | Record<string, string | number>[]>
 } {
   const framesFromComponent = framesFromComponentStack(data.localizedDescription)
   const framesFromReactNativeIos = framesFromReactNativeIosStack(data)
   const framesFromIosCall = framesFromIOSCallStack(data)
 
   let backtrace = []
-  let backtraceDetails:Record<string, any> = {}
+  const backtraceDetails:Record<string, string | Record<string, string | number>[]> = {}
 
   if (framesFromComponent.length) {
     backtrace = framesFromComponent
@@ -58,7 +58,7 @@ export function backtraceAndDetailsFromIosException(data:NativeExceptionData): {
 
 function framesFromComponentStack(str:string) {
   str = str || ''
-  let frames = []
+  const frames = []
   const regex = /^\s*in\s(\S+)(\s\(at\s(\S+):(\S+)\)\s*$)?/gm
   let match
   while ((match = regex.exec(str)) !== null) {
@@ -96,7 +96,7 @@ function framesFromIOSCallStack(data:NativeExceptionData) {
     callStack = data.callStackSymbols.map(item => item.trim());
   }
 
-  let frames = [];
+  const frames = [];
   const regex = /\d+\s+(\S+)\s+(\S+)\s(.+)\s\+\s(\d+)(\s+\((\S+):(\S+)\))?/gm
   let match
   callStack.forEach(element => {
@@ -105,11 +105,11 @@ function framesFromIOSCallStack(data:NativeExceptionData) {
         regex.lastIndex++;
       }
 
-      let moduleName = match && match.length > 1 ? match[1] : '';
-      let stackAddress = match && match.length > 2 ? match[2] : '';
-      let loadAddress = match && match.length > 3 ? match[3] : '';
-      let file = match && match.length > 6 ? match[6] : '';
-      let line = match && match.length > 7 ? match[7] : '';
+      const moduleName = match && match.length > 1 ? match[1] : '';
+      const stackAddress = match && match.length > 2 ? match[2] : '';
+      const loadAddress = match && match.length > 3 ? match[3] : '';
+      const file = match && match.length > 6 ? match[6] : '';
+      const line = match && match.length > 7 ? match[7] : '';
 
       // TODO: Why doesn't this match the BacktraceFrame type?
       frames.push({
