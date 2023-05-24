@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Button, TextInput, NativeModules } from 'react-native';
+import { StyleSheet, View, Button, TextInput } from 'react-native';
 import Honeybadger from '@honeybadger-io/react-native';
-// const { ThrowErrModule } = NativeModules
+import { throwNativeErr } from './modules/thow-err-module'
 
 export default function App() {
   const [apiKey, setApiKey] = useState('');
@@ -31,10 +31,9 @@ export default function App() {
     Honeybadger.notify(new Error('This is a test notify() from the react-native-cli example project'), {})
   }
 
-  // TODO
-  // function onNativeErrPress() {
-  //   ThrowErrModule.throwErr()
-  // }
+  function onNativeErrPress() {
+    throwNativeErr()
+  }
 
   return (
     <View style={styles.container}>
@@ -57,7 +56,7 @@ export default function App() {
       <Button onPress={onSetContextButtonPress} title="Set context" />
       <Button onPress={onErrButtonPress} title="Throw a JS error!" />
       <Button onPress={onNotifyButtonPress} title="Honeybader.notify()" />
-      {/* <Button onPress={onNativeErrPress} title="Throw a native error" /> */}
+      <Button onPress={onNativeErrPress} title="Throw a native error" />
     </View>
   );
 }
