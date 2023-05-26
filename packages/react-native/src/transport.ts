@@ -21,7 +21,6 @@ export class Transport implements Types.Transport {
         ...options.headers, 
         'User-Agent': this.buildUserAgent()
       },
-      // TODO: is this sanitize helpful?
       body: JSON.stringify(Util.sanitize(payload, options.maxObjectDepth))
     };
 
