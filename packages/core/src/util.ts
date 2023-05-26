@@ -121,6 +121,7 @@ export function getCauses(notice: Partial<Notice>, logger: Logger) {
   if (notice.cause) {
     const causes =[]
     let cause = notice as Error
+    // @ts-ignore this throws an error if tsconfig.json has strict: true
     while (causes.length < 3 && (cause = cause.cause) as Error) {
       causes.push({
         class: cause.name,

@@ -26,5 +26,13 @@
   ],
   "include": [
     "./src/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../js"
+    },
+    {
+      "path": "../react"
+    }
   ]
 }
