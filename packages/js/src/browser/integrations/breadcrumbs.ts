@@ -107,7 +107,9 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
           return function () {
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const xhr = this
-            const url = arguments[1]
+            const rawUrl = arguments[1]
+            // in case of url being URL object (which is valid input) we need to stringify it
+            const url =  typeof rawUrl === 'string' ? rawUrl : String(rawUrl)
             const method = typeof arguments[0] === 'string' ? arguments[0].toUpperCase() : arguments[0]
             const message = `${method} ${localURLPathname(url)}`
 
