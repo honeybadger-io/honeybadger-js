@@ -104,6 +104,21 @@ or
 npm run android:release
 ```
 
+### Development workflow
+When developing the react-native package and testing against the example projects, you will need to change the dependency in the example project's `package.json`. Rather than `"@honeybadger-io/react-native": "latest"`, you'll want to generate a tarball of the `react-native` package and install it. For example:
+
+In the `react-native` folder: 
+```shell
+npm run build && npm pack
+```
+This will generate a tarball. Install it in an example project by updating `package.json`, for example:
+```json
+"@honeybadger-io/react-native": "file:../../honeybadger-io-react-native-5.1.6.tgz"
+```
+Then run `npm install` within the example project. 
+
+If you notice that your changes are not being picked up, there may be a caching issue. You can bust this by renaming the tarball to a unique name and re-installing it. 
+
 ## License
 
 The Honeybadger React Native library is MIT-licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.
