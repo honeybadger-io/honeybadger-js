@@ -3,6 +3,149 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 6.0.0 (2023-05-29)
+
+## 5.4.1 (2023-05-08)
+
+## 5.3.0 (2023-04-14)
+
+
+### Features
+
+* nextjs integration ([#1030](https://github.com/honeybadger-io/honeybadger-js/issues/1030)) ([695abec](https://github.com/honeybadger-io/honeybadger-js/commit/695abecf6753c4d37b7ead517c13385d1a64eaf6))
+
+## 5.2.0 (2023-03-27)
+
+## 5.1.7 (2023-03-20)
+
+## 5.1.1 (2023-02-13)
+
+## 5.0.0 (2023-02-05)
+
+## 4.10.0 (2023-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* specify "engines" in package.json
+
+### Features
+
+* specify "engines" in package.json ([d0eb1a3](https://github.com/honeybadger-io/honeybadger-js/commit/d0eb1a368b9904d464528a61844fa52416d14828)), closes [#961](https://github.com/honeybadger-io/honeybadger-js/issues/961)
+
+## 4.9.3 (2023-01-20)
+
+## 4.9.2 (2023-01-18)
+
+
+### Bug Fixes
+
+* replace instrument with safer alternative addEventListener ([#1002](https://github.com/honeybadger-io/honeybadger-js/issues/1002)) ([8569f09](https://github.com/honeybadger-io/honeybadger-js/commit/8569f096788b55beb26a6290f4b481035455adbb))
+
+## 4.9.0 (2023-01-14)
+
+
+### Features
+
+* collect user feedback ([#965](https://github.com/honeybadger-io/honeybadger-js/issues/965)) ([0842f0a](https://github.com/honeybadger-io/honeybadger-js/commit/0842f0afeb65dc28045809cae4ebc94e461aeb4b))
+
+## 4.8.2 (2023-01-02)
+
+## 4.8.1 (2022-12-22)
+
+
+### Bug Fixes
+
+* filter out honeybadger source code from stack trace ([#982](https://github.com/honeybadger-io/honeybadger-js/issues/982)) ([e647b75](https://github.com/honeybadger-io/honeybadger-js/commit/e647b75a58bce6a98da6bcc418dd77ecabe0fae1))
+
+## 4.8.0 (2022-12-12)
+
+
+### Features
+
+* add window / document checks, refactor XMLHttpRequest to Fetch ([#958](https://github.com/honeybadger-io/honeybadger-js/issues/958)) ([b7e717f](https://github.com/honeybadger-io/honeybadger-js/commit/b7e717fc685f637717f304522b3e093521dc5657))
+
+## 4.7.4 (2022-11-26)
+
+
+### Bug Fixes
+
+* exit process on unhandledRejection ([#950](https://github.com/honeybadger-io/honeybadger-js/issues/950)) ([ffff051](https://github.com/honeybadger-io/honeybadger-js/commit/ffff05101abf8251ff4cf1289a11a5fdedca060b))
+
+## 4.7.1 (2022-11-14)
+
+## 4.6.2 (2022-10-28)
+
+
+### Bug Fixes
+
+* add @types/express in deps ([#917](https://github.com/honeybadger-io/honeybadger-js/issues/917)) ([d06717b](https://github.com/honeybadger-io/honeybadger-js/commit/d06717b1ada4d96a1eefd3eff7c1084371e5986d))
+
+## 4.6.1 (2022-10-24)
+
+
+### Bug Fixes
+
+* README.md misleading dev to use wrong import code on while working with ES6 Import.  ([#916](https://github.com/honeybadger-io/honeybadger-js/issues/916)) ([246633a](https://github.com/honeybadger-io/honeybadger-js/commit/246633a4db1c422868b530ad925ff99ed0b90503))
+
+## 4.6.0 (2022-10-17)
+
+
+### Features
+
+* rework store API ([d814174](https://github.com/honeybadger-io/honeybadger-js/commit/d81417456f2f0b3b69f22cf96c24c5fd330fd5d8))
+
+## 4.3.1 (2022-09-26)
+
+## 4.3.0 (2022-09-17)
+
+
+### Features
+
+* migrate honeybadger-vue to monorepo ([#881](https://github.com/honeybadger-io/honeybadger-js/issues/881)) ([3172203](https://github.com/honeybadger-io/honeybadger-js/commit/317220310f07edd18283214fe8901cab31218416)), closes [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870)
+
+
+### Bug Fixes
+
+* handle sync lambda handlers (non callback-based) ([#887](https://github.com/honeybadger-io/honeybadger-js/issues/887)) ([be5c2fd](https://github.com/honeybadger-io/honeybadger-js/commit/be5c2fd8ca5ef61971bc522f036e2f6ab9555477)), closes [#860](https://github.com/honeybadger-io/honeybadger-js/issues/860)
+
+## 4.2.0 (2022-09-13)
+
+
+### Features
+
+* migrate honeybadger-webpack to monorepo ([#869](https://github.com/honeybadger-io/honeybadger-js/issues/869)) ([0c31c1a](https://github.com/honeybadger-io/honeybadger-js/commit/0c31c1ad2905f275574263f3b34cb9c33cab6e10))
+
+## 4.1.3 (2022-09-04)
+
+
+### Bug Fixes
+
+* update package-lock.json to include @types/aws-lambda ([85748bb](https://github.com/honeybadger-io/honeybadger-js/commit/85748bbab1141ac1bf1d99d1eeeee761d2e58af2))
+
+## 4.1.2 (2022-09-01)
+
+
+### Bug Fixes
+
+* add @types/aws-lambda as a dependency ([#865](https://github.com/honeybadger-io/honeybadger-js/issues/865)) ([56a7dc3](https://github.com/honeybadger-io/honeybadger-js/commit/56a7dc353b8cf61ef9f34403de3a921c42a0b01d)), closes [#863](https://github.com/honeybadger-io/honeybadger-js/issues/863)
+
+## 4.1.1 (2022-08-20)
+
+
+### Bug Fixes
+
+* improve type definition for GlobalStore ([#862](https://github.com/honeybadger-io/honeybadger-js/issues/862)) ([6f722fe](https://github.com/honeybadger-io/honeybadger-js/commit/6f722fece40dd08a903affdff7f5f2dd643c1612))
+
+## 4.1.0 (2022-08-12)
+
+
+### Features
+
+* **monorepo:** setup monorepo skeleton and break js to 2 packages ([#844](https://github.com/honeybadger-io/honeybadger-js/issues/844)) ([2fbdc56](https://github.com/honeybadger-io/honeybadger-js/commit/2fbdc56678da3ccebca3dbb99795e803888540fd)), closes [#854](https://github.com/honeybadger-io/honeybadger-js/issues/854)
+
+
+
 ## [5.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.0...v5.4.1) (2023-05-08)
 
 **Note:** Version bump only for package @honeybadger-io/js
