@@ -6,9 +6,9 @@ import { backtraceFromAndroidException } from './androidUtils'
 import { NativeExceptionData } from './types'
 
 class Honeybadger extends Client {
-  protected __jsHandlerInitialized:boolean
-  protected __nativeHandlerInitialized:boolean
-  protected __originalJsHandler:(error: Error, isFatal: boolean) => void
+  private __jsHandlerInitialized:boolean
+  private __nativeHandlerInitialized:boolean
+  private __originalJsHandler:(error: Error, isFatal: boolean) => void
 
   constructor(opts: Partial<Types.Config> = {}) {
     super(mergeDefaultOpts(opts), new Transport())
