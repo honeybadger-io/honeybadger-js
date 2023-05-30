@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Button, TextInput } from 'react-native';
 import Honeybadger from '@honeybadger-io/react-native';
-import { throwNativeErr } from './modules/thow-err-module'
+import { throwNativeErr } from './modules/throw-err-module'
 
 export default function App() {
   const [apiKey, setApiKey] = useState('');

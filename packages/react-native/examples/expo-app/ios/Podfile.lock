@@ -306,7 +306,7 @@ PODS:
     - React-jsi (= 0.70.8)
     - React-logger (= 0.70.8)
     - React-perflogger (= 0.70.8)
-  - ThowErrModule (1.0.0):
+  - ThrowErrModule (1.0.0):
     - ExpoModulesCore
   - Yoga (1.14.0)
 
@@ -352,7 +352,7 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - ThowErrModule (from `../modules/thow-err-module/ios`)
+  - ThrowErrModule (from `../modules/throw-err-module/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -440,8 +440,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/runtimeexecutor"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  ThowErrModule:
-    :path: "../modules/thow-err-module/ios"
+  ThrowErrModule:
+    :path: "../modules/throw-err-module/ios"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -487,7 +487,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: 19d21a3ed620352180800447771f68a101f196e9
   React-runtimeexecutor: f795fd426264709901c09432c6ce072f8400147e
   ReactCommon: c440e7f15075e81eb29802521c58a1f38b1aa903
-  ThowErrModule: fee570c3ca07c1ad92b29eb229c6dfb923b114fe
+  ThrowErrModule: f930b0924ef40341fe23fc2b5e97e9da0b124ad7
   Yoga: d6133108734e69e8c0becc6ba587294b94829687
 
 PODFILE CHECKSUM: aab9bcea9332112cf0e584ee15df9c75498a4ccc

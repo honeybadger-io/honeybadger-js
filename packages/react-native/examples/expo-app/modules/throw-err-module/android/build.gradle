@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'maven-publish'
 
-group = 'expo.modules.thowerrmodule'
+group = 'expo.modules.throwerrmodule'
 version = '0.1.0'
 
 buildscript {

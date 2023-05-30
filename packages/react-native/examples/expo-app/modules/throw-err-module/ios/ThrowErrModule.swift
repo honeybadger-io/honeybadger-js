@@ -1,53 +1,47 @@
-package expo.modules.thowerrmodule
+import ExpoModulesCore
 
-import expo.modules.kotlin.modules.Module
-import expo.modules.kotlin.modules.ModuleDefinition
+enum TestError: Error {
+  case whoopsYouMessedUp
+}
 
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-
-class ThowErrModule : Module() {
+public class ThrowErrModule: Module {
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
-  override fun definition() = ModuleDefinition {
+  public func definition() -> ModuleDefinition {
     // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
     // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ThowErrModule')` in JavaScript.
-    Name("ThowErrModule")
+    // The module will be accessible from `requireNativeModule('ThrowErrModule')` in JavaScript.
+    Name("ThrowErrModule")
 
     // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
-      "PI" to Math.PI
-    )
+    Constants([
+      "PI": Double.pi
+    ])
 
     // Defines event names that the module can send to JavaScript.
     Events("onChange")
 
+    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
     Function("throwErr") {
-      val r = Runnable {
-        throw Exception("Test Android Native Exception")
-      }
-      Handler(Looper.getMainLooper()).postDelayed(r, 5000)
+      throw TestError.whoopsYouMessedUp
     }
-
 
     // Defines a JavaScript function that always returns a Promise and whose native code
     // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
+    AsyncFunction("setValueAsync") { (value: String) in
       // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
+      self.sendEvent("onChange", [
+        "value": value
+      ])
     }
 
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(ThowErrModuleView::class) {
+    // Enables the module to be used as a native view. Definition components that are accepted as part of the
+    // view definition: Prop, Events.
+    View(ThrowErrModuleView.self) {
       // Defines a setter for the `name` prop.
-      Prop("name") { view: ThowErrModuleView, prop: String ->
-        println(prop)
+      Prop("name") { (view: ThrowErrModuleView, prop: String) in
+        print(prop)
       }
     }
   }

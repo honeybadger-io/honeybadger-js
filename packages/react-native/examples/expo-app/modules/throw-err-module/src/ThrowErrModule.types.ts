@@ -2,6 +2,6 @@ export type ChangeEventPayload = {
   value: string;
 };
 
-export type ThowErrModuleViewProps = {
+export type ThrowErrModuleViewProps = {
   name: string;
 };
