@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.0.0...@honeybadger-io/js@6.1.0) (2023-05-31)
+
+
+### Features
+
+* support URL objects in XHR requests ([#1079](https://github.com/honeybadger-io/honeybadger-js/issues/1079)) ([2ffda3b](https://github.com/honeybadger-io/honeybadger-js/commit/2ffda3bd9ced471881ea14185d7f29e79be0b4bb))
+
+
+
 ## 6.0.0 (2023-05-29)
 
 ## 5.4.1 (2023-05-08)
