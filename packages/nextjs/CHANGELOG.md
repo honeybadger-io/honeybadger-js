@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.6.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.5.1...@honeybadger-io/nextjs@5.6.0) (2023-06-02)
+
+
+### Features
+
+* **nextjs:** app router support ([#1071](https://github.com/honeybadger-io/honeybadger-js/issues/1071)) ([e3752f4](https://github.com/honeybadger-io/honeybadger-js/commit/e3752f4400cbd0222dafdbfd16f6dd84c3b67893))
+
+
+
 ## [5.5.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.5.0...@honeybadger-io/nextjs@5.5.1) (2023-05-31)
 
 **Note:** Version bump only for package @honeybadger-io/nextjs
