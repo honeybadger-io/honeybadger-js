@@ -8,14 +8,14 @@ A React Native library for integrating [Honeybadger](https://honeybadger.io) int
 
 ## Installation
 
-From the root directory of your React Native project:
+From the root directory of your React Native project, add *@honeybadger-io/react-native* as a dependency:
 
 ```shell
 npm install "@honeybadger-io/react-native"
 cd ios && pod install
 ```
 
-The above will download the Honeybadger React Native library and add it as a dependency of your project. The iOS step is required to properly add the library to the Xcode project through CocoaPods. Android doesn't require a separate step.
+The iOS step is required to properly add the library to the Xcode project through CocoaPods. Android doesn't require a separate step.
 
 ## Initialization
 
@@ -32,7 +32,7 @@ export default function App() {
 }
 ```
 
-You can log into your [Honeybadger](https://honeybadger.io) account to obtain your API key.
+You can log into your [Honeybadger](https://app.honeybadger.io/) account to obtain your API key.
 
 
 ## Configuration
