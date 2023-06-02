@@ -72,7 +72,8 @@ describe('HoneybadgerReact', () => {
       sandbox.spy(honeybadger, 'notify')
       sandbox.spy(honeybadger, 'showUserFeedbackForm')
 
-      const MyError = jest.fn(() => 'custom error view')
+      // need to cast to unknown because ErrorComponent does not expect a jest.Mock type
+      const MyError = jest.fn(() => 'custom error view') as unknown as string
       TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} ErrorComponent={MyError}><Broken /></HoneybadgerErrorBoundary>)
       expect(MyError).toBeCalledWith({
         error: expect.any(Error),
@@ -92,7 +93,8 @@ describe('HoneybadgerReact', () => {
       sandbox.spy(honeybadger, 'notify')
       sandbox.spy(honeybadger, 'showUserFeedbackForm')
 
-      const MyError = jest.fn(() => 'custom error view')
+      // need to cast to unknown because ErrorComponent does not expect a jest.Mock type
+      const MyError = jest.fn(() => 'custom error view') as unknown as string
       TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} showUserFeedbackFormOnError={true} ErrorComponent={MyError}><Broken /></HoneybadgerErrorBoundary>)
       expect(MyError).toBeCalledWith({
         error: expect.any(Error),
