@@ -9,7 +9,7 @@
     "start": "expo start --dev-client"
   },
   "dependencies": {
-    "@honeybadger-io/react-native": "file:../../honeybadger-io-react-native-5.1.6_517150.tgz",
+    "@honeybadger-io/react-native": "latest",
     "expo": "~47.0.14",
     "expo-status-bar": "~1.4.2",
     "react": "18.1.0",
