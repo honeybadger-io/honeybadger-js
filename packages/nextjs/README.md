@@ -31,13 +31,17 @@ This version is considered suitable for preview.
 
 The following limitations are known to exist and will be tackled in future releases:
 
-- [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1055): A custom `_error.js` component is used to report uncaught exceptions to Honeybadger. 
+- [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1055): A custom error component is used to report uncaught exceptions to Honeybadger. 
   This is necessary because Next.js does not provide a way to hook into the error handler.
-  This is not a catch-all errors solution. There are some caveats to this approach, as reported [here](https://nextjs.org/docs/advanced-features/custom-error-page#caveats).
+  This is not a catch-all errors solution.  
+  If you are using the _Pages Router_, there are some caveats to this approach, as reported [here](https://nextjs.org/docs/advanced-features/custom-error-page#caveats).
   This is a limitation of Next.js, not Honeybadger's Next.js integration.
-  Errors thrown in middlewares or API routes will not be reported to Honeybadger, since when they reach _error.js, the response status code is 404 and no error information is available.
-  Additionally, there is an open [issue](https://github.com/vercel/next.js/issues/45535) about 404 being reported with Next.js apps deployed on Vercel, when they should be reported as 500.
-- [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1056):Source maps for the [Edge runtime](https://vercel.com/docs/concepts/functions/edge-functions/edge-runtime) are not supported yet.
+  Errors thrown in middlewares or API routes will not be reported to Honeybadger, since when they reach the error component, the response status code is 404 and no error information is available.
+  Additionally, there is an open [issue](https://github.com/vercel/next.js/issues/45535) about 404 being reported with Next.js apps deployed on Vercel, when they should be reported as 500.  
+  If you are using the _App Router_, these limitations do not apply, because errors thrown in middlewares or API routes do not reach the custom error component
+  but are caught by the global `window.onerror` handler. However, some other server errors (i.e. from data fetching methods) will be reported with minimal information, 
+  since Next.js will send a [generic error message](https://nextjs.org/docs/app/building-your-application/routing/error-handling#handling-server-errors) to this component for better security.
+- [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1056): Source maps for the [Edge runtime](https://vercel.com/docs/concepts/functions/edge-functions/edge-runtime) are not supported yet.
 
 ## Example app
 
