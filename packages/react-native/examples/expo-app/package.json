@@ -2,17 +2,18 @@
   "name": "expo-app",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start --dev-client",
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
-    "web": "expo start --web"
+    "android:release": "npx expo run:android --variant release",
+    "ios:release": "npx expo run:ios --configuration Release",
+    "start": "expo start --dev-client"
   },
   "dependencies": {
-    "@honeybadger-io/react-native": "^5.1.1",
-    "expo": "~47.0.12",
+    "@honeybadger-io/react-native": "latest",
+    "expo": "~47.0.14",
     "expo-status-bar": "~1.4.2",
     "react": "18.1.0",
-    "react-native": "0.70.5",
+    "react-native": "0.70.8",
     "expo-splash-screen": "~0.17.5"
   },
   "devDependencies": {

@@ -1,6 +1,9 @@
 # OSX
 .DS_Store
 
+# Tarball (used for testing)
+honeybadger-io-react-native-*.tgz
+
 # Node
 *.log
 npm-debug.log
