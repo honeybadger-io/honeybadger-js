@@ -1,5 +1,5 @@
 import { Types, Util } from '@honeybadger-io/core'
-import { Platform } from 'react-native';
+import { Platform } from 'react-native'
 import * as pkg from '../package.json'
 
 export class Transport implements Types.Transport {
@@ -8,23 +8,19 @@ export class Transport implements Types.Transport {
     options: Types.TransportOptions, 
     payload?: Types.NoticeTransportPayload
   ): Promise<{ statusCode: number; body: string; }> {
-    
-    if (payload) {
-      payload.notifier = {
-        name: pkg.name, 
-        url: pkg.repository.url, 
-        version: pkg.version,
-      }
-    }
 
-    const params = {
+    const params: RequestInit = {
       method: options.method,
       headers: {
         ...options.headers, 
         'User-Agent': this.buildUserAgent()
       },
-      body: JSON.stringify(Util.sanitize(payload, options.maxObjectDepth))
-    };
+    }
+
+    // GET methods cannot have a body.
+    if (options.method === 'POST') {
+      params.body = this.buildJsonBody(options, payload)
+    }
 
     // react-native provides a fetch API
     const res = await fetch(options.endpoint, params)
@@ -48,5 +44,20 @@ export class Transport implements Types.Transport {
     }
 
     return `${pkg.name} ${pkg.version}; ${reactNativeVersion}; ${nativePlatform}`;
+  }
+
+  private buildJsonBody(
+    options: Types.TransportOptions, 
+    payload: Types.NoticeTransportPayload
+  ): string {
+    const body = Util.sanitize({
+      ...payload, 
+      notifier: {
+        name: pkg.name, 
+        url: pkg.repository.url, 
+        version: pkg.version,
+      }
+    }, options.maxObjectDepth)
+    return JSON.stringify(body)
   }
 }
