@@ -1,5 +1,5 @@
 import { Types, Util } from '@honeybadger-io/core'
-import { Platform  } from 'react-native';
+import { Platform } from 'react-native';
 import * as pkg from '../package.json'
 
 export class Transport implements Types.Transport {
@@ -9,10 +9,12 @@ export class Transport implements Types.Transport {
     payload?: Types.NoticeTransportPayload
   ): Promise<{ statusCode: number; body: string; }> {
     
-    payload.notifier = {
-      name: pkg.name, 
-      url: pkg.repository.url, 
-      version: pkg.version,
+    if (payload) {
+      payload.notifier = {
+        name: pkg.name, 
+        url: pkg.repository.url, 
+        version: pkg.version,
+      }
     }
 
     const params = {
