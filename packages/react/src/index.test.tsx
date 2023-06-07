@@ -72,10 +72,11 @@ describe('HoneybadgerReact', () => {
       sandbox.spy(honeybadger, 'notify')
       sandbox.spy(honeybadger, 'showUserFeedbackForm')
 
-      // need to cast to unknown because ErrorComponent does not expect a jest.Mock type
-      const MyError = jest.fn(() => 'custom error view') as unknown as string
-      TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} ErrorComponent={MyError}><Broken /></HoneybadgerErrorBoundary>)
-      expect(MyError).toBeCalledWith({
+      const MyErrComponent = () => <>custom error</>
+      const MyErrComponentMock = jest.fn(MyErrComponent) as jest.MockedFunction<typeof MyErrComponent>
+
+      TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} ErrorComponent={MyErrComponentMock}><Broken /></HoneybadgerErrorBoundary>)
+      expect(MyErrComponentMock).toBeCalledWith({
         error: expect.any(Error),
         info: { componentStack: expect.any(String) },
         errorOccurred: expect.any(Boolean)
@@ -93,10 +94,11 @@ describe('HoneybadgerReact', () => {
       sandbox.spy(honeybadger, 'notify')
       sandbox.spy(honeybadger, 'showUserFeedbackForm')
 
-      // need to cast to unknown because ErrorComponent does not expect a jest.Mock type
-      const MyError = jest.fn(() => 'custom error view') as unknown as string
-      TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} showUserFeedbackFormOnError={true} ErrorComponent={MyError}><Broken /></HoneybadgerErrorBoundary>)
-      expect(MyError).toBeCalledWith({
+      const MyErrComponent = () => <>custom error</>
+      const MyErrComponentMock = jest.fn(MyErrComponent) as jest.MockedFunction<typeof MyErrComponent>
+
+      TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} showUserFeedbackFormOnError={true} ErrorComponent={MyErrComponentMock}><Broken /></HoneybadgerErrorBoundary>)
+      expect(MyErrComponentMock).toBeCalledWith({
         error: expect.any(Error),
         info: { componentStack: expect.any(String) },
         errorOccurred: expect.any(Boolean)
