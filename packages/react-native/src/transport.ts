@@ -6,7 +6,7 @@ export class Transport implements Types.Transport {
   
   async send(
     options: Types.TransportOptions, 
-    payload: Types.NoticeTransportPayload
+    payload?: Types.NoticeTransportPayload
   ): Promise<{ statusCode: number; body: string; }> {
     
     payload.notifier = {

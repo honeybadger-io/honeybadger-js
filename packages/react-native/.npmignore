@@ -1,6 +1,10 @@
 # Examples
 examples/
 
+# Test
+/test
+.jest
+
 # Config
 tsconfig.json
 rollup.config.mjs
