@@ -87,7 +87,7 @@ function framesFromReactNativeIosStack(data:NativeExceptionData) {
   }))
 }
 
-function framesFromIOSCallStack(data:NativeExceptionData) {
+export function framesFromIOSCallStack(data:NativeExceptionData) {
   let callStack = []
 
   if (data.localizedDescription && typeof data.localizedDescription === 'string') {
@@ -111,7 +111,8 @@ function framesFromIOSCallStack(data:NativeExceptionData) {
       const file = match && match.length > 6 ? match[6] : '';
       const line = match && match.length > 7 ? match[7] : '';
 
-      // TODO: Why doesn't this match the BacktraceFrame type?
+      // TODO: This should match the BacktraceFrame type
+      // symbolication is needed https://github.com/honeybadger-io/honeybadger-js/issues/1082
       frames.push({
         file: file || moduleName || '',
         line: line || '',
