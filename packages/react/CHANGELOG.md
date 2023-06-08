@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.0.2...@honeybadger-io/react@6.0.3) (2023-06-08)
+
+
+### Bug Fixes
+
+* **react:** update types to work with react 18 ([#1083](https://github.com/honeybadger-io/honeybadger-js/issues/1083)) ([6f46ff8](https://github.com/honeybadger-io/honeybadger-js/commit/6f46ff8ac52cc5f5bc0a03ae6d09d7157f6a8c27))
+
+
+
 ## [6.0.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.0.1...@honeybadger-io/react@6.0.2) (2023-06-02)
 
 **Note:** Version bump only for package @honeybadger-io/react
