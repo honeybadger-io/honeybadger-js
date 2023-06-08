@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from 'react'
+import React, { Component, ComponentType, ElementType, ReactNode } from 'react'
 import Honeybadger from '@honeybadger-io/js'
 import DefaultErrorComponent, { DefaultErrorComponentProps } from './DefaultErrorComponent'
 import PropTypes from 'prop-types';
@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 interface HoneybadgerErrorBoundaryProps {
   honeybadger: typeof Honeybadger
   showUserFeedbackFormOnError?: boolean
-  ErrorComponent?: ReactNode
+  ErrorComponent?: ReactNode | ComponentType | ElementType
+  children?: ReactNode
 }
 
 interface HoneybadgerErrorBoundaryState extends DefaultErrorComponentProps {
