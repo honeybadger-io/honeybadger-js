@@ -105,6 +105,8 @@ jobs:
             packages/vue/examples/vue2/package-lock.json
             packages/vue/examples/vue3/package-lock.json
             packages/react-native/example/package-lock.json
+            packages/nextjs/examples/app-router/package-lock.json
+            packages/nextjs/examples/pages-router/package-lock.json
 
       - name: Build
         run: npm ci
