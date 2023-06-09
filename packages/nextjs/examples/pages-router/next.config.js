@@ -1,4 +1,5 @@
-const { setupHoneybadger } = require('../../dist/honeybadger-nextjs.cjs')
+// const { setupHoneybadger } = require('../../dist/honeybadger-nextjs.cjs')
+const { setupHoneybadger } = require('@honeybadger-io/nextjs')
 
 const moduleExports = {
   // ... Your existing module.exports object goes here
