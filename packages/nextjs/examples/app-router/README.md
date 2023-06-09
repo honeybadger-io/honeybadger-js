@@ -39,8 +39,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 Since this example project is inside a monorepo, you will have to follow the guide available [here](https://vercel.com/docs/concepts/monorepos)
 to get it working. Alternatively, you can clone this folder into a new repository.
 
-You must add the following configuration values when deploying:
+You must add the following environment values when deploying:
 
 - `NEXT_PUBLIC_HONEYBADGER_API_KEY` - The API key from your **project settings page** in [Honeybadger](https://app.honeybadger.io).
 - `NEXT_PUBLIC_HONEYBADGER_ASSETS_URL` - Required by [honeybadger-webpack](https://github.com/honeybadger-io/honeybadger-webpack#configuration) to upload source maps to Honeybadger. Replace `[host]` with your domain name: `https://[host]/_next` (if using Vercel's domain, the host looks like this: `[your app name].vercel.app`)
 - `NEXT_PUBLIC_HONEYBADGER_REVISION` - The version (i.e. 1.0.0) of your the app. This is necessary to in order to apply source maps to errors in Honeybadger.
+
+You should override build and install commands:
+- Build: `cd ../.. && npm run build && cd examples/pages-router && npm run build`
+- Install: `cd ../../.. && npm install`
+
+The above overrides bootstrap the monorepo, allowing to import honeybadger packages that haven't been published to npm yet.
