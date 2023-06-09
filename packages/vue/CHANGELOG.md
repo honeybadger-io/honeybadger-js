@@ -3,6 +3,119 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.0.2...@honeybadger-io/vue@6.0.3) (2023-06-07)
+
+**Note:** Version bump only for package @honeybadger-io/vue
+
+
+
+
+
+## [6.0.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.0.1...@honeybadger-io/vue@6.0.2) (2023-06-02)
+
+**Note:** Version bump only for package @honeybadger-io/vue
+
+
+
+
+
+## [6.0.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.0.0...@honeybadger-io/vue@6.0.1) (2023-05-31)
+
+**Note:** Version bump only for package @honeybadger-io/vue
+
+
+
+
+
+## 6.0.0 (2023-05-29)
+
+## 5.4.1 (2023-05-08)
+
+## 5.3.0 (2023-04-14)
+
+## 5.2.0 (2023-03-27)
+
+## 5.1.7 (2023-03-20)
+
+## 5.1.2 (2023-02-14)
+
+
+### Bug Fixes
+
+* update peer deps ([#1021](https://github.com/honeybadger-io/honeybadger-js/issues/1021)) ([2c34f0c](https://github.com/honeybadger-io/honeybadger-js/commit/2c34f0cbea92ff60af37345a107b8b7c6c3d96e5))
+
+## 5.1.1 (2023-02-13)
+
+## 5.0.0 (2023-02-05)
+
+## 4.10.0 (2023-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* specify "engines" in package.json
+
+### Features
+
+* specify "engines" in package.json ([d0eb1a3](https://github.com/honeybadger-io/honeybadger-js/commit/d0eb1a368b9904d464528a61844fa52416d14828)), closes [#961](https://github.com/honeybadger-io/honeybadger-js/issues/961)
+
+## 4.9.3 (2023-01-20)
+
+
+### Bug Fixes
+
+* **vue3:** constructor was accessed during render warning in ([40568c9](https://github.com/honeybadger-io/honeybadger-js/commit/40568c949f6dda402db472e41d41e5d0d3e1ac1f)), closes [#996](https://github.com/honeybadger-io/honeybadger-js/issues/996)
+
+## 4.9.2 (2023-01-18)
+
+## 4.9.1 (2023-01-14)
+
+
+### Bug Fixes
+
+* improve generateStackTrace function to hide vue warn message ([#1000](https://github.com/honeybadger-io/honeybadger-js/issues/1000)) ([45c6ad6](https://github.com/honeybadger-io/honeybadger-js/commit/45c6ad6bc30a3680ddb402bd3598fda4d57f8ec9))
+
+## 4.9.0 (2023-01-14)
+
+
+### Features
+
+* collect user feedback ([#965](https://github.com/honeybadger-io/honeybadger-js/issues/965)) ([0842f0a](https://github.com/honeybadger-io/honeybadger-js/commit/0842f0afeb65dc28045809cae4ebc94e461aeb4b))
+
+## 4.8.2 (2023-01-02)
+
+## 4.8.1 (2022-12-22)
+
+## 4.8.0 (2022-12-12)
+
+## 4.7.4 (2022-11-26)
+
+## 4.7.1 (2022-11-14)
+
+## 4.6.2 (2022-10-28)
+
+## 4.6.1 (2022-10-24)
+
+## 4.6.0 (2022-10-17)
+
+## 4.4.0 (2022-09-28)
+
+
+### Features
+
+* migrate honeybadger-react to monorepo ([#892](https://github.com/honeybadger-io/honeybadger-js/issues/892)) ([e026b76](https://github.com/honeybadger-io/honeybadger-js/commit/e026b76fe6e2540fcd1be33274a5e5cb61cd4a90))
+
+## 4.3.1 (2022-09-26)
+
+## 4.3.0 (2022-09-17)
+
+
+### Features
+
+* migrate honeybadger-vue to monorepo ([#881](https://github.com/honeybadger-io/honeybadger-js/issues/881)) ([3172203](https://github.com/honeybadger-io/honeybadger-js/commit/317220310f07edd18283214fe8901cab31218416)), closes [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870) [#870](https://github.com/honeybadger-io/honeybadger-js/issues/870)
+
+
+
 ## [5.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.0...v5.4.1) (2023-05-08)
 
 **Note:** Version bump only for package @honeybadger-io/vue

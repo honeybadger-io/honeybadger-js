@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.0.0...@honeybadger-io/react-native@6.0.1) (2023-06-08)
+
+**Note:** Version bump only for package @honeybadger-io/react-native
+
+
+
+
+
+## 6.0.0 (2023-06-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **react-native:** include the features of the core js project (#1069)
+
+### Features
+
+* **react-native:** include the features of the core js project ([#1069](https://github.com/honeybadger-io/honeybadger-js/issues/1069)) ([a956508](https://github.com/honeybadger-io/honeybadger-js/commit/a956508272bdec340e6c93cf3e1f38ad4028cbfd))
+
+## 5.2.0 (2023-03-27)
+
+## 5.1.6 (2023-03-14)
+
+## 5.1.4 (2023-02-27)
+
+## 5.1.1 (2023-02-13)
+
+## 5.0.0 (2023-02-05)
+
+## 4.10.0 (2023-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* specify "engines" in package.json
+
+### Features
+
+* **rollup-plugin:** add rollup/vite plugin that uploads sourcemaps to honeybadger API ([850b2b5](https://github.com/honeybadger-io/honeybadger-js/commit/850b2b5740d960e7e533b848c09c62a9bb9f63cb))
+* specify "engines" in package.json ([d0eb1a3](https://github.com/honeybadger-io/honeybadger-js/commit/d0eb1a368b9904d464528a61844fa52416d14828)), closes [#961](https://github.com/honeybadger-io/honeybadger-js/issues/961)
+
+## 4.8.2 (2023-01-02)
+
+## 4.8.0 (2022-12-12)
+
+## 4.7.1 (2022-11-14)
+
+## 4.7.0 (2022-11-01)
+
+
+### Features
+
+* migrate honeybadger-react-native to monorepo ([#901](https://github.com/honeybadger-io/honeybadger-js/issues/901)) ([46f3d7e](https://github.com/honeybadger-io/honeybadger-js/commit/46f3d7e0db7c4c18698fb2044802351efbbdbab9))
+
+
+
 ## [5.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.7...v5.2.0) (2023-03-27)
 
 **Note:** Version bump only for package @honeybadger-io/react-native

@@ -3,8 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "install:clean": "rm -rf node_modules && npm install",
     "android": "react-native run-android",
+    "android:release": "rm -rf android/app/build && react-native run-android --mode release",
     "ios": "react-native run-ios",
+    "ios:install": "cd ios && pod install && cd ..",
+    "ios:release": "react-native run-ios --configuration Release",
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest"

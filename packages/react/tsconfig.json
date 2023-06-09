@@ -28,5 +28,10 @@
   ],
   "include": [
     "./src/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "../js"
+    }
   ]
 }

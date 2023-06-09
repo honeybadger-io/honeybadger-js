@@ -79,8 +79,9 @@ For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
 
 ## Releasing
 
-All packages in the monorepo are released in [fixed mode](https://lerna.js.org/docs/features/version-and-publish#fixedlocked-mode-default), meaning that releasing a new version of one package also creates a release in that version for the other packages.
-Releasing is done using `npm run release`. This command calls `lerna publish`, which does the following:
+Packages in the monorepo are released in [independent mode](https://lerna.js.org/docs/features/version-and-publish#independent-mode), meaning that Lerna will decide which packages to release and what version bump to apply based on the commits since the last release.
+
+Releasing is done using [Github actions](https://github.com/honeybadger-io/honeybadger-js/actions), which run `npm run release`. This command calls `lerna publish`, which does the following:
 - generates changelog based on the commit messages (see [Changelog](#changelog) above)
 - `npm version`
 - `npm publish`
@@ -89,8 +90,9 @@ Releasing is done using `npm run release`. This command calls `lerna publish`, w
 
 ### Release Automation
 
-The repository automatically releases new packages every week (see `lerna-scheduled-publish.yml`).
-You can manually trigger a new release using the `Publish New Release` (`lerna-publish.yml`) workflow.
+The repository automatically releases new packages every week using the [**Publish New Release - Scheduled** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-scheduled-publish.yml) (`lerna-scheduled-publish.yml`).
+
+You can manually trigger a new release using the [**Publish New Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`).
 
 *Note*: only users with _write_ permissions can trigger this workflow (i.e. Collaborators).
 

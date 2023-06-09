@@ -16,6 +16,6 @@
   "devDependencies": {
     "@honeybadger-io/rollup-plugin": "file:../..",
     "@vitejs/plugin-vue": "^4.0.0",
-    "vite": "^4.0.0"
+    "vite": "^4.0.5"
   }
 }
