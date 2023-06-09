@@ -46,7 +46,7 @@ You must add the following environment values when deploying:
 - `NEXT_PUBLIC_HONEYBADGER_REVISION` - The version (i.e. 1.0.0) of your the app. This is necessary to in order to apply source maps to errors in Honeybadger.
 
 You should override build and install commands:
-- Build: `cd ../.. && npm run build && cd examples/pages-router && npm run build`
+- Build: `cd ../.. && npm run build && cd examples/app-router && npm run build`
 - Install: `cd ../../.. && npm install`
 
 The above overrides bootstrap the monorepo, allowing to import honeybadger packages that haven't been published to npm yet.
