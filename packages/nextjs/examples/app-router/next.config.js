@@ -2,7 +2,10 @@ const { setupHoneybadger } = require('../../dist/honeybadger-nextjs.cjs')
 
 const moduleExports = {
   // ... Your existing module.exports object goes here
-  productionBrowserSourceMaps: true
+  productionBrowserSourceMaps: true,
+  experimental: {
+    appDir: true,
+  },
 }
 
 // Showing default values
