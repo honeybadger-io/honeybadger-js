@@ -62,7 +62,7 @@ function framesFromComponentStack(str:string) {
   const regex = /^\s*in\s(\S+)(\s\(at\s(\S+):(\S+)\)\s*$)?/gm
   let match
   while ((match = regex.exec(str)) !== null) {
-    if ( match.index === regex.lastIndex) {
+    if (match.index === regex.lastIndex) {
       regex.lastIndex++;
     }
     frames.push({
@@ -87,7 +87,11 @@ function framesFromReactNativeIosStack(data:NativeExceptionData) {
   }))
 }
 
-export function framesFromIOSCallStack(data:NativeExceptionData) {
+/* Parses call stack lines that look like: 
+  *  0   CoreFoundation                      0x00007ff8004288ab __exceptionPreprocess + 242
+  *  1   libobjc.A.dylib                     0x00007ff80004dba3 objc_exception_throw + 48
+**/
+function framesFromIOSCallStack(data:NativeExceptionData) {
   let callStack = []
 
   if (data.localizedDescription && typeof data.localizedDescription === 'string') {
@@ -97,6 +101,7 @@ export function framesFromIOSCallStack(data:NativeExceptionData) {
   }
 
   const frames = [];
+  
   const regex = /\d+\s+(\S+)\s+(\S+)\s(.+)\s\+\s(\d+)(\s+\((\S+):(\S+)\))?/gm
   let match
   callStack.forEach(element => {

@@ -1,7 +1,21 @@
 import { 
   errorMessageFromIosException, 
-  framesFromIOSCallStack, 
+  backtraceAndDetailsFromIosException, 
 } from "../src/iosUtils"
+
+/* TODO from Bethany June 2023:
+ * The iosUtils code came from Andrey's original code and I took pains
+ * not to mess with how it works. However, in my testing, I've only found 
+ * backtraces generated using framesFromIOSCallStack. I've never seen an
+ * error reported with primaryBackTraceSource = 'ReactNativeComponentStack'
+ * or primaryBackTraceSource = 'ReactNativeIOSStackTrace'
+ * 
+ * Need to check with Andrey if he remembers how to generate an error that 
+ * would trigger these code paths. 
+ * 
+ * As of now, I don't test these paths since I wanted to use example data 
+ * from a real error. 
+**/
 
 // Pulled this example data from a native error thrown in 
 // examples/react-native-cli running in dev mode (npm run ios)
@@ -22,6 +36,25 @@ const dataWithLocalizedDescription = {
   type: "Error",
 }
 
+// Pulled this example data from a native error thrown in 
+// examples/react-native-cli running in release mode (npm run ios:release)
+// Shortened the callstack for simplicity
+const dataWithCallStackSymbols = {
+  "reason" : "Testing native iOS exception",
+  "architecture" : "x86_64h",
+  "initialHandler" : "RCTSetFatalExceptionHandler",
+  "reactNativeStackTrace" : [],
+  "type" : "Exception",
+  "callStackSymbols" : [
+    "0 CoreFoundation 0x00007ff8004288ab __exceptionPreprocess + 242",
+    "1 libobjc.A.dylib 0x00007ff80004dba3 objc_exception_throw + 48",
+    "2 AwesomeProject 0x0000000105861ab0 -[AppDelegate application:didFinishLaunchingWithOptions:] + 0",
+    "3 CoreFoundation 0x00007ff80042f2fc __invoking___ + 140",
+  ],
+  "name" : "Sample_iOS_Exception",
+  "userInfo" : {}
+}
+
 describe('iosUtils', () => {
   describe('errorMessageFromIosException', () => {
     it('pulls the message from the localizedDescription, cutting the call stack', () => { 
@@ -39,66 +72,54 @@ describe('iosUtils', () => {
       expect(result).toBe('This is the first line')
     })
 
-    it('uses name and reason if localizedDescription is missing', () => { 
-      const data = {
-        name: 'Sample_iOS_Exception', 
-        reason: 'Testing native iOS exception ',
-        type: "Error",
-      }
-      const result = errorMessageFromIosException(data)
+    it('uses name and reason if we have callStackSymbols rather than localizedDescription', () => { 
+      const result = errorMessageFromIosException(dataWithCallStackSymbols)
       expect(result).toBe('Sample_iOS_Exception : Testing native iOS exception')
     })
   })
 
   describe('backtraceAndDetailsFromIosException', () => {
-    // TODO
-    it('returns a backtrace and details from the iOSCallStack', () => {
+    const expectedBacktrace = [
+      {
+        file: "CoreFoundation",
+        line: "",
+        method: "__exceptionPreprocess",
+        stack_address: "0x00007ff8004288ab",
+      }, 
+      {
+        file: "libobjc.A.dylib",
+        line: "",
+        method: "objc_exception_throw",
+        stack_address: "0x00007ff80004dba3",
+      },
+      {
+        file: "AwesomeProject",
+        line: "",
+        method: "-[AppDelegate application:didFinishLaunchingWithOptions:]",
+        stack_address: "0x0000000105861ab0",
+      },
+      {
+        file: "CoreFoundation",
+        line: "",
+        method: "__invoking___",
+        stack_address: "0x00007ff80042f2fc",
+      },
+    ]
 
+    it('returns a backtrace and details from the localizedDescription', () => {
+      const result = backtraceAndDetailsFromIosException(dataWithLocalizedDescription)
+      expect(result).toStrictEqual({
+        backtrace: expectedBacktrace, 
+        backtraceDetails: { primaryBackTraceSource: 'iOSCallStack' }
+      })
     })
-  })
 
-  describe('framesFromComponentStack', () => {
-    // TODO
-    it('does stuff', () => {
-
-    })
-  })
-
-  describe('framesFromReactNativeIosStack', () => {
-    // TODO
-    it('does stuff', () => {
-
-    })
-  })
-
-  describe('framesFromIOSCallStack', () => {
-    it('returns the localizedDescription call stack parsed into an array', () => {
-      expect(framesFromIOSCallStack(dataWithLocalizedDescription)).toStrictEqual([
-        {
-          file: "CoreFoundation",
-          line: "",
-          method: "__exceptionPreprocess",
-          stack_address: "0x00007ff8004288ab",
-        }, 
-        {
-          file: "libobjc.A.dylib",
-          line: "",
-          method: "objc_exception_throw",
-          stack_address: "0x00007ff80004dba3",
-        },
-        {
-          file: "AwesomeProject",
-          line: "",
-          method: "-[AppDelegate application:didFinishLaunchingWithOptions:]",
-          stack_address: "0x0000000105861ab0",
-        },
-        {
-          file: "CoreFoundation",
-          line: "",
-          method: "__invoking___",
-          stack_address: "0x00007ff80042f2fc",
-        },
-      ])
+    it('returns a backtrace and details from the callStackSymbols', () => {
+      const result = backtraceAndDetailsFromIosException(dataWithCallStackSymbols)
+      expect(result).toStrictEqual({
+        backtrace: expectedBacktrace, 
+        backtraceDetails: { primaryBackTraceSource: 'iOSCallStack' }
+      })
     })
   })
 })
