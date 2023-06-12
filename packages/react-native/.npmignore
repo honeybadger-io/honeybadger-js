@@ -3,6 +3,7 @@ examples/
 
 # Test
 /test
+/dist/test
 .jest
 
 # Config
