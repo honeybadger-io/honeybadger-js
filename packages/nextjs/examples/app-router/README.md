@@ -8,8 +8,12 @@ This project demonstrates Honeybadger's error reporting for Next.js, using the n
 - Error thrown in middleware (`http://localhost:3000/middleware-test`), which will be caught with the global `window.onerror` handler.
 
 ## Getting Started
+First, install node modules: 
+```bash
+npm install
+```
 
-First, run the development server:
+Run the development server:
 
 ```bash
 npm run dev
@@ -21,9 +25,12 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
+You must add the following environment variables to use Honeybadger in this project:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- `NEXT_PUBLIC_HONEYBADGER_API_KEY` - The API key from your **project settings page** in [Honeybadger](https://app.honeybadger.io).
+- `NEXT_PUBLIC_HONEYBADGER_ASSETS_URL` - Required by [honeybadger-webpack](https://github.com/honeybadger-io/honeybadger-webpack#configuration) to upload source maps to Honeybadger. Replace `[host]` with your domain name: `https://[host]/_next` (if using Vercel's domain, the host looks like this: `[your app name].vercel.app`)
+- `NEXT_PUBLIC_HONEYBADGER_REVISION` - The version (i.e. 1.0.0) of your the app. This is necessary to in order to apply source maps to errors in Honeybadger.
 
 ## Learn More
 
@@ -39,8 +46,4 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 Since this example project is inside a monorepo, you will have to follow the guide available [here](https://vercel.com/docs/concepts/monorepos)
 to get it working. Alternatively, you can clone this folder into a new repository.
 
-You must add the following environment values when deploying:
-
-- `NEXT_PUBLIC_HONEYBADGER_API_KEY` - The API key from your **project settings page** in [Honeybadger](https://app.honeybadger.io).
-- `NEXT_PUBLIC_HONEYBADGER_ASSETS_URL` - Required by [honeybadger-webpack](https://github.com/honeybadger-io/honeybadger-webpack#configuration) to upload source maps to Honeybadger. Replace `[host]` with your domain name: `https://[host]/_next` (if using Vercel's domain, the host looks like this: `[your app name].vercel.app`)
-- `NEXT_PUBLIC_HONEYBADGER_REVISION` - The version (i.e. 1.0.0) of your the app. This is necessary to in order to apply source maps to errors in Honeybadger.
+You must add the necessary environment variables when deploying. See [Environment Variables](#environment-variables) above.
