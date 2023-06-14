@@ -36,7 +36,7 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "peerDependencies": {
-    "@honeybadger-io/react": "5.x",
+    "@honeybadger-io/react": ">= 5.x",
     "next": "13.x"
   },
   "dependencies": {
