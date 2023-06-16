@@ -33,6 +33,7 @@ jobs:
         run: echo ${{ github.event_name }}
 
       - name: Check PR name for breaking changes
+        if: ${{ github.event_name == 'pull_request' && contains('BREAKING CHANGE', github.event.pull_request.title) }}
         uses: mshick/add-pr-comment@v2
         with:
           message-id: upgrade-guide
