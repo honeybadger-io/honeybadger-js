@@ -46,7 +46,7 @@ jobs:
           message-id: upgrade-guide
           message: |
             :warning: Breaking change detected. This PR will cause a major version upgrade. Please make sure to:
-            - [ ] Create an upgrade guide in the documentation.
+            - [ ] Create an upgrade guide in the documentation project.
 
             If you believe an upgrade guide is unnecessary, go ahead and check this box anyway.
 
