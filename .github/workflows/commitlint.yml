@@ -27,8 +27,11 @@ jobs:
 
   needs-migration-docs-check:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' && contains(fromJSON('["!", "BREAKING CHANGE"]'), github.event_name) }}
+    if: ${{ true }}
     steps:
+      - name: ECHO
+        run: echo ${{ github.event_name }}
+
       - name: Check PR name for breaking changes
         uses: mshick/add-pr-comment@v2
         with:
