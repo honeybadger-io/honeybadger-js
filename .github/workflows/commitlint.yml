@@ -31,8 +31,8 @@ jobs:
     steps:
       - name: ECHO
         run: |
-          echo ${{ github.event_name }}
-          echo ${{ github.event.pull_request.title }}
+          echo "${{ github.event_name }}"
+          echo "${{ github.event.pull_request.title }}"
 
       - name: Check PR name for breaking changes
         if: ${{ github.event_name == 'pull_request' && contains('BREAKING CHANGE', github.event.pull_request.title) }}
