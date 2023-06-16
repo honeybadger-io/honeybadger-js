@@ -1,4 +1,6 @@
 test/integration/
+packages/nextjs/examples/app-router
+packages/nextjs/examples/pages-router
 dist
 build
 tmp
