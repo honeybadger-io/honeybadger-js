@@ -27,12 +27,9 @@ jobs:
 
   needs-migration-docs-check:
     runs-on: ubuntu-latest
-    if: ${{ true }}
     steps:
-      - name: ECHO
-        run: |
-          echo "${{ github.event_name }}"
-          echo "${{ github.event.pull_request.title }}"
+      - name: Echo event name
+        run: echo "${{ github.event_name }}:${{ github.event.pull_request.title }}"
 
       - name: Check PR name for breaking changes
         if: github.event_name == 'pull_request' && ( contains(github.event.pull_request.title, '!') || contains(github.event.pull_request.title, 'BREAKING CHANGE') )
