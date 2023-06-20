@@ -3,18 +3,9 @@ import {
   backtraceAndDetailsFromIosException, 
 } from '../src/iosUtils'
 
-/* TODO from Bethany June 2023:
- * The iosUtils code came from Andrey's original code and I took pains
- * not to mess with how it works. However, in my testing, I've only found 
- * backtraces generated using framesFromIOSCallStack. I've never seen an
- * error reported with primaryBackTraceSource = 'ReactNativeComponentStack'
- * or primaryBackTraceSource = 'ReactNativeIOSStackTrace'
- * 
- * Need to check with Andrey if he remembers how to generate an error that 
- * would trigger these code paths. 
- * 
- * As of now, I don't test these paths since I wanted to use example data 
- * from a real error. 
+/* 
+ * Currently only has tests for backtraces generated using framesFromIOSCallStack. 
+ * See https://github.com/honeybadger-io/honeybadger-js/issues/1099
 **/
 
 // Pulled this example data from a native error thrown in 
