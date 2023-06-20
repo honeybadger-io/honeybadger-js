@@ -7,7 +7,7 @@ Honeybadger
     environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || process.env.NODE_ENV,
     revision: process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
     projectRoot: 'webpack:///./',
-    // debug: true,
+    debug: true,
     // reportData: true,
   })
   .beforeNotify((notice) => {
