@@ -24,3 +24,20 @@ jobs:
       - name: Verify PR title is in the correct format
         run: |
           echo "${{ github.event.pull_request.title }}" | npx commitlint -V
+
+  needs-migration-docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo event name
+        run: echo "${{ github.event_name }}:${{ github.event.pull_request.title }}"
+
+      - name: Check PR name for breaking changes
+        if: github.event_name == 'pull_request' && ( contains(github.event.pull_request.title, '!') || contains(github.event.pull_request.title, 'BREAKING CHANGE') )
+        uses: mshick/add-pr-comment@v2
+        with:
+          message-id: upgrade-guide
+          message: |
+            :warning: Breaking change detected. This PR will cause a major version upgrade. Please make sure to:
+            - [ ] Create an upgrade guide in the documentation project.
+
+            If you believe an upgrade guide is unnecessary, go ahead and check this box anyway.
