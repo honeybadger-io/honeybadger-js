@@ -8,7 +8,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^2.6.14"
+    "vue": "^2.6.14",
+    "@honeybadger-io/vue": "^6.0.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
