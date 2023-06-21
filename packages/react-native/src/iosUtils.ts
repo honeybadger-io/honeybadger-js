@@ -62,7 +62,7 @@ function framesFromComponentStack(str:string) {
   const regex = /^\s*in\s(\S+)(\s\(at\s(\S+):(\S+)\)\s*$)?/gm
   let match
   while ((match = regex.exec(str)) !== null) {
-    if ( match.index === regex.lastIndex) {
+    if (match.index === regex.lastIndex) {
       regex.lastIndex++;
     }
     frames.push({
@@ -87,6 +87,10 @@ function framesFromReactNativeIosStack(data:NativeExceptionData) {
   }))
 }
 
+/* Parses call stack lines that look like: 
+  *  0   CoreFoundation                      0x00007ff8004288ab __exceptionPreprocess + 242
+  *  1   libobjc.A.dylib                     0x00007ff80004dba3 objc_exception_throw + 48
+**/
 function framesFromIOSCallStack(data:NativeExceptionData) {
   let callStack = []
 
@@ -97,6 +101,7 @@ function framesFromIOSCallStack(data:NativeExceptionData) {
   }
 
   const frames = [];
+  
   const regex = /\d+\s+(\S+)\s+(\S+)\s(.+)\s\+\s(\d+)(\s+\((\S+):(\S+)\))?/gm
   let match
   callStack.forEach(element => {
@@ -111,7 +116,8 @@ function framesFromIOSCallStack(data:NativeExceptionData) {
       const file = match && match.length > 6 ? match[6] : '';
       const line = match && match.length > 7 ? match[7] : '';
 
-      // TODO: Why doesn't this match the BacktraceFrame type?
+      // TODO: This should match the BacktraceFrame type
+      // symbolication is needed https://github.com/honeybadger-io/honeybadger-js/issues/1082
       frames.push({
         file: file || moduleName || '',
         line: line || '',
