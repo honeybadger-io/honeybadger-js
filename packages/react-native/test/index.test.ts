@@ -6,6 +6,7 @@ import { Transport } from '../src/transport'
 describe('react native client', () => {
   // Using any rather than the real type so we can test and spy on 
   // private methods
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   let client: any
   const config = {
     apiKey: 'testApiKey',
@@ -213,8 +214,7 @@ describe('react native client', () => {
   })
 
   describe('onNativeIOSException', () => {
-    // Note: Decided not to mock out iosUtils, so this is more of 
-    // an integration test
+    // Note: Decided not to mock out iosUtils here
     it('formats a notice and calls notify', () => {
       const data = {
         'reason' : 'Testing native iOS exception',
@@ -229,7 +229,6 @@ describe('react native client', () => {
         'name' : 'Sample_iOS_Exception',
         'userInfo' : {}
       }
-
       jest.spyOn(client, 'notify')
 
       client.onNativeIOSException(data)
@@ -257,8 +256,40 @@ describe('react native client', () => {
           architecture: 'x86_64h', 
           primaryBackTraceSource: 'iOSCallStack',
         }
+      })    
+    })
+
+    describe('onNativeAndroidException', () => {
+      // Note: Decided not to mock out androidUtils here
+      it('formats a notice and calls notify', () => {
+        const data = {
+          stackTrace: [
+            {
+              line: 30,
+              class: 'com.awesomeproject.ThrowErrModule$1',
+              method: 'run',
+              file: 'ThrowErrModule.java'
+            },
+          ],
+          message: 'Test Delayed Exception',
+          type: 'Exception'
+        }
+        jest.spyOn(client, 'notify')
+  
+        client.onNativeAndroidException(data)
+
+        expect(client.notify).toHaveBeenCalledWith({
+          name: 'React Native Android Exception', 
+          message: 'Test Delayed Exception', 
+          backtrace: [
+            {
+              method: 'com.awesomeproject.ThrowErrModule$1.run',
+              file: 'ThrowErrModule.java',
+              number: 30,
+            }, 
+          ]
+        })
       })
-      
     })
   })
 })

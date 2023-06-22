@@ -92,12 +92,12 @@ class Honeybadger extends Client {
 
   private onNativeException(data:NativeExceptionData) {
     switch ( Platform.OS ) {
-      case 'ios': 
-        this.onNativeIOSException(data)
-        break
-      case 'android': 
-        this.onNativeAndroidException(data)
-        break
+    case 'ios': 
+      this.onNativeIOSException(data)
+      break
+    case 'android': 
+      this.onNativeAndroidException(data)
+      break
     }
   }
 
@@ -122,12 +122,6 @@ class Honeybadger extends Client {
     const notice = {
       name: `React Native Android ${data.type}`,
       message: data.message || '',
-      details: {
-        errorDomain: data.errorDomain || '',
-        initialHandler: data.initialHandler || '',
-        userInfo: data.userInfo || {},
-        architecture: data.architecture || '',
-      },
       backtrace: backtraceFromAndroidException(data)
     }
     this.notify(notice)
