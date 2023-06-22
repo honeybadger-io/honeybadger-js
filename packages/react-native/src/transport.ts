@@ -33,7 +33,8 @@ export class Transport implements Types.Transport {
   }
 
   private buildUserAgent() {
-    const reactNativeVersion = `${Platform.constants.reactNativeVersion.major}.${Platform.constants.reactNativeVersion.minor}.${Platform.constants.reactNativeVersion.patch}`
+    const rnVersion = Platform.constants?.reactNativeVersion
+    const rnVersionStr = `${rnVersion?.major}.${rnVersion?.minor}.${rnVersion?.patch}`
     
     let nativePlatform:string
     if (Platform.OS === 'ios') {
@@ -43,7 +44,7 @@ export class Transport implements Types.Transport {
       nativePlatform = 'Android'
     }
 
-    return `${pkg.name} ${pkg.version}; ${reactNativeVersion}; ${nativePlatform}`;
+    return `${pkg.name} ${pkg.version}; ${rnVersionStr}; ${nativePlatform}`;
   }
 
   private buildJsonBody(

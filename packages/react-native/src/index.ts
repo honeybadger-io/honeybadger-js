@@ -50,20 +50,24 @@ class Honeybadger extends Client {
     this.__originalJsHandler = ErrorUtils.getGlobalHandler();
 
     ErrorUtils.setGlobalHandler((err, isFatal) => {
-      this.logger.debug('JavaScript global error handler triggered.')
-      this.notify(err)
-
-      // Allowing the default error handler to process the error after
-      // we're done with it will show the useful RN red info box in dev.
-      // However in prod it causes duplicate errors to be reported on iOS
-      // since the default handler re-throws a native error
-      if (__DEV__ && this.__originalJsHandler) {
-        this.logger.debug('Passing error to previous error handler.')
-        this.__originalJsHandler(err, isFatal)
-      }
+      this.onJavascriptError(err, isFatal, __DEV__)
     })
 
     this.__jsHandlerInitialized = true
+  }
+
+  private onJavascriptError(err:Error, isFatal:boolean, isDev:boolean=__DEV__) {
+    this.logger.debug('JavaScript global error handler triggered.')
+    this.notify(err)
+
+    // Allowing the default error handler to process the error after
+    // we're done with it will show the useful RN red info box in dev.
+    // However in prod it causes duplicate errors to be reported on iOS
+    // since the default handler re-throws a native error
+    if (isDev && this.__originalJsHandler) {
+      this.logger.debug('Passing error to previous error handler.')
+      this.__originalJsHandler(err, isFatal)
+    }
   }
 
   private setNativeExceptionHandler() {
@@ -88,12 +92,12 @@ class Honeybadger extends Client {
 
   private onNativeException(data:NativeExceptionData) {
     switch ( Platform.OS ) {
-    case 'ios': 
-      this.onNativeIOSException(data)
-      break
-    case 'android': 
-      this.onNativeAndroidException(data)
-      break
+      case 'ios': 
+        this.onNativeIOSException(data)
+        break
+      case 'android': 
+        this.onNativeAndroidException(data)
+        break
     }
   }
 
