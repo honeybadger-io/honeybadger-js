@@ -5,7 +5,6 @@ import TestCanvasForProps from '../TestCanvasForProps.vue'
 import { createSandbox } from 'sinon'
 import fetch from 'jest-fetch-mock'
 import { mount } from '@vue/test-utils'
-import packageJson from '../../../package.json'
 
 describe('HoneybadgerVue', () => {
   let sandbox
@@ -141,8 +140,8 @@ describe('HoneybadgerVue', () => {
   it('should have the correct notifier name and version', () => {
     const wrapper = factory()
     const app = getAppInstance(wrapper)
-    expect(app.$honeybadger.notifier.name).toEqual(packageJson.name.replace('@', ''))
-    expect(app.$honeybadger.notifier.version).toEqual(packageJson.version)
+    const notifier = app.$honeybadger.getNotifier()
+    expect(notifier.name).toEqual('@honeybadger-io/vue')
   })
 
   it('should bubble up a rendering error to errorHandler', (done) => {

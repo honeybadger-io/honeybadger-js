@@ -27,7 +27,6 @@
     "node_modules"
   ],
   "include": [
-    "package.json",
     "./src/*.tsx"
   ],
   "references": [

@@ -1,6 +1,12 @@
 import Honeybadger from '@honeybadger-io/js'
 import { logError } from './error-logging'
 
+const NOTIFIER = {
+  name: '@honeybadger-io/vue',
+  url: 'https://github.com/honeybadger-io/honeybadger-js',
+  version: '__VERSION__'
+}
+
 function shouldLogError (app, options) {
   if (app.config.warnHandler) {
     return true
@@ -36,6 +42,8 @@ function install(vue, options) {
     console.log(`Honeybadger configured with ${options.apiKey}`)
   }
   const honeybadger = Honeybadger.configure(options)
+  honeybadger.setNotifier(NOTIFIER)
+
   vue.$honeybadger = honeybadger
 
   // vue 2 support -> make available for all components

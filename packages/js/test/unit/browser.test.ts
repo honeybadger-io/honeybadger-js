@@ -165,6 +165,23 @@ describe('browser client', function () {
         })
       })
     })
+
+    it('uses the correct notifier name', function () {
+      return new Promise<void>((resolve) => {
+        client.configure({
+          apiKey: 'testing'
+        })
+
+        client.notify('testing')
+
+        setTimeout(() => {
+          // @ts-expect-error
+          const payload = JSON.parse(fetch.mock.lastCall[1].body)
+          expect(payload.notifier.name).toEqual('@honeybadger-io/js')
+          resolve()
+        })
+      })
+    })
   })
 
   describe('showUserFeedbackForm', function () {

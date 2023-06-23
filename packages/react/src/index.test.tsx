@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react'
 import TestRenderer from 'react-test-renderer'
-import packageJson from '../package.json'
 
 // Need to import like this because react-scripts does not support jest's {@link https://jestjs.io/docs/configuration#resolver-string resolver} option.
 // We need "resolver" to ask jest to respect the "browser" field in the package.json.
@@ -47,8 +46,8 @@ describe('HoneybadgerReact', () => {
   }
 
   it('should have the correct notifier name and version', () => {
-    expect(honeybadger.notifier.name).toEqual(packageJson.name.replace('@', ''))
-    expect(honeybadger.notifier.version).toEqual(packageJson.version)
+    const notifier = honeybadger.getNotifier()
+    expect(notifier.name).toEqual('@honeybadger-io/react')
   })
 
   it('should render the default component when there are no errors', () => {

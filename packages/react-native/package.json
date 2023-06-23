@@ -47,6 +47,6 @@
     "node": ">=14"
   },
   "dependencies": {
-    "@honeybadger-io/core": "^5.2.0"
+    "@honeybadger-io/core": "^6.0.0"
   }
 }
