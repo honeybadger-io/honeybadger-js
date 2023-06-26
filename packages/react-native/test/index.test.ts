@@ -2,6 +2,7 @@ import Honeybadger from '../src/index'
 import fetch from 'jest-fetch-mock'
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native'
 import { Transport } from '../src/transport'
+import { AfterNotifyHandler, NoticeTransportPayload } from '@honeybadger-io/core/build/src/types'
 
 describe('react native client', () => {
   // Using any rather than the real type so we can test and spy on 
@@ -288,6 +289,91 @@ describe('react native client', () => {
               number: 30,
             }, 
           ]
+        })
+      })
+    })
+
+    describe('parent Client class', () => {
+      it('beforeNotify works as in parent', () => {
+        client.config.breadcrumbsEnabled = false
+        const beforeNotifyHandler = jest.fn()
+        const err = new Error('whoops') 
+
+        client.beforeNotify(beforeNotifyHandler)
+        client.onJavascriptError(err, false, false)
+        
+        expect(client.__beforeNotifyHandlers.length).toBe(1)
+        expect(beforeNotifyHandler).toHaveBeenCalledTimes(1)
+        const expectedNotice = {
+          ...client.makeNotice(err),
+          __breadcrumbs: []
+        }
+        const receivedNotice = beforeNotifyHandler.mock.calls[0][0]
+        expect(receivedNotice).toStrictEqual(expectedNotice)
+        expect(receivedNotice.message).toBe('whoops')     
+      })
+
+      it('afterNotify works as in parent', async () => {
+        const id = 'testWithBeforeAfterNotify'
+        
+        fetch.mockResponse(JSON.stringify({ id }), { status: 201 })
+        const err = new Error('whoops') 
+
+        return new Promise<void>(resolve => {
+          const afterNotifyHandler: AfterNotifyHandler = (error, notice) => {
+            expect(error).toBe(undefined)
+            expect(notice.id).toBe(id)
+            resolve()
+          }
+          client.afterNotify(afterNotifyHandler)
+          client.onJavascriptError(err, false, false)
+        })
+      })
+
+      it('addBreadcrumb works as in parent', async () => {
+        client.config.breadcrumbsEnabled = true
+        const err = new Error('whoops') 
+        const sendSpy = jest.spyOn(client.__transport, 'send')
+        fetch.mockResponse(JSON.stringify({ id: 'foo' }), { status: 201 })
+
+        client.addBreadcrumb('sourdough', { category: 'bread crumb' })
+        expect(client.__getBreadcrumbs()[0].category).toEqual('bread crumb')        
+
+        return new Promise<void>(resolve => {
+          const afterNotifyHandler: AfterNotifyHandler = () => {
+            const payloadSent = sendSpy.mock.lastCall[1] as NoticeTransportPayload
+            const crumbsSent = payloadSent.breadcrumbs.trail.map(({ category, message }) => ({ category, message }))
+            expect(crumbsSent).toStrictEqual([
+              { category: 'bread crumb', message: 'sourdough' }, 
+              { category: 'notice', message: 'Honeybadger Notice' },
+            ])
+            resolve()
+          }
+          client.afterNotify(afterNotifyHandler)
+          client.onJavascriptError(err, false, false)
+        })
+      })
+
+      it('setContext works as in parent', async () => {
+        const err = new Error('whoops') 
+        const sendSpy = jest.spyOn(client.__transport, 'send')
+        fetch.mockResponse(JSON.stringify({ id: 'foo' }), { status: 201 })
+
+        client.setContext({ key: 'value' })
+        expect(client.__getContext().key).toEqual('value')        
+
+        return new Promise<void>(resolve => {
+          const afterNotifyHandler: AfterNotifyHandler = () => {
+            const payloadSent = sendSpy.mock.lastCall[1] as NoticeTransportPayload
+            const contextSent = payloadSent.request.context
+            expect(contextSent).toStrictEqual({
+              key: 'value', 
+              platform: { os: 'android', version: 30 }
+            })
+            resolve()
+          }
+          client.afterNotify(afterNotifyHandler)
+          client.onJavascriptError(err, false, false)
         })
       })
     })
