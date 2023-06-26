@@ -1,7 +1,7 @@
 import { NativeExceptionData } from './types'
 import { Types } from '@honeybadger-io/core'
 
-export function errorMessageFromIosException(data:NativeExceptionData):string {
+export function errorMessageFromIosException(data: NativeExceptionData): string {
   if ( !data ) {
     return '';
   }
@@ -22,7 +22,7 @@ export function errorMessageFromIosException(data:NativeExceptionData):string {
   }
 }
 
-export function backtraceAndDetailsFromIosException(data:NativeExceptionData): {
+export function backtraceAndDetailsFromIosException(data: NativeExceptionData): {
     backtrace: Types.BacktraceFrame[];
     backtraceDetails: Record<string, string | Record<string, string | number>[]>
 } {
@@ -31,7 +31,7 @@ export function backtraceAndDetailsFromIosException(data:NativeExceptionData): {
   const framesFromIosCall = framesFromIOSCallStack(data)
 
   let backtrace = []
-  const backtraceDetails:Record<string, string | Record<string, string | number>[]> = {}
+  const backtraceDetails: Record<string, string | Record<string, string | number>[]> = {}
 
   if (framesFromComponent.length) {
     backtrace = framesFromComponent
@@ -56,7 +56,7 @@ export function backtraceAndDetailsFromIosException(data:NativeExceptionData): {
   return { backtrace, backtraceDetails }
 }
 
-function framesFromComponentStack(str:string) {
+function framesFromComponentStack(str: string) {
   str = str || ''
   const frames = []
   const regex = /^\s*in\s(\S+)(\s\(at\s(\S+):(\S+)\)\s*$)?/gm
@@ -74,7 +74,7 @@ function framesFromComponentStack(str:string) {
   return frames
 }
 
-function framesFromReactNativeIosStack(data:NativeExceptionData) {
+function framesFromReactNativeIosStack(data: NativeExceptionData) {
   if (!data.reactNativeStackTrace) {
     return []
   }
@@ -91,7 +91,7 @@ function framesFromReactNativeIosStack(data:NativeExceptionData) {
   *  0   CoreFoundation                      0x00007ff8004288ab __exceptionPreprocess + 242
   *  1   libobjc.A.dylib                     0x00007ff80004dba3 objc_exception_throw + 48
 **/
-function framesFromIOSCallStack(data:NativeExceptionData) {
+function framesFromIOSCallStack(data: NativeExceptionData) {
   let callStack = []
 
   if (data.localizedDescription && typeof data.localizedDescription === 'string') {

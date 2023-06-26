@@ -22,6 +22,7 @@
       "error",
       "always"
     ],
+    "@typescript-eslint/type-annotation-spacing": 1,
     "@typescript-eslint/no-this-alias": 0,
     "@typescript-eslint/no-empty-function": 0,
     "@typescript-eslint/no-var-requires": 0,

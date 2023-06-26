@@ -34,9 +34,11 @@ export class Transport implements Types.Transport {
 
   private buildUserAgent() {
     const rnVersion = Platform.constants?.reactNativeVersion
-    const rnVersionStr = `${rnVersion?.major}.${rnVersion?.minor}.${rnVersion?.patch}`
+    const rnVersionStr = rnVersion 
+      ? `${rnVersion?.major}.${rnVersion?.minor}.${rnVersion?.patch}`
+      : 'n/a'
     
-    let nativePlatform:string
+    let nativePlatform: string
     if (Platform.OS === 'ios') {
       const nativePlatformName = Platform.constants.systemName || 'iOS'
       nativePlatform = `${nativePlatformName} ${Platform.constants.osVersion}`
