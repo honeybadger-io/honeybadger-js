@@ -30,7 +30,7 @@ const defaultOptions = {
 }
 
 export function cleanOptions(
-  options:Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
+  options: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
 ): HbPluginOptions {
   // Validate presence of required fields
   required.forEach(field => {

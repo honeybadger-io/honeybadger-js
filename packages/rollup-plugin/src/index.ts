@@ -6,7 +6,7 @@ import type { OutputBundle, Plugin, NormalizedOutputOptions } from 'rollup'
 
 export default function honeybadgerRollupPlugin(
   options: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
-):Plugin {
+): Plugin {
   const hbOptions = cleanOptions(options)
 
   return {
