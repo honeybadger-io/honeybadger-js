@@ -186,7 +186,7 @@ class Honeybadger extends Client {
    * removeEventListener.
    * @internal
    */
-  __wrap(f:unknown, opts:Record<string, unknown> = {}):WrappedFunc {
+  __wrap(f: unknown, opts: Record<string, unknown> = {}): WrappedFunc {
     const func = f as WrappedFunc
     if (!opts) { opts = {} }
     try {

@@ -4,7 +4,7 @@ import * as td from 'testdouble'
 import { HbPluginOptions } from '../src/types'
 
 describe('Index', () => {
-  let honeybadgerRollupPlugin:(opts: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>) => Plugin
+  let honeybadgerRollupPlugin: (opts: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>) => Plugin
   let cleanOptionsMock,
     isNonProdEnvMock,
     extractSourcemapDataFromBundleMock,
