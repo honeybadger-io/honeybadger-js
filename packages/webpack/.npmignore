@@ -7,3 +7,4 @@ docs
 tmp
 coverage.lcov
 .nyc_output
+.dummy

@@ -8,7 +8,7 @@ You can refer to the README of each package for more information and instruction
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fcore.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fcore)  
   The core package that integrates with Honeybadger API
 - [@honeybadger-io/js](./packages/js)  
-  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)  
   SDK for browser, nodejs and AWS Lambda 
 - [@honeybadger-io/webpack](./packages/webpack)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)  
@@ -19,12 +19,18 @@ You can refer to the README of each package for more information and instruction
 - [@honeybadger-io/react](./packages/react)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact)  
   SDK for React integration
+- [@honeybadger-io/nextjs](./packages/nextjs)  
+  [![npm version](https://badge.fury.io/js/@honeybadger-io%2Fnextjs.svg)](https://badge.fury.io/js/@honeybadger-io%2Fnextjs)  
+  SDK for Next.js integration
 - [@honeybadger-io/gatsby-plugin-honeybadger](./packages/gatsby-plugin)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger)  
   [Gatsby](https://www.gatsbyjs.com) plugin
 - [@honeybadger-io/react-native](./packages/react-native)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact-native.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact-native)  
   SDK for React Native integration
+- [@honeybadger-io/rollup-plugin](./packages/rollup-plugin)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin.svg)](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin)  
+  Rollup/Vite plugin to upload source maps to Honeybadger
 
 ## Documentation and Support
 
@@ -73,8 +79,9 @@ For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
 
 ## Releasing
 
-All packages in the monorepo are released in [fixed mode](https://lerna.js.org/docs/features/version-and-publish#fixedlocked-mode-default), meaning that releasing a new version of one package also creates a release in that version for the other packages.
-Releasing is done using `npm run release`. This command calls `lerna publish`, which does the following:
+Packages in the monorepo are released in [independent mode](https://lerna.js.org/docs/features/version-and-publish#independent-mode), meaning that Lerna will decide which packages to release and what version bump to apply based on the commits since the last release.
+
+Releasing is done using [Github actions](https://github.com/honeybadger-io/honeybadger-js/actions), which run `npm run release`. This command calls `lerna publish`, which does the following:
 - generates changelog based on the commit messages (see [Changelog](#changelog) above)
 - `npm version`
 - `npm publish`
@@ -83,8 +90,9 @@ Releasing is done using `npm run release`. This command calls `lerna publish`, w
 
 ### Release Automation
 
-The repository automatically releases new packages every week (see `lerna-scheduled-publish.yml`).
-You can manually trigger a new release using the `Publish New Release` (`lerna-publish.yml`) workflow.
+The repository automatically releases new packages every week using the [**Publish New Release - Scheduled** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-scheduled-publish.yml) (`lerna-scheduled-publish.yml`).
+
+You can manually trigger a new release using the [**Publish New Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`).
 
 *Note*: only users with _write_ permissions can trigger this workflow (i.e. Collaborators).
 

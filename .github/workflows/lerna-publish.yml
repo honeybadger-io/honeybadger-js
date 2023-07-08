@@ -15,6 +15,8 @@ on:
         required: true
       LERNA_PUBLISH_PAT:
         required: true
+      BUNNY_API_KEY:
+        required: true
 
 jobs:
   publish:
@@ -55,3 +57,4 @@ jobs:
           AWS_DEFAULT_REGION: "us-east-1"
           HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
           HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
+          BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}

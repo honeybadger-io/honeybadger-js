@@ -16,7 +16,6 @@ List related PRs against other branches:
 ## Todos
 - [ ] Tests
 - [ ] Documentation
-- [ ] Changelog Entry (unreleased)
 
 ## Steps to Test or Reproduce
 Outline the steps to test or reproduce the PR here.

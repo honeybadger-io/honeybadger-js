@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.7](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.6...v5.1.7) (2023-03-20)
+
+**Note:** Version bump only for package @honeybadger-io/webpack
+
+
+
+
+
+## [5.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.0.0...v5.1.0) (2023-02-08)
+
+**Note:** Version bump only for package @honeybadger-io/webpack
+
+
+
+
+
+## [5.0.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.10.0...v5.0.0) (2023-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* changes default revision from master to main (#951)
+
+### Features
+
+* changes default revision from master to main ([#951](https://github.com/honeybadger-io/honeybadger-js/issues/951)) ([33a8a46](https://github.com/honeybadger-io/honeybadger-js/commit/33a8a46bf76d06776eb7df737239f10d742dbc56))
+
+
+
+## [4.8.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.1...v4.8.2) (2023-01-02)
+
+**Note:** Version bump only for package @honeybadger-io/webpack
+
+
+
+
+
 ## [4.7.5](https://github.com/honeybadger-io/honeybadger-js/compare/v4.7.4...v4.7.5) (2022-12-05)
 
 **Note:** Version bump only for package @honeybadger-io/webpack

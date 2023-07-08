@@ -78,6 +78,7 @@ export interface Notice {
 }
 
 export interface BrowserConfig extends Config {
+  userFeedbackEndpoint: string,
   async: boolean
   maxErrors: number
 }
@@ -186,4 +187,22 @@ export interface HoneybadgerStore {
 export type StoreContents = {
   context: Record<string, unknown>,
   breadcrumbs: BreadcrumbRecord[]
+}
+
+export type UserFeedbackFormOptions = {
+  onLoad?: () => void;
+  messages?: {
+    heading?: string;
+    explanation?: string;
+    thanks?: string;
+  }
+  buttons?: {
+    submit?: string;
+    cancel?: string;
+  };
+  labels?: {
+    name?: string;
+    email?: string;
+    comment?: string;
+  };
 }

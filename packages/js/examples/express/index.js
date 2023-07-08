@@ -1,3 +1,5 @@
+const path = require('path')
+const fs = require('fs')
 const express = require('express')
 const app = express()
 const port = 3000
@@ -19,6 +21,18 @@ app.use(function(req, res, next) {
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
+})
+
+app.get('/feedback-form', (_req, res) => {
+  const htmlFilePath = path.resolve(__dirname, '../../assets/user-feedback-form.html')
+  const htmlData = fs.readFileSync(htmlFilePath, 'utf-8')
+  const jsFilePath = path.resolve(__dirname, '../../assets/user-feedback-form.js')
+  let jsData = fs.readFileSync(jsFilePath, 'utf-8')
+  jsData = jsData.replace('$$TEMPLATE$$', htmlData)
+
+  res.setHeader('Content-Type', 'text/javascript')
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+  res.send(jsData)
 })
 
 app.get('/fail', (_req, _res) => {

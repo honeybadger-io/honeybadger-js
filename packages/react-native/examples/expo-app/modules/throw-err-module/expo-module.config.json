@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android", "web"],
+  "ios": {
+    "modules": ["ThrowErrModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.throwerrmodule.ThrowErrModule"]
+  }
+}

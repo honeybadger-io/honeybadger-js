@@ -1,0 +1,18 @@
+{
+  "name": "rollup-example",
+  "version": "1.0.0",
+  "description": "Example of using rollup plugin in simple rollup project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@honeybadger-io/rollup-plugin": "file:../..",
+    "rollup": "^3.9.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3"
+  }
+}

@@ -61,6 +61,7 @@ export function nativeFetch () {
 
   if (!global.fetch) { return false }
   if (isNative(global.fetch)) { return true }
+  if (typeof document === 'undefined') { return false }
 
   // If fetch isn't native, it may be wrapped by someone else. Try to get
   // a pristine function from an iframe.
@@ -84,7 +85,7 @@ function isNative(func) {
   return func.toString().indexOf('native') !== -1
 }
 
-export function parseURL(url) {
+export function parseURL(url: string) {
   // Regexp: https://tools.ietf.org/html/rfc3986#appendix-B
   const match = url.match(/^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?$/) || {}
 
@@ -95,7 +96,7 @@ export function parseURL(url) {
   }
 }
 
-export function localURLPathname(url) {
+export function localURLPathname(url: string) {
   const parsed = parseURL(url)
   const parsedDocURL = parseURL(document.URL)
 

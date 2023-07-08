@@ -1,0 +1,21 @@
+{
+  "name": "vite-vue",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 8080"
+  },
+  "dependencies": {
+    "@honeybadger-io/js": "^4.9.3",
+    "@honeybadger-io/vue": "^4.9.3",
+    "vue": "^3.2.45"
+  },
+  "devDependencies": {
+    "@honeybadger-io/rollup-plugin": "file:../..",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "vite": "^4.0.5"
+  }
+}

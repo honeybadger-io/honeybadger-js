@@ -3,6 +3,249 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.6](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.0.5...@honeybadger-io/react@6.0.6) (2023-07-03)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [6.0.5](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.0.4...@honeybadger-io/react@6.0.5) (2023-06-26)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [6.0.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.0.3...@honeybadger-io/react@6.0.4) (2023-06-19)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [6.0.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.0.2...@honeybadger-io/react@6.0.3) (2023-06-08)
+
+
+### Bug Fixes
+
+* **react:** update types to work with react 18 ([#1083](https://github.com/honeybadger-io/honeybadger-js/issues/1083)) ([6f46ff8](https://github.com/honeybadger-io/honeybadger-js/commit/6f46ff8ac52cc5f5bc0a03ae6d09d7157f6a8c27))
+
+
+
+## [6.0.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.0.1...@honeybadger-io/react@6.0.2) (2023-06-02)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [6.0.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.0.0...@honeybadger-io/react@6.0.1) (2023-05-31)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## 6.0.0 (2023-05-29)
+
+## 5.4.1 (2023-05-08)
+
+## 5.3.0 (2023-04-14)
+
+
+### Features
+
+* nextjs integration ([#1030](https://github.com/honeybadger-io/honeybadger-js/issues/1030)) ([695abec](https://github.com/honeybadger-io/honeybadger-js/commit/695abecf6753c4d37b7ead517c13385d1a64eaf6))
+
+## 5.2.0 (2023-03-27)
+
+## 5.1.7 (2023-03-20)
+
+## 5.1.3 (2023-02-17)
+
+
+### Bug Fixes
+
+* **react:** import correctly @honeybadger-io/js ([#1024](https://github.com/honeybadger-io/honeybadger-js/issues/1024)) ([10b4a5f](https://github.com/honeybadger-io/honeybadger-js/commit/10b4a5f566ebeca372a163ed34c7971050a920aa))
+
+## 5.1.2 (2023-02-14)
+
+
+### Bug Fixes
+
+* update peer deps ([#1021](https://github.com/honeybadger-io/honeybadger-js/issues/1021)) ([2c34f0c](https://github.com/honeybadger-io/honeybadger-js/commit/2c34f0cbea92ff60af37345a107b8b7c6c3d96e5))
+
+## 5.1.1 (2023-02-13)
+
+## 5.0.0 (2023-02-05)
+
+## 4.10.0 (2023-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* specify "engines" in package.json
+
+### Features
+
+* specify "engines" in package.json ([d0eb1a3](https://github.com/honeybadger-io/honeybadger-js/commit/d0eb1a368b9904d464528a61844fa52416d14828)), closes [#961](https://github.com/honeybadger-io/honeybadger-js/issues/961)
+
+## 4.9.3 (2023-01-20)
+
+## 4.9.2 (2023-01-18)
+
+## 4.9.0 (2023-01-14)
+
+
+### Features
+
+* collect user feedback ([#965](https://github.com/honeybadger-io/honeybadger-js/issues/965)) ([0842f0a](https://github.com/honeybadger-io/honeybadger-js/commit/0842f0afeb65dc28045809cae4ebc94e461aeb4b))
+
+## 4.8.2 (2023-01-02)
+
+## 4.8.1 (2022-12-22)
+
+## 4.8.0 (2022-12-12)
+
+## 4.7.4 (2022-11-26)
+
+## 4.7.2 (2022-11-21)
+
+## 4.7.1 (2022-11-14)
+
+## 4.6.2 (2022-10-28)
+
+## 4.6.1 (2022-10-24)
+
+## 4.6.0 (2022-10-17)
+
+## 4.4.1 (2022-10-03)
+
+## 4.4.0 (2022-09-28)
+
+
+### Features
+
+* migrate honeybadger-react to monorepo ([#892](https://github.com/honeybadger-io/honeybadger-js/issues/892)) ([e026b76](https://github.com/honeybadger-io/honeybadger-js/commit/e026b76fe6e2540fcd1be33274a5e5cb61cd4a90))
+
+
+
+## [5.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.0...v5.4.1) (2023-05-08)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [5.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.2.0...v5.3.0) (2023-04-14)
+
+
+### Features
+
+* nextjs integration ([#1030](https://github.com/honeybadger-io/honeybadger-js/issues/1030)) ([695abec](https://github.com/honeybadger-io/honeybadger-js/commit/695abecf6753c4d37b7ead517c13385d1a64eaf6))
+
+
+
+## [5.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.7...v5.2.0) (2023-03-27)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [5.1.7](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.6...v5.1.7) (2023-03-20)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [5.1.3](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.2...v5.1.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* **react:** import correctly @honeybadger-io/js ([#1024](https://github.com/honeybadger-io/honeybadger-js/issues/1024)) ([10b4a5f](https://github.com/honeybadger-io/honeybadger-js/commit/10b4a5f566ebeca372a163ed34c7971050a920aa))
+
+
+
+## [5.1.2](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.1...v5.1.2) (2023-02-14)
+
+
+### Bug Fixes
+
+* update peer deps ([#1021](https://github.com/honeybadger-io/honeybadger-js/issues/1021)) ([2c34f0c](https://github.com/honeybadger-io/honeybadger-js/commit/2c34f0cbea92ff60af37345a107b8b7c6c3d96e5))
+
+
+
+## [5.1.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.0...v5.1.1) (2023-02-13)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [5.0.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.10.0...v5.0.0) (2023-02-05)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [4.9.3](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.2...v4.9.3) (2023-01-20)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [4.9.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.1...v4.9.2) (2023-01-18)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+# [4.9.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.2...v4.9.0) (2023-01-14)
+
+
+### Features
+
+* collect user feedback ([#965](https://github.com/honeybadger-io/honeybadger-js/issues/965)) ([0842f0a](https://github.com/honeybadger-io/honeybadger-js/commit/0842f0afeb65dc28045809cae4ebc94e461aeb4b))
+
+
+
+
+
+## [4.8.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.1...v4.8.2) (2023-01-02)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
+## [4.8.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.0...v4.8.1) (2022-12-22)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
 # [4.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.7.5...v4.8.0) (2022-12-12)
 
 **Note:** Version bump only for package @honeybadger-io/react

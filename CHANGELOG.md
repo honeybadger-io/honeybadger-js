@@ -3,6 +3,221 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.5.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.1...v5.5.0) (2023-05-11)
+
+
+### Features
+
+* **rollup-plugin:** rely on the sourcemap and js files being in the same folder and named the same ([#1063](https://github.com/honeybadger-io/honeybadger-js/issues/1063)) ([0ea16b6](https://github.com/honeybadger-io/honeybadger-js/commit/0ea16b64f6fa901856f6a9bfdce4ba00c9db6db2))
+
+
+
+## [5.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.4.0...v5.4.1) (2023-05-08)
+
+
+### Bug Fixes
+
+* **rollup-plugin:** document rollup peer dependency ([#1061](https://github.com/honeybadger-io/honeybadger-js/issues/1061)) ([d64a681](https://github.com/honeybadger-io/honeybadger-js/commit/d64a6819e7d0a43a576387d6dd18739edd1236e2))
+
+
+
+## [5.4.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.2...v5.4.0) (2023-04-27)
+
+
+### Features
+
+* add ignorePaths option ([#1059](https://github.com/honeybadger-io/honeybadger-js/issues/1059)) ([27c357e](https://github.com/honeybadger-io/honeybadger-js/commit/27c357ee02adc4f49062c4b6283c2dc3faf57546))
+
+
+
+## [5.3.2](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.1...v5.3.2) (2023-04-14)
+
+
+### Bug Fixes
+
+* **nextjs:** move notify logic in _error.js ([0179ec4](https://github.com/honeybadger-io/honeybadger-js/commit/0179ec48db25760378342411bb3271272701a435))
+
+
+
+## [5.3.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.3.0...v5.3.1) (2023-04-14)
+
+
+### Bug Fixes
+
+* **nextjs:** copy _error.js component ([2fa5c7d](https://github.com/honeybadger-io/honeybadger-js/commit/2fa5c7dcb98cebd71998459b55d9cd59778c72c1))
+
+
+
+## [5.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.2.0...v5.3.0) (2023-04-14)
+
+
+### Features
+
+* nextjs integration ([#1030](https://github.com/honeybadger-io/honeybadger-js/issues/1030)) ([695abec](https://github.com/honeybadger-io/honeybadger-js/commit/695abecf6753c4d37b7ead517c13385d1a64eaf6))
+
+
+
+## [5.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.7...v5.2.0) (2023-03-27)
+
+
+### Features
+
+* **core:** accept a backtrace passed in the notice ([#1049](https://github.com/honeybadger-io/honeybadger-js/issues/1049)) ([9c56a9f](https://github.com/honeybadger-io/honeybadger-js/commit/9c56a9f41deec7d8a655c770b4a8ca03ca56b177))
+
+
+
+## [5.1.7](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.6...v5.1.7) (2023-03-20)
+
+**Note:** Version bump only for package root
+
+
+
+
+
+## [5.1.6](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.5...v5.1.6) (2023-03-14)
+
+**Note:** Version bump only for package root
+
+
+
+
+
+## [5.1.5](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.4...v5.1.5) (2023-03-06)
+
+**Note:** Version bump only for package root
+
+
+
+
+
+## [5.1.4](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.3...v5.1.4) (2023-02-27)
+
+**Note:** Version bump only for package root
+
+
+
+
+
+## [5.1.3](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.2...v5.1.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* **react:** import correctly @honeybadger-io/js ([#1024](https://github.com/honeybadger-io/honeybadger-js/issues/1024)) ([10b4a5f](https://github.com/honeybadger-io/honeybadger-js/commit/10b4a5f566ebeca372a163ed34c7971050a920aa))
+
+
+
+## [5.1.2](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.1...v5.1.2) (2023-02-14)
+
+
+### Bug Fixes
+
+* update peer deps ([#1021](https://github.com/honeybadger-io/honeybadger-js/issues/1021)) ([2c34f0c](https://github.com/honeybadger-io/honeybadger-js/commit/2c34f0cbea92ff60af37345a107b8b7c6c3d96e5))
+
+
+
+## [5.1.1](https://github.com/honeybadger-io/honeybadger-js/compare/v5.1.0...v5.1.1) (2023-02-13)
+
+**Note:** Version bump only for package root
+
+
+
+
+
+## [5.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/v5.0.0...v5.1.0) (2023-02-08)
+
+
+### Features
+
+* **rollup:** add deployment notification to Rollup plugin ([2b3abf3](https://github.com/honeybadger-io/honeybadger-js/commit/2b3abf3cc7e11066db7f8a0dc2d20c442ff89673)), closes [#1012](https://github.com/honeybadger-io/honeybadger-js/issues/1012)
+
+
+
+## [5.0.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.10.0...v5.0.0) (2023-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* minimum supported nodejs at v14.x
+* changes default revision from master to main (#951)
+* update to lerna 6 (#918)
+
+### Features
+
+* changes default revision from master to main ([#951](https://github.com/honeybadger-io/honeybadger-js/issues/951)) ([33a8a46](https://github.com/honeybadger-io/honeybadger-js/commit/33a8a46bf76d06776eb7df737239f10d742dbc56))
+* rollup / vite plugin ([9246ed7](https://github.com/honeybadger-io/honeybadger-js/commit/9246ed7cedb3b1e01c87d06d668297690bfcb8e7))
+
+
+### Build System
+
+* minimum supported nodejs at v14.x ([e1f3e01](https://github.com/honeybadger-io/honeybadger-js/commit/e1f3e018ad7d956da1180656ce757e82097846bd))
+* update to lerna 6 ([#918](https://github.com/honeybadger-io/honeybadger-js/issues/918)) ([b12d1e8](https://github.com/honeybadger-io/honeybadger-js/commit/b12d1e88937c2c8de2628653ca48535766079ec4))
+
+
+
+## [4.9.3](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.2...v4.9.3) (2023-01-20)
+
+
+### Bug Fixes
+
+* **vue3:** constructor was accessed during render warning in ([40568c9](https://github.com/honeybadger-io/honeybadger-js/commit/40568c949f6dda402db472e41d41e5d0d3e1ac1f)), closes [#996](https://github.com/honeybadger-io/honeybadger-js/issues/996)
+
+
+
+
+
+## [4.9.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.1...v4.9.2) (2023-01-18)
+
+
+### Bug Fixes
+
+* replace instrument with safer alternative addEventListener ([#1002](https://github.com/honeybadger-io/honeybadger-js/issues/1002)) ([8569f09](https://github.com/honeybadger-io/honeybadger-js/commit/8569f096788b55beb26a6290f4b481035455adbb))
+
+
+
+
+
+## [4.9.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.9.0...v4.9.1) (2023-01-14)
+
+
+### Bug Fixes
+
+* improve generateStackTrace function to hide vue warn message ([#1000](https://github.com/honeybadger-io/honeybadger-js/issues/1000)) ([45c6ad6](https://github.com/honeybadger-io/honeybadger-js/commit/45c6ad6bc30a3680ddb402bd3598fda4d57f8ec9))
+
+
+
+
+
+# [4.9.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.2...v4.9.0) (2023-01-14)
+
+
+### Features
+
+* collect user feedback ([#965](https://github.com/honeybadger-io/honeybadger-js/issues/965)) ([0842f0a](https://github.com/honeybadger-io/honeybadger-js/commit/0842f0afeb65dc28045809cae4ebc94e461aeb4b))
+
+
+
+
+
+## [4.8.2](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.1...v4.8.2) (2023-01-02)
+
+**Note:** Version bump only for package root
+
+
+
+
+
+## [4.8.1](https://github.com/honeybadger-io/honeybadger-js/compare/v4.8.0...v4.8.1) (2022-12-22)
+
+
+### Bug Fixes
+
+* filter out honeybadger source code from stack trace ([#982](https://github.com/honeybadger-io/honeybadger-js/issues/982)) ([e647b75](https://github.com/honeybadger-io/honeybadger-js/commit/e647b75a58bce6a98da6bcc418dd77ecabe0fae1))
+
+
+
+
+
 # [4.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/v4.7.5...v4.8.0) (2022-12-12)
 
 

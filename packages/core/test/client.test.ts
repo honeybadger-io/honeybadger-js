@@ -1,5 +1,7 @@
+import * as stackTraceParser from 'stacktrace-parser'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 import { Notice } from '../src/types'
+import { makeBacktrace, DEFAULT_BACKTRACE_SHIFT } from '../src/util'
 
 class MyError extends Error {
   context = null
@@ -19,7 +21,8 @@ describe('client', function () {
   beforeEach(function () {
     client = new TestClient({
       logger: nullLogger(),
-      environment: null
+      environment: null,
+      projectRoot: process.cwd()
     }, new TestTransport())
     client.configure()
   })
@@ -309,18 +312,6 @@ describe('client', function () {
       expect(payload.error.backtrace.length).toBeGreaterThan(0)
     })
 
-    it('generates a backtrace when there isn\'t one', function () {
-      client.configure({
-        apiKey: 'testing'
-      })
-
-      const payload = client.getPayload('expected message')
-
-      expect(payload.error.message).toEqual('expected message')
-      expect((payload.error.backtrace).length).toBeGreaterThan(0)
-      expect(payload.error.backtrace[0].file).toMatch('helpers.ts')
-    })
-
     it('sends details', function () {
       client.configure({
         apiKey: 'testing'
@@ -335,6 +326,135 @@ describe('client', function () {
       const payload = client.getPayload('testing', { details: details })
 
       expect(payload.details).toEqual(details)
+    })
+  })
+
+  describe('backtrace', function () {
+    it('uses the passed-in backtrace if there is one', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const payload = client.getPayload({
+        name: 'TestError', 
+        message: 'I have a custom backtrace', 
+        backtrace: [{
+          file: 'foo.js', 
+          method: 'doStuff', 
+          number: 3, 
+          column: 23,
+        }]
+      })
+
+      expect(payload.error.backtrace.length).toBe(1)
+      expect(payload.error.backtrace[0].file).toBe('foo.js')
+    })
+
+    it('generates a backtrace when existing one is not an array or empty', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const stringBacktracePayload = client.getPayload({
+        name: 'TestError', 
+        message: 'I have a custom backtrace', 
+        // @ts-expect-error
+        backtrace: 'oops this should not be a string',
+      })
+
+      const emptyBacktracePayload = client.getPayload({
+        name: 'TestError', 
+        message: 'I have a custom backtrace', 
+        backtrace: [],
+      })
+
+      expect(stringBacktracePayload.error.backtrace[0].file).toMatch('client.test.ts')
+      expect(emptyBacktracePayload.error.backtrace[0].file).toMatch('client.test.ts')
+    })
+
+    it('generates a backtrace when there isn\'t one', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const payload = client.getPayload('expected message')
+
+      expect(payload.error.message).toEqual('expected message')
+      expect((payload.error.backtrace).length).toBeGreaterThan(0)
+      expect(payload.error.backtrace[0].file).toMatch('client.test.ts')
+    })
+
+    it('returns an empty array when no stack is undefined', function () {
+      const backtrace = makeBacktrace(undefined)
+      expect(backtrace).toEqual([])
+    })
+
+    it('filters out top frames that come from @honeybadger-io (nodejs)', function () {
+      const error = new Error('ENOENT: no such file or directory, open \'\'/tmp/file-123456\'\'')
+      error.stack = `Error: ENOENT: no such file or directory, open ''/tmp/file-67efc3cb2da4'' 
+            at generateStackTrace (/var/www/somebody/node_modules/@honeybadger-io/js/dist/server/honeybadger.js:563:15)
+            at Honeybadger.Client.makeNotice (/var/www/somebody/node_modules/@honeybadger-io/js/dist/server/honeybadger.js:985:60)
+            at Honeybadger.Client.notify (/var/www/somebody/node_modules/@honeybadger-io/js/dist/server/honeybadger.js:827:27)
+            at /var/www/somebody/node_modules/@honeybadger-io/js/dist/server/honeybadger.js:946:19
+            at new Promise (<anonymous>)
+            at Honeybadger.Client.notifyAsync (/var/www/somebody/node_modules/@honeybadger-io/js/dist/server/honeybadger.js:914:16)
+            at HoneybadgerTransport.log (/var/www/somebody/node_modules/@somebody/logger/HoneybadgerTransport.js:18:19)
+            at HoneybadgerTransport._write (/var/www/somebody/node_modules/winston-transport/index.js:82:19)
+            at doWrite (/var/www/somebody/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:409:139)
+            at writeOrBuffer (/var/www/somebody/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:398:5)
+            at HoneybadgerTransport.Writable.write (/var/www/somebody/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:307:11)
+            at DerivedLogger.ondata (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_readable.js:681:20)
+            at DerivedLogger.emit (node:events:525:35)
+            at DerivedLogger.emit (node:domain:489:12)
+            at addChunk (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_readable.js:298:12)
+            at readableAddChunk (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_readable.js:280:11)
+            at DerivedLogger.Readable.push (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_readable.js:241:10)
+            at DerivedLogger.Transform.push (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_transform.js:139:32)
+            at DerivedLogger._transform (/var/www/somebody/node_modules/winston/lib/winston/logger.js:313:12)
+            at DerivedLogger.Transform._read (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_transform.js:177:10)
+            at DerivedLogger.Transform._write (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_transform.js:164:83)
+            at doWrite (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_writable.js:409:139)
+            at writeOrBuffer (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_writable.js:398:5)
+            at DerivedLogger.Writable.write (/var/www/somebody/node_modules/winston/node_modules/readable-stream/lib/_stream_writable.js:307:11)
+            at DerivedLogger.log (/var/www/somebody/node_modules/winston/lib/winston/logger.js:252:14)
+            at DerivedLogger.<computed> [as error] (/var/www/somebody/node_modules/winston/lib/winston/create-logger.js:95:19)
+            at console.hideMe [as error] (/var/www/somebody/node_modules/@somebody/logger/index.js:83:45)
+            at Function.logerror (/var/www/somebody/node_modules/express/lib/application.js:647:43)`
+      const backtrace = makeBacktrace(error.stack, true)
+      expect(backtrace[0]).toEqual({
+        file: '/var/www/somebody/node_modules/@somebody/logger/HoneybadgerTransport.js',
+        method: 'HoneybadgerTransport.log',
+        number: 18,
+        column: 19
+      })
+    })
+
+    it('filters out top frames that come from @honeybadger-io (browser)', function () {
+      const error = new Error('This is a test message reported from an addEventListener callback.')
+      error.stack = `Error: This is a test message reported from an addEventListener callback.
+            at __webpack_modules__../node_modules/@honeybadger-io/js/dist/browser/honeybadger.js.Client.notify (http://localhost:63342/honeybadger-js/packages/js/examples/webpack/bundle.js:821:28)
+            at HTMLButtonElement.<anonymous> (http://localhost:63342/honeybadger-js/packages/js/examples/webpack/bundle.js:2139:10)
+            at func.___hb (http://localhost:63342/honeybadger-js/packages/js/examples/webpack/bundle.js:2030:39)`
+      const backtrace = makeBacktrace(error.stack, true)
+      expect(backtrace[0]).toEqual({
+        file: 'http://localhost:63342/honeybadger-js/packages/js/examples/webpack/bundle.js',
+        method: 'HTMLButtonElement.<anonymous>',
+        number: 2139,
+        column: 10
+      })
+    })
+
+    it('filters out default number of frames if no honeybadger source code is found', function () {
+      const error = new Error('This is an error from the test file. Tests are not under @honeybadger-io node_modules so the default backtrace shift will be applied.')
+      const originalBacktrace = stackTraceParser.parse(error.stack)
+      const shiftedBacktrace = makeBacktrace(error.stack, true)
+      expect(originalBacktrace.length).toEqual(shiftedBacktrace.length + DEFAULT_BACKTRACE_SHIFT)
+      expect(originalBacktrace[DEFAULT_BACKTRACE_SHIFT]).toMatchObject({
+        file: shiftedBacktrace[0].file,
+        methodName: shiftedBacktrace[0].method,
+        lineNumber: shiftedBacktrace[0].number,
+        column: shiftedBacktrace[0].column
+      })
     })
   })
 

@@ -9,6 +9,23 @@ import { BrowserTransport } from './browser/transport'
 
 const { merge, filter, objectIsExtensible } = Util
 
+const getProjectRoot = () => {
+  const global = globalThisOrWindow()
+  let projectRoot = ''
+
+  // Cloudflare workers do not have access to location API.
+  if (global.location != null) {
+    projectRoot = global.location.protocol + '//' + global.location.host
+  }
+
+  return projectRoot
+}
+
+export const getUserFeedbackScriptUrl = (version: string) => {
+  const majorMinorVersion = version.split('.').slice(0,2).join('.')
+  return `https://js.honeybadger.io/v${majorMinorVersion}/honeybadger-feedback-form.js`
+}
+
 interface WrappedFunc {
   (): (...args: unknown[]) => unknown
   ___hb: WrappedFunc
@@ -19,6 +36,8 @@ class Honeybadger extends Client {
   private __errorsSent = 0
   /** @internal */
   private __lastWrapErr = undefined
+  /** @internal */
+  private __lastNoticeId = undefined
 
   config: Types.BrowserConfig
 
@@ -40,19 +59,21 @@ class Honeybadger extends Client {
     }
   ]
 
-  constructor (opts: Partial<Types.BrowserConfig> = {}) {
-    const global = globalThisOrWindow()
-    let projectRoot = ''
-
-    // Cloudflare workers do not have access to location API.
-    if (global.location != null) {
-      projectRoot = global.location.protocol + '//' + global.location.host
+  protected __afterNotifyHandlers: Types.AfterNotifyHandler[] = [
+    (_error?: unknown, notice?: Types.Notice) => {
+      if (notice) {
+        this.__lastNoticeId = notice.id
+      }
+      return true
     }
+  ]
 
+  constructor (opts: Partial<Types.BrowserConfig> = {}) {
     super({
+      userFeedbackEndpoint: 'https://api.honeybadger.io/v2/feedback',
       async: true,
       maxErrors: null,
-      projectRoot,
+      projectRoot: getProjectRoot(),
       ...opts
     }, new BrowserTransport())
   }
@@ -74,6 +95,60 @@ class Honeybadger extends Client {
     throw new Error('Honeybadger.checkIn() is not supported on the browser')
   }
 
+  public async showUserFeedbackForm(options: Types.UserFeedbackFormOptions = {}) {
+    if (!this.config || !this.config.apiKey) {
+      this.logger.debug('Client not initialized')
+      return
+    }
+
+    if (!this.__lastNoticeId) {
+      this.logger.debug("Can't show user feedback form without a notice already reported")
+      return
+    }
+
+    const global = globalThisOrWindow()
+    if (typeof global.document === 'undefined') {
+      this.logger.debug('global.document is undefined. Cannot attach script')
+      return
+    }
+
+    if (this.isUserFeedbackScriptUrlAlreadyVisible()) {
+      this.logger.debug('User feedback form is already visible')
+      return
+    }
+
+    global['honeybadgerUserFeedbackOptions'] = {
+      ...options,
+      apiKey: this.config.apiKey,
+      endpoint: this.config.userFeedbackEndpoint,
+      noticeId: this.__lastNoticeId
+    }
+    const script = global.document.createElement('script')
+    script.setAttribute('src', this.getUserFeedbackSubmitUrl())
+    script.setAttribute('async', 'true')
+    if (options.onLoad) {
+      script.onload = options.onLoad
+    }
+    (global.document.head || global.document.body).appendChild(script)
+  }
+
+  private isUserFeedbackScriptUrlAlreadyVisible() {
+    const global = globalThisOrWindow()
+    const feedbackScriptUrl =this.getUserFeedbackSubmitUrl()
+    for (let i = 0; i < global.document.scripts.length; i++) {
+      const script = global.document.scripts[i]
+      if (script.src === feedbackScriptUrl) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private getUserFeedbackSubmitUrl() {
+    return getUserFeedbackScriptUrl(this.getVersion())
+  }
+
   /** @internal */
   protected __buildPayload(notice: Types.Notice): Types.NoticeTransportPayload {
     const cgiData = {
@@ -82,7 +157,10 @@ class Honeybadger extends Client {
       HTTP_COOKIE: undefined
     }
 
-    cgiData.HTTP_USER_AGENT = navigator.userAgent
+    if (typeof navigator !== 'undefined' && navigator.userAgent) {
+      cgiData.HTTP_USER_AGENT = navigator.userAgent
+    }
+
     if (typeof document !== 'undefined' && document.referrer.match(/\S/)) {
       cgiData.HTTP_REFERER = document.referrer
     }
@@ -108,7 +186,7 @@ class Honeybadger extends Client {
    * removeEventListener.
    * @internal
    */
-  __wrap(f:unknown, opts:Record<string, unknown> = {}):WrappedFunc {
+  __wrap(f: unknown, opts: Record<string, unknown> = {}): WrappedFunc {
     const func = f as WrappedFunc
     if (!opts) { opts = {} }
     try {

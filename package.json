@@ -9,7 +9,7 @@
     "eslint": "^8.20.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-promise": "^6.0.0",
-    "lerna": "^5.1.8"
+    "lerna": "^6.0.1"
   },
   "scripts": {
     "prepare": "npm run build",
@@ -17,6 +17,6 @@
     "test": "lerna run test --stream",
     "install": "lerna bootstrap",
     "lint": "npx eslint .",
-    "release": "lerna publish --conventional-commits --yes --create-release github --loglevel silly"
+    "release": "lerna publish --conventional-commits --changelog-preset conventional-changelog-conventionalcommits --yes --create-release github --loglevel silly"
   }
 }

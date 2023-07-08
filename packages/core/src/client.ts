@@ -22,7 +22,7 @@ import {
   Notice,
   Noticeable,
   HoneybadgerStore,
-  BacktraceFrame, Transport, NoticeTransportPayload
+  BacktraceFrame, Transport, NoticeTransportPayload, UserFeedbackFormOptions
 } from './types'
 import { GlobalStore } from './store';
 
@@ -86,6 +86,8 @@ export abstract class Client {
   protected abstract factory(opts: Partial<Config>): this
 
   protected abstract checkIn(id: string): Promise<void>
+
+  protected abstract showUserFeedbackForm(options: UserFeedbackFormOptions): Promise<void>
 
   getVersion(): string {
     return notifier.version
@@ -316,13 +318,16 @@ export abstract class Client {
       tags: uniqueTags,
     })
 
-    let backtraceShift = 0
-    if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
-      notice.stack = generateStackTrace()
-      backtraceShift = 2
+    // If we're passed a custom backtrace array, use it
+    // Otherwise we make one. 
+    if (!Array.isArray(notice.backtrace) || !notice.backtrace.length) {
+      if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
+        notice.stack = generateStackTrace()
+        notice.backtrace = makeBacktrace(notice.stack, true, this.logger)
+      } else {
+        notice.backtrace = makeBacktrace(notice.stack, false, this.logger)
+      }
     }
-
-    notice.backtrace = makeBacktrace(notice.stack, backtraceShift)
 
     return notice as Notice
   }
@@ -380,7 +385,7 @@ export abstract class Client {
         backtrace: notice.backtrace,
         fingerprint: notice.fingerprint,
         tags: notice.tags,
-        causes: getCauses(notice),
+        causes: getCauses(notice, this.logger),
       },
       request: {
         url: filterUrl(notice.url, this.config.filters),

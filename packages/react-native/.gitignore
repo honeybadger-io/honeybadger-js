@@ -1,6 +1,9 @@
 # OSX
 .DS_Store
 
+# Tarball (used for testing)
+honeybadger-io-react-native-*.tgz
+
 # Node
 *.log
 npm-debug.log
@@ -9,6 +12,9 @@ build
 dist
 node_modules/
 yarn-error.log
+
+# Test
+.jest
 
 # Xcode
 build/

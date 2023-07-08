@@ -6,7 +6,7 @@
 [![npm dt](https://img.shields.io/npm/dt/@honeybadger-io/webpack)](https://www.npmjs.com/package/@honeybadger-io/webpack)
 
 [Webpack](https://webpack.js.org/) plugin to upload JavaScript
-sourcemaps to [Honeybadger](https://docs.honeybadger.io/guides/source-maps.html). You can also send [deployment notifications](https://docs.honeybadger.io/api/deployments.html).
+sourcemaps to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). You can also send [deployment notifications](https://docs.honeybadger.io/api/deployments.html).
 
 Word Up! to the [thredUP](https://github.com/thredup) development team for a
 similar webpack plugin they have authored.
@@ -25,7 +25,7 @@ yarn add @honeybadger-io/webpack --dev
 
 ### Plugin parameters
 
-These plugin parameters correspond to the Honeybadger [Source Map Upload API](https://docs.honeybadger.io/api/reporting-source-maps/) and [Deployments API](https://docs.honeybadger.io/api/deployments.html).
+These plugin parameters correspond to the Honeybadger [Source Map Upload API](https://docs.honeybadger.io/api/reporting-source-maps/) and [Deployments API](https://docs.honeybadger.io/api/reporting-deployments/).
 
 <dl>
   <dt><code>apiKey</code> (required)</dt>
@@ -39,7 +39,7 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   sourcemap server you would like to upload your sourcemaps to instead
   of honeybadger.</dd>
 
-  <dt><code>revision</code> (optional &mdash; default: "master")</dt>
+  <dt><code>revision</code> (optional &mdash; default: "main")</dt>
   <dd>The deploy revision (i.e. commit hash) that your source map applies to. This could also be a code version. For best results, set it to something unique every time your code changes. <a href="https://docs.honeybadger.io/lib/javascript/guides/using-source-maps.html#versioning-your-project">See the Honeybadger docs for examples.</a></dd>
 
   <dt><code>silent</code> (optional &mdash; default: "null/false")</dt>
@@ -63,7 +63,7 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
 
   <dt><code>deploy</code> (optional &mdash; default: false)</dt>
   <dd>
-  Configuration for deployment notifications. To disable deployment notifications, ignore this option. To enable deployment notifications, set this to <code>true</code>, or to an object containing any of these fields (see the <a href="https://docs.honeybadger.io/api/deployments.html">API reference</a>):</br>
+  Configuration for deployment notifications. To disable deployment notifications, ignore this option. To enable deployment notifications, set this to <code>true</code>, or to an object containing any of these fields (see the <a href="https://docs.honeybadger.io/api/reporting-deployments/">API reference</a>):</br>
 
   <dl>
     <dt><code>environment</code></dt>
@@ -85,7 +85,7 @@ const webpackConfig = {
   plugins: [new HoneybadgerSourceMapPlugin({
     apiKey: 'abc123',
     assetsUrl: ASSETS_URL,
-    revision: 'master',
+    revision: 'main',
     // You can also enable deployment notifications:
     deploy: {
        environment: process.env.NODE_ENV,
@@ -103,7 +103,7 @@ const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
 
 // Assumes Heroku / 12-factor application style ENV variables
 // named GIT_COMMIT, HONEYBADGER_API_KEY, ASSETS_URL
-const revision = process.env.GIT_COMMIT || 'master'
+const revision = process.env.GIT_COMMIT || 'main'
 
 environment.plugins.append(
   'HoneybadgerSourceMap',

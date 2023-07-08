@@ -3,5 +3,5 @@
     "packages/*"
   ],
   "useNx": false,
-  "version": "4.8.0"
+  "version": "independent"
 }

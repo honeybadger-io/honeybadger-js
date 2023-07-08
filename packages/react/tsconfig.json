@@ -4,7 +4,7 @@
     "composite": true,
     "rootDir": "./src",
     "outDir": "./build",
-    "jsx": "react-jsx",
+    "jsx": "react",
     "target": "es2018",
     "module": "esnext",
     "moduleResolution": "node",
@@ -28,5 +28,10 @@
   ],
   "include": [
     "./src/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "../js"
+    }
   ]
 }

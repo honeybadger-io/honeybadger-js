@@ -16,7 +16,9 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
 
       // Breadcrumbs: instrument console
       (function () {
-        if (!breadcrumbsEnabled('console')) { return }
+        if (!breadcrumbsEnabled('console')) {
+          return
+        }
 
         function inspectArray(obj) {
           if (!Array.isArray(obj)) { return '' }
@@ -55,7 +57,13 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
 
       // Breadcrumbs: instrument click events
       (function () {
-        if (!breadcrumbsEnabled('dom')) { return }
+        if (!breadcrumbsEnabled('dom')) {
+          return
+        }
+
+        if (typeof _window.addEventListener !== 'function') {
+          return
+        }
 
         _window.addEventListener('click', (event) => {
           let message, selector, text
@@ -80,22 +88,28 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
               event
             }
           })
-        }, _window.location ? true : false) // In CloudFlare workers useCapture must be false. window.locaiton is a hacky way to detect it.
+        }, _window.location ? true : false) // In CloudFlare workers useCapture must be false. window.location is a hacky way to detect it.
       })();
 
       // Breadcrumbs: instrument XMLHttpRequest
       (function () {
-        if (!breadcrumbsEnabled('network')) { return }
+        if (!breadcrumbsEnabled('network')) {
+          return
+        }
 
         // Some environments may not support XMLHttpRequest.
-        if (typeof XMLHttpRequest === 'undefined') return
+        if (typeof XMLHttpRequest === 'undefined') {
+          return
+        }
 
         // -- On xhr.open: capture initial metadata
         instrument(XMLHttpRequest.prototype, 'open', function (original) {
           return function () {
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const xhr = this
-            const url = arguments[1]
+            const rawUrl = arguments[1]
+            // in case of url being URL object (which is valid input) we need to stringify it
+            const url =  typeof rawUrl === 'string' ? rawUrl : String(rawUrl)
             const method = typeof arguments[0] === 'string' ? arguments[0].toUpperCase() : arguments[0]
             const message = `${method} ${localURLPathname(url)}`
 
@@ -160,7 +174,9 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
 
       // Breadcrumbs: instrument fetch
       (function () {
-        if (!breadcrumbsEnabled('network')) { return }
+        if (!breadcrumbsEnabled('network')) {
+          return
+        }
 
         if (!nativeFetch()) {
           // Polyfills use XHR.
@@ -247,15 +263,15 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
           })
         }
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-        instrument(_window, 'onpopstate', function (original) {
-          return function () {
+        if (typeof addEventListener === 'function') {
+          addEventListener('popstate', (_event) => {
             recordUrlChange(lastHref, _window.location.href)
-            if (original) {
-              return original.apply(this, arguments)
-            }
-          }
-        })
+          })
+        }
+
+        if (typeof _window.history === 'undefined') {
+          return
+        }
 
         // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
         // https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState

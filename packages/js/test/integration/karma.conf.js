@@ -37,6 +37,9 @@ module.exports = function (config) {
 
       // Integration sandbox
       { pattern: 'test/integration/sandbox.html', included: false },
+
+      // User Feedback Form asset
+      { pattern: 'dist/browser/honeybadger-feedback-form.js', included: false },
     ],
     frameworks: ['jasmine', 'jasmine-matchers'],
   })
