@@ -53,9 +53,4 @@ export class TestClient extends BaseClient {
     // called in (server|browser).__send()
     return this.__buildPayload(notice)
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  protected __send(notice) {
-    runAfterNotifyHandlers(notice, this.__afterNotifyHandlers)
-  }
 }

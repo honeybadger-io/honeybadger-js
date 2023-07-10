@@ -143,93 +143,32 @@ export abstract class Client {
   }
 
   notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
-    let preConditionError: Error = null
     const notice = this.makeNotice(noticeable, name, extra)
-    if (!notice) {
-      this.logger.debug('failed to build error report')
-      preConditionError = new Error('failed to build error report')
-    }
 
-    if (!preConditionError && this.config.reportData === false) {
-      this.logger.debug('skipping error report: honeybadger.js is disabled', notice)
-      preConditionError = new Error('honeybadger.js is disabled')
-    }
-
-    if (!preConditionError && this.__developmentMode()) {
-      this.logger.log('honeybadger.js is in development mode; the following error report will be sent in production.', notice)
-      preConditionError = new Error('honeybadger.js is in development mode')
-    }
-
-    if (!preConditionError && !this.config.apiKey) {
-      this.logger.warn('could not send error report: no API key has been configured', notice)
-      preConditionError = new Error('missing API key')
-    }
     // we need to have the source file data before the beforeNotifyHandlers,
     // in case they modify them
     const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
-    const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
+    const preConditionsResult = this.__runPreconditions(notice)
+    if (preConditionsResult instanceof Error) {
+      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, preConditionsResult)
 
-
-    if (!preConditionError && !beforeNotifyResult.result) {
-      this.logger.debug('skipping error report: one or more beforeNotify handlers returned false', notice)
-      preConditionError = new Error('beforeNotify handlers returned false')
-    }
-
-    if (preConditionError) {
-      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, preConditionError)
       return false
     }
 
-    this.addBreadcrumb('Honeybadger Notice', {
-      category: 'notice',
-      metadata: {
-        message: notice.message,
-        name: notice.name,
-        stack: notice.stack
-      }
-    })
+    if (preConditionsResult instanceof Promise) {
+      preConditionsResult.then((result) => {
+        if (result instanceof Error) {
+          runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, result)
 
-    const breadcrumbs = this.__store.getContents('breadcrumbs')
-    notice.__breadcrumbs = this.config.breadcrumbsEnabled ? breadcrumbs : []
+          return false
+        }
+        return this.__send(notice, sourceCodeData)
+      })
 
-    getSourceForBacktrace(sourceCodeData, this.__getSourceFileHandler)
-      .then(async (sourcePerTrace) => {
-        sourcePerTrace.forEach((source, index) => {
-          notice.backtrace[index].source = source
-        })
+      return true
+    }
 
-        // Make sure all of our promises have finished before sending the payload.
-        await Promise.allSettled(beforeNotifyResult.results)
-        const payload = this.__buildPayload(notice)
-        this.__transport
-          .send({
-            headers: {
-              'X-API-Key': this.config.apiKey,
-              'Content-Type': 'application/json',
-              'Accept': 'text/json, application/json'
-            },
-            method: 'POST',
-            endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
-            maxObjectDepth: this.config.maxObjectDepth,
-            logger: this.logger,
-          }, payload)
-          .then(res => {
-            if (res.statusCode !== 201) {
-              runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${res.statusCode}`))
-              this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
-              return
-            }
-            const uuid = JSON.parse(res.body).id
-            runAfterNotifyHandlers(merge(notice, {
-              id: uuid
-            }), this.__afterNotifyHandlers)
-            this.logger.info(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
-          })
-          .catch(err => {
-            this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
-            runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
-          })
-        })
+    this.__send(notice, sourceCodeData).catch((_err) => { /* error is already caught and logged */ })
 
     return true
   }
@@ -319,7 +258,7 @@ export abstract class Client {
     })
 
     // If we're passed a custom backtrace array, use it
-    // Otherwise we make one. 
+    // Otherwise we make one.
     if (!Array.isArray(notice.backtrace) || !notice.backtrace.length) {
       if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
         notice.stack = generateStackTrace()
@@ -413,5 +352,109 @@ export abstract class Client {
     }
 
     return tags.toString().split(TAG_SEPARATOR).filter((tag) => NOT_BLANK.test(tag))
+  }
+
+  private __runPreconditions(notice: Notice): Error | null | Promise<Error | null> {
+    let preConditionError: Error | null = null
+    if (!notice) {
+      this.logger.debug('failed to build error report')
+      preConditionError = new Error('failed to build error report')
+    }
+
+    if (this.config.reportData === false) {
+      this.logger.debug('skipping error report: honeybadger.js is disabled', notice)
+      preConditionError = new Error('honeybadger.js is disabled')
+    }
+
+    if (this.__developmentMode()) {
+      this.logger.log('honeybadger.js is in development mode; the following error report will be sent in production.', notice)
+      preConditionError = new Error('honeybadger.js is in development mode')
+    }
+
+    if (!this.config.apiKey) {
+      this.logger.warn('could not send error report: no API key has been configured', notice)
+      preConditionError = new Error('missing API key')
+    }
+
+    const beforeNotifyResult = runBeforeNotifyHandlers(notice, this.__beforeNotifyHandlers)
+    if (!preConditionError && !beforeNotifyResult.result) {
+      this.logger.debug('skipping error report: one or more beforeNotify handlers returned false', notice)
+      preConditionError = new Error('beforeNotify handlers returned false')
+    }
+
+    if (beforeNotifyResult.results.length && beforeNotifyResult.results.some(result => result instanceof Promise)) {
+      return Promise.allSettled(beforeNotifyResult.results)
+        .then((results) => {
+          if (!preConditionError && (results.some(result => result.status === 'rejected' || result.value === false))) {
+            this.logger.debug('skipping error report: one or more beforeNotify handlers returned false', notice)
+            preConditionError = new Error('beforeNotify handlers (async) returned false')
+          }
+
+          if (preConditionError) {
+            return preConditionError
+          }
+        })
+    }
+
+    return preConditionError
+  }
+
+  private __send(notice: Notice, originalBacktrace: BacktraceFrame[]) {
+    if (this.config.breadcrumbsEnabled) {
+      this.addBreadcrumb('Honeybadger Notice', {
+        category: 'notice',
+        metadata: {
+          message: notice.message,
+          name: notice.name,
+          stack: notice.stack
+        }
+      })
+      notice.__breadcrumbs = this.__store.getContents('breadcrumbs')
+    }
+    else {
+      notice.__breadcrumbs = []
+    }
+
+    return getSourceForBacktrace(originalBacktrace, this.__getSourceFileHandler)
+      .then(async (sourcePerTrace) => {
+        sourcePerTrace.forEach((source, index) => {
+          notice.backtrace[index].source = source
+        })
+
+        const payload = this.__buildPayload(notice)
+        return this.__transport
+          .send({
+            headers: {
+              'X-API-Key': this.config.apiKey,
+              'Content-Type': 'application/json',
+              'Accept': 'text/json, application/json'
+            },
+            method: 'POST',
+            endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
+            maxObjectDepth: this.config.maxObjectDepth,
+            logger: this.logger,
+          }, payload)
+      })
+      .then(res => {
+        if (res.statusCode !== 201) {
+          runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, new Error(`Bad HTTP response: ${res.statusCode}`))
+          this.logger.warn(`Error report failed: unknown response from server. code=${res.statusCode}`)
+
+          return false
+        }
+        const uuid = JSON.parse(res.body).id
+        runAfterNotifyHandlers(merge(notice, {
+          id: uuid
+        }), this.__afterNotifyHandlers)
+        this.logger.info(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
+
+        return true
+      })
+      .catch(err => {
+        this.logger.error('Error report failed: an unknown error occurred.', `message=${err.message}`)
+        runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err)
+
+        return false
+      })
   }
 }

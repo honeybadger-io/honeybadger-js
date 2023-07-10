@@ -40,6 +40,10 @@ export function objectIsExtensible(obj): boolean {
 }
 
 export function makeBacktrace(stack: string, filterHbSourceCode = false, logger: Logger = console): BacktraceFrame[] {
+  if (typeof stack === 'undefined') {
+    return []
+  }
+
   try {
     const backtrace = stackTraceParser
       .parse(stack)
@@ -159,9 +163,7 @@ export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeN
   let result = true
   for (let i = 0, len = handlers.length; i < len; i++) {
     const handler = handlers[i]
-
     const handlerResult = handler(notice)
-
     if (handlerResult === false) {
       result = false
     }
