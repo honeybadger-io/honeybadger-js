@@ -57,7 +57,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
-    "@rollup/plugin-replace": "^4.0.0",
+    "@rollup/plugin-replace": "^5.0.2",
     "@types/jest": "^27.0.3",
     "@types/node": "^17.0.45",
     "express": "^4.17.1",

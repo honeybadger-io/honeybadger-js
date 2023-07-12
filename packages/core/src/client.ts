@@ -22,15 +22,9 @@ import {
   Notice,
   Noticeable,
   HoneybadgerStore,
-  BacktraceFrame, Transport, NoticeTransportPayload, UserFeedbackFormOptions
+  BacktraceFrame, Transport, NoticeTransportPayload, UserFeedbackFormOptions, Notifier
 } from './types'
 import { GlobalStore } from './store';
-
-const notifier = {
-  name: 'honeybadger-js',
-  url: 'https://github.com/honeybadger-io/honeybadger-js',
-  version: '__VERSION__'
-}
 
 // Split at commas and spaces
 const TAG_SEPARATOR = /,|\s+/
@@ -47,6 +41,12 @@ export abstract class Client {
   protected __getSourceFileHandler: (path: string) => Promise<string>
 
   protected readonly __transport: Transport;
+
+  protected __notifier: Notifier = {
+    name: '@honeybadger-io/core',
+    url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/core',
+    version: '__VERSION__'
+  }
 
   config: Config
   logger: Logger
@@ -90,7 +90,15 @@ export abstract class Client {
   protected abstract showUserFeedbackForm(options: UserFeedbackFormOptions): Promise<void>
 
   getVersion(): string {
-    return notifier.version
+    return this.__notifier.version
+  }
+
+  getNotifier() {
+    return this.__notifier
+  }
+
+  setNotifier(notifier: Notifier) {
+    this.__notifier = notifier
   }
 
   configure(opts: Partial<Config> = {}): this {
@@ -315,7 +323,7 @@ export abstract class Client {
     })
 
     // If we're passed a custom backtrace array, use it
-    // Otherwise we make one. 
+    // Otherwise we make one.
     if (!Array.isArray(notice.backtrace) || !notice.backtrace.length) {
       if (typeof notice.stack !== 'string' || !notice.stack.trim()) {
         notice.stack = generateStackTrace()
@@ -370,7 +378,7 @@ export abstract class Client {
     }, this.config.filters)
 
     return {
-      notifier: notifier,
+      notifier: this.__notifier,
       breadcrumbs: {
         enabled: !!this.config.breadcrumbsEnabled,
         trail: notice.__breadcrumbs || []
