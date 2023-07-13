@@ -1,6 +1,5 @@
 import { Client as BaseClient } from '../src/client'
 import { Config, Logger, Notice, Noticeable, Transport, TransportOptions, NoticeTransportPayload, UserFeedbackFormOptions } from '../src/types'
-import { runAfterNotifyHandlers } from '../src/util'
 
 export function nullLogger(): Logger {
   return {
