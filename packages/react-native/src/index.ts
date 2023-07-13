@@ -10,15 +10,21 @@ class Honeybadger extends Client {
   private __nativeHandlerInitialized: boolean
   private __originalJsHandler: (error: Error, isFatal: boolean) => void
 
+  protected override __notifier = {
+    name: '@honeybadger-io/react-native',
+    url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/react-native',
+    version: '__VERSION__'
+  }
+
   constructor(opts: Partial<Types.Config> = {}) {
     super(mergeDefaultOpts(opts), new Transport())
-    
+
     this.__jsHandlerInitialized = false
     this.__nativeHandlerInitialized = false
 
-    this.setContext({ 
+    this.setContext({
       platform: {
-        os: Platform.OS, 
+        os: Platform.OS,
         version: Platform.Version
       }
     })
@@ -78,12 +84,12 @@ class Honeybadger extends Client {
       this.logger.error('The native module was not found. Please review the installation instructions.')
       return
     }
-  
+
     HoneybadgerNativeModule.start()
-  
+
     const nativeEventEmitter = new NativeEventEmitter(HoneybadgerNativeModule)
     nativeEventEmitter.addListener(
-      'native-exception-event', 
+      'native-exception-event',
       this.onNativeException.bind(this)
     )
 
@@ -92,10 +98,10 @@ class Honeybadger extends Client {
 
   private onNativeException(data: NativeExceptionData) {
     switch ( Platform.OS ) {
-    case 'ios': 
+    case 'ios':
       this.onNativeIOSException(data)
       break
-    case 'android': 
+    case 'android':
       this.onNativeAndroidException(data)
       break
     }
@@ -130,7 +136,7 @@ class Honeybadger extends Client {
 
 function mergeDefaultOpts(opts) {
   return {
-    environment: __DEV__ ? 'development' : 'production', 
+    environment: __DEV__ ? 'development' : 'production',
     ...opts
   }
 }

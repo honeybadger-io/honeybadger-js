@@ -9,8 +9,8 @@ import uncaughtException from './server/integrations/uncaught_exception'
 import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
-import { ServerTransport } from './server/transport';
-import { StackedStore } from './server/stacked_store';
+import { ServerTransport } from './server/transport'
+import { StackedStore } from './server/stacked_store'
 
 const { endpoint } = Util
 
@@ -57,7 +57,10 @@ class Honeybadger extends Client {
 
   factory(opts?: Partial<Types.Config | Types.ServerlessConfig>): this {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new Honeybadger(opts) as any
+    const clone = new Honeybadger(opts) as any
+    clone.setNotifier(this.getNotifier())
+
+    return clone
   }
 
   configure(opts: Partial<Types.Config | Types.ServerlessConfig> = {}): this {
@@ -123,11 +126,21 @@ class Honeybadger extends Client {
   }
 }
 
-export { Types } from '@honeybadger-io/core'
-
-export default new Honeybadger({
+const singleton = new Honeybadger({
   __plugins: [
     uncaughtException(),
     unhandledRejection()
   ],
 })
+
+const NOTIFIER = {
+  name: '@honeybadger-io/js',
+  url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js',
+  version: '__VERSION__'
+}
+
+singleton.setNotifier(NOTIFIER)
+
+export { Types } from '@honeybadger-io/core'
+
+export default singleton

@@ -130,12 +130,14 @@ export type TransportOptions = {
   logger: Logger
 }
 
+export type Notifier = {
+  name: string,
+  url: string,
+  version: string
+}
+
 export type NoticeTransportPayload = {
-  notifier: {
-    name: string,
-    url: string,
-    version: string
-  },
+  notifier: Notifier,
   breadcrumbs: {
     enabled: boolean,
     trail: BreadcrumbRecord[]

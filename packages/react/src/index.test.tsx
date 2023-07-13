@@ -9,6 +9,9 @@ import { Honeybadger as HoneybadgerUniversalType, HoneybadgerErrorBoundary } fro
 import { SinonSpy, assert, createSandbox } from 'sinon'
 import fetch from 'jest-fetch-mock'
 
+// because of the above, we need to set the notifier manually
+Honeybadger.setNotifier(HoneybadgerUniversalType.getNotifier())
+
 describe('HoneybadgerReact', () => {
   const config = { apiKey: 'FFAACCCC00' }
   // need to type cast to the universal type (both Server and Client) because that's what the component expects
@@ -44,6 +47,11 @@ describe('HoneybadgerReact', () => {
       done()
     }, timeout)
   }
+
+  it('should have the correct notifier name and version', () => {
+    const notifier = honeybadger.getNotifier()
+    expect(notifier.name).toEqual('@honeybadger-io/react')
+  })
 
   it('should render the default component when there are no errors', () => {
     const testRenderer = TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger}><Clean /></HoneybadgerErrorBoundary>)

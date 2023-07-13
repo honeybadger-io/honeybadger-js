@@ -137,6 +137,13 @@ describe('HoneybadgerVue', () => {
     })
   })
 
+  it('should have the correct notifier name and version', () => {
+    const wrapper = factory()
+    const app = getAppInstance(wrapper)
+    const notifier = app.$honeybadger.getNotifier()
+    expect(notifier.name).toEqual('@honeybadger-io/vue')
+  })
+
   it('should bubble up a rendering error to errorHandler', (done) => {
     const wrapper = factory(Miniwolf)
     const vm = getComponentInstance(wrapper)
@@ -148,6 +155,7 @@ describe('HoneybadgerVue', () => {
       expect(vm.$honeybadger.notify.calledOnce).toBeTruthy()
     })
   })
+
   describe('when a component has props', () => {
     it('should pass the props in the error notification', (done) => {
       const wrapper = factory(TestCanvasForProps)

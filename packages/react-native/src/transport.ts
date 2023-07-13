@@ -3,16 +3,16 @@ import { Platform } from 'react-native'
 import * as pkg from '../package.json'
 
 export class Transport implements Types.Transport {
-  
+
   async send(
-    options: Types.TransportOptions, 
+    options: Types.TransportOptions,
     payload?: Types.NoticeTransportPayload
   ): Promise<{ statusCode: number; body: string; }> {
 
     const params: RequestInit = {
       method: options.method,
       headers: {
-        ...options.headers, 
+        ...options.headers,
         'User-Agent': this.buildUserAgent()
       },
     }
@@ -27,17 +27,17 @@ export class Transport implements Types.Transport {
     const resBody = await res.text()
 
     return {
-      statusCode: res.status, 
+      statusCode: res.status,
       body: resBody
     }
   }
 
   private buildUserAgent() {
     const rnVersion = Platform.constants?.reactNativeVersion
-    const rnVersionStr = rnVersion 
+    const rnVersionStr = rnVersion
       ? `${rnVersion?.major}.${rnVersion?.minor}.${rnVersion?.patch}`
       : 'n/a'
-    
+
     let nativePlatform: string
     if (Platform.OS === 'ios') {
       const nativePlatformName = Platform.constants.systemName || 'iOS'
@@ -50,17 +50,10 @@ export class Transport implements Types.Transport {
   }
 
   private buildJsonBody(
-    options: Types.TransportOptions, 
+    options: Types.TransportOptions,
     payload: Types.NoticeTransportPayload
   ): string {
-    const body = Util.sanitize({
-      ...payload, 
-      notifier: {
-        name: pkg.name, 
-        url: pkg.repository.url, 
-        version: pkg.version,
-      }
-    }, options.maxObjectDepth)
+    const body = Util.sanitize(payload, options.maxObjectDepth)
     return JSON.stringify(body)
   }
 }

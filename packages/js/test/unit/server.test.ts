@@ -123,6 +123,10 @@ describe('server client', function () {
     }
   })
 
+  it('uses the correct notifier name', function () {
+    expect(client.getNotifier().name).toEqual('@honeybadger-io/js')
+  })
+
   describe('afterNotify', function () {
     beforeEach(function () {
       client.configure({
