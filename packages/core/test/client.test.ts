@@ -841,6 +841,21 @@ describe('client', function () {
         client.notify('should not report')
       })
     })
+
+    it('accepts an async function', function () {
+      client.configure({
+        apiKey: 'abc123',
+      })
+
+      return new Promise<void>(resolve => {
+        client.afterNotify(async (err) => {
+          expect(err).toBeUndefined()
+          resolve()
+        })
+
+        client.notify('should report')
+      })
+    })
   })
 
   describe('beforeNotify & afterNotify', function () {
