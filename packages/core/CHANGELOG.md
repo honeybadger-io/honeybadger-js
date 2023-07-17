@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.0.0...@honeybadger-io/core@6.1.0) (2023-07-17)
+
+
+### Features
+
+* specify notifier per package ([#1107](https://github.com/honeybadger-io/honeybadger-js/issues/1107)) ([fe14f50](https://github.com/honeybadger-io/honeybadger-js/commit/fe14f509c60f36bf3456b8a4fbd743648c2b5ea1))
+
+
+
 ## 6.0.0 (2023-06-02)
 
 ## 5.2.0 (2023-03-27)
