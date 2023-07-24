@@ -43,7 +43,7 @@ export interface BeforeNotifyHandler {
 
 export interface AfterNotifyHandler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (error: any, notice?: Notice): boolean | void | Promise<void>
+  (error: any, notice?: Notice): void | Promise<void>
 }
 
 export interface Plugin {
