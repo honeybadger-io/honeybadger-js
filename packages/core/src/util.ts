@@ -40,7 +40,7 @@ export function objectIsExtensible(obj): boolean {
 }
 
 export function makeBacktrace(stack: string, filterHbSourceCode = false, logger: Logger = console): BacktraceFrame[] {
-  if (typeof stack === 'undefined') {
+  if (!stack) {
     return []
   }
 
