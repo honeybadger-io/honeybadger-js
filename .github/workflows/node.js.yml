@@ -29,6 +29,17 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: |
+          package-lock.json
+          packages/core/package-lock.json
+          packages/gatsby-plugin/package-lock.json
+          packages/js/package-lock.json
+          packages/nextjs/package-lock.json
+          packages/react/package-lock.json
+          packages/react-native/package-lock.json
+          packages/rollup-plugin/package-lock.json
+          packages/vue/package-lock.json
+          packages/webpack/package-lock.json
 
     - name: Build
       run: npm ci

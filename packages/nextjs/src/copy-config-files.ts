@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const path = require('path')
 const fs = require('fs')
 
@@ -9,21 +7,30 @@ function usesTypescript() {
   return fs.existsSync('tsconfig.json')
 }
 
-function usesPagesRouter() {
-  return fs.existsSync('pages')
+function usesSrcFolder() {
+  return fs.existsSync('src')
 }
 
-function usesAppRouter() {
-  return fs.existsSync('app')
+function usesPagesRouter(isUnderSrc: boolean) {
+  const srcFolder = isUnderSrc ? 'src' : ''
+
+  return fs.existsSync(path.join(srcFolder, 'pages'))
 }
 
-function getTargetPath(isAppRouter = false, isGlobalErrorComponent = false) {
+function usesAppRouter(isUnderSrc: boolean) {
+  const srcFolder = isUnderSrc ? 'src' : ''
+
+  return fs.existsSync(path.join(srcFolder, 'app'))
+}
+
+function getTargetPath(isUnderSrc: boolean, isAppRouter = false, isGlobalErrorComponent = false) {
   if (!isAppRouter && isGlobalErrorComponent) {
     throw new Error('invalid arguments: isGlobalErrorComponent can only be true when isAppRouter is true')
   }
 
   const extension = usesTypescript() ? 'tsx' : 'js'
-  const srcFolder = isAppRouter ? 'app' : 'pages'
+  let srcFolder = isUnderSrc ? 'src' : ''
+  srcFolder = path.join(srcFolder, isAppRouter ? 'app' : 'pages')
 
   let fileName = ''
   if (isAppRouter) {
@@ -47,16 +54,16 @@ function getTemplate(isAppRouter = false, isGlobalErrorComponent = false) {
   return path.resolve(__dirname, '../templates', templateName + '.' + extension)
 }
 
-async function copyErrorJs(isAppRouter = false) {
+async function copyErrorJs(isUnderSrc: boolean, isAppRouter = false) {
   const sourcePath = getTemplate(isAppRouter)
-  const targetPath = getTargetPath(isAppRouter)
+  const targetPath = getTargetPath(isUnderSrc, isAppRouter)
 
   return copyFileWithBackup(sourcePath, targetPath)
 }
 
-function copyGlobalErrorJs() {
+function copyGlobalErrorJs(isUnderSrc: boolean) {
   const sourcePath = getTemplate(true, true)
-  const targetPath = getTargetPath(true, true)
+  const targetPath = getTargetPath(isUnderSrc, true, true)
 
   return copyFileWithBackup(sourcePath, targetPath)
 }
@@ -79,7 +86,7 @@ async function copyFileWithBackup(sourcePath, targetPath) {
   return fs.promises.copyFile(sourcePath, targetPath)
 }
 
-async function copyConfigFiles() {
+export async function copyConfigFiles() {
   if (debug) {
     console.debug('cwd', process.cwd())
   }
@@ -98,21 +105,18 @@ async function copyConfigFiles() {
     return fs.promises.copyFile(path.join(templateDir, file), file)
   })
 
-  if (usesPagesRouter()) {
-    copyPromises.push(copyErrorJs(false))
+  const isUnderSrcFolder = usesSrcFolder()
+
+  if (usesPagesRouter(isUnderSrcFolder)) {
+    copyPromises.push(copyErrorJs(isUnderSrcFolder, false))
   }
 
-  if (usesAppRouter()) {
-    copyPromises.push(copyErrorJs(true))
-    copyPromises.push(copyGlobalErrorJs())
+  if (usesAppRouter(isUnderSrcFolder)) {
+    copyPromises.push(copyErrorJs(isUnderSrcFolder, true))
+    copyPromises.push(copyGlobalErrorJs(isUnderSrcFolder))
   }
 
   await Promise.all(copyPromises);
 
   console.log('Done copying config files.')
 }
-
-copyConfigFiles().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
