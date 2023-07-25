@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.7.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.6.3...@honeybadger-io/nextjs@5.7.0) (2023-07-25)
+
+
+### Features
+
+* **nextjs:** support project structure under src folder ([#1130](https://github.com/honeybadger-io/honeybadger-js/issues/1130)) ([1dc4e4f](https://github.com/honeybadger-io/honeybadger-js/commit/1dc4e4fc2d6ff9073a392868f84f8f913e4d3eb0))
+
+
+
 ## [5.6.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.6.2...@honeybadger-io/nextjs@5.6.3) (2023-07-17)
 
 **Note:** Version bump only for package @honeybadger-io/nextjs

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.2.0...@honeybadger-io/js@6.3.0) (2023-07-25)
+
+
+### Features
+
+* **nextjs:** support project structure under src folder ([#1130](https://github.com/honeybadger-io/honeybadger-js/issues/1130)) ([1dc4e4f](https://github.com/honeybadger-io/honeybadger-js/commit/1dc4e4fc2d6ff9073a392868f84f8f913e4d3eb0))
+
+
+
 ## [6.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.1.3...@honeybadger-io/js@6.2.0) (2023-07-17)
 
 
