@@ -12,7 +12,9 @@ import {
   filterUrl,
   formatCGIData,
   getSourceForBacktrace,
-  runAfterNotifyHandlers, endpoint, getCauses
+  runAfterNotifyHandlers, 
+  endpoint, 
+  getCauses,
 } from './util'
 import {
   Config,
@@ -22,7 +24,11 @@ import {
   Notice,
   Noticeable,
   HoneybadgerStore,
-  BacktraceFrame, Transport, NoticeTransportPayload, UserFeedbackFormOptions, Notifier
+  BacktraceFrame, 
+  Transport, 
+  NoticeTransportPayload, 
+  UserFeedbackFormOptions, 
+  Notifier,
 } from './types'
 import { GlobalStore } from './store';
 
@@ -97,6 +103,13 @@ export abstract class Client {
     return this.__notifier
   }
 
+  /**
+   * CAREFUL: When adding a new notifier or updating the name of an existing notifier,
+   * the Honeybadger rails project may need its mappings updated.
+   * See https://github.com/honeybadger-io/honeybadger/blob/master/app/presenters/breadcrumbs_presenter.rb
+   *     https://github.com/honeybadger-io/honeybadger/blob/master/app/models/parser/java_script.rb
+   *     https://github.com/honeybadger-io/honeybadger/blob/master/app/models/language.rb
+   **/
   setNotifier(notifier: Notifier) {
     this.__notifier = notifier
   }
