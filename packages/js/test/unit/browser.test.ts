@@ -113,57 +113,58 @@ describe('browser client', function () {
       expect(result).toEqual(false)
     })
 
-    it('excludes cookies by default', function () {
-      return new Promise<void>((resolve) => {
-        client.configure({
-          apiKey: 'testing'
-        })
-
-        client.notify('testing')
-
-        setTimeout(() => {
-          // @ts-expect-error
-          const payload = JSON.parse(fetch.mock.lastCall[1].body)
-          expect(payload.request.cgi_data.HTTP_COOKIE).toBeUndefined()
-          resolve()
-        })
+    it('excludes cookies by default', async function () {
+      client.configure({
+        apiKey: 'testing'
       })
+
+      fetch.mockResponseOnce(JSON.stringify({ id: '1' }), { status: 201 })
+      await client.notifyAsync('testing')
+
+      // @ts-expect-error
+      const payload = JSON.parse(fetch.mock.lastCall[1].body)
+      expect(payload.request.cgi_data.HTTP_COOKIE).toBeUndefined()
     })
 
-    it('filters cookies string', function () {
-      return new Promise<void>((resolve) => {
-        client.configure({
-          apiKey: 'testing'
-        })
-
-        client.notify('testing', {
-          cookies: 'expected=value; password=secret'
-        })
-
-        setTimeout(() => {
-          // @ts-expect-error
-          const payload = JSON.parse(fetch.mock.lastCall[1].body)
-          expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
-          resolve()
-        }, 0)
+    it('filters cookies string', async function () {
+      client.configure({
+        apiKey: 'testing'
       })
+
+      fetch.mockResponseOnce(JSON.stringify({ id: '1' }), { status: 201 })
+      await client.notifyAsync('testing', {
+        cookies: 'expected=value; password=secret'
+      })
+
+      // @ts-expect-error
+      const payload = JSON.parse(fetch.mock.lastCall[1].body)
+      expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
     })
 
-    it('filters cookies object', function () {
-      return new Promise<void>((resolve) => {
-        client.configure({
-          apiKey: 'testing'
-        })
-
-        client.notify('testing', { cookies: { expected: 'value', password: 'secret' } })
-
-        setTimeout(() => {
-          // @ts-expect-error
-          const payload = JSON.parse(fetch.mock.lastCall[1].body)
-          expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
-          resolve()
-        })
+    it('filters cookies object', async function () {
+      client.configure({
+        apiKey: 'testing'
       })
+
+      fetch.mockResponseOnce(JSON.stringify({ id: '1' }), { status: 201 })
+      await client.notifyAsync('testing', { cookies: { expected: 'value', password: 'secret' } })
+
+      // @ts-expect-error
+      const payload = JSON.parse(fetch.mock.lastCall[1].body)
+      expect(payload.request.cgi_data.HTTP_COOKIE).toEqual('expected=value;password=[FILTERED]')
+    })
+
+    it('uses the correct notifier name', async function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      fetch.mockResponseOnce(JSON.stringify({ id: '1' }), { status: 201 })
+      await client.notifyAsync('testing')
+
+      // @ts-expect-error
+      const payload = JSON.parse(fetch.mock.lastCall[1].body)
+      expect(payload.notifier.name).toEqual('@honeybadger-io/js')
     })
   })
 

@@ -1,6 +1,11 @@
 # Examples
 examples/
 
+# Test
+/test
+/dist/test
+.jest
+
 # Config
 tsconfig.json
 rollup.config.mjs

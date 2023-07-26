@@ -1,4 +1,5 @@
 import commonjs from '@rollup/plugin-commonjs'
+import replace from '@rollup/plugin-replace'
 import path from 'path'
 
 import pkg from './package.json'
@@ -50,6 +51,11 @@ export default {
     '@honeybadger-io/js'
   ],
   plugins: [
+    replace({
+      preventAssignment: false,
+      exclude: 'node_modules/**',
+      __VERSION__: pkg.version
+    }),
     commonjs()
   ]
 }

@@ -7,7 +7,7 @@ export interface NativeExceptionData {
   reason?: string;
   userInfo?: object;
   callStackSymbols?: string[];
-  initialHandler?: (error: Error, isFatal: boolean) => void;
+  initialHandler?: string;
   reactNativeStackTrace?: {
     methodName?: string;
     lineNumber?: string | number;
@@ -19,7 +19,7 @@ export interface NativeExceptionData {
   stackTrace?: {
     method?: string, 
     class?: string, 
-    line?: string, 
+    line?: string | number, 
     file?: string
   }[];
 }

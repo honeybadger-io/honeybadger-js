@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.0.3...@honeybadger-io/react-native@6.1.0) (2023-07-17)
+
+
+### Features
+
+* specify notifier per package ([#1107](https://github.com/honeybadger-io/honeybadger-js/issues/1107)) ([fe14f50](https://github.com/honeybadger-io/honeybadger-js/commit/fe14f509c60f36bf3456b8a4fbd743648c2b5ea1))
+
+
+
+## [6.0.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.0.2...@honeybadger-io/react-native@6.0.3) (2023-07-03)
+
+**Note:** Version bump only for package @honeybadger-io/react-native
+
+
+
+
+
+## [6.0.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.0.1...@honeybadger-io/react-native@6.0.2) (2023-06-26)
+
+**Note:** Version bump only for package @honeybadger-io/react-native
+
+
+
+
+
 ## [6.0.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.0.0...@honeybadger-io/react-native@6.0.1) (2023-06-08)
 
 **Note:** Version bump only for package @honeybadger-io/react-native

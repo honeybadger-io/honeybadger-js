@@ -38,6 +38,8 @@ export default {
     copy({
       targets: [
         { src: 'build/copy-config-files.js*', dest: 'dist' },
+        { src: 'build/copy-config-files-exec.js*', dest: 'dist' },
+        { src: 'build/*.d.ts', dest: 'dist' },
       ]
     })
   ]

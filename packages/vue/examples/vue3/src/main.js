@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import HoneybadgerVue from '../../../src/index'
+import HoneybadgerVue from '@honeybadger-io/vue'
 
 const app = createApp(App)
 

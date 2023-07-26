@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.2.0...@honeybadger-io/js@6.3.0) (2023-07-25)
+
+
+### Features
+
+* **nextjs:** support project structure under src folder ([#1130](https://github.com/honeybadger-io/honeybadger-js/issues/1130)) ([1dc4e4f](https://github.com/honeybadger-io/honeybadger-js/commit/1dc4e4fc2d6ff9073a392868f84f8f913e4d3eb0))
+
+
+
+## [6.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.1.3...@honeybadger-io/js@6.2.0) (2023-07-17)
+
+
+### Features
+
+* specify notifier per package ([#1107](https://github.com/honeybadger-io/honeybadger-js/issues/1107)) ([fe14f50](https://github.com/honeybadger-io/honeybadger-js/commit/fe14f509c60f36bf3456b8a4fbd743648c2b5ea1))
+
+
+
+## [6.1.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.1.2...@honeybadger-io/js@6.1.3) (2023-07-03)
+
+**Note:** Version bump only for package @honeybadger-io/js
+
+
+
+
+
 ## [6.1.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.1.1...@honeybadger-io/js@6.1.2) (2023-06-19)
 
 **Note:** Version bump only for package @honeybadger-io/js

@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/vue",
-  "version": "6.0.4",
+  "version": "6.1.1",
   "license": "MIT",
   "description": "Honeybadger Vue.js client",
   "author": "Jason Truesdell <jason@yuzuten.com> (https://github.com/JasonTrue)",
@@ -42,7 +42,8 @@
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.18.9",
     "@babel/preset-env": "^7.18.9",
-    "@honeybadger-io/js": "^6.1.2",
+    "@honeybadger-io/js": "^6.3.0",
+    "@rollup/plugin-replace": "^5.0.2",
     "@vue/compiler-sfc": "^3.2.37",
     "@vue/test-utils": "^2.0.2",
     "babel-plugin-syntax-jsx": "^6.18.0",
@@ -63,7 +64,7 @@
     "vue-jest": "^5.0.0-alpha.10"
   },
   "peerDependencies": {
-    "@honeybadger-io/js": "3.x || 4.x || 5.x",
+    "@honeybadger-io/js": "3.x || 4.x || 5.x || 6.x",
     "vue": "2.x || 3.x"
   },
   "browserslist": [
