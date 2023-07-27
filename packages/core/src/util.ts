@@ -40,6 +40,10 @@ export function objectIsExtensible(obj): boolean {
 }
 
 export function makeBacktrace(stack: string, filterHbSourceCode = false, logger: Logger = console): BacktraceFrame[] {
+  if (!stack) {
+    return []
+  }
+
   try {
     const backtrace = stackTraceParser
       .parse(stack)
@@ -154,15 +158,23 @@ export async function getSourceForBacktrace(backtrace: BacktraceFrame[],
   return result
 }
 
-export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeNotifyHandler[]): boolean {
+export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeNotifyHandler[]): { results: ReturnType<BeforeNotifyHandler>[], result: boolean } {
+  const results: ReturnType<BeforeNotifyHandler>[] = []
   let result = true
   for (let i = 0, len = handlers.length; i < len; i++) {
     const handler = handlers[i]
-    if (handler(notice) === false) {
+    const handlerResult = handler(notice)
+    if (handlerResult === false) {
       result = false
     }
+
+    results.push(handlerResult)
   }
-  return result
+
+  return {
+    results,
+    result
+  }
 }
 
 export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNotifyHandler[], error?: Error): boolean {

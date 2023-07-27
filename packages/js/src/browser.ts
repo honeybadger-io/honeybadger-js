@@ -64,7 +64,6 @@ class Honeybadger extends Client {
       if (notice) {
         this.__lastNoticeId = notice.id
       }
-      return true
     }
   ]
 

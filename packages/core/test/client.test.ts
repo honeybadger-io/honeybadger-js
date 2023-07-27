@@ -336,12 +336,12 @@ describe('client', function () {
       })
 
       const payload = client.getPayload({
-        name: 'TestError', 
-        message: 'I have a custom backtrace', 
+        name: 'TestError',
+        message: 'I have a custom backtrace',
         backtrace: [{
-          file: 'foo.js', 
-          method: 'doStuff', 
-          number: 3, 
+          file: 'foo.js',
+          method: 'doStuff',
+          number: 3,
           column: 23,
         }]
       })
@@ -356,15 +356,15 @@ describe('client', function () {
       })
 
       const stringBacktracePayload = client.getPayload({
-        name: 'TestError', 
-        message: 'I have a custom backtrace', 
+        name: 'TestError',
+        message: 'I have a custom backtrace',
         // @ts-expect-error
         backtrace: 'oops this should not be a string',
       })
 
       const emptyBacktracePayload = client.getPayload({
-        name: 'TestError', 
-        message: 'I have a custom backtrace', 
+        name: 'TestError',
+        message: 'I have a custom backtrace',
         backtrace: [],
       })
 
@@ -578,6 +578,22 @@ describe('client', function () {
       expect(client.notify('testing')).toEqual(false)
     })
 
+    it('does not deliver notice when async beforeNotify callback returns false', function () {
+      client.beforeNotify(async function () {
+        return false
+      })
+
+      return new Promise<void>((resolve) => {
+        client.afterNotify((error) => {
+          expect(error.message).toEqual('beforeNotify handlers (async) returned false')
+          resolve()
+        })
+
+        // notify returns true because the beforeNotify callback is async
+        expect(client.notify('testing')).toEqual(true)
+      })
+    })
+
     it('delivers notice when beforeNotify returns true', function () {
       client.beforeNotify(function () {
         return true
@@ -694,7 +710,7 @@ describe('client', function () {
       })
 
       return new Promise<void>(resolve => {
-        const expected = 4
+        const expected = 5
         let total = 0
         client.beforeNotify(() => {
           total++
@@ -708,13 +724,45 @@ describe('client', function () {
           total++
           return false
         })
+        client.beforeNotify(async () => {
+          total++
+          return true
+        })
         client.beforeNotify(() => {
           total++
+        })
+
+        client.afterNotify(() => {
           expect(total).toEqual(expected)
           resolve()
         })
 
         client.notify('should not report')
+      })
+    })
+
+    it('modifies the notice when an async function is provided', function () {
+      const funkyName = 'My funky name'
+
+      client.beforeNotify(async (notice) => {
+        const modifyName = () => new Promise<void>((resolve) => {
+          setTimeout(() => {
+            notice.name = funkyName
+            resolve()
+          })
+        })
+
+
+        await modifyName()
+      })
+
+      return new Promise<void>((resolve) => {
+        client.afterNotify((_err, notice) => {
+          expect(notice.name).toEqual(funkyName)
+          resolve()
+        })
+
+        expect(client.notify('Should report and modify notice')).toEqual(true)
       })
     })
   })
@@ -791,6 +839,21 @@ describe('client', function () {
         client.afterNotify(handlerCalled)
 
         client.notify('should not report')
+      })
+    })
+
+    it('accepts an async function', function () {
+      client.configure({
+        apiKey: 'abc123',
+      })
+
+      return new Promise<void>(resolve => {
+        client.afterNotify(async (err) => {
+          expect(err).toBeUndefined()
+          resolve()
+        })
+
+        client.notify('should report')
       })
     })
   })

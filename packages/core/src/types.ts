@@ -38,12 +38,12 @@ export interface ServerlessConfig extends Config {
 }
 
 export interface BeforeNotifyHandler {
-  (notice?: Notice): boolean | void
+  (notice?: Notice): boolean | void | Promise<boolean | void>
 }
 
 export interface AfterNotifyHandler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (error: any, notice?: Notice): boolean | void
+  (error: any, notice?: Notice): void | Promise<void>
 }
 
 export interface Plugin {

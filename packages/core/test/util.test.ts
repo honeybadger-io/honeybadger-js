@@ -95,7 +95,7 @@ describe('utils', function () {
         () => false,
         () => true
       ]
-      expect(runBeforeNotifyHandlers(<never>{}, handlers)).toEqual(false)
+      expect(runBeforeNotifyHandlers(<never>{}, handlers).result).toEqual(false)
     })
 
     it('returns true when all handlers return true', function () {
@@ -103,7 +103,7 @@ describe('utils', function () {
         () => true,
         () => true
       ]
-      expect(runBeforeNotifyHandlers(<never>{}, handlers)).toEqual(true)
+      expect(runBeforeNotifyHandlers(<never>{}, handlers).result).toEqual(true)
     })
 
     it('passes the notice to handlers', function () {
