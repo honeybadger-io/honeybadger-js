@@ -502,23 +502,30 @@ describe('browser integration', function () {
           Honeybadger.notify('an error message')
         })
         .then(function (results) {
-          console.log('NOTICES', JSON.stringify(results.notices))
+          console.log('\n\nNOTICES.LENGTH\n', results.notices.length)
+          console.log('\n\nNOTICES\n', JSON.stringify(results.notices))
           expect(results.notices.length).toEqual(1)
+          console.log('\n\nINNERHTML\n', sandbox.contentWindow.document.head.innerHTML)
           expect(sandbox.contentWindow.document.head.innerHTML).toMatch('<script src="/base/dist/browser/honeybadger-feedback-form.js" async="true"></script>')
           setTimeout(() => {
             let feedbackFormWrapper = sandbox.contentWindow.document.getElementById('honeybadger-feedback-wrapper')
             expect(feedbackFormWrapper).not.toBeNull()
+            console.log('\n\n feedbackFormWrapper not toBeNull passed')
 
             const button = sandbox.contentWindow.document.getElementById('honeybadger-feedback-cancel')
             button.click()
+            console.log('\n\nbutton clicked')
 
             feedbackFormWrapper = sandbox.contentWindow.document.getElementById('honeybadger-feedback-wrapper')
             expect(feedbackFormWrapper).toBeNull()
+            console.log('\n\nfedbackFormWrapper toBeNull passed')
 
             done()
           }, 500)
         })
-        .catch(done)
+        .catch(err => {
+          console.error('ERR CAUGHT', err)
+        })
   })
 })
 
