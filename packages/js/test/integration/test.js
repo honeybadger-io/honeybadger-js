@@ -502,7 +502,7 @@ describe('browser integration', function () {
           Honeybadger.notify('an error message')
         })
         .then(function (results) {
-          console.log('NOTICES', results.notices)
+          console.log('NOTICES', JSON.stringify(results.notices))
           expect(results.notices.length).toEqual(1)
           expect(sandbox.contentWindow.document.head.innerHTML).toMatch('<script src="/base/dist/browser/honeybadger-feedback-form.js" async="true"></script>')
           setTimeout(() => {
