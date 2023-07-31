@@ -506,7 +506,8 @@ describe('browser integration', function () {
           console.log('\n\nNOTICES\n', JSON.stringify(results.notices))
           expect(results.notices.length).toEqual(1)
           console.log('\n\nINNERHTML\n', sandbox.contentWindow.document.head.innerHTML)
-          expect(sandbox.contentWindow.document.head.innerHTML).toMatch('<script src="/base/dist/browser/honeybadger-feedback-form.js" async="true"></script>')
+          // Accept either order of `async="true"` and `src="..."` 
+          expect(sandbox.contentWindow.document.head.innerHTML).toMatch(/<script src="\/base\/dist\/browser\/honeybadger-feedback-form\.js" async="true"><\/script>|<script async="true" src="\/base\/dist\/browser\/honeybadger-feedback-form\.js"><\/script>/)
           setTimeout(() => {
             let feedbackFormWrapper = sandbox.contentWindow.document.getElementById('honeybadger-feedback-wrapper')
             expect(feedbackFormWrapper).not.toBeNull()
