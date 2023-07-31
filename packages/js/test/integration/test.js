@@ -69,7 +69,6 @@ describe('browser integration', function () {
   let sandbox;
 
   beforeEach(function (done) {
-    'use strict';
     sandbox = createSandbox(done);
   });
 

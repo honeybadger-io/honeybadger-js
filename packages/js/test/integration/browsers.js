@@ -18,21 +18,21 @@ module.exports = {
     browser: 'Chrome',
     browser_version: '44',
     os: 'Windows',
-    os_version: '8'
+    os_version: '10'
   },
   bs_chrome_latest: {
     base: 'BrowserStack',
     browser: 'Chrome',
     browser_version: 'latest',
     os: 'Windows',
-    os_version: '10'
+    os_version: '11'
   },
   bs_firefox_min: {
     base: 'BrowserStack',
     browser: 'Firefox',
     browser_version: '40',
     os: 'Windows',
-    os_version: '8'
+    os_version: '10'
   },
   bs_firefox_latest: {
     base: 'BrowserStack',
