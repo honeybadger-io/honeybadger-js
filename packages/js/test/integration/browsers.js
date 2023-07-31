@@ -30,7 +30,7 @@ module.exports = {
   bs_firefox_min: {
     base: 'BrowserStack',
     browser: 'Firefox',
-    browser_version: '44',
+    browser_version: '65',
     os: 'Windows',
     os_version: '10'
   },
