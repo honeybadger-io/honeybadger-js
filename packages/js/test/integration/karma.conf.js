@@ -22,10 +22,6 @@ module.exports = function (config) {
     singleRun: true,
     logLevel: config.LOG_INFO,
     files: [
-      // Polyfills for IE 11
-      'test/integration/node_modules/promise-polyfill/dist/polyfill.js',
-      'test/integration/node_modules/whatwg-fetch/dist/fetch.umd.js',
-
       // The test file
       'test/integration/test.js',
 
