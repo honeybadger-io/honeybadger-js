@@ -16,7 +16,7 @@ module.exports = {
   bs_chrome_min: {
     base: 'BrowserStack',
     browser: 'Chrome',
-    browser_version: '44',
+    browser_version: '49',
     os: 'Windows',
     os_version: '10'
   },
@@ -30,7 +30,7 @@ module.exports = {
   bs_firefox_min: {
     base: 'BrowserStack',
     browser: 'Firefox',
-    browser_version: '40',
+    browser_version: '44',
     os: 'Windows',
     os_version: '10'
   },
