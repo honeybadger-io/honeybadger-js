@@ -530,7 +530,7 @@ describe('browser integration', function () {
   })
 })
 
-fdescribe("Web Worker", function () {
+describe("Web Worker", function () {
   it('works within a web worker', function (done) {
     let results = []
 
