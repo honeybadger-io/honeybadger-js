@@ -542,7 +542,7 @@ fdescribe("Web Worker", function () {
     const MyWorker = new Worker("/base/test/integration/worker.js")
 
     MyWorker.onmessage = (e) => {
-      console.log('RESULTS', JSON.stringify(results))
+      console.log('e', JSON.stringify(e))
       results = e.data
 
       expect(results.notices.length).toEqual(1);
