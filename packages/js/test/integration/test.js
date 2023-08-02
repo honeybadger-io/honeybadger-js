@@ -542,10 +542,11 @@ fdescribe("Web Worker", function () {
     const MyWorker = new Worker("/base/test/integration/worker.js")
 
     MyWorker.onmessage = (e) => {
+      console.log('MyWorker.onmessage called')
       console.log('e', JSON.stringify(e))
       results = e.data
-
-      expect(results.notices.length).toEqual(1);
+      console.log('results', JSON.stringify(results))
+      expect(results.notices.length).toEqual(10000);
       expect(results.notices[0].breadcrumbs.trail.length).toEqual(1);
       expect(results.notices[0].breadcrumbs.trail[0].message).toEqual('Honeybadger Notice');
       expect(results.notices[0].breadcrumbs.trail[0].category).toEqual('notice');
