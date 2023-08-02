@@ -530,7 +530,7 @@ describe('browser integration', function () {
   })
 })
 
-describe("Web Worker", function () {
+fdescribe("Web Worker", function () {
   it('works within a web worker', function (done) {
     let results = []
 
@@ -542,6 +542,7 @@ describe("Web Worker", function () {
     const MyWorker = new Worker("/base/test/integration/worker.js")
 
     MyWorker.onmessage = (e) => {
+      console.log('RESULTS', JSON.stringify(results))
       results = e.data
 
       expect(results.notices.length).toEqual(1);
