@@ -1,3 +1,7 @@
+// When updating the minimum versions we test against in this file, 
+// please also update the docs:
+//   https://github.com/honeybadger-io/docs/blob/master/source/lib/javascript/reference/supported-versions.html.md
+
 module.exports = {
   bs_safari_min: {
     base: 'BrowserStack',
