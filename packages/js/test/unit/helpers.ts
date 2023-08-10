@@ -52,3 +52,18 @@ export class TestClient extends BaseClient {
     return this.__buildPayload(notice)
   }
 }
+
+export class TestServerClient extends TestClient {
+  constructor(opts: Partial<Types.Config | Types.ServerlessConfig> = {}) {
+    super(opts, new TestTransport())
+
+    this.__getSourceFileHandler = jest.fn()
+  }
+
+  public errorHandler = jest.fn()
+  public requestHandler = jest.fn()
+  public lambdaHandler = jest.fn()
+  public withRequest = jest.fn()
+  public run = jest.fn()
+  protected __beforeNotifyHandlers = []
+}

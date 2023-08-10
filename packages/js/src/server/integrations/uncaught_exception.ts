@@ -25,49 +25,61 @@ function hasOtherUncaughtExceptionListeners() {
   return process.listeners('uncaughtException').length > 1
 }
 
+function handleUncaughtException(uncaughtError: Error, client: typeof Client) {
+  if (isReporting) { 
+    return 
+  }
+
+  // In the "load" function in the exported plugin below, we 
+  // never attach this listener if enableUncaught is false...
+  // so why do we need this?
+  if (!client.config.enableUncaught) {
+    client.config.afterUncaught(uncaughtError)
+    if (!hasOtherUncaughtExceptionListeners()) {
+      fatallyLogAndExit(uncaughtError)
+    }
+    return
+  }
+
+  // report only the first error - prevent reporting recursive errors
+  if (handlerAlreadyCalled) {
+    if (!hasOtherUncaughtExceptionListeners()) {
+      fatallyLogAndExit(uncaughtError)
+    }
+    return
+  }
+
+  isReporting = true
+  client.notify(uncaughtError, {
+    afterNotify: (_err, _notice) => {
+      isReporting = false
+      handlerAlreadyCalled = true
+      client.config.afterUncaught(uncaughtError)
+      if (!hasOtherUncaughtExceptionListeners()) {
+        fatallyLogAndExit(uncaughtError)
+      }
+    }
+  })
+}
+
 export default function (): Types.Plugin {
   return {
     load: (client: typeof Client) => {
       if (!client.config.enableUncaught) {
         return
       }
-
       removeAwsLambdaListener()
-
-
-      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener(uncaughtError) {
-        if (!client.config.enableUncaught) {
-          client.config.afterUncaught(uncaughtError)
-          if (!hasOtherUncaughtExceptionListeners()) {
-            fatallyLogAndExit(uncaughtError)
-          }
-          return
-        }
-
-        // report only the first error - prevent reporting recursive errors
-        if (handlerAlreadyCalled) {
-          if (!hasOtherUncaughtExceptionListeners()) {
-            fatallyLogAndExit(uncaughtError)
-          }
-          return
-        }
-
-        if (isReporting) {
-          return
-        }
-
-        isReporting = true
-        client.notify(uncaughtError, {
-          afterNotify: (_err, _notice) => {
-            isReporting = false
-            handlerAlreadyCalled = true
-            client.config.afterUncaught(uncaughtError)
-            if (!hasOtherUncaughtExceptionListeners()) {
-              fatallyLogAndExit(uncaughtError)
-            }
-          }
-        })
+      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener(uncaughtException) {
+        handleUncaughtException(uncaughtException, client)
       })
     }
   }
+}
+
+export const exportedForTesting = {
+  handleUncaughtException, 
+  isReporting, 
+  handlerAlreadyCalled,
+  setIsReporting: (bool: boolean) => { isReporting = bool }, 
+  setHandlerAlreadyCalled: (bool: boolean) => { handlerAlreadyCalled = bool },
 }

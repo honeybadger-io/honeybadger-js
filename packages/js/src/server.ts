@@ -14,7 +14,7 @@ import { StackedStore } from './server/stacked_store'
 
 const { endpoint } = Util
 
-class Honeybadger extends Client {
+export class Honeybadger extends Client {
   /** @internal */
   protected __beforeNotifyHandlers: Types.BeforeNotifyHandler[] = [
     (notice?: Types.Notice) => {
@@ -38,7 +38,6 @@ class Honeybadger extends Client {
 
   constructor(opts: Partial<Types.Config | Types.ServerlessConfig> = {}) {
     super({
-      afterUncaught: fatallyLogAndExit,
       projectRoot: process.cwd(),
       hostname: os.hostname(),
       ...opts,
