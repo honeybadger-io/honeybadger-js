@@ -1,23 +1,25 @@
 import defaultExport, { exportedForTesting } from '../../../../src/server/integrations/uncaught_exception'
-import { TestTransport, TestClient } from '../../helpers'
-import { Honeybadger } from '../../../../src/server'
+import { TestTransport, TestClient, nullLogger } from '../../helpers'
 import * as util from '../../../../src/server/util'
 import * as aws from '../../../../src/server/aws_lambda'
+import Singleton from '../../../../src/server'
 const { 
   handleUncaughtException, 
   setIsReporting,
   setHandlerAlreadyCalled,
 } = exportedForTesting
 
-describe('uncaught exceptions', () => {
-  let client: Honeybadger
+describe('Uncaught Exception', () => {
+  let client: typeof Singleton
   let fatallyLogAndExitSpy: jest.SpyInstance
   let notifySpy: jest.SpyInstance
 
   beforeEach(() => {
-    // For these tests a simplified client is enough, so ignoring type errors for it
-    client = new TestClient({}, new TestTransport()) as unknown as Honeybadger
-    client.configure({ apiKey: 'testKey', afterUncaught: jest.fn() })
+    // We just need a really basic client, so ignoring type issues here
+    client = new TestClient(
+      { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger() }, 
+      new TestTransport()
+    ) as unknown as typeof Singleton
     // Have to mock fatallyLogAndExit or we will crash the test
     fatallyLogAndExitSpy = jest
       .spyOn(util, 'fatallyLogAndExit')

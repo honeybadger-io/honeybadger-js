@@ -69,8 +69,8 @@ export default function (): Types.Plugin {
         return
       }
       removeAwsLambdaListener()
-      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener(uncaughtException) {
-        handleUncaughtException(uncaughtException, client)
+      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener(uncaughtError) {
+        handleUncaughtException(uncaughtError, client)
       })
     }
   }
@@ -78,8 +78,6 @@ export default function (): Types.Plugin {
 
 export const exportedForTesting = {
   handleUncaughtException, 
-  isReporting, 
-  handlerAlreadyCalled,
   setIsReporting: (bool: boolean) => { isReporting = bool }, 
   setHandlerAlreadyCalled: (bool: boolean) => { handlerAlreadyCalled = bool },
 }

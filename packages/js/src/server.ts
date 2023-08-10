@@ -1,10 +1,7 @@
 import os from 'os'
 import domain from 'domain'
 import { Client, Util, Types } from '@honeybadger-io/core'
-import {
-  fatallyLogAndExit,
-  getSourceFile
-} from './server/util'
+import { getSourceFile } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception'
 import unhandledRejection from './server/integrations/unhandled_rejection'
 import { errorHandler, requestHandler } from './server/middleware'
@@ -14,7 +11,7 @@ import { StackedStore } from './server/stacked_store'
 
 const { endpoint } = Util
 
-export class Honeybadger extends Client {
+class Honeybadger extends Client {
   /** @internal */
   protected __beforeNotifyHandlers: Types.BeforeNotifyHandler[] = [
     (notice?: Types.Notice) => {
