@@ -49,11 +49,11 @@ export function handleUncaughtException(uncaughtError: Error, client: typeof Cli
     return
   }
 
-  isReporting = true
+  setIsReporting(true)
   client.notify(uncaughtError, {
     afterNotify: (_err, _notice) => {
-      isReporting = false
-      handlerAlreadyCalled = true
+      setIsReporting(false)
+      setHandlerAlreadyCalled(true)
       client.config.afterUncaught(uncaughtError)
       if (!hasOtherUncaughtExceptionListeners()) {
         fatallyLogAndExit(uncaughtError)

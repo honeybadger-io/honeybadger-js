@@ -2,7 +2,7 @@ import defaultExport, {
   setIsReporting,
   setHandlerAlreadyCalled, 
   handleUncaughtException,
- } from '../../../../src/server/integrations/uncaught_exception'
+} from '../../../../src/server/integrations/uncaught_exception'
 import { TestTransport, TestClient, nullLogger } from '../../helpers'
 import * as util from '../../../../src/server/util'
 import * as aws from '../../../../src/server/aws_lambda'
