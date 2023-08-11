@@ -1,13 +1,12 @@
-import defaultExport, { exportedForTesting } from '../../../../src/server/integrations/uncaught_exception'
+import defaultExport, { 
+  setIsReporting,
+  setHandlerAlreadyCalled, 
+  handleUncaughtException,
+ } from '../../../../src/server/integrations/uncaught_exception'
 import { TestTransport, TestClient, nullLogger } from '../../helpers'
 import * as util from '../../../../src/server/util'
 import * as aws from '../../../../src/server/aws_lambda'
 import Singleton from '../../../../src/server'
-const { 
-  handleUncaughtException, 
-  setIsReporting,
-  setHandlerAlreadyCalled,
-} = exportedForTesting
 
 describe('Uncaught Exception', () => {
   let client: typeof Singleton
@@ -56,7 +55,7 @@ describe('Uncaught Exception', () => {
       })
 
       it('removes the AWS lambda uncaught exception listener', () => {
-        const restoreEnv = process.env
+        const restoreEnv = { ...process.env }
         process.env.LAMBDA_TASK_ROOT = 'foobar'
         const removeLambdaSpy = jest
           .spyOn(aws, 'removeAwsDefaultUncaughtExceptionListener')

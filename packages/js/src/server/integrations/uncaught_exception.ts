@@ -25,7 +25,7 @@ function hasOtherUncaughtExceptionListeners() {
   return process.listeners('uncaughtException').length > 1
 }
 
-function handleUncaughtException(uncaughtError: Error, client: typeof Client) {
+export function handleUncaughtException(uncaughtError: Error, client: typeof Client) {
   if (isReporting) { 
     return 
   }
@@ -76,8 +76,11 @@ export default function (): Types.Plugin {
   }
 }
 
-export const exportedForTesting = {
-  handleUncaughtException, 
-  setIsReporting: (bool: boolean) => { isReporting = bool }, 
-  setHandlerAlreadyCalled: (bool: boolean) => { handlerAlreadyCalled = bool },
+export function setIsReporting(bool: boolean) { 
+  isReporting = bool 
+} 
+
+export function setHandlerAlreadyCalled(bool: boolean) { 
+  handlerAlreadyCalled = bool 
 }
+
