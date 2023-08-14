@@ -5,7 +5,6 @@ import Singleton from '../../../../src/server'
 
 describe('Uncaught Exception Plugin', () => {
   let client: typeof Singleton
-  let fatallyLogAndExitSpy: jest.SpyInstance
   let notifySpy: jest.SpyInstance
 
   beforeEach(() => {
@@ -15,7 +14,7 @@ describe('Uncaught Exception Plugin', () => {
       new TestTransport()
     ) as unknown as typeof Singleton
     // Have to mock fatallyLogAndExit or we will crash the test
-    fatallyLogAndExitSpy = jest
+    jest
       .spyOn(util, 'fatallyLogAndExit')
       .mockImplementation(() => true as never)
     notifySpy = jest.spyOn(client, 'notify')
