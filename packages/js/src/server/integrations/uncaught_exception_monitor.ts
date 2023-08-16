@@ -27,7 +27,13 @@ export default class UncaughtExceptionMonitor {
    * which is to exit the process with code 1
    */
   hasOtherUncaughtExceptionListeners() {
-    return process.listeners('uncaughtException').length > 1
+    const allListeners = process.listeners('uncaughtException')
+    // Node sets up these listeners when we use domains
+    // Since they're not set up by a user, they shouldn't affect whether we exit or not
+    const domainListeners = allListeners.filter(listener => {
+      listener.name === 'domainUncaughtExceptionClear' 
+    })
+    return allListeners.length - domainListeners.length > 1
   }
 
   handleUncaughtException(uncaughtError: Error) {
