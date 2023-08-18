@@ -31,7 +31,7 @@ export default class UncaughtExceptionMonitor {
     // Node sets up these listeners when we use domains
     // Since they're not set up by a user, they shouldn't affect whether we exit or not
     const domainListeners = allListeners.filter(listener => {
-      listener.name === 'domainUncaughtExceptionClear' 
+      return listener.name === 'domainUncaughtExceptionClear' 
     })
     return allListeners.length - domainListeners.length > 1
   }

@@ -97,4 +97,29 @@ describe('UncaughtExceptionMonitor', () => {
       expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(error)
     })
   })
+
+  describe('hasOtherUncaughtExceptionListeners', () => {
+    it('returns true if there are user-added listeners', () => {
+      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener() {
+        return
+      })
+      process.on('uncaughtException', function domainUncaughtExceptionClear() {
+        return 
+      })
+      process.on('uncaughtException', function userAddedListener() {
+        return
+      })
+      expect(uncaughtExceptionMonitor.hasOtherUncaughtExceptionListeners()).toBe(true)
+    })
+
+    it('returns false if there are only our expected listeners', () => {
+      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener() {
+        return
+      })
+      process.on('uncaughtException', function domainUncaughtExceptionClear() {
+        return 
+      })
+      expect(uncaughtExceptionMonitor.hasOtherUncaughtExceptionListeners()).toBe(false)
+    })
+  })
 })
