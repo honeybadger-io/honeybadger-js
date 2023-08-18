@@ -56,14 +56,6 @@ describe('UnhandledRejectionMonitor', () => {
         done()
       }) 
     })
-  
-    // Seems like it was meant to work this way but was never implemented?
-    // it('returns if it is already reporting', () => {
-    //   unhandledRejectionMonitor.__isReporting = true
-    //   unhandledRejectionMonitor.handleUnhandledRejection(reason, promise)
-    //   expect(notifySpy).not.toHaveBeenCalled()
-    //   expect(fatallyLogAndExitSpy).not.toHaveBeenCalled()
-    // })
 
     it('exits if enableUnhandledRejection is false and there are no other listeners', () => {
       client.configure({ enableUnhandledRejection: false })

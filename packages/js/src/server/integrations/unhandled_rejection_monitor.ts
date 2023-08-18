@@ -21,7 +21,7 @@ export default class UnhandledRejectionMonitor {
     return process.listeners('unhandledRejection').length > 1
   }
 
-  handleUnhandledRejection(reason: Error | any, _promise: Promise<any>) {
+  handleUnhandledRejection(reason: unknown, _promise: Promise<unknown>) {
     if (!this.__client.config.enableUnhandledRejection) {
       if (!this.hasOtherUnhandledRejectionListeners() && !this.__isReporting) {
         fatallyLogAndExit(reason as Error)
