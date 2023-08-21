@@ -18,7 +18,8 @@ describe('UncaughtExceptionMonitor', () => {
       { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger() }, 
       new TestTransport()
     ) as unknown as typeof Singleton
-    uncaughtExceptionMonitor = new UncaughtExceptionMonitor(client)
+    uncaughtExceptionMonitor = new UncaughtExceptionMonitor()
+    uncaughtExceptionMonitor.setClient(client)
     // Have to mock fatallyLogAndExit or we will crash the test
     fatallyLogAndExitSpy = jest
       .spyOn(util, 'fatallyLogAndExit')
@@ -42,12 +43,27 @@ describe('UncaughtExceptionMonitor', () => {
 
       // Using any rather than the real type so we can test and spy on private methods
       // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      const newMonitor = new UncaughtExceptionMonitor(client) as any
+      const newMonitor = new UncaughtExceptionMonitor() as any
       expect(removeLambdaSpy).toHaveBeenCalledTimes(1)
       expect(newMonitor.__isReporting).toBe(false)
       expect(newMonitor.__handlerAlreadyCalled).toBe(false)
 
       process.env = restoreEnv
+    })
+  })
+
+  describe('maybeAddListener', () => {
+    it('adds our listener if it is not already added', () => {
+      uncaughtExceptionMonitor.maybeAddListener()
+      const listeners = process.listeners('uncaughtException')
+      expect(listeners.length).toBe(1)
+    })
+
+    it('does not add it again if called again', () => {
+      uncaughtExceptionMonitor.maybeAddListener()
+      uncaughtExceptionMonitor.maybeAddListener()
+      const listeners = process.listeners('uncaughtException')
+      expect(listeners.length).toBe(1)
     })
   })
 

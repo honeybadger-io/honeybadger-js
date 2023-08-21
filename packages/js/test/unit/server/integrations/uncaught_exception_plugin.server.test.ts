@@ -38,7 +38,7 @@ describe('Uncaught Exception Plugin', () => {
       load(client)
       const listeners = process.listeners('uncaughtException')
       expect(listeners.length).toBe(1)
-      expect(listeners[0].name).toBe('honeybadgerUncaughtExceptionListener') 
+      expect(listeners[0].name).toBe('bound honeybadgerUncaughtExceptionListener') 
 
       const error = new Error('uncaught')
       process.emit('uncaughtException', error)

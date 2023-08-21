@@ -6,12 +6,32 @@ export default class UncaughtExceptionMonitor {
   protected __isReporting: boolean
   protected __handlerAlreadyCalled: boolean
   protected __client: typeof Client
+  // TODO: binding this makes the name 'bound honeybadgerUncaughtExceptionlistener'
+  // could instead do something like 'makeListener()'
+  // the name is not critical afaik, but I'd like it to be clean
+  protected __listener = function honeybadgerUncaughtExceptionListener(uncaughtError) {
+    this.handleUncaughtException(uncaughtError)
+  }.bind(this)
 
-  constructor(client: typeof Client) {
+  constructor() {
     this.__isReporting = false
-    this.__handlerAlreadyCalled = false
-    this.__client = client
+    this.__handlerAlreadyCalled = false 
     this.removeAwsLambdaListener()
+  }
+
+  setClient(client: typeof Client) {
+    this.__client = client
+  }
+
+  maybeAddListener() {
+    const listeners = process.listeners('uncaughtException')
+    if (!listeners.includes(this.__listener)) {
+      process.on('uncaughtException', this.__listener)
+    }
+  }
+
+  maybeRemoveListener() {
+
   }
 
   removeAwsLambdaListener() {
