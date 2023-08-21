@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.4.0...@honeybadger-io/js@6.4.1) (2023-08-21)
+
+
+### Bug Fixes
+
+* **js:** remove default `afterUncaught` and add tests for our unhandled node error listener ([#1161](https://github.com/honeybadger-io/honeybadger-js/issues/1161)) ([8c4d574](https://github.com/honeybadger-io/honeybadger-js/commit/8c4d574562f718e427c060dec18dc0809649c37d))
+
+
+
+## [6.4.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.3.0...@honeybadger-io/js@6.4.0) (2023-08-07)
+
+
+### Features
+
+* allow async beforeNotify functions to modify the notice object ([#984](https://github.com/honeybadger-io/honeybadger-js/issues/984)) ([bcb2b92](https://github.com/honeybadger-io/honeybadger-js/commit/bcb2b92ca479aae26b648fb7bb5480b8c2eadd8b))
+
+
+
 ## [6.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.2.0...@honeybadger-io/js@6.3.0) (2023-07-25)
 
 

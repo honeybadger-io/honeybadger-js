@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.1.0...@honeybadger-io/core@6.2.0) (2023-08-07)
+
+
+### Features
+
+* allow async beforeNotify functions to modify the notice object ([#984](https://github.com/honeybadger-io/honeybadger-js/issues/984)) ([bcb2b92](https://github.com/honeybadger-io/honeybadger-js/commit/bcb2b92ca479aae26b648fb7bb5480b8c2eadd8b))
+
+
+
 ## [6.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.0.0...@honeybadger-io/core@6.1.0) (2023-07-17)
 
 

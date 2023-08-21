@@ -1,12 +1,9 @@
 import os from 'os'
 import domain from 'domain'
 import { Client, Util, Types } from '@honeybadger-io/core'
-import {
-  fatallyLogAndExit,
-  getSourceFile
-} from './server/util'
-import uncaughtException from './server/integrations/uncaught_exception'
-import unhandledRejection from './server/integrations/unhandled_rejection'
+import { getSourceFile } from './server/util'
+import uncaughtException from './server/integrations/uncaught_exception_plugin'
+import unhandledRejection from './server/integrations/unhandled_rejection_plugin'
 import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { ServerTransport } from './server/transport'
@@ -38,7 +35,6 @@ class Honeybadger extends Client {
 
   constructor(opts: Partial<Types.Config | Types.ServerlessConfig> = {}) {
     super({
-      afterUncaught: fatallyLogAndExit,
       projectRoot: process.cwd(),
       hostname: os.hostname(),
       ...opts,
