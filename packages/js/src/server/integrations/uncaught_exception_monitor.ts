@@ -6,21 +6,52 @@ export default class UncaughtExceptionMonitor {
   protected __isReporting: boolean
   protected __handlerAlreadyCalled: boolean
   protected __client: typeof Client
-  // TODO: binding this makes the name 'bound honeybadgerUncaughtExceptionlistener'
-  // could instead do something like 'makeListener()'
-  // the name is not critical afaik, but I'd like it to be clean
-  protected __listener = function honeybadgerUncaughtExceptionListener(uncaughtError) {
-    this.handleUncaughtException(uncaughtError)
-  }.bind(this)
+  protected __listener: (error: Error) => void
 
   constructor() {
     this.__isReporting = false
     this.__handlerAlreadyCalled = false 
+    this.__listener = this.makeListener()
     this.removeAwsLambdaListener()
   }
 
   setClient(client: typeof Client) {
     this.__client = client
+  }
+
+  makeListener() {
+    const honeybadgerUncaughtExceptionListener = (uncaughtError: Error) => {
+      if (this.__isReporting || !this.__client) { return }
+  
+      if (!this.__client.config.enableUncaught) {
+        this.__client.config.afterUncaught(uncaughtError)
+        if (!this.hasOtherUncaughtExceptionListeners()) {
+          fatallyLogAndExit(uncaughtError)
+        }
+        return
+      }
+    
+      // report only the first error - prevent reporting recursive errors
+      if (this.__handlerAlreadyCalled) {
+        if (!this.hasOtherUncaughtExceptionListeners()) {
+          fatallyLogAndExit(uncaughtError)
+        }
+        return
+      }
+    
+      this.__isReporting = true
+      this.__client.notify(uncaughtError, {
+        afterNotify: (_err, _notice) => {
+          this.__isReporting = false
+          this.__handlerAlreadyCalled = true
+          this.__client.config.afterUncaught(uncaughtError)
+          if (!this.hasOtherUncaughtExceptionListeners()) {
+            fatallyLogAndExit(uncaughtError)
+          }
+        }
+      })
+    }
+    return honeybadgerUncaughtExceptionListener
   }
 
   maybeAddListener() {
@@ -54,37 +85,5 @@ export default class UncaughtExceptionMonitor {
       return listener.name === 'domainUncaughtExceptionClear' 
     })
     return allListeners.length - domainListeners.length > 1
-  }
-
-  handleUncaughtException(uncaughtError: Error) {
-    if (this.__isReporting) { return }
-  
-    if (!this.__client.config.enableUncaught) {
-      this.__client.config.afterUncaught(uncaughtError)
-      if (!this.hasOtherUncaughtExceptionListeners()) {
-        fatallyLogAndExit(uncaughtError)
-      }
-      return
-    }
-  
-    // report only the first error - prevent reporting recursive errors
-    if (this.__handlerAlreadyCalled) {
-      if (!this.hasOtherUncaughtExceptionListeners()) {
-        fatallyLogAndExit(uncaughtError)
-      }
-      return
-    }
-  
-    this.__isReporting = true
-    this.__client.notify(uncaughtError, {
-      afterNotify: (_err, _notice) => {
-        this.__isReporting = false
-        this.__handlerAlreadyCalled = true
-        this.__client.config.afterUncaught(uncaughtError)
-        if (!this.hasOtherUncaughtExceptionListeners()) {
-          fatallyLogAndExit(uncaughtError)
-        }
-      }
-    })
   }
 }

@@ -47,6 +47,8 @@ describe('UncaughtExceptionMonitor', () => {
       expect(removeLambdaSpy).toHaveBeenCalledTimes(1)
       expect(newMonitor.__isReporting).toBe(false)
       expect(newMonitor.__handlerAlreadyCalled).toBe(false)
+      expect(newMonitor.__listener).toStrictEqual(expect.any(Function))
+      expect(newMonitor.__listener.name).toBe('honeybadgerUncaughtExceptionListener')
 
       process.env = restoreEnv
     })
@@ -67,11 +69,11 @@ describe('UncaughtExceptionMonitor', () => {
     })
   })
 
-  describe('handleUncaughtException', () => {   
+  describe('__listener', () => {   
     const error = new Error('dang, broken again')  
 
     it('calls notify, afterUncaught, and fatallyLogAndExit', (done) => {
-      uncaughtExceptionMonitor.handleUncaughtException(error)
+      uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).toHaveBeenCalledTimes(1)
       expect(notifySpy).toHaveBeenCalledWith(
         error, 
@@ -86,7 +88,7 @@ describe('UncaughtExceptionMonitor', () => {
 
     it('returns if it is already reporting', () => {
       uncaughtExceptionMonitor.__isReporting = true
-      uncaughtExceptionMonitor.handleUncaughtException(error)
+      uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).not.toHaveBeenCalled()
       expect(fatallyLogAndExitSpy).not.toHaveBeenCalled()
     })
@@ -94,21 +96,21 @@ describe('UncaughtExceptionMonitor', () => {
     it('returns if it was already called and there are other listeners', () => {
       process.on('uncaughtException', () => true)
       process.on('uncaughtException', () => true)
-      uncaughtExceptionMonitor.handleUncaughtException(error)
+      uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).toHaveBeenCalledTimes(1)
 
       client.afterNotify(() => {
         expect(fatallyLogAndExitSpy).not.toHaveBeenCalled()
         expect(uncaughtExceptionMonitor.__handlerAlreadyCalled).toBe(true)
         // Doesn't notify a second time
-        uncaughtExceptionMonitor.handleUncaughtException(error)
+        uncaughtExceptionMonitor.__listener(error)
         expect(notifySpy).toHaveBeenCalledTimes(1)
       })
     })
 
     it('exits if it was already called and there are no other listeners', () => {
       uncaughtExceptionMonitor.__handlerAlreadyCalled = true
-      uncaughtExceptionMonitor.handleUncaughtException(error)
+      uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).not.toHaveBeenCalled()
       expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(error)
     })
