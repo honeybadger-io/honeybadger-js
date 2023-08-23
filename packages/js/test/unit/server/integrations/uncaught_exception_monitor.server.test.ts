@@ -4,6 +4,10 @@ import Singleton from '../../../../src/server'
 import UncaughtExceptionMonitor from '../../../../src/server/integrations/uncaught_exception_monitor'
 import * as aws from '../../../../src/server/aws_lambda'
 
+function getListenerCount() {
+  return process.listeners('uncaughtException').length
+}
+
 describe('UncaughtExceptionMonitor', () => {
   // Using any rather than the real type so we can test and spy on private methods
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
@@ -55,17 +59,14 @@ describe('UncaughtExceptionMonitor', () => {
   })
 
   describe('maybeAddListener', () => {
-    it('adds our listener if it is not already added', () => {
+    it('adds our listener a maximum of one time', () => {
+      expect(getListenerCount()).toBe(0)
+      // Adds our listener
       uncaughtExceptionMonitor.maybeAddListener()
-      const listeners = process.listeners('uncaughtException')
-      expect(listeners.length).toBe(1)
-    })
-
-    it('does not add it again if called again', () => {
+      expect(getListenerCount()).toBe(1)
+      // Doesn't add a duplicate
       uncaughtExceptionMonitor.maybeAddListener()
-      uncaughtExceptionMonitor.maybeAddListener()
-      const listeners = process.listeners('uncaughtException')
-      expect(listeners.length).toBe(1)
+      expect(getListenerCount()).toBe(1)
     })
   })
 
@@ -73,18 +74,18 @@ describe('UncaughtExceptionMonitor', () => {
     it('removes our listener if it is present', () => {
       uncaughtExceptionMonitor.maybeAddListener()
       process.on('uncaughtException', (err) => { console.log(err) })
-      expect(process.listeners('uncaughtException').length).toBe(2)
+      expect(getListenerCount()).toBe(2)
 
       uncaughtExceptionMonitor.maybeRemoveListener()
-      expect(process.listeners('uncaughtException').length).toBe(1)
+      expect(getListenerCount()).toBe(1)
     })
 
     it('does nothing if our listener is not present', () => {
       process.on('uncaughtException', (err) => { console.log(err) })
-      expect(process.listeners('uncaughtException').length).toBe(1)
+      expect(getListenerCount()).toBe(1)
       
       uncaughtExceptionMonitor.maybeRemoveListener()
-      expect(process.listeners('uncaughtException').length).toBe(1)
+      expect(getListenerCount()).toBe(1)
     })
   })
 

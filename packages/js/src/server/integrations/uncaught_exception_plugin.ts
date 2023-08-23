@@ -8,10 +8,11 @@ export default function (): Types.Plugin {
   return {
     load: (client: typeof Client) => {
       uncaughtExceptionMonitor.setClient(client)
-      if (!client.config.enableUncaught) { 
-        return
+      if (client.config.enableUncaught) { 
+        uncaughtExceptionMonitor.maybeAddListener()
+      } else {
+        uncaughtExceptionMonitor.maybeRemoveListener()
       }
-      uncaughtExceptionMonitor.maybeAddListener()
     }
   }
 }
