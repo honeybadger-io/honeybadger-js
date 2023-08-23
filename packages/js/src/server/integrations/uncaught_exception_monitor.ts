@@ -79,14 +79,16 @@ export default class UncaughtExceptionMonitor {
    * we want to report the exception to Honeybadger and
    * mimic the default behavior of NodeJs,
    * which is to exit the process with code 1
+   * 
+   * Node sets up domainUncaughtExceptionClear when we use domains.
+   * Since they're not set up by a user, they shouldn't affect whether we exit or not
    */
-  hasOtherUncaughtExceptionListeners() {
+  hasOtherUncaughtExceptionListeners(): boolean {
     const allListeners = process.listeners('uncaughtException')
-    // Node sets up these listeners when we use domains
-    // Since they're not set up by a user, they shouldn't affect whether we exit or not
-    const domainListeners = allListeners.filter(listener => {
-      return listener.name === 'domainUncaughtExceptionClear' 
-    })
-    return allListeners.length - domainListeners.length > 1
+    const otherListeners = allListeners.filter(listener => (
+      listener.name !== 'domainUncaughtExceptionClear' 
+      && listener !== this.__listener
+    ))
+    return otherListeners.length > 0
   }
 }

@@ -137,9 +137,7 @@ describe('UncaughtExceptionMonitor', () => {
 
   describe('hasOtherUncaughtExceptionListeners', () => {
     it('returns true if there are user-added listeners', () => {
-      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener() {
-        return
-      })
+      uncaughtExceptionMonitor.maybeAddListener()
       process.on('uncaughtException', function domainUncaughtExceptionClear() {
         return 
       })
@@ -150,9 +148,7 @@ describe('UncaughtExceptionMonitor', () => {
     })
 
     it('returns false if there are only our expected listeners', () => {
-      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener() {
-        return
-      })
+      uncaughtExceptionMonitor.maybeAddListener()
       process.on('uncaughtException', function domainUncaughtExceptionClear() {
         return 
       })
