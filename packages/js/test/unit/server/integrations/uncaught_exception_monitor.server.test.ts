@@ -69,6 +69,25 @@ describe('UncaughtExceptionMonitor', () => {
     })
   })
 
+  describe('maybeRemoveListener', () => {
+    it('removes our listener if it is present', () => {
+      uncaughtExceptionMonitor.maybeAddListener()
+      process.on('uncaughtException', (err) => { console.log(err) })
+      expect(process.listeners('uncaughtException').length).toBe(2)
+
+      uncaughtExceptionMonitor.maybeRemoveListener()
+      expect(process.listeners('uncaughtException').length).toBe(1)
+    })
+
+    it('does nothing if our listener is not present', () => {
+      process.on('uncaughtException', (err) => { console.log(err) })
+      expect(process.listeners('uncaughtException').length).toBe(1)
+      
+      uncaughtExceptionMonitor.maybeRemoveListener()
+      expect(process.listeners('uncaughtException').length).toBe(1)
+    })
+  })
+
   describe('__listener', () => {   
     const error = new Error('dang, broken again')  
 

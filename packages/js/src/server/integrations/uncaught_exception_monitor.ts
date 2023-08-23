@@ -62,7 +62,10 @@ export default class UncaughtExceptionMonitor {
   }
 
   maybeRemoveListener() {
-
+    const listeners = process.listeners('uncaughtException')
+    if (listeners.includes(this.__listener)) {
+      process.removeListener('uncaughtException', this.__listener)
+    }
   }
 
   removeAwsLambdaListener() {
