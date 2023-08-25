@@ -65,10 +65,8 @@ jobs:
               - 'packages/js/**'
 
   integration:
-    # integration tests from "js" package fail if they are executed at the same time
     needs: changes
     if: needs.changes.outputs.core == 'true'
-    concurrency: js-concurrency
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -81,22 +79,17 @@ jobs:
         cache: 'npm'
         cache-dependency-path: |
           package-lock.json
-          packages/js/test/integration/package-lock.json
+          packages/js/package-lock.json
 
     - name: Build
-      run: |
-        npm ci
-        cd packages/js/test/integration
-        npm ci
+      run: npm ci
 
     - name: Run integration tests
       env:
         CI: true
-        BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
-        BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
       run: |
         cd packages/js
-        npm run test:integration
+        npm run test:integration:playwright
 
 
   lint:
