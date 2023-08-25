@@ -1,8 +1,10 @@
 import { test, expect, Page } from '@playwright/test'
 import { resolve } from 'path'
 import type Honeybadger from '../../honeybadger'
+import type { NoticeTransportPayload }  from '../../../core/src/types'
 
-declare const window: { Honeybadger: Honeybadger, results: { notices: unknown[], error: Error } }
+type Results = { notices: NoticeTransportPayload[], error: Error }
+declare const window: { Honeybadger: Honeybadger, results: Results }
 
 const setup = async (page: Page): Promise<void> => {
   await page.goto('/')
@@ -24,7 +26,7 @@ test.beforeEach(async ({ page }, _testInfo) => {
 test('it notifies Honeybadger of unhandled exceptions', async ({ page }) => {
   await triggerException(page)
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(notices[0].error.message).toEqual('unhandled exception with known stack trace')
 })
@@ -34,7 +36,7 @@ test('it notifies Honeybadger manually', async ({ page }) => {
   await expect(resultHandle.jsonValue()).resolves.toEqual(true)
   await resultHandle.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(notices[0].error.message).toEqual('expected message')
 })
@@ -50,7 +52,7 @@ test('it reports multiple errors in the same process', async ({ page }) => {
 
   await triggerException(page)
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(3)
 })
 
@@ -61,7 +63,7 @@ test('it sends console breadcrumbs', async ({ page }) => {
   })
   await resultHandle.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(notices[0].breadcrumbs.trail.length).toEqual(2)
   expect(notices[0].breadcrumbs.trail[0].message).toEqual('expected message');
@@ -75,7 +77,7 @@ test('it sends string value console breadcrumbs when null', async ({ page }) => 
   })
   await resultHandle.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(notices[0].breadcrumbs.trail.length).toEqual(2)
   expect(notices[0].breadcrumbs.trail[0].message).toEqual('null')
@@ -90,7 +92,7 @@ test('it sends click breadcrumbs', async ({ page }) => {
   })
   await resultHandle.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(notices[0].breadcrumbs.trail.length).toEqual(2)
   expect(notices[0].breadcrumbs.trail[0].message).toEqual('button#normal-button')
@@ -115,7 +117,7 @@ test.skip('it sends XHR breadcrumbs for relative paths', async ({ page }) => {
   })
   await resultHandle.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1);
   expect(notices[0].breadcrumbs.trail.length).toEqual(2);
   expect(notices[0].breadcrumbs.trail[0].message).toEqual('GET /example/path');
@@ -124,15 +126,15 @@ test.skip('it sends XHR breadcrumbs for relative paths', async ({ page }) => {
   expect('message' in notices[0].breadcrumbs.trail[0].metadata).toBe(false);
 })
 
-test.skip('it sends XHR breadcrumbs for absolute paths', async ({ page }) => {
+test.skip('it sends XHR breadcrumbs for absolute paths', async ({ page: _ }) => {
 
 })
 
-test.skip('it sends fetch breadcrumbs', async ({ page }) => {
+test.skip('it sends fetch breadcrumbs', async ({ page: _ }) => {
 
 })
 
-test.skip('it sends navigation breadcrumbs', async ({ page }) => {
+test.skip('it sends navigation breadcrumbs', async ({ page: _ }) => {
 
 })
 
@@ -142,7 +144,7 @@ test('it sends notify breadcrumbs', async ({ page }) => {
   })
   await resultHandle.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(notices[0].breadcrumbs.trail.length).toEqual(1);
   expect(notices[0].breadcrumbs.trail[0].message).toEqual('Honeybadger Notice');
@@ -157,7 +159,7 @@ test('it sends notify breadcrumbs', async ({ page }) => {
 
 test('it sends window.onerror breadcrumbs', async ({ page }) => {
   await triggerException(page)
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(notices[0].error.message).toEqual('unhandled exception with known stack trace')
   expect(Array.isArray(notices[0].breadcrumbs.trail)).toEqual(true)
@@ -187,7 +189,7 @@ test('it skips onunhandledrejection when already sent', async ({ page }) => {
   })
   await resultHandle2.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
 })
 
@@ -207,7 +209,7 @@ test('it sends window.onunhandledrejection breadcrumbs when rejection is an Erro
   })
   await handle.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(Array.isArray(notices[0].breadcrumbs.trail)).toEqual(true)
 
@@ -238,7 +240,7 @@ test('it skips window.onunhandledrejection breadcrumbs when rejection is not Err
   })
   await handle.dispose()
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
   expect(Array.isArray(notices[0].breadcrumbs.trail)).toEqual(true)
 
@@ -248,9 +250,9 @@ test('it skips window.onunhandledrejection breadcrumbs when rejection is not Err
 
 test('it shows user feedback form', async ({ page }) => {
   const handle = await page.evaluateHandle(_ => {
-    // @ts-expect-error private access
+    // @ts-ignore private access
     window.Honeybadger.isUserFeedbackScriptUrlAlreadyVisible = () => false
-    // @ts-expect-error private access
+    // @ts-ignore private access
     window.Honeybadger.appendUserFeedbackScriptTag = () => { }
     window.Honeybadger.afterNotify(() => {
       window.Honeybadger.showUserFeedbackForm()
@@ -265,7 +267,7 @@ test('it shows user feedback form', async ({ page }) => {
   })
   await page.waitForSelector('div#honeybadger-feedback')
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
 
   const noticeId = await page.evaluate('window.honeybadgerUserFeedbackOptions.noticeId')
@@ -277,9 +279,9 @@ test('it shows user feedback form', async ({ page }) => {
 
 test('it shows user feedback form with custom labels', async ({ page }) => {
   const handle = await page.evaluateHandle(_ => {
-    // @ts-expect-error private access
+    // @ts-ignore private access
     window.Honeybadger.isUserFeedbackScriptUrlAlreadyVisible = () => false
-    // @ts-expect-error private access
+    // @ts-ignore private access
     window.Honeybadger.appendUserFeedbackScriptTag = () => { }
     window.Honeybadger.afterNotify(() => {
       window.Honeybadger.showUserFeedbackForm({
@@ -298,7 +300,7 @@ test('it shows user feedback form with custom labels', async ({ page }) => {
   })
   await page.waitForSelector('div#honeybadger-feedback')
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
 
   const noticeId = await page.evaluate('window.honeybadgerUserFeedbackOptions.noticeId')
@@ -310,9 +312,9 @@ test('it shows user feedback form with custom labels', async ({ page }) => {
 
 test('it sends user feedback for notice on submit', async ({ page }) => {
   const handle = await page.evaluateHandle(_ => {
-    // @ts-expect-error private access
+    // @ts-ignore private access
     window.Honeybadger.isUserFeedbackScriptUrlAlreadyVisible = () => false
-    // @ts-expect-error private access
+    // @ts-ignore private access
     window.Honeybadger.appendUserFeedbackScriptTag = () => { }
     window.Honeybadger.afterNotify(() => {
       window.Honeybadger.showUserFeedbackForm()
@@ -327,7 +329,7 @@ test('it sends user feedback for notice on submit', async ({ page }) => {
   })
   await page.waitForSelector('div#honeybadger-feedback')
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
 
   const noticeId = await page.evaluate('window.honeybadgerUserFeedbackOptions.noticeId')
@@ -356,9 +358,9 @@ test('it sends user feedback for notice on submit', async ({ page }) => {
 
 test('it closes user feedback form on cancel', async ({ page }) => {
   const handle = await page.evaluateHandle(_ => {
-    // @ts-expect-error private access
+    // @ts-ignore private access
     window.Honeybadger.isUserFeedbackScriptUrlAlreadyVisible = () => false
-    // @ts-expect-error private access
+    // @ts-ignore private access
     window.Honeybadger.appendUserFeedbackScriptTag = () => { }
     window.Honeybadger.afterNotify(() => {
       window.Honeybadger.showUserFeedbackForm()
@@ -373,7 +375,7 @@ test('it closes user feedback form on cancel', async ({ page }) => {
   })
   await page.waitForSelector('div#honeybadger-feedback')
 
-  const { notices } = await page.evaluate('results')
+  const { notices } = await page.evaluate<Results>('results')
   expect(notices.length).toEqual(1)
 
   const noticeId = await page.evaluate('window.honeybadgerUserFeedbackOptions.noticeId')
