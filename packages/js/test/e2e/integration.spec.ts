@@ -19,15 +19,15 @@ const triggerException = async (page: Page) => {
   await page.click('button#throw-exception')
 }
 
-test.beforeAll(async ({ page }) => {
-  const context = page.context()
-  const browser = context.browser()
-  console.log('Running on', browser.browserType(), browser.version())
-})
-
 test.describe('Browser Integration', () => {
   test.beforeEach(async ({ page }, _testInfo) => {
     await setup(page)
+  })
+
+  test('it logs browser type and version', async ({ page }) => {
+    const context = page.context()
+    const browser = context.browser()
+    console.log('Running on', browser.browserType(), browser.version())
   })
 
   test('it notifies Honeybadger of unhandled exceptions', async ({ page }) => {
