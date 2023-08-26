@@ -27,7 +27,7 @@ test.describe('Browser Integration', () => {
   test('it logs browser type and version', async ({ page }) => {
     const context = page.context()
     const browser = context.browser()
-    console.log('Running on', browser.browserType(), browser.version())
+    console.log('Running on', browser.browserType().name(), browser.version())
   })
 
   test('it notifies Honeybadger of unhandled exceptions', async ({ page }) => {
@@ -137,8 +137,7 @@ test.describe('Browser Integration', () => {
     const resultHandle = await page.evaluateHandle(async _ => {
       return new Promise<void>(function (resolve, _reject) {
         const request = new XMLHttpRequest()
-        request.withCredentials = true
-        request.open('GET', 'http://localhost:3000/example/path', false);
+        request.open('GET', 'https://example.com/example/path', true);
         request.onreadystatechange = function () {
           if (request.readyState === 4) {
             window.Honeybadger.notify('testing')
@@ -153,7 +152,7 @@ test.describe('Browser Integration', () => {
     const { notices } = await page.evaluate<Results>('results')
     expect(notices.length).toEqual(1);
     expect(notices[0].breadcrumbs.trail.length).toEqual(2);
-    expect(notices[0].breadcrumbs.trail[0].message).toEqual('GET http://localhost:3000/example/path');
+    expect(notices[0].breadcrumbs.trail[0].message).toEqual('GET https://example.com/example/path');
     expect(notices[0].breadcrumbs.trail[0].category).toEqual('request');
     expect(notices[0].breadcrumbs.trail[0].metadata.type).toEqual('xhr');
     expect('message' in notices[0].breadcrumbs.trail[0].metadata).toBe(false);
