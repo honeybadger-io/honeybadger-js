@@ -29,6 +29,19 @@ However, since the package is isomorphic, TypeScript users will likely be writin
    account and use `BROWSERSTACK_USERNAME=your_username BROWSERSTACK_ACCESS_KEY=your-access-key npm run test:integration`.
 3. To test the TypeScript type definitions: `npm run tsd`.
 
+#### End-to-end tests with Playwright
+We use [Playwright](https://playwright.dev) to run integration tests in a real browser.
+The config file is at the root of this package: `playwright.config.ts`.
+To run these tests locally, you'll need to install the browsers you want to test with.
+The easiest way to do this is to use the `npx playwright install --with-deps` command.
+Then run `npm run test:integration:playwright`.
+
+##### Architecture
+Inside `./test/e2e`, you will find a `server.js` file that runs a simple nodejs http server.
+This server is used to serve the test page, along with other static assets and to receive the error reports from the browser.
+The test page is found in `./test/e2e/sandbox.html`.
+All tests are found in `./test/e2e/integration.spec.ts`.
+
 ## Releasing
 
 This package comes with a `postpublish` script (`scripts/release-cdn.sh`) 

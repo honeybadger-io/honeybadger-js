@@ -22,9 +22,10 @@ const toBool = [() => true, () => false];
 
 const prepareFile = async (url) => {
   const paths = [STATIC_PATH, url];
-  if (url.endsWith('/')) paths.push('test/e2e/sandbox.html');
-  const filePath = path.join(...paths);
-  console.log('looking for', filePath)
+  if (url === '/') paths.push('test/e2e/sandbox.html')
+
+  const filePath = path.join(...paths)
+  console.log('original url', url, '=> looking for', filePath)
   const pathTraversal = !filePath.startsWith(STATIC_PATH);
   const exists = await fs.promises.access(filePath).then(...toBool);
   const found = !pathTraversal && exists;
