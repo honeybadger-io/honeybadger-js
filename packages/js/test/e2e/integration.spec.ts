@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect, Page, TestInfo } from '@playwright/test'
 import { resolve } from 'path'
 import type Honeybadger from '../../honeybadger'
 import type { NoticeTransportPayload }  from '../../../core/src/types'
@@ -19,9 +19,34 @@ const triggerException = async (page: Page) => {
   await page.click('button#throw-exception')
 }
 
+const isRunningOnBrowserStack = (testInfo: TestInfo) => {
+  return testInfo.project.name.includes('browserstack')
+}
+
 test.describe('Browser Integration', () => {
-  test.beforeEach(async ({ page }, _testInfo) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (isRunningOnBrowserStack(testInfo)) {
+      const data = {
+        action: 'setSessionName',
+        arguments: { name: testInfo.project.name }
+      }
+      await page.evaluate(_ => {},`browserstack_executor: ${JSON.stringify(data)}`);
+    }
     await setup(page)
+  })
+
+  test.afterEach(async ({ page }, testInfo) => {
+    if (isRunningOnBrowserStack(testInfo)) {
+      const isPassed = testInfo.status === testInfo.expectedStatus
+      const data = {
+        action: 'setSessionStatus',
+        arguments: {
+          status: isPassed ? 'passed' : 'failed',
+          reason: isPassed ? testInfo.title : testInfo.errors.map(e => e.message).join('\n')
+        }
+      }
+      await page.evaluate(_ => {}, `browserstack_executor: ${JSON.stringify(data)}`);
+    }
   })
 
   test('it logs browser type and version', async ({ page }) => {

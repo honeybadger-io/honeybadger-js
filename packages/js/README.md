@@ -25,22 +25,31 @@ However, since the package is isomorphic, TypeScript users will likely be writin
 
 ### Tests
 1. To run unit tests for both browser and server builds: `npm test`. Or separately: `npm run test:browser`, `npm run test:server`.
-2. To run integration tests across all supported platforms, set up a [BrowserStack](https://www.browserstack.com/)
-   account and use `BROWSERSTACK_USERNAME=your_username BROWSERSTACK_ACCESS_KEY=your-access-key npm run test:integration`.
+2. To run integration tests across all supported platforms, see [End-to-end tests with Playwright and Browserstack](#end-to-end-tests-with-playwright-and-browserstack-optional).
 3. To test the TypeScript type definitions: `npm run tsd`.
 
-#### End-to-end tests with Playwright
+#### End-to-end tests with Playwright and Browserstack (optional)
 We use [Playwright](https://playwright.dev) to run integration tests in a real browser.
-The config file is at the root of this package: `playwright.config.ts`.
+The config file is at `test/e2e/playwright.config.ts`.
 To run these tests locally, you'll need to install the browsers you want to test with.
-The easiest way to do this is to use the `npx playwright install --with-deps` command.
-Then run `npm run test:integration:playwright`.
+Open `test/e2e/browsers.ts` and enable the browsers you want to test with.
+Then, run `npx playwright install --with-deps` to install the browsers.
+Lastly, run `npm run test:integration`. 
+Additionally, if you want to run the tests on Browserstack:
+- enable Browserstack browsers in `browsers.ts`,
+- set up a [BrowserStack](https://www.browserstack.com/) account and 
+- use `BROWSERSTACK_USERNAME=your_username BROWSERSTACK_ACCESS_KEY=your-access-key npm run test:integration`.
 
 ##### Architecture
 Inside `./test/e2e`, you will find a `server.js` file that runs a simple nodejs http server.
 This server is used to serve the test page, along with other static assets and to receive the error reports from the browser.
+The server is automatically started and stopped by Playwright, as you can at the bottom of the `./test/e2e/playwright.config.ts` file.
 The test page is found in `./test/e2e/sandbox.html`.
 All tests are found in `./test/e2e/integration.spec.ts`.
+Two more configuration files, `./test/e2e/global-setup.ts` and `./test/e2e/global-teardown.ts` are used to start and stop
+a local browserstack executable, needed to run the tests on Browserstack. This executable will only be executed if you are testing on Browserstack.
+Finally, the `./test/e2e/browserstack.config.ts` file contains the configuration and helper functions to run the tests on Browserstack.
+
 
 ## Releasing
 

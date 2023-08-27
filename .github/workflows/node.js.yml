@@ -84,7 +84,7 @@ jobs:
     - name: Build
       run: npm ci
 
-    - name: Instal Playwright Browsers
+    - name: Instal; Playwright Browsers
       run: npx playwright install --with-deps
 
     - name: Run integration tests
@@ -92,7 +92,7 @@ jobs:
         CI: true
       run: |
         cd packages/js
-        npm run test:integration:playwright
+        npm run test:integration
 
 
   lint:
