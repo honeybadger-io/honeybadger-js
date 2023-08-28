@@ -7,21 +7,39 @@ import { devices } from '@playwright/test';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCdpEndpoint } from './browserstack.config';
 
-export const browsers = [
-  // {
-  //   // Chrome minimum version
-  //   name: 'browserstack_chrome_83_windows',
-  //   use: {
-  //     connectOptions: { wsEndpoint: getCdpEndpoint('chrome@83:Windows 10','browserstack_chrome_49_windows') },
-  //   },
-  // },
-  // {
-  //   // Chrome latest version
-  //   name: 'browserstack_chrome_latest_windows',
-  //   use: {
-  //     connectOptions: { wsEndpoint: getCdpEndpoint('chrome@latest:Windows 11','browserstack_chrome_latest_windows') },
-  //   },
-  // },
+const browserStackBrowsers = [
+  {
+    // Chrome minimum version
+    // Earliest available chrome version is 83
+    // https://www.browserstack.com/docs/automate/playwright/browsers-and-os
+    name: 'browserstack_chrome_83_windows',
+    use: {
+      connectOptions: { wsEndpoint: getCdpEndpoint('chrome@83:Windows 10','browserstack_chrome_83_windows') },
+    },
+  },
+  {
+    // Chrome latest version
+    name: 'browserstack_chrome_latest_windows',
+    use: {
+      connectOptions: { wsEndpoint: getCdpEndpoint('chrome@latest:Windows 11','browserstack_chrome_latest_windows') },
+    },
+  },
+  {
+    // Edge minimum version
+    // Earliest available chrome version is 83
+    // https://www.browserstack.com/docs/automate/playwright/browsers-and-os
+    name: 'browserstack_edge_83_windows',
+    use: {
+      connectOptions: { wsEndpoint: getCdpEndpoint('edge@83:Windows 10','browserstack_edge_83_windows') },
+    },
+  },
+  {
+    // Edge latest version
+    name: 'browserstack_edge_latest_windows',
+    use: {
+      connectOptions: { wsEndpoint: getCdpEndpoint('edge@latest:Windows 11','browserstack_edge_latest_windows') },
+    },
+  },
   // {
   //   // Safari minimum version
   //   base: 'BrowserStack',
@@ -54,24 +72,9 @@ export const browsers = [
   //   os: 'Windows',
   //   os_version: '10'
   // },
-  // {
-  //   // Edge minimum version
-  //   base: 'BrowserStack',
-  //   browser: 'Edge',
-  //   browser_version: '15',
-  //   os: 'Windows',
-  //   os_version: '10'
-  // },
-  // {
-  //   // Edge latest version
-  //   base: 'BrowserStack',
-  //   browser: 'Edge',
-  //   browser_version: 'latest',
-  //   os: 'Windows',
-  //   os_version: '11'
-  // },
+]
 
-  // Uncomment below to test with playwright's bundled browsers
+const playwrightBrowsers = [
   {
     name: 'chromium',
     use: { ...devices['Desktop Chrome'] },
@@ -105,3 +108,6 @@ export const browsers = [
   //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
   // },
 ]
+
+// eslint-disable-next-line
+export const browsers = !!process.env.CI ? browserStackBrowsers : playwrightBrowsers
