@@ -4,6 +4,10 @@ import Singleton from '../../../../src/server'
 import UncaughtExceptionMonitor from '../../../../src/server/integrations/uncaught_exception_monitor'
 import * as aws from '../../../../src/server/aws_lambda'
 
+function getListenerCount() {
+  return process.listeners('uncaughtException').length
+}
+
 describe('UncaughtExceptionMonitor', () => {
   // Using any rather than the real type so we can test and spy on private methods
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
@@ -18,7 +22,8 @@ describe('UncaughtExceptionMonitor', () => {
       { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger() }, 
       new TestTransport()
     ) as unknown as typeof Singleton
-    uncaughtExceptionMonitor = new UncaughtExceptionMonitor(client)
+    uncaughtExceptionMonitor = new UncaughtExceptionMonitor()
+    uncaughtExceptionMonitor.setClient(client)
     // Have to mock fatallyLogAndExit or we will crash the test
     fatallyLogAndExitSpy = jest
       .spyOn(util, 'fatallyLogAndExit')
@@ -42,20 +47,53 @@ describe('UncaughtExceptionMonitor', () => {
 
       // Using any rather than the real type so we can test and spy on private methods
       // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      const newMonitor = new UncaughtExceptionMonitor(client) as any
+      const newMonitor = new UncaughtExceptionMonitor() as any
       expect(removeLambdaSpy).toHaveBeenCalledTimes(1)
       expect(newMonitor.__isReporting).toBe(false)
       expect(newMonitor.__handlerAlreadyCalled).toBe(false)
+      expect(newMonitor.__listener).toStrictEqual(expect.any(Function))
+      expect(newMonitor.__listener.name).toBe('honeybadgerUncaughtExceptionListener')
 
       process.env = restoreEnv
     })
   })
 
-  describe('handleUncaughtException', () => {   
+  describe('maybeAddListener', () => {
+    it('adds our listener a maximum of one time', () => {
+      expect(getListenerCount()).toBe(0)
+      // Adds our listener
+      uncaughtExceptionMonitor.maybeAddListener()
+      expect(getListenerCount()).toBe(1)
+      // Doesn't add a duplicate
+      uncaughtExceptionMonitor.maybeAddListener()
+      expect(getListenerCount()).toBe(1)
+    })
+  })
+
+  describe('maybeRemoveListener', () => {
+    it('removes our listener if it is present', () => {
+      uncaughtExceptionMonitor.maybeAddListener()
+      process.on('uncaughtException', (err) => { console.log(err) })
+      expect(getListenerCount()).toBe(2)
+
+      uncaughtExceptionMonitor.maybeRemoveListener()
+      expect(getListenerCount()).toBe(1)
+    })
+
+    it('does nothing if our listener is not present', () => {
+      process.on('uncaughtException', (err) => { console.log(err) })
+      expect(getListenerCount()).toBe(1)
+      
+      uncaughtExceptionMonitor.maybeRemoveListener()
+      expect(getListenerCount()).toBe(1)
+    })
+  })
+
+  describe('__listener', () => {   
     const error = new Error('dang, broken again')  
 
     it('calls notify, afterUncaught, and fatallyLogAndExit', (done) => {
-      uncaughtExceptionMonitor.handleUncaughtException(error)
+      uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).toHaveBeenCalledTimes(1)
       expect(notifySpy).toHaveBeenCalledWith(
         error, 
@@ -70,7 +108,7 @@ describe('UncaughtExceptionMonitor', () => {
 
     it('returns if it is already reporting', () => {
       uncaughtExceptionMonitor.__isReporting = true
-      uncaughtExceptionMonitor.handleUncaughtException(error)
+      uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).not.toHaveBeenCalled()
       expect(fatallyLogAndExitSpy).not.toHaveBeenCalled()
     })
@@ -78,21 +116,21 @@ describe('UncaughtExceptionMonitor', () => {
     it('returns if it was already called and there are other listeners', () => {
       process.on('uncaughtException', () => true)
       process.on('uncaughtException', () => true)
-      uncaughtExceptionMonitor.handleUncaughtException(error)
+      uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).toHaveBeenCalledTimes(1)
 
       client.afterNotify(() => {
         expect(fatallyLogAndExitSpy).not.toHaveBeenCalled()
         expect(uncaughtExceptionMonitor.__handlerAlreadyCalled).toBe(true)
         // Doesn't notify a second time
-        uncaughtExceptionMonitor.handleUncaughtException(error)
+        uncaughtExceptionMonitor.__listener(error)
         expect(notifySpy).toHaveBeenCalledTimes(1)
       })
     })
 
     it('exits if it was already called and there are no other listeners', () => {
       uncaughtExceptionMonitor.__handlerAlreadyCalled = true
-      uncaughtExceptionMonitor.handleUncaughtException(error)
+      uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).not.toHaveBeenCalled()
       expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(error)
     })
@@ -100,9 +138,7 @@ describe('UncaughtExceptionMonitor', () => {
 
   describe('hasOtherUncaughtExceptionListeners', () => {
     it('returns true if there are user-added listeners', () => {
-      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener() {
-        return
-      })
+      uncaughtExceptionMonitor.maybeAddListener()
       process.on('uncaughtException', function domainUncaughtExceptionClear() {
         return 
       })
@@ -113,9 +149,7 @@ describe('UncaughtExceptionMonitor', () => {
     })
 
     it('returns false if there are only our expected listeners', () => {
-      process.on('uncaughtException', function honeybadgerUncaughtExceptionListener() {
-        return
-      })
+      uncaughtExceptionMonitor.maybeAddListener()
       process.on('uncaughtException', function domainUncaughtExceptionClear() {
         return 
       })
