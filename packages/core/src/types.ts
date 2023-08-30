@@ -48,6 +48,7 @@ export interface AfterNotifyHandler {
 
 export interface Plugin {
   load(client: Client): void
+  shouldReloadOnConfigure?: boolean
 }
 
 export interface Notice {
