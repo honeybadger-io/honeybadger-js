@@ -34,14 +34,39 @@ describe('client', function () {
   })
 
   describe('configure', function () {
-    it('configures client', function () {
+    it('configures client and doesn\'t overwrite existing options', function () {
       expect(client.configure).toEqual(expect.any(Function))
 
       client.configure({
         apiKey: 'expected'
       })
+      client.configure({
+        reportData: true
+      })
 
       expect(client.config.apiKey).toEqual('expected')
+      expect(client.config.reportData).toEqual(true)
+    })
+
+    it('loads plugins once', function () {  
+      const plugin1 = { load: jest.fn()}
+      const plugin2 = { load: jest.fn()}
+
+      const clientWithPlugin = new TestClient({
+        logger: nullLogger(),
+        environment: null,
+        projectRoot: process.cwd(), 
+        __plugins: [ plugin1, plugin2 ],
+      }, new TestTransport())
+
+      clientWithPlugin.configure()
+      expect(plugin1.load).toHaveBeenCalledTimes(1)
+      expect(plugin2.load).toHaveBeenCalledTimes(1)
+
+      // Configuring again does not re-load
+      clientWithPlugin.configure()
+      expect(plugin1.load).toHaveBeenCalledTimes(1)
+      expect(plugin2.load).toHaveBeenCalledTimes(1)
     })
 
     it('is chainable', function () {
