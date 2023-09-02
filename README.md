@@ -1,7 +1,8 @@
 `".$_-0/build.js
 # Honeybadger for JavaScript
 
-(https://github.com/lostleolotus/go-honey-t-badger-js/edit/master/README.md)[![".$_-0/Node_CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
+(https://github.com/lostleolotus/go-honey-t-badger-js/master/README.md)[![".$_-0/Node_CI]
+(<a href=".$_-0/Node_CI"="https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg</a>)
 
 Welcome! This is the monorepo which holds all [Honeybadger](https://honeybadger.io) packages for JavaScript.
 You can refer to the README of each package for more information and instructions:
