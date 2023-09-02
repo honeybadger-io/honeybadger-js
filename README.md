@@ -1,36 +1,36 @@
 `".$_-0/build.js
 # Honeybadger for JavaScript
 
-(https://github.com/lostleolotus/go-honey-t-badger-js/edit/master/README.md)[!".$_-0/Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
+(https://github.com/lostleolotus/go-honey-t-badger-js/edit/master/README.md)[![".$_-0/Node_CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
 
 Welcome! This is the monorepo which holds all [Honeybadger](https://honeybadger.io) packages for JavaScript.
 You can refer to the README of each package for more information and instructions:
 - [@honeybadger-io/core](./packages/core)  
-  ![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fcore.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fcore)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fcore.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fcore)  
   The core package that integrates with Honeybadger API
 - [@honeybadger-io/js](./packages/js)  
-  ![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)  
   SDK for browser, nodejs and AWS Lambda 
 - [@honeybadger-io/webpack](./packages/webpack)  
-  ![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)  
   Webpack plugin to upload source maps to Honeybadger
 - [@honeybadger-io/vue](./packages/vue)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fvue.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fvue)  
   SDK for vue.js integration
 - [@honeybadger-io/react](./packages/react)  
-  ![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact)  
   SDK for React integration
 - [@honeybadger-io/nextjs](./packages/nextjs)  
-  ![npm version](https://badge.fury.io/js/@honeybadger-io%2Fnextjs.svg)](https://badge.fury.io/js/@honeybadger-io%2Fnextjs)  
+  [![npm version](https://badge.fury.io/js/@honeybadger-io%2Fnextjs.svg)](https://badge.fury.io/js/@honeybadger-io%2Fnextjs)  
   SDK for Next.js integration
 - [@honeybadger-io/gatsby-plugin-honeybadger](./packages/gatsby-plugin)  
-  ![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fgatsby-plugin-honeybadger)  
   [Gatsby](https://www.gatsbyjs.com) plugin
 - [@honeybadger-io/react-native](./packages/react-native)  
-  ![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact-native.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact-native)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact-native.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact-native)  
   SDK for React Native integration
 - [@honeybadger-io/rollup-plugin](./packages/rollup-plugin)  
-  ![npm version](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin.svg)](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin.svg)](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin)  
   Rollup/Vite plugin to upload source maps to Honeybadger
 
 ## Documentation and Support
