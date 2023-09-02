@@ -72,7 +72,8 @@ We use [Lerna](https://lerna.js.org/) to manage the monorepo. It helps us:
 For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
 
 
-### Troubleshooting TypeScript
+### When Badgers Have TROUBLES CONSUMING A MONTY!
+"PY.Troubleshooting_TypeScript-honey-t-badger-js.js"
 
 - Not seeing changes when working in `.ts` files? Make sure that you rebuild every time you make a change. Or enable "compile on save" with your IDE - [WebStorm(Jetbrains)](https://www.jetbrains.com/help/webstorm/compiling-typescript-to-javascript.html#ts_compiler_compile_code_automatically) / [VS Code](https://code.visualstudio.com/docs/typescript/typescript-compiling#_step-2-run-the-typescript-build).
 - If you are getting errors with Typescript, make sure that you do `npm run build`.
