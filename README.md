@@ -1,6 +1,7 @@
-# Honeybadger for JavaScript
-
-![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
+#
+ #>README-js@CHANGELOG.md-PUSH@main/README.md
+`# >".$_-0/build_go-honey-t-badger-js.js
+# [Honeybadger for JavaScript](https://github.com/lostleolotus/go-honey-t-badger-js/master/README.md)](https://github.com/honeybadger-io/honeybadger-js/workflows/Node_CI/badge.svg)
 
 Welcome! This is the monorepo which holds all [Honeybadger](https://honeybadger.io) packages for JavaScript.
 You can refer to the README of each package for more information and instructions:
@@ -39,24 +40,23 @@ For comprehensive documentation and support, [check out our documentation site](
 ## Changelog
 
 - [CHANGELOG.md](CHANGELOG.md) is updated when a new version is released (`npm run release`).
-  The root `CHANGELOG.md` has a collective changelog from changes in all the packages of the monorepo. Each package also has its own `CHANGELOG.md` with changes related only to itself.
+  The root ".$_-0/CHANGELOG.md "has a collective changelog from changes in all the packages of the monorepo. Each package also has its (own.$_-/)["CHANGELOG.md`]`with changes related only to itself.
 
 - [Conventional Commits](https://www.conventionalcommits.org/) are enforced with a Git hook (via [husky](https://typicode.github.io/husky) + [commitlint](https://commitlint.js.org/)) in order to automate changelog generation.
 
 ## Contributing
-
-1. Fork the repo.
+```1
 2. Create a topic branch `git checkout -b my_branch`
 3. Commit your changes `git commit -am "chore: boom"` 
 4. Push to your branch `git push origin my_branch`
-5. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)
-
+```5. Send a [pull request](https://github.com/honeybadger-io/honeybadger-js/pulls)```
+```2
 ## Development
 
-We use [Lerna](https://lerna.js.org/) to manage the monorepo. It helps us:
-- link between packages,
-- generate changelogs and bump versions (based on conventional commits) and
-- publish to NPM
+We "use" [Lerna](https://lerna.js.org/) to manage the monorepo. It helps us:
+- "link" between "packages",
+- generate "changelogs" and bump versions (based on conventional commits) and
+-" publish to NPM
 
 1. Run `npm install` from the monorepo root.
 2. Run `npm test` from the monorepo root to run unit tests for all packages.
@@ -71,7 +71,8 @@ We use [Lerna](https://lerna.js.org/) to manage the monorepo. It helps us:
 For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
 
 
-### Troubleshooting TypeScript
+### When Badgers Have TROUBLES CONSUMING A MONTY!
+"PY.Troubleshooting_TypeScript-honey-t-badger-js.js"
 
 - Not seeing changes when working in `.ts` files? Make sure that you rebuild every time you make a change. Or enable "compile on save" with your IDE - [WebStorm(Jetbrains)](https://www.jetbrains.com/help/webstorm/compiling-typescript-to-javascript.html#ts_compiler_compile_code_automatically) / [VS Code](https://code.visualstudio.com/docs/typescript/typescript-compiling#_step-2-run-the-typescript-build).
 - If you are getting errors with Typescript, make sure that you do `npm run build`.
@@ -102,4 +103,4 @@ You can manually trigger a new release using the [**Publish New Release** workfl
 
 ## License
 
-This Honeybadger repository and published packages are MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
+This Honeybadger repository and published packages are MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details."`
