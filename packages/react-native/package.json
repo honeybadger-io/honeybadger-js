@@ -12,7 +12,7 @@
     "test": "jest"
   },
   "bin": {
-    "honeybadger-upload-sourcemaps": ".scripts//honeybadger-upload-sourcemaps.sh"
+    "honeybadger-upload-sourcemaps": "./scripts/honeybadger-upload-sourcemaps.sh"
   },
   "repository": {
     "type": "git",
