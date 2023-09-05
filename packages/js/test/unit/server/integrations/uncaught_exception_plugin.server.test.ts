@@ -3,6 +3,14 @@ import { TestTransport, TestClient, nullLogger } from '../../helpers'
 import * as util from '../../../../src/server/util'
 import Singleton from '../../../../src/server'
 
+function getListeners() {
+  return process.listeners('uncaughtException')
+}
+
+function getListenerCount() {
+  return getListeners().length
+}
+
 describe('Uncaught Exception Plugin', () => {
   let client: typeof Singleton
   let notifySpy: jest.SpyInstance
@@ -34,9 +42,9 @@ describe('Uncaught Exception Plugin', () => {
   describe('load', () => {
     const load = plugin().load
 
-    it('attaches a listener for uncaughtException', () => {
+    it('adds a listener for uncaughtException if enableUncaught is true', () => {
       load(client)
-      const listeners = process.listeners('uncaughtException')
+      const listeners = getListeners()
       expect(listeners.length).toBe(1)
       expect(listeners[0].name).toBe('honeybadgerUncaughtExceptionListener') 
 
@@ -45,11 +53,23 @@ describe('Uncaught Exception Plugin', () => {
       expect(notifySpy).toHaveBeenCalledTimes(1)
     })
 
-    it('returns if enableUncaught is not true', () => {
+    it('does not add a listener if enableUncaught is false', () => {
       client.configure({ enableUncaught: false })
       load(client)
-      const listeners = process.listeners('uncaughtException')
-      expect(listeners.length).toBe(0)
+      expect(getListenerCount()).toBe(0)
+    })
+
+    it('adds or removes listener if needed when reloaded', () => {
+      load(client)
+      expect(getListenerCount()).toBe(1)
+      
+      client.configure({ enableUncaught: false })
+      load(client)
+      expect(getListenerCount()).toBe(0)
+      
+      client.configure({ enableUncaught: true })
+      load(client)
+      expect(getListenerCount()).toBe(1)
     })
   })  
 })
