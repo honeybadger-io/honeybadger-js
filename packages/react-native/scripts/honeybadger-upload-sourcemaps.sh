@@ -289,7 +289,7 @@ if $SKIP_UPLOAD; then
 	exit;
 fi
 
-echo "Source maps generated. iOS: Uploading to Honeybadger ...";
+echo "Source maps generated. Uploading to Honeybadger ...";
 
 rm -f "$EMPTY_FILE"
 touch "$EMPTY_FILE"
