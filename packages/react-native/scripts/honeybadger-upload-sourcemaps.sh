@@ -215,7 +215,7 @@ if $USE_HERMES; then
 	HERMES_EXECUTABLE="$PROJECT_ROOT_DIR/ios/Pods/hermes-engine/destroot/bin/hermesc"
 
 	if [ ! -f "$HERMES_EXECUTABLE" ]; then
-		echo "Error: The Hermes compiler executable for iOS was not found in the expected location: $HERMES_EXECUTABLE"
+		echo "Error: The Hermes compiler executable for iOS was not found in the expected location: $HERMES_EXECUTABLE . Did you run pod install in the ios/ directory?"
 		exit 1
 	fi
 
