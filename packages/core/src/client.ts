@@ -39,7 +39,7 @@ const TAG_SEPARATOR = /,|\s+/
 const NOT_BLANK = /\S/
 
 export abstract class Client {
-  protected __pluginsExecuted = false
+  protected __pluginsLoaded = false
 
   protected __store: HoneybadgerStore = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
@@ -118,12 +118,17 @@ export abstract class Client {
     for (const k in opts) {
       this.config[k] = opts[k]
     }
-    if (!this.__pluginsExecuted) {
-      this.__pluginsExecuted = true
-      this.config.__plugins.forEach((plugin) => plugin.load(this))
-    }
+    this.loadPlugins()
 
     return this
+  }
+
+  loadPlugins() {
+    const pluginsToLoad = this.__pluginsLoaded
+      ? this.config.__plugins.filter(plugin => plugin.shouldReloadOnConfigure)
+      : this.config.__plugins
+    pluginsToLoad.forEach(plugin => plugin.load(this))
+    this.__pluginsLoaded = true
   }
 
   protected __initStore() {

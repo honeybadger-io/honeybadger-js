@@ -34,18 +34,54 @@ describe('client', function () {
   })
 
   describe('configure', function () {
-    it('configures client', function () {
+    it('configures client and doesn\'t overwrite existing options', function () {
       expect(client.configure).toEqual(expect.any(Function))
 
-      client.configure({
-        apiKey: 'expected'
-      })
+      client.configure({ apiKey: 'expected' })
+      client.configure({ reportData: true })
 
       expect(client.config.apiKey).toEqual('expected')
+      expect(client.config.reportData).toEqual(true)
+    })
+
+    it('loads plugins', function () {
+      jest.spyOn(client, 'loadPlugins')
+      client.configure()
+      expect(client.loadPlugins).toHaveBeenCalledTimes(1)
     })
 
     it('is chainable', function () {
       expect(client.configure({})).toEqual(client)
+    })
+  })
+
+  describe('loadPlugins', function () {
+    it('does nothing if there are no plugins', function () {
+      client.loadPlugins()
+      expect(client.getPluginsLoaded()).toEqual(true)
+    })
+
+    it('loads all plugins once and reloads as needed', function () {  
+      const plugin1 = { load: jest.fn() }
+      const plugin2 = { load: jest.fn(), shouldReloadOnConfigure: false }
+      const plugin3 = { load: jest.fn(), shouldReloadOnConfigure: true }
+
+      const clientWithPlugins = new TestClient({
+        logger: nullLogger(),
+        __plugins: [ plugin1, plugin2, plugin3 ],
+      }, new TestTransport())
+
+      clientWithPlugins.configure()
+      expect(plugin1.load).toHaveBeenCalledTimes(1)
+      expect(plugin2.load).toHaveBeenCalledTimes(1)
+      expect(plugin3.load).toHaveBeenCalledTimes(1)
+      expect(client.getPluginsLoaded()).toEqual(true)
+
+      // Only re-loads if shouldReloadOnConfigure is true
+      clientWithPlugins.configure()
+      expect(plugin1.load).toHaveBeenCalledTimes(1)
+      expect(plugin2.load).toHaveBeenCalledTimes(1)
+      expect(plugin3.load).toHaveBeenCalledTimes(2)
     })
   })
 

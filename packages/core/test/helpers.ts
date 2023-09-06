@@ -52,4 +52,8 @@ export class TestClient extends BaseClient {
     // called in (server|browser).__send()
     return this.__buildPayload(notice)
   }
+
+  public getPluginsLoaded() {
+    return this.__pluginsLoaded
+  }
 }
