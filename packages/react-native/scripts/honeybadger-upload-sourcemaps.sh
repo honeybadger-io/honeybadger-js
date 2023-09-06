@@ -34,10 +34,6 @@ IOS_FINAL_SOURCE_MAP="$PROJECT_ROOT_DIR/main.jsbundle.map"
 # This is needed for the API call to upload source maps to Honeybadger.
 EMPTY_FILE="$PROJECT_ROOT_DIR/empty_file.txt"
 
-# For debugging, set SUPPRESS_OUTPUT to an empty string
-SUPPRESS_OUTPUT=" > /dev/null 2>&1"
-# SUPPRESS_OUTPUT=""
-
 API_KEY=""
 REVISION=""
 USE_HERMES=true
@@ -141,7 +137,7 @@ npx react-native bundle \
 	--reset-cache \
 	--bundle-output "$ANDROID_PACKAGER_BUNDLE" \
 	--sourcemap-output "$ANDROID_PACKAGER_SOURCE_MAP" \
-	--minify false $SUPPRESS_OUTPUT
+	--minify false > /dev/null 2>&1
 
 
 echo "Generating the iOS source map ..."
@@ -153,7 +149,7 @@ npx react-native bundle \
 	--reset-cache \
 	--bundle-output "$IOS_PACKAGER_BUNDLE" \
 	--sourcemap-output "$IOS_PACKAGER_SOURCE_MAP" \
-	--minify false $SUPPRESS_OUTPUT
+	--minify false > /dev/null 2>&1
 
 
 if $USE_HERMES; then
@@ -192,7 +188,7 @@ if $USE_HERMES; then
 		-emit-binary \
 		-output-source-map \
 		-out="$ANDROID_COMPILER_BUNDLE" \
-		"$ANDROID_PACKAGER_BUNDLE" $SUPPRESS_OUTPUT
+		"$ANDROID_PACKAGER_BUNDLE" > /dev/null 2>&1
 
 	#
 	# merge the two Android sourcemaps
@@ -201,7 +197,7 @@ if $USE_HERMES; then
 	node "$NODE_MODULES/react-native/scripts/compose-source-maps.js" \
 		"$ANDROID_PACKAGER_SOURCE_MAP" \
 		"$ANDROID_COMPILER_SOURCE_MAP" \
-		-o "$ANDROID_FINAL_SOURCE_MAP" $SUPPRESS_OUTPUT
+		-o "$ANDROID_FINAL_SOURCE_MAP" > /dev/null 2>&1
 
 
 	#
@@ -227,7 +223,7 @@ if $USE_HERMES; then
 		-emit-binary \
 		-output-source-map \
 		-out="$IOS_COMPILER_BUNDLE" \
-		"$IOS_PACKAGER_BUNDLE" $SUPPRESS_OUTPUT
+		"$IOS_PACKAGER_BUNDLE" > /dev/null 2>&1
 
 	#
 	# merge the two iOS sourcemaps
@@ -236,7 +232,7 @@ if $USE_HERMES; then
 	node "$NODE_MODULES/react-native/scripts/compose-source-maps.js" \
 		"$IOS_PACKAGER_SOURCE_MAP" \
 		"$IOS_COMPILER_SOURCE_MAP" \
-		-o "$IOS_FINAL_SOURCE_MAP" $SUPPRESS_OUTPUT
+		-o "$IOS_FINAL_SOURCE_MAP" > /dev/null 2>&1
 
 
 	#
@@ -287,14 +283,14 @@ curl https://api.honeybadger.io/v1/source_maps \
 	-F revision="$REVISION" \
 	-F minified_url=index.android.bundle \
 	-F source_map=@"$ANDROID_FINAL_SOURCE_MAP" \
-	-F minified_file=@"$EMPTY_FILE" $SUPPRESS_OUTPUT
+	-F minified_file=@"$EMPTY_FILE" > /dev/null 2>&1
 
 curl https://api.honeybadger.io/v1/source_maps \
 	-F api_key="$API_KEY" \
 	-F revision="$REVISION" \
 	-F minified_url=main.jsbundle \
 	-F source_map=@"$IOS_FINAL_SOURCE_MAP" \
-	-F minified_file=@"$EMPTY_FILE" $SUPPRESS_OUTPUT
+	-F minified_file=@"$EMPTY_FILE" > /dev/null 2>&1
 	
 #
 # Cleanup
