@@ -5,15 +5,18 @@
 # Generate and upload sourcemaps to Honeybadger
 #
 # USAGE:
-# npx honeybadger-upload-sourcemaps [--no-hermes] --apiKey <project-api-key> --revision <build-revision>
+# npx honeybadger-upload-sourcemaps [--no-hermes] [--skip-upload] --apiKey <project-api-key> --revision <build-revision>
 #
 # Hermes is enabled by default in React Native projects as of React Native 0.70.
 # This script assumes that Hermes is being used. If you are not using Hermes in 
 # your React Native project, use the "--no-hermes" flag.
 #
+# If you just need to generate the sourcemaps without uploading them to 
+# Honeybadger, use the --skip-upload flag.
+#
 # ----------------------------------------------------------------------------
 
-USAGE="npx honeybadger-upload-sourcemaps [--no-hermes] --apiKey <project-api-key> --revision <build-revision>"
+USAGE="npx honeybadger-upload-sourcemaps [--no-hermes] [--skip-upload] --apiKey <project-api-key> --revision <build-revision>"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 PROJECT_ROOT_DIR="$SCRIPT_DIR/../.."
@@ -37,6 +40,7 @@ EMPTY_FILE="$PROJECT_ROOT_DIR/empty_file.txt"
 API_KEY=""
 REVISION=""
 USE_HERMES=true
+SKIP_UPLOAD=false
 
 OS_BIN=""
 
@@ -53,6 +57,10 @@ while [[ $# -gt 0 ]]; do
             USE_HERMES=false
             shift
             ;;
+		--skip-upload)
+			SKIP_UPLOAD=true
+			shift
+			;;
         --apiKey)
             shift
             if [[ $# -gt 0 ]]; then
@@ -273,7 +281,15 @@ fi
 # We should now have Android and iOS source maps ready for upload.
 #
 
-echo "Source maps generated. Uploading to Honeybadger ...";
+if $SKIP_UPLOAD; then
+	echo "Source maps generated."
+	echo "    iOS: main.jsbundle.map"
+	echo "    Android: index.android.bundle.map"
+	echo "Skipping upload.";
+	exit;
+fi
+
+echo "Source maps generated. iOS: Uploading to Honeybadger ...";
 
 rm -f "$EMPTY_FILE"
 touch "$EMPTY_FILE"
