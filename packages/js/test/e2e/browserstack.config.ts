@@ -26,6 +26,8 @@ const caps = {
   'browserstack.accessKey': process.env.BROWSERSTACK_ACCESS_KEY,
   'browserstack.local': true, // we are running a local web server, so we need this to be true
   'browserstack.networkLogs': true,
+  'browserstack.debug': true, // visual logs
+  'browserstack.console': 'verbose', // console logs
   'client.playwrightVersion': clientPlaywrightVersion,
 }
 
