@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.1.1...@honeybadger-io/react-native@6.2.0) (2023-09-07)
+
+
+### Features
+
+* **react-native:** new source maps generation script with support for hermes ([#1169](https://github.com/honeybadger-io/honeybadger-js/issues/1169)) ([ed10921](https://github.com/honeybadger-io/honeybadger-js/commit/ed10921806d7552f1342bda9e8691a27c0773613))
+
+
+
 ## [6.1.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.1.0...@honeybadger-io/react-native@6.1.1) (2023-08-07)
 
 **Note:** Version bump only for package @honeybadger-io/react-native
