@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.4.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.4.2...@honeybadger-io/js@6.4.3) (2023-09-07)
+
+**Note:** Version bump only for package @honeybadger-io/js
+
+
+
+
+
+## [6.4.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.4.1...@honeybadger-io/js@6.4.2) (2023-09-04)
+
+
+### Bug Fixes
+
+* **js:** move unhandled rejection monitor to a class, fix filter for domainUncaughtExceptionClear ([#1166](https://github.com/honeybadger-io/honeybadger-js/issues/1166)) ([72b30b3](https://github.com/honeybadger-io/honeybadger-js/commit/72b30b382fa5af4b0813e9975d9fabfdd13485ff))
+
+
+
 ## [6.4.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.4.0...@honeybadger-io/js@6.4.1) (2023-08-21)
 
 

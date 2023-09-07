@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.2.0...@honeybadger-io/core@6.3.0) (2023-09-07)
+
+
+### Features
+
+* **core:** optionally reload plugins ([#1174](https://github.com/honeybadger-io/honeybadger-js/issues/1174)) ([0f4698e](https://github.com/honeybadger-io/honeybadger-js/commit/0f4698e5070559bcb1ed3409d1d63db7152f14a6))
+
+
+
 ## [6.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.1.0...@honeybadger-io/core@6.2.0) (2023-08-07)
 
 
