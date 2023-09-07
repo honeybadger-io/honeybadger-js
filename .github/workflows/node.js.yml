@@ -92,7 +92,6 @@ jobs:
         CI: true
         BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-        BROWSERSTACK_LOCAL: false
       run: |
         cd packages/js
         npm run test:integration

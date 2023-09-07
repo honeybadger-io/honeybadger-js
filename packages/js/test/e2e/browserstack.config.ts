@@ -15,7 +15,6 @@ export const BS_LOCAL_ARGS = {
 }
 
 // BrowserStack Specific Capabilities.
-// Set 'browserstack.local:true For Local testing
 const caps = {
   browser: 'chrome',
   browser_version: 'latest',
