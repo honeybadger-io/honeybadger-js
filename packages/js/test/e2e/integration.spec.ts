@@ -42,7 +42,7 @@ test.describe('Browser Integration', () => {
         action: 'setSessionStatus',
         arguments: {
           status: isPassed ? 'passed' : 'failed',
-          reason: isPassed ? testInfo.title : testInfo.errors.map(e => e.message).join('\n')
+          reason: isPassed ? testInfo.title : (`${testInfo.title}[retry:${testInfo.retry}] | ` + testInfo.errors.map(e => e.message).join('\n'))
         }
       }
       await page.evaluate(_ => {}, `browserstack_executor: ${JSON.stringify(data)}`);

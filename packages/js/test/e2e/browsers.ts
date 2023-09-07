@@ -17,13 +17,13 @@ const browserStackBrowsers = [
       connectOptions: { wsEndpoint: getCdpEndpoint('chrome@83:Windows 10','browserstack_chrome_83_windows') },
     },
   },
-  // {
-  //   // Chrome latest version
-  //   name: 'browserstack_chrome_latest_windows',
-  //   use: {
-  //     connectOptions: { wsEndpoint: getCdpEndpoint('chrome@latest:Windows 11','browserstack_chrome_latest_windows') },
-  //   },
-  // },
+  {
+    // Chrome latest version
+    name: 'browserstack_chrome_latest_windows',
+    use: {
+      connectOptions: { wsEndpoint: getCdpEndpoint('chrome@latest:Windows 11','browserstack_chrome_latest_windows') },
+    },
+  },
   // {
   //   // Edge minimum version
   //   // Earliest available chrome version is 83
