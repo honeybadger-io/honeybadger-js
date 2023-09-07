@@ -26,6 +26,7 @@ const caps = {
   'browserstack.username': process.env.BROWSERSTACK_USERNAME,
   'browserstack.accessKey': process.env.BROWSERSTACK_ACCESS_KEY,
   'browserstack.local': process.env.BROWSERSTACK_LOCAL || true,
+  'browserstack.networkLogs': true,
   'client.playwrightVersion': clientPlaywrightVersion,
 }
 
