@@ -1,12 +1,13 @@
-// global-setup.js
 import { bsLocal, BS_LOCAL_ARGS } from './browserstack.config'
-import { promisify } from 'util';
+import { promisify } from 'util'
 
-const sleep = promisify(setTimeout);
-const redColour = '\x1b[31m';
-const whiteColour = '\x1b[0m';
+const sleep = promisify(setTimeout)
+const redColour = '\x1b[31m'
+const whiteColour = '\x1b[0m'
 module.exports = async () => {
   if (!process.env.BROWSERSTACK_ACCESS_KEY) {
+    console.log('Will not start BrowserStackLocal because BROWSERSTACK_ACCESS_KEY is not set')
+
     return
   }
 
@@ -17,13 +18,13 @@ module.exports = async () => {
     if (err) {
       console.error(
         `${redColour}Error starting BrowserStackLocal${whiteColour}`
-      );
+      )
     } else {
-      console.log('BrowserStackLocal Started');
+      console.log('BrowserStackLocal Started')
     }
     localResponseReceived = true;
   });
   while (!localResponseReceived) {
-    await sleep(1000);
+    await sleep(1000)
   }
-};
+}

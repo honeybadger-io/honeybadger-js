@@ -25,7 +25,7 @@ const caps = {
   build: 'honeybadger-playwright-browserstack',
   'browserstack.username': process.env.BROWSERSTACK_USERNAME,
   'browserstack.accessKey': process.env.BROWSERSTACK_ACCESS_KEY,
-  'browserstack.local': process.env.BROWSERSTACK_LOCAL || true,
+  'browserstack.local': true, // we are running a local web server, so we need this to be true
   'browserstack.networkLogs': true,
   'client.playwrightVersion': clientPlaywrightVersion,
 }
