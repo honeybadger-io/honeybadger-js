@@ -36,5 +36,7 @@ export default defineConfig({
     command: 'node ./server.js',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });

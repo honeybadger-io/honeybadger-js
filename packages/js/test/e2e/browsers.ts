@@ -17,29 +17,29 @@ const browserStackBrowsers = [
       connectOptions: { wsEndpoint: getCdpEndpoint('chrome@83:Windows 10','browserstack_chrome_83_windows') },
     },
   },
-  {
-    // Chrome latest version
-    name: 'browserstack_chrome_latest_windows',
-    use: {
-      connectOptions: { wsEndpoint: getCdpEndpoint('chrome@latest:Windows 11','browserstack_chrome_latest_windows') },
-    },
-  },
-  {
-    // Edge minimum version
-    // Earliest available chrome version is 83
-    // https://www.browserstack.com/docs/automate/playwright/browsers-and-os
-    name: 'browserstack_edge_83_windows',
-    use: {
-      connectOptions: { wsEndpoint: getCdpEndpoint('edge@83:Windows 10','browserstack_edge_83_windows') },
-    },
-  },
-  {
-    // Edge latest version
-    name: 'browserstack_edge_latest_windows',
-    use: {
-      connectOptions: { wsEndpoint: getCdpEndpoint('edge@latest:Windows 11','browserstack_edge_latest_windows') },
-    },
-  },
+  // {
+  //   // Chrome latest version
+  //   name: 'browserstack_chrome_latest_windows',
+  //   use: {
+  //     connectOptions: { wsEndpoint: getCdpEndpoint('chrome@latest:Windows 11','browserstack_chrome_latest_windows') },
+  //   },
+  // },
+  // {
+  //   // Edge minimum version
+  //   // Earliest available chrome version is 83
+  //   // https://www.browserstack.com/docs/automate/playwright/browsers-and-os
+  //   name: 'browserstack_edge_83_windows',
+  //   use: {
+  //     connectOptions: { wsEndpoint: getCdpEndpoint('edge@83:Windows 10','browserstack_edge_83_windows') },
+  //   },
+  // },
+  // {
+  //   // Edge latest version
+  //   name: 'browserstack_edge_latest_windows',
+  //   use: {
+  //     connectOptions: { wsEndpoint: getCdpEndpoint('edge@latest:Windows 11','browserstack_edge_latest_windows') },
+  //   },
+  // },
   // {
   //   // Safari minimum version
   //   base: 'BrowserStack',
