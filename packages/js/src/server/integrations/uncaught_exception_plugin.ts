@@ -13,6 +13,7 @@ export default function (): Types.Plugin {
       } else {
         uncaughtExceptionMonitor.maybeRemoveListener()
       }
-    }
+    }, 
+    shouldReloadOnConfigure: true,
   }
 }

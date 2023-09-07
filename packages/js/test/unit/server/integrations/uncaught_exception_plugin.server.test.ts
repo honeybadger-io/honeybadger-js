@@ -35,7 +35,8 @@ describe('Uncaught Exception Plugin', () => {
 
   it('is a function which returns an object with a load function', () => {
     expect(plugin()).toStrictEqual({
-      load: expect.any(Function)
+      load: expect.any(Function), 
+      shouldReloadOnConfigure: true,
     })
   })
 

@@ -22,14 +22,6 @@ export default class UncaughtExceptionMonitor {
   makeListener() {
     const honeybadgerUncaughtExceptionListener = (uncaughtError: Error) => {
       if (this.__isReporting || !this.__client) { return }
-  
-      if (!this.__client.config.enableUncaught) {
-        this.__client.config.afterUncaught(uncaughtError)
-        if (!this.hasOtherUncaughtExceptionListeners()) {
-          fatallyLogAndExit(uncaughtError)
-        }
-        return
-      }
     
       // report only the first error - prevent reporting recursive errors
       if (this.__handlerAlreadyCalled) {

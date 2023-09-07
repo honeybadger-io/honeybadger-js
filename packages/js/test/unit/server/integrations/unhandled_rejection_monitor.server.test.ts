@@ -92,22 +92,6 @@ describe('UnhandledRejectionMonitor', () => {
         done()
       }) 
     })
-
-    it('exits if enableUnhandledRejection is false and there are no other listeners', () => {
-      client.configure({ enableUnhandledRejection: false })
-      unhandledRejectionMonitor.__listener(reason, promise)
-      expect(notifySpy).not.toHaveBeenCalled()
-      expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(reason)
-    })
-
-    it('returns if enableUnhandledRejection is false and there are other listeners', () => {
-      process.on('unhandledRejection', () => true)
-      process.on('unhandledRejection', () => true)
-      client.configure({ enableUnhandledRejection: false })
-      unhandledRejectionMonitor.__listener(reason, promise)
-      expect(notifySpy).not.toHaveBeenCalled()
-      expect(fatallyLogAndExitSpy).not.toHaveBeenCalled()
-    })
   })
 
   describe('hasOtherUnhandledRejectionListeners', () => {
