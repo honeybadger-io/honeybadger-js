@@ -43,7 +43,7 @@ Additionally, if you want to run the tests on Browserstack:
 ##### Architecture
 Inside `./test/e2e`, you will find a `server.js` file that runs a simple nodejs http server.
 This server is used to serve the test page, along with other static assets and to receive the error reports from the browser.
-The server is automatically started and stopped by Playwright, as you can at the bottom of the `./test/e2e/playwright.config.ts` file.
+The server is automatically started and stopped by Playwright, as you can see at the bottom of the `./test/e2e/playwright.config.ts` file.
 The test page is found in `./test/e2e/sandbox.html`.
 All tests are found in `./test/e2e/integration.spec.ts`.
 Two more configuration files, `./test/e2e/global-setup.ts` and `./test/e2e/global-teardown.ts` are used to start and stop
