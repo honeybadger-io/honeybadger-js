@@ -49,7 +49,7 @@ Error reports can be [customized](https://docs.honeybadger.io/lib/javascript/gui
 ### Limitations
 Some native errors on Android may not be recorded if they cause an immediate crash of the app before the notice makes it to Honeybadger. 
 
-### Source Maps
+## Source Maps
 To generate and upload source maps to Honeybadger, use the following command:
 ```shell
 npx honeybadger-upload-sourcemaps --apiKey <your project API key> --revision <build revision>
