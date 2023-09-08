@@ -299,4 +299,29 @@ describe('server client', function () {
       expect(request.isDone()).toBe(true)
     })
   })
+
+  describe('__plugins', function () {
+    it('exported singleton includes plugins', function () {
+      Singleton.configure({ apiKey: 'foo' })
+      expect(Singleton.config.__plugins.length).toBe(2)
+    })
+    
+    it('clients produced via factory don\'t include plugins', function () {
+      client.configure({ apiKey: 'foo' })
+      expect(client.config.__plugins.length).toBe(0)
+    })
+
+    // Integration test with the plugins themselves
+    it('uncaughtException and unhandledRejection plugins reload on configure', function () {
+      function getListenerCount(type) {
+        return process.listeners(type).length
+      }
+      Singleton.configure({ apiKey: 'foo' })
+      expect(getListenerCount('uncaughtException')).toBe(1)
+      expect(getListenerCount('unhandledRejection')).toBe(1)
+      Singleton.configure({ enableUncaught: false, enableUnhandledRejection: false })
+      expect(getListenerCount('uncaughtException')).toBe(0)
+      expect(getListenerCount('unhandledRejection')).toBe(0)
+    })
+  })
 })

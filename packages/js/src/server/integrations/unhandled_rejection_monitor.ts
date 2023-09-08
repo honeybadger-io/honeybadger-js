@@ -18,13 +18,6 @@ export default class UnhandledRejectionMonitor {
 
   makeListener() {
     const honeybadgerUnhandledRejectionListener = (reason: unknown, _promise: Promise<unknown>) => {
-      if (!this.__client || !this.__client.config.enableUnhandledRejection) {
-        if (!this.hasOtherUnhandledRejectionListeners() && !this.__isReporting) {
-          fatallyLogAndExit(reason as Error)
-        }
-        return
-      }
-  
       this.__isReporting = true;
       this.__client.notify(reason as Types.Noticeable, { component: 'unhandledRejection' }, {
         afterNotify: () => {
