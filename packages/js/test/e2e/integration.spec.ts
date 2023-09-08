@@ -274,12 +274,10 @@ test.describe('Browser Integration', () => {
     expect(notices.length).toEqual(1)
   })
 
-  test('it sends window.onunhandledrejection breadcrumbs when rejection is an Error', async ({ page }) => {
-  // let errorStack = null
-  // page.on('pageerror', (err) => errorStack = err.stack)
+  test('it sends window.onunhandledrejection breadcrumbs when rejection is an Error', async ({ page }, testInfo) => {
     const resultHandle = await page.evaluateHandle(_ => !('onunhandledrejection' in window))
     const doesNotSupportUnhandledRejectionListener = await resultHandle.jsonValue()
-    test.skip(doesNotSupportUnhandledRejectionListener, 'onunhandledrejection not supported')
+    test.skip(doesNotSupportUnhandledRejectionListener || ['browserstack_chrome_83_windows', 'browserstack_edge_83_windows'].includes(testInfo.project.name), 'onunhandledrejection not supported')
 
     const handle = await page.evaluateHandle(_ => {
       const myPromise = new Promise<void>(() => {
