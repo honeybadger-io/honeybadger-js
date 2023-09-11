@@ -13,6 +13,7 @@ export default function (): Types.Plugin {
       } else {
         unhandledRejectionMonitor.maybeRemoveListener()
       } 
-    }
+    }, 
+    shouldReloadOnConfigure: true,
   }
 }
