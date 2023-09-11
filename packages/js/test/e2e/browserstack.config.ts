@@ -1,3 +1,6 @@
+// This file is a modified version of the file from the Playwright BrowserStack Typescript example:
+// https://github.com/browserstack/typescript-playwright-browserstack/blob/main/browserstack.config.ts#L41C8-L41C8
+
 import * as cp from 'child_process'
 import * as BrowserStackLocal from 'browserstack-local'
 
@@ -14,7 +17,7 @@ export const BS_LOCAL_ARGS = {
 }
 
 // BrowserStack Specific Capabilities.
-const caps = {
+const defaultCapabilities = {
   browser: 'chrome',
   browser_version: 'latest',
   os: 'osx',
@@ -30,23 +33,11 @@ const caps = {
   'client.playwrightVersion': clientPlaywrightVersion,
 }
 
-// Patching the capabilities dynamically according to the project name.
-const patchCaps = (name: string, title: string) => {
-  const combination = name.split(/@browserstack/)[0]
-  const [browserCaps, osCaps] = combination.split(/:/)
-  const [browser, browser_version] = browserCaps.split(/@/)
-  const osCapsSplit = osCaps.split(/ /)
-  const os = osCapsSplit.shift()
-  const os_version = osCapsSplit.join(' ')
-  caps.browser = browser ? browser : 'chrome'
-  caps.browser_version = browser_version ? browser_version : 'latest'
-  caps.os = os ? os : 'osx'
-  caps.os_version = os_version ? os_version : 'catalina'
-  caps.name = title
-}
+type OverridableCapabilities =
+    Pick<typeof defaultCapabilities, 'browser' | 'browser_version' | 'os' | 'os_version' | 'name'>
 
-export function getCdpEndpoint(name: string, title: string){
-  patchCaps(name, title)
+export function getCdpEndpoint(capabilities: OverridableCapabilities){
+  const merged = { ...defaultCapabilities, ...capabilities }
 
-  return `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(JSON.stringify(caps))}`
+  return `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(JSON.stringify(merged))}`
 }

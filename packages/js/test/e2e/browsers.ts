@@ -12,14 +12,30 @@ const browserStackBrowsers = [
     // https://www.browserstack.com/docs/automate/playwright/browsers-and-os
     name: 'browserstack_chrome_83_windows',
     use: {
-      connectOptions: { wsEndpoint: getCdpEndpoint('chrome@83:Windows 10','browserstack_chrome_83_windows') },
+      connectOptions: {
+        wsEndpoint: getCdpEndpoint({
+          browser: 'chrome',
+          browser_version: '83',
+          os: 'Windows',
+          os_version: '10',
+          name: 'browserstack_chrome_83_windows'
+        })
+      },
     },
   },
   {
     // Chrome latest version
     name: 'browserstack_chrome_latest_windows',
     use: {
-      connectOptions: { wsEndpoint: getCdpEndpoint('chrome@latest:Windows 11','browserstack_chrome_latest_windows') },
+      connectOptions: {
+        wsEndpoint: getCdpEndpoint({
+          browser: 'chrome',
+          browser_version: 'latest',
+          os: 'Windows',
+          os_version: '11',
+          name: 'browserstack_chrome_latest_windows'
+        })
+      },
     },
   },
   {
@@ -28,14 +44,30 @@ const browserStackBrowsers = [
     // https://www.browserstack.com/docs/automate/playwright/browsers-and-os
     name: 'browserstack_edge_83_windows',
     use: {
-      connectOptions: { wsEndpoint: getCdpEndpoint('edge@83:Windows 10','browserstack_edge_83_windows') },
+      connectOptions: {
+        wsEndpoint: getCdpEndpoint({
+          browser: 'edge',
+          browser_version: '83',
+          os: 'Windows',
+          os_version: '10',
+          name: 'browserstack_edge_83_windows'
+        })
+      },
     },
   },
   {
     // Edge latest version
     name: 'browserstack_edge_latest_windows',
     use: {
-      connectOptions: { wsEndpoint: getCdpEndpoint('edge@latest:Windows 11','browserstack_edge_latest_windows') },
+      connectOptions: {
+        wsEndpoint: getCdpEndpoint({
+          browser: 'edge',
+          browser_version: 'latest',
+          os: 'Windows',
+          os_version: '11',
+          name: 'browserstack_edge_latest_windows'
+        })
+      },
     },
   },
 ]
