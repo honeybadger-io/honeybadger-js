@@ -9,7 +9,6 @@ const clientPlaywrightVersion = cp
 
 export const bsLocal = new BrowserStackLocal.Local()
 
-// replace YOUR_ACCESS_KEY with your key. You can also set an environment variable - "BROWSERSTACK_ACCESS_KEY".
 export const BS_LOCAL_ARGS = {
   key: process.env.BROWSERSTACK_ACCESS_KEY,
 }
@@ -48,6 +47,6 @@ const patchCaps = (name: string, title: string) => {
 
 export function getCdpEndpoint(name: string, title: string){
   patchCaps(name, title)
+
   return `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(JSON.stringify(caps))}`
-  // console.log(`--> ${cdpUrl}`)
 }

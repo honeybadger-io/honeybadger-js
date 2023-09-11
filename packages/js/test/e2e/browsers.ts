@@ -2,12 +2,9 @@
 // please also update the docs:
 //   https://github.com/honeybadger-io/docs/blob/master/source/lib/javascript/reference/supported-versions.html.md
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { devices } from '@playwright/test';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCdpEndpoint } from './browserstack.config';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const browserStackBrowsers = [
   {
     // Chrome minimum version
