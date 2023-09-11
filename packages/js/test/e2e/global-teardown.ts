@@ -1,18 +1,33 @@
-import { bsLocal } from './browserstack.config';
-import { promisify } from 'util';
+import { bsLocal } from './browserstack.config'
+import { promisify } from 'util'
 
-const sleep = promisify(setTimeout)
-module.exports = async () => {
-  // Stop the Local instance after your test run is completed, i.e after driver.quit
-  let localStopped = false;
+let bsLocalStopped = false
+const stopBsLocal = async () => {
+  if (bsLocalStopped) {
+    return
+  }
 
   if (bsLocal && bsLocal.isRunning()) {
     bsLocal.stop(() => {
-      localStopped = true;
+      bsLocalStopped = true
       console.log('Stopped BrowserStackLocal')
     });
-    while (!localStopped) {
-      await sleep(1000);
+    while (!bsLocalStopped) {
+      await sleep(1000)
     }
   }
 }
+
+const sleep = promisify(setTimeout)
+module.exports = async () => {
+  await stopBsLocal()
+}
+
+process.on('SIGINT', function() {
+  stopBsLocal()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('Error stopping BrowserStackLocal', err)
+      process.exit(1)
+    })
+});
