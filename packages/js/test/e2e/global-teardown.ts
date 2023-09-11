@@ -5,7 +5,7 @@ import { bsLocal } from './browserstack.config'
 
 let bsLocalStopped = false
 const stopBsLocal = async () => {
-  return new Promise(resolve => {
+  return new Promise<void>(resolve => {
     if (bsLocalStopped) {
       return resolve()
     }
