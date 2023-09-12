@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.5.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.4.3...@honeybadger-io/js@6.5.0) (2023-09-12)
+
+
+### Features
+
+* **js:** reload unhandledRejection and uncaughtException plugins on configure ([#1184](https://github.com/honeybadger-io/honeybadger-js/issues/1184)) ([9f1591e](https://github.com/honeybadger-io/honeybadger-js/commit/9f1591ee8c9c312d88b2a251122f84a64ef722a4))
+
+
+
 ## [6.4.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.4.2...@honeybadger-io/js@6.4.3) (2023-09-07)
 
 **Note:** Version bump only for package @honeybadger-io/js
