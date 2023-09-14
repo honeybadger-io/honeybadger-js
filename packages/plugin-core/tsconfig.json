@@ -5,6 +5,7 @@
   ], 
   "compilerOptions": {
     "rootDir": "./", 
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true, 
+    "target": "ES2015"
   },
 }
