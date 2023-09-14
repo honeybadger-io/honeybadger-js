@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+  <title>Integration Sandbox</title>
+</head>
+
+<body>
+  <div id="buttonDivId">
+    <button id="normal-button">normal button</button>
+  </div>
+  <a href="#anchor" id="anchor">anchor text</a>
+  <button id="throw-exception">throw exception</button>
+
+  <script type="text/javascript" src="dist/browser/honeybadger.js"></script>
+  <script type="text/javascript">
+    // button to trigger an unhandled exception
+    document.getElementById('throw-exception').addEventListener('click', function() {
+      throw results.error
+    })
+
+    const results = {
+      notices: [],
+      error: new Error('unhandled exception with known stack trace')
+    }
+
+    console.log(results.error.stack)
+
+    Honeybadger.configure({
+      apiKey: 'integration_sandbox',
+      debug: true
+    })
+
+    Honeybadger.__transport.send = function (options, payload) {
+      results.notices.push(payload);
+      return Promise.resolve({ statusCode: 201, body: JSON.stringify({id: 'test'}) })
+    }
+  </script>
+</body>
+</html>

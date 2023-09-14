@@ -1,4 +1,4 @@
-self.importScripts('/base/dist/browser/honeybadger.js')
+self.importScripts('/dist/browser/honeybadger.js')
 
 self.Honeybadger.configure({
   apiKey: 'integration_sandbox'
