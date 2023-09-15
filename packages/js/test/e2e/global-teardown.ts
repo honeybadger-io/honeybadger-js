@@ -4,18 +4,21 @@
 import { bsLocal } from './browserstack.config'
 
 let bsLocalStopped = false
-const stopBsLocal = async () => {
+const stopBsLocal = () => {
   return new Promise<void>(resolve => {
     if (bsLocalStopped) {
       return resolve()
     }
 
-    if (bsLocal && bsLocal.isRunning()) {
-      bsLocal.stop(() => {
-        bsLocalStopped = true
-        console.log('Stopped BrowserStackLocal')
-        resolve()
-      });
+    if (bsLocal) {
+      if (bsLocal.isRunning()) {
+        bsLocal.stop(() => {
+          bsLocalStopped = true
+          console.log('Stopped BrowserStackLocal')
+          resolve()
+        });
+      }
+      else resolve()
     }
   })
 }
