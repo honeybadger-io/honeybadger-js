@@ -1,6 +1,8 @@
 import type { HbPluginOptions } from './types'
 
 export const MAX_RETRIES = 10
+export const MIN_WORKER_COUNT = 1
+export const DEFAULT_WORKER_COUNT = 5
 export const DEFAULT_RETRIES = 3
 export const DEFAULT_ENDPOINT = 'https://api.honeybadger.io/v1/source_maps'
 export const DEFAULT_REVISION = 'main'
@@ -8,6 +10,7 @@ export const DEFAULT_SILENT = false
 export const DEFAULT_DEPLOY = false
 export const DEPLOY_ENDPOINT = 'https://api.honeybadger.io/v1/deploys'
 export const IGNORE_PATHS = []
+export const DEFAULT_IGNORE_ERRORS = false
 
 const required = [
   'apiKey',
@@ -22,6 +25,8 @@ const defaultOptions = {
   deploy: DEFAULT_DEPLOY,
   deployEndpoint: DEPLOY_ENDPOINT,
   ignorePaths: IGNORE_PATHS,
+  ignoreErrors: DEFAULT_IGNORE_ERRORS,
+  workerCount: DEFAULT_WORKER_COUNT,
 }
 
 export function cleanOptions(
@@ -45,6 +50,11 @@ export function cleanOptions(
       console.warn(`Using max retries: ${MAX_RETRIES}`)
     }
     options.retries = MAX_RETRIES
+  }
+
+  // Don't allow silly worker count
+  if (options.workerCount < MIN_WORKER_COUNT) {
+    options.workerCount = MIN_WORKER_COUNT
   }
 
   // Merge in our defaults

@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import 'mocha'
 import {
   MAX_RETRIES,
   DEFAULT_ENDPOINT,
@@ -6,6 +7,9 @@ import {
   DEFAULT_SILENT,
   DEPLOY_ENDPOINT,
   cleanOptions,
+  DEFAULT_IGNORE_ERRORS,
+  DEFAULT_WORKER_COUNT,
+  MIN_WORKER_COUNT,
 } from '../src/options';
 
 describe('Options', () => {
@@ -31,6 +35,15 @@ describe('Options', () => {
       expect(result.retries).to.equal(MAX_RETRIES)
     })
 
+    it('should not allow worker count below MIN_WORKER_COUNT', () => {
+      const result = cleanOptions({
+        apiKey: 'test_key',
+        assetsUrl: 'https://foo.bar',
+        workerCount: 0
+      })
+      expect(result.workerCount).to.equal(MIN_WORKER_COUNT)
+    }) 
+
     it('should merge in default options', () => {
       const result = cleanOptions({
         apiKey: 'test_key',
@@ -48,6 +61,8 @@ describe('Options', () => {
         deploy: { localUsername: 'BethanyBerkowitz' },
         deployEndpoint: DEPLOY_ENDPOINT,
         ignorePaths: [],
+        ignoreErrors: DEFAULT_IGNORE_ERRORS,
+        workerCount: DEFAULT_WORKER_COUNT,
       })
     })
   });

@@ -8,6 +8,8 @@ export interface HbPluginOptions {
   deployEndpoint: string;
   deploy: boolean | Deploy;
   ignorePaths: Array<string>;
+  ignoreErrors: boolean;
+  workerCount: number;
 }
 
 export interface Deploy {
