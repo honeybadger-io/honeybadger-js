@@ -10,16 +10,14 @@ const stopBsLocal = () => {
       return resolve()
     }
 
-    if (bsLocal) {
-      if (bsLocal.isRunning()) {
-        bsLocal.stop(() => {
-          bsLocalStopped = true
-          console.log('Stopped BrowserStackLocal')
-          resolve()
-        });
-      }
-      else resolve()
+    if (bsLocal && bsLocal.isRunning()) {
+      bsLocal.stop(() => {
+        bsLocalStopped = true
+        console.log('Stopped BrowserStackLocal')
+        resolve()
+      });
     }
+    else resolve()
   })
 }
 

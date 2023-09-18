@@ -5,7 +5,6 @@
 import { devices } from '@playwright/test';
 import { getCdpEndpoint } from './browserstack.config';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const browserStackBrowsers = [
   {
     // Chrome minimum version
