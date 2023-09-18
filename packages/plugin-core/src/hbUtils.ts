@@ -1,3 +1,4 @@
+import { settlePromiseWithWorkers } from './helpers'
 import originalFetch from 'node-fetch'
 import FormData from 'form-data'
 import { promises as fs } from 'fs'
@@ -13,13 +14,14 @@ import type { DeployBody, HbPluginOptions, SourcemapInfo } from './types'
 export async function uploadSourcemaps(sourcemapData: SourcemapInfo[], hbOptions: HbPluginOptions) {
   if (sourcemapData.length === 0 && !hbOptions.silent) {
     console.warn('Could not find any sourcemaps in the bundle. Nothing will be uploaded.')
+    return
   }
 
-  const sourcemapUploadPromises = sourcemapData.map(data => {
-    return uploadSourcemap(data, hbOptions)
-  })
+  const sourcemapUploadPromises = sourcemapData.map(data => (
+    () => { return uploadSourcemap(data, hbOptions) }
+  ))
+  const results = await settlePromiseWithWorkers(sourcemapUploadPromises, hbOptions.workerCount)
   
-  const results = await Promise.allSettled(sourcemapUploadPromises)
   const fulfilled = results.filter((p): p is PromiseFulfilledResult<Response> => p.status === 'fulfilled')
   const rejected = results.filter((p): p is PromiseRejectedResult => p.status === 'rejected')
 

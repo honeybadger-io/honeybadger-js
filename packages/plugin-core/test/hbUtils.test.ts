@@ -12,6 +12,7 @@ describe('hbUtils', () => {
     retries: 0,
     revision: '12345', 
     silent: false, 
+    workerCount: 3,
   }
   
   // Mock accessing the files 

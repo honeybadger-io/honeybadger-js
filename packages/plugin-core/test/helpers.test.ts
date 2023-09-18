@@ -1,23 +1,26 @@
 import { expect, td } from './testSetup'
 
-import { resolvePromiseWithWorkers } from '../src/helpers'
+import { settlePromiseWithWorkers } from '../src/helpers'
 
 describe('helpers', () => {
-  describe('resolvePromiseWithWorkers', () => {
+  describe('settlePromiseWithWorkers', () => {
     function asyncPromiseGenerator(
       name:string,
       timeout = 1,
-      traceCallback?
+      shouldResolve = true,
+      traceCallback
     ) {
-      if (!traceCallback) {
-        traceCallback = (str) => (null)
-      }
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         traceCallback(`start ${name}`)
     
         setTimeout(() => {
-          traceCallback(`resolve ${name}`)
-          resolve(name)
+          if (shouldResolve) {
+            traceCallback(`resolve ${name}`)
+            resolve(name)
+          } else {
+            traceCallback(`reject ${name}`)
+            reject(new Error(name))
+          }
         }, timeout)
       })
     }
@@ -28,71 +31,80 @@ describe('helpers', () => {
     ) {
       const captor = td.matchers.captor()
       td.verify(spy(captor.capture()))
-      console.log(captor.values)
       for (let i = 0; i < sequence.length; ++i) {
         expect(captor.values && captor.values[i]).to.equal(sequence[i])
-        // sinon.assert.calledWith(spy.getCall(i), sequence[i])
       }
     }
-    
-    const promises = [
-      () => asyncPromiseGenerator('First', 1),
-      () => asyncPromiseGenerator('Second', 10),
-      () => asyncPromiseGenerator('Third', 3)
-    ]
 
-    it('should resolve all promises', async function () {
-      const results = await resolvePromiseWithWorkers(promises, 5)
-      expect(results).to.deep.eq(['First', 'Second', 'Third'])
-    })
+    let spy
+    let promises
 
-    it('should resolve all promises if the number of workers is lower than the number of promises', async function () {
-      expect(await resolvePromiseWithWorkers(promises, 1))
-        .to.deep.eq(['First', 'Second', 'Third'])
-    })
-
-    it('should resolve the promises sequentially if the number of worker is 1', async function () {
-      const spy = td.func()
-      const promisesWithCallback = [
-        () => asyncPromiseGenerator('First', 1, spy),
-        () => asyncPromiseGenerator('Second', 3, spy),
-        () => asyncPromiseGenerator('Third', 5, spy)
+    beforeEach(() => {
+      spy = td.func()
+      promises = [
+        () => asyncPromiseGenerator('First', 1, true, spy),
+        () => asyncPromiseGenerator('Second', 3, false, spy),
+        () => asyncPromiseGenerator('Third', 5, true, spy)
       ]
+    })
 
-      await resolvePromiseWithWorkers(promisesWithCallback, 1)
+    afterEach(() => {
+      td.reset()
+    })
+
+    it('should settle all promises', async function () {
+      const results = await settlePromiseWithWorkers(promises, 5)
+      expect(results[0]).to.deep.eq({ status: 'fulfilled', value: 'First' })
+      const rejected = results[1] as PromiseRejectedResult
+      expect(rejected.status).to.eq('rejected')
+      expect(rejected.reason.message).to.eq('Second')
+      expect(results[2]).to.deep.eq({ status: 'fulfilled', value: 'Third' })
+    })
+
+    it('should settle all promises if the number of workers is lower than the number of promises', async function () {
+      const results = await settlePromiseWithWorkers(promises, 1)
+      expect(results.map(r => r.status)).to.deep.eq([
+        'fulfilled', 
+        'rejected', 
+        'fulfilled',
+      ])
+    })
+
+    it('should settle the promises sequentially if the number of worker is 1', async function () {
+      await settlePromiseWithWorkers(promises, 1)
 
       const sequence = [
         'start First',
         'resolve First',
         'start Second',
-        'resolve Second',
+        'reject Second',
         'start Third',
         'resolve Third'
       ]
       assertCallSequence(spy, sequence)
     })
 
-    it('should resolve the promises by workers', async function () {
-      const spy = td.func()
-      const promisesWithCallback = [
-        () => asyncPromiseGenerator('First', 1, spy),
+    it('should settle the promises by workers', async function () {
+      const promisesWithDelay = [
+        () => asyncPromiseGenerator('First', 1, true, spy),
         () =>
           asyncPromiseGenerator(
             'Second',
             50 /* A very long promise that should keep a worker busy */,
+            true, 
             spy
           ),
-        () => asyncPromiseGenerator('Third', 1, spy),
-        () => asyncPromiseGenerator('Fourth', 1, spy)
+        () => asyncPromiseGenerator('Third', 1, false, spy),
+        () => asyncPromiseGenerator('Fourth', 1, true, spy)
       ]
 
-      await resolvePromiseWithWorkers(promisesWithCallback, 2)
+      await settlePromiseWithWorkers(promisesWithDelay, 2)
       const sequence = [
         'start First',
         'start Second',
         'resolve First',
         'start Third',
-        'resolve Third',
+        'reject Third',
         'start Fourth',
         'resolve Fourth',
         'resolve Second'

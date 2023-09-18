@@ -11,14 +11,23 @@ async function worker (
   results:unknown[]
 ) {
   for (const [promise, index] of generator) {
-    results[index] = await promise
+    try {
+      const value = await promise
+      results[index] = { status: 'fulfilled', value }
+    } catch (err) {
+      results[index] = { status: 'rejected', reason: err }
+    } 
   }
 }
 
-export async function resolvePromiseWithWorkers (
+/*
+ * Settle promises with a configurable worker count
+ * Return value is formatted like Promise.allSettled([...])
+**/
+export async function settlePromiseWithWorkers (
   promiseFactories:(() => Promise<unknown>)[],
   workerCount:number
-) {
+): Promise<PromiseSettledResult<unknown>[]> {
   // The generator and the results are shared between workers, ensuring each promise is only resolved once
   const sharedGenerator = generator(promiseFactories)
 
@@ -34,7 +43,7 @@ export async function resolvePromiseWithWorkers (
     worker(sharedGenerator, results)
   )
 
-  await Promise.all(workers)
+  await Promise.allSettled(workers)
 
   return results
 }
