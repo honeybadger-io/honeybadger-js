@@ -4,8 +4,11 @@
     "src/**/*.ts"
   ], 
   "compilerOptions": {
-    "rootDir": "./", 
+    "rootDir": "src", 
     "allowSyntheticDefaultImports": true, 
-    "target": "ES2015"
+    "target": "ES2015",
+		"declaration": true,
+		"declarationDir": "dist/dts",
+    "moduleResolution": "node",
   },
 }

@@ -1,37 +1,26 @@
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import json from '@rollup/plugin-json'
 import typescript from '@rollup/plugin-typescript'
-
-const sharedPlugins = [
-  nodeResolve({ preferBuiltins: true }), 
-  commonjs(), 
-  json(),
-]
+import { dts } from 'rollup-plugin-dts'
+import del from "rollup-plugin-delete"
 
 export default [
   {
     input: 'src/index.ts',
     output: {
-      dir: 'dist/cjs', 
+      dir: 'dist', 
       format: 'cjs',
       sourcemap: true,
     },
     plugins: [ 
-      ...sharedPlugins,
-      typescript({ declarationDir: 'dist/cjs' }),
-    ]
+      typescript(),
+    ], 
+    external: [ 'node-fetch', 'form-data', 'fs', 'fetch-retry' ]
   }, 
   {
-    input: 'src/index.ts',
-    output: {
-      dir: 'dist/es', 
-      format: 'es', 
-      sourcemap: true,
-    },
+    input: 'dist/dts/index.d.ts',
+    output: { file: 'dist/index.d.ts' },
     plugins: [ 
-      ...sharedPlugins,
-      typescript({ declarationDir: 'dist/es' }),
-    ]
-  }
+      dts(), 
+      del({ hook: "buildEnd", targets: "./dist/dts" })
+    ],
+  },
 ]

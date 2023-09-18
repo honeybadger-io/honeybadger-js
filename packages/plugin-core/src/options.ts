@@ -8,8 +8,8 @@ export const DEFAULT_ENDPOINT = 'https://api.honeybadger.io/v1/source_maps'
 export const DEFAULT_REVISION = 'main'
 export const DEFAULT_SILENT = false
 export const DEFAULT_DEPLOY = false
-export const DEPLOY_ENDPOINT = 'https://api.honeybadger.io/v1/deploys'
-export const IGNORE_PATHS = []
+export const DEFAULT_DEPLOY_ENDPOINT = 'https://api.honeybadger.io/v1/deploys'
+export const DEFAULT_IGNORE_PATHS = []
 export const DEFAULT_IGNORE_ERRORS = false
 
 const required = [
@@ -23,8 +23,8 @@ const defaultOptions = {
   revision: DEFAULT_REVISION,
   silent: DEFAULT_SILENT,
   deploy: DEFAULT_DEPLOY,
-  deployEndpoint: DEPLOY_ENDPOINT,
-  ignorePaths: IGNORE_PATHS,
+  deployEndpoint: DEFAULT_DEPLOY_ENDPOINT,
+  ignorePaths: DEFAULT_IGNORE_PATHS,
   ignoreErrors: DEFAULT_IGNORE_ERRORS,
   workerCount: DEFAULT_WORKER_COUNT,
 }
@@ -53,7 +53,7 @@ export function cleanOptions(
   }
 
   // Don't allow silly worker count
-  if (options.workerCount < MIN_WORKER_COUNT) {
+  if (options.workerCount !== undefined && options.workerCount < MIN_WORKER_COUNT) {
     options.workerCount = MIN_WORKER_COUNT
   }
 

@@ -1,3 +1,8 @@
-import * as hbUtils from './hbUtils'
+import { uploadSourcemaps, sendDeployNotification } from './hbUtils'
+import { cleanOptions } from './options'
 
-export default hbUtils
+export {
+  cleanOptions,
+  uploadSourcemaps,
+  sendDeployNotification,
+}
