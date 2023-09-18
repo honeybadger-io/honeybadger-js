@@ -76,10 +76,10 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '14.x'
-#        cache: 'npm'
-#        cache-dependency-path: |
-#          package-lock.json
-#          packages/js/package-lock.json
+        cache: 'npm'
+        cache-dependency-path: |
+          package-lock.json
+          packages/js/package-lock.json
 
     - name: Build
       run: npm ci
