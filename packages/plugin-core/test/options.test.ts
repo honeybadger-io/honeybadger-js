@@ -1,5 +1,4 @@
-import { expect } from 'chai'
-import 'mocha'
+import { expect } from './testSetup'
 import {
   MAX_RETRIES,
   DEFAULT_ENDPOINT,

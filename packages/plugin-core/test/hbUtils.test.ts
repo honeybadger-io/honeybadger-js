@@ -1,5 +1,4 @@
-import { expect } from 'chai'
-import * as td from 'testdouble'
+import { expect, td } from './testSetup'
 import FormData from 'form-data'
 import { Buffer } from 'buffer'
 import { Response, FetchError } from 'node-fetch'

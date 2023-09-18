@@ -1,6 +1,4 @@
-import mocha from 'mocha'
-import { expect } from 'chai'
-import * as sinon from 'sinon'
+import { expect, td } from './testSetup'
 
 import { resolvePromiseWithWorkers } from '../src/helpers'
 
@@ -9,8 +7,11 @@ describe('helpers', () => {
     function asyncPromiseGenerator(
       name:string,
       timeout = 1,
-      traceCallback = (str:string) => (null)
+      traceCallback?
     ) {
+      if (!traceCallback) {
+        traceCallback = (str) => (null)
+      }
       return new Promise((resolve) => {
         traceCallback(`start ${name}`)
     
@@ -25,8 +26,12 @@ describe('helpers', () => {
       spy,
       sequence
     ) {
+      const captor = td.matchers.captor()
+      td.verify(spy(captor.capture()))
+      console.log(captor.values)
       for (let i = 0; i < sequence.length; ++i) {
-        sinon.assert.calledWith(spy.getCall(i), sequence[i])
+        expect(captor.values && captor.values[i]).to.equal(sequence[i])
+        // sinon.assert.calledWith(spy.getCall(i), sequence[i])
       }
     }
     
@@ -47,7 +52,7 @@ describe('helpers', () => {
     })
 
     it('should resolve the promises sequentially if the number of worker is 1', async function () {
-      const spy = sinon.spy()
+      const spy = td.func()
       const promisesWithCallback = [
         () => asyncPromiseGenerator('First', 1, spy),
         () => asyncPromiseGenerator('Second', 3, spy),
@@ -68,7 +73,7 @@ describe('helpers', () => {
     })
 
     it('should resolve the promises by workers', async function () {
-      const spy = sinon.spy()
+      const spy = td.func()
       const promisesWithCallback = [
         () => asyncPromiseGenerator('First', 1, spy),
         () =>
