@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.7.5](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.7.4...@honeybadger-io/nextjs@5.7.5) (2023-09-12)
+
+
+### Bug Fixes
+
+* **nextjs:** build copy files script as a commonjs module with rollup ([#1187](https://github.com/honeybadger-io/honeybadger-js/issues/1187)) ([4e73df1](https://github.com/honeybadger-io/honeybadger-js/commit/4e73df1be32337694dc078e4a5359ea4ad6237e3))
+
+
+
+## [5.7.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.7.3...@honeybadger-io/nextjs@5.7.4) (2023-09-07)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
+## [5.7.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.7.2...@honeybadger-io/nextjs@5.7.3) (2023-09-04)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
 ## [5.7.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.7.1...@honeybadger-io/nextjs@5.7.2) (2023-08-21)
 
 **Note:** Version bump only for package @honeybadger-io/nextjs

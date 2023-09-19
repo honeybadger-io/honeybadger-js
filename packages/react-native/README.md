@@ -51,8 +51,26 @@ Error reports can be [customized](https://docs.honeybadger.io/lib/javascript/gui
 ### Limitations
 Some native errors on Android may not be recorded if they cause an immediate crash of the app before the notice makes it to Honeybadger. 
 
-### Source Maps
-The procedure to generate and upload sourcemaps for react-native is currently [under development](https://github.com/honeybadger-io/honeybadger-js/issues/1029).
+## Source Maps
+To generate and upload source maps to Honeybadger, use the following command:
+```shell
+npx honeybadger-upload-sourcemaps --apiKey <your project API key> --revision <build revision>
+```
+
+The `--apiKey` param is your Honeybadger API key for the project. The `--revision` param should match the revision param of the `Honeybadger.init` call inside your application. This is done so that reported errors are correctly matched up against the generated source maps.
+
+As of version 0.70, React Native uses Hermes as the default JavaScript engine. The source maps tool assumes that your project uses Hermes. If you are building against an earlier version of React Native, or are explicitly not using Hermes, add the `--no-hermes` flag to the sourcemaps tool, like so:
+
+```shell
+npx honeybadger-upload-sourcemaps --no-hermes --apiKey <your project API key> --revision <build revision>
+```
+
+If you just want to generate the sourcemaps without uploading them to Honeybadger, you can use the `--skip-upload` flag.
+
+```shell
+npx honeybadger-upload-sourcemaps --skip-upload --apiKey <your project API key> --revision <build revision>
+```
+
 
 ## Example Projects
 
