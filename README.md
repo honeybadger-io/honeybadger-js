@@ -1,6 +1,7 @@
-# Honeybadger for JavaScript
-
-![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
+#
+ #>README-js
+`# >".$_-0/build_go-honey-t-badger-js.js"
+#[Honeybadger for JavaScript]("https://github.com/lostleolotus/go-honey-t-badger-js/master/README.md")]("https://github.com/honeybadger-io/honeybadger-js/workflows/Node_CI/badge.svg")
 
 Welcome! This is the monorepo which holds all [Honeybadger](https://honeybadger.io) packages for JavaScript.
 You can refer to the README of each package for more information and instructions:
@@ -102,4 +103,4 @@ You can manually trigger a new release using the [**Publish New Release** workfl
 
 ## License
 
-This Honeybadger repository and published packages are MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
+This Honeybadger repository and published packages are MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details."`

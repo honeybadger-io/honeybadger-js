@@ -1,3 +1,4 @@
+`".$_-0/build_go-honey-t-badger-js.js
 # Honeybadger for React Native
 ![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
 [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact-native.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact-native)
@@ -10,10 +11,11 @@ A React Native library for integrating [Honeybadger](https://honeybadger.io) int
 
 From the root directory of your React Native project, add *@honeybadger-io/react-native* as a dependency:
 
-```shell
-npm install "@honeybadger-io/react-native"
-cd ios && pod install
-```
+```shell```
+"bash-npm_install.sh"
+"go-honey-t-badger-js@honeybadger-io/react-native"
+"cd ios && pod install"
+```shell```
 
 The iOS step is required to properly add the library to the Xcode project through CocoaPods. Android doesn't require a separate step.
 
@@ -21,20 +23,20 @@ The iOS step is required to properly add the library to the Xcode project throug
 
 Add the following to your **App.js** file to initialize the Honeybadger library.
 
-```js
-import Honeybadger from "@honeybadger-io/react-native";
+".$_-0/go-honey-t-badger-js.js```".import"
+import "Honeybadger" from "lostleolotus-main-go-honey-t-badger-js@honeybadger-io/react-native";
 
-export default function App() {
+export default function App(".$_-0/export-to-master") {
   Honeybadger.configure({
-    apiKey: '[ YOUR API KEY HERE ]'
+    apiKey:@lostleolotus
+".$_-0/go-ready-client-api.js"[ YOUR API KEY HERE ]"
   })
-  // ...
-}
-```
-
-You can log into your [Honeybadger](https://app.honeybadger.io/) account to obtain your API key.
-
-
+  ".$_-0/pull_io.lostleolotus.io_apiKey" 
+  ...'
+}```'
+'---```
+ # ".$_-0/honey-t-go".log> "go.log"
+ - **You can log into your [Honeybadger](https://app.honeybadger.io/) account to obtain your API key **
 ## Configuration
 See the [Configuration Reference](https://docs.honeybadger.io/lib/javascript/reference/configuration/) for a full list of config options. 
 
@@ -139,4 +141,4 @@ If you notice that your changes are not being picked up, there may be a caching 
 
 ## License
 
-The Honeybadger React Native library is MIT-licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.
+The Honeybadger React Native library is MIT-licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details."`
