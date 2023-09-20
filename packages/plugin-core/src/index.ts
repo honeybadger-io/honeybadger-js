@@ -6,3 +6,5 @@ export {
   uploadSourcemaps,
   sendDeployNotification,
 }
+
+export * as Types from './types'

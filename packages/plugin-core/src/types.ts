@@ -1,3 +1,4 @@
+// All our plugin options
 export interface HbPluginOptions {
   apiKey: string;
   assetsUrl: string;
@@ -11,6 +12,9 @@ export interface HbPluginOptions {
   ignoreErrors: boolean;
   workerCount: number;
 }
+
+// Options passed in by a user
+export type HbPluginUserOptions = Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
 
 export interface Deploy {
   repository?: string;
