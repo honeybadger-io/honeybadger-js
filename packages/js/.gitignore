@@ -1,1 +1,6 @@
 local.log
+node_modules/
+/test-results/
+/playwright-report/
+/playwright/.cache/
+dummy-commit-to-trigger-ci

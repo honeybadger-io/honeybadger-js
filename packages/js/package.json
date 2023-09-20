@@ -43,9 +43,7 @@
     "test": "npm run test:browser && npm run test:server && npm run tsd",
     "test:browser": "jest --env=jsdom --setupFiles=\"<rootDir>/test/unit/jest-browser-setup.js\" --testPathPattern=\"test/unit/.*(?<![\\./]server)\\.test\\.(js|ts)\"",
     "test:server": "jest --env=node --testPathPattern=\"test/unit/.*(?<![\\./]browser)\\.test\\.(js|ts)\"",
-    "test:integration": "test/integration/node_modules/karma/bin/karma start test/integration/karma.conf.js",
-    "test:integration:browserstack": "npm run test:integration",
-    "test:integration:headless": "HEADLESS=1 npm run test:integration",
+    "test:integration": "npx playwright test --config test/e2e/playwright.config.ts",
     "tsd": "tsd",
     "postpublish": "./scripts/release-cdn.sh"
   },
@@ -55,11 +53,13 @@
     "@types/express": "^4.17.13"
   },
   "devDependencies": {
+    "@playwright/test": "^1.37.1",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^5.0.2",
     "@types/jest": "^27.0.3",
     "@types/node": "^17.0.45",
+    "browserstack-local": "^1.5.4",
     "express": "^4.17.1",
     "jest": "^27.4.4",
     "jest-fetch-mock": "^3.0.3",

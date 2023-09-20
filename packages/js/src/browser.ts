@@ -125,7 +125,12 @@ class Honeybadger extends Client {
       endpoint: this.config.userFeedbackEndpoint,
       noticeId: this.__lastNoticeId
     }
-    const script = global.document.createElement('script')
+
+    this.appendUserFeedbackScriptTag(global, options)
+  }
+
+  private appendUserFeedbackScriptTag(window: typeof globalThis, options: Types.UserFeedbackFormOptions = {}) {
+    const script = window.document.createElement('script')
     script.setAttribute('src', this.getUserFeedbackSubmitUrl())
     script.setAttribute('async', 'true')
     if (options.onLoad) {
