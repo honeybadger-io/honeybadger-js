@@ -1,3 +1,22 @@
+/**
+ * Attempts to parse error details from a non-ok Response
+ */
+export async function parseResErrorDetails(res: Response): Promise<string> {
+  let details: string
+  try {
+    const body = await res.json()
+    if (body && body.error) {
+      details = `${res.status} - ${body.error}`
+    } else {
+      details = `${res.status} - ${res.statusText}`
+    }
+  } catch (parseErr) {
+    details = `${res.status} - ${res.statusText}`
+  }
+
+  return details
+}
+
 function* generator (
   promiseFactories:(() => Promise<unknown>)[]
 ): Generator<[Promise<any>, number]> {

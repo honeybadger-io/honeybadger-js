@@ -20,13 +20,13 @@ describe('hbUtils', () => {
     return Buffer.from(filePath)
   }
 
-  let utils
+  let sourcemaps
 
   beforeEach(async () => {
     // Replace node-fetch with a mock before importing 
     td.replace('node-fetch', fetchMock);
     td.replace('fs', { promises: { readFile: readFileMock } })
-    utils = await import('../src/hbUtils')
+    sourcemaps = await import('../src/sourcemaps')
   })
 
   afterEach(() => {
@@ -36,7 +36,7 @@ describe('hbUtils', () => {
   describe('uploadSourcemaps', () => {
     it('should warn if no sourcemaps are passed in and silent is false', async () => {
       const warnMock = td.replace(console, 'warn')
-      await utils.uploadSourcemaps( 
+      await sourcemaps.uploadSourcemaps( 
         [], 
         { silent: false }
       )
@@ -61,7 +61,7 @@ describe('hbUtils', () => {
           return new Response(JSON.stringify({ jsFilename }), { status: 200 })
         })
 
-      const responses = await utils.uploadSourcemaps(sourcemapData, hbOptions)
+      const responses = await sourcemaps.uploadSourcemaps(sourcemapData, hbOptions)
       expect(responses).to.have.length(3)
 
       const responseBodies = await Promise.all(responses.map(res => res.json()))
@@ -86,7 +86,7 @@ describe('hbUtils', () => {
         .thenReject(new FetchError('Nope', 'Fail'))
 
       try {
-        await utils.uploadSourcemaps(sourcemapData, hbOptions)
+        await sourcemaps.uploadSourcemaps(sourcemapData, hbOptions)
       } catch (err) {
         expect(err.message).to.include('Failed to upload 2 sourcemap file(s)')
       }
@@ -112,7 +112,7 @@ describe('hbUtils', () => {
       }))
         .thenResolve(new Response('Ok', { status: 200 }))
 
-      const res = await utils.uploadSourcemap(testData, hbOptions)
+      const res = await sourcemaps.uploadSourcemap(testData, hbOptions)
       expect(res.status).to.equal(200)
     })
 
@@ -121,7 +121,7 @@ describe('hbUtils', () => {
         .thenReject(new FetchError('Go fetch it yourself', 'Grrr'))
 
       try {
-        await utils.uploadSourcemap(testData, hbOptions)
+        await sourcemaps.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: FetchError - Go fetch it yourself')
       }
@@ -133,7 +133,7 @@ describe('hbUtils', () => {
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(res)
       try {
-        await utils.uploadSourcemap(testData, hbOptions)
+        await sourcemaps.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 500 - Internal server error')
       }
@@ -143,7 +143,7 @@ describe('hbUtils', () => {
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(res)
       try {
-        await utils.uploadSourcemap(testData, hbOptions)
+        await sourcemaps.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 404 - Not found')
       }
@@ -153,7 +153,7 @@ describe('hbUtils', () => {
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenResolve(res)
       try {
-        await utils.uploadSourcemap(testData, hbOptions)
+        await sourcemaps.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 500 - Server has the hiccups')
       }
@@ -169,7 +169,7 @@ describe('hbUtils', () => {
         .thenReject(new FetchError('', ''))
 
       try {
-        await utils.uploadSourcemap(testData, hbOptions)
+        await sourcemaps.uploadSourcemap(testData, hbOptions)
       } catch (err) {
         expect(err.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: FetchError')
       }
@@ -184,7 +184,7 @@ describe('hbUtils', () => {
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()), { times: 1 })
         .thenReject(new FetchError('', ''))
       
-      const res = await utils.uploadSourcemap(testData, { ...hbOptions, retries: 3 })
+      const res = await sourcemaps.uploadSourcemap(testData, { ...hbOptions, retries: 3 })
       expect(res.status).to.equal(201)
     })
   })
@@ -198,7 +198,7 @@ describe('hbUtils', () => {
     }
 
     it('should return an instance of FormData with expected entries', async () => {
-      const result = await utils.buildBodyForSourcemapUpload(testData, hbOptions)
+      const result = await sourcemaps.buildBodyForSourcemapUpload(testData, hbOptions)
 
       expect(result).to.be.an.instanceOf(FormData)
 
@@ -224,144 +224,5 @@ describe('hbUtils', () => {
         expect(str.match(pattern)).to.have.length(1)
       }) 
     })
-  });
-
-  describe('sendDeployNotification', () => {
-    const testData = {
-      deployEndpoint: 'https://api.honeybadger.io/testing/deploys', 
-      apiKey: 'test_api_key', 
-      revision: 'revision_1', 
-      retries: 0, 
-      silent: false
-    }
-
-    it('should resolve with the response if the response is ok', async () => {
-      // Check we called fetch with the expected arguments
-      td.when(fetchMock(testData.deployEndpoint, {
-        method: 'POST',
-        headers: {
-          'X-API-KEY': testData.apiKey,
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: td.matchers.isA(String),
-        redirect: 'follow',
-        retries: testData.retries,
-        retryDelay: 1000
-      }))
-        .thenResolve(new Response('Ok', { status: 200 }))
-
-      const res = await utils.sendDeployNotification(testData)
-      expect(res.status).to.equal(200)
-    })
-
-    it('should reject with an error if fetch rejects', async () => {
-      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
-        .thenReject(new FetchError('Go fetch it yourself', 'Yeah'))
-
-      try {
-        await utils.sendDeployNotification(testData)
-      } catch (err) {
-        expect(err.message).to.equal('Failed to send deploy notification to Honeybadger: FetchError - Go fetch it yourself')
-      }
-    })
-
-    it('should reject with a useful error if response is not ok', async () => {
-      // Nothing useful in the body
-      let res = new Response(JSON.stringify({ foo: 'bar' }), { status: 500, statusText: 'Internal server error' })
-      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
-        .thenResolve(res)
-      try {
-        await utils.sendDeployNotification(testData)
-      } catch (err) {
-        expect(err.message).to.equal('Failed to send deploy notification to Honeybadger: 500 - Internal server error')
-      }
-      
-      // No body at all
-      res = new Response('', { status: 404, statusText: 'Not found' })
-      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
-        .thenResolve(res)
-      try {
-        await utils.sendDeployNotification(testData)
-      } catch (err) {
-        expect(err.message).to.equal('Failed to send deploy notification to Honeybadger: 404 - Not found')
-      }
-
-      // Body contains error data
-      res = new Response(JSON.stringify({ error: 'Server has the hiccups' }), { status: 500 })
-      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
-        .thenResolve(res)
-      try {
-        await utils.sendDeployNotification(testData)
-      } catch (err) {
-        expect(err.message).to.equal('Failed to send deploy notification to Honeybadger: 500 - Server has the hiccups')
-      }
-    })
-
-    it('should not retry if retries = 0', async () => {
-      const okRes = new Response('', { status: 201 })
-
-      // Reject once, then resolve
-      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
-        .thenResolve(okRes)
-      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()), { times: 1 })
-        .thenReject(new FetchError('', ''))
-
-      try {
-        await utils.sendDeployNotification(testData)
-      } catch (err) {
-        expect(err.message).to.equal('Failed to send deploy notification to Honeybadger: FetchError')
-      }
-    })
-
-    it('should retry if retries > 0', async () => {
-      const okRes = new Response('', { status: 201 })
-
-      // Reject once, then resolve
-      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
-        .thenResolve(okRes)
-      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()), { times: 1 })
-        .thenReject(new FetchError('No fetch', 'Nope'))
-      
-      const res = await utils.sendDeployNotification({ ...testData, retries: 3 })
-      expect(res.status).to.equal(201)
-    })
   })
-
-  describe('buildBodyForDeployNotification', () => {
-    it('should return expected JSON string if deploy is true', () => {
-      const result = utils.buildBodyForDeployNotification({
-        deploy: true, 
-        revision: 'revision123'
-      })
-
-      expect(result).equals('{"deploy":{"revision":"revision123"}}') 
-    })
-
-    it('should return expected JSON string if deploy is an object', () => {
-      const result = utils.buildBodyForDeployNotification({
-        deploy: { 
-          repository: 'https://github.com/honeybadger-io/honeybadger-js', 
-          localUsername: 'BethanyBerkowitz', 
-          environment: 'production'
-        }, 
-        revision: 'revision123'
-      })
-
-      expect(result).equals('{"deploy":{"revision":"revision123","repository":"https://github.com/honeybadger-io/honeybadger-js","local_username":"BethanyBerkowitz","environment":"production"}}') 
-    })
-
-    it('should ignore missing keys', () => {
-      // Not passing environment in
-      const result = utils.buildBodyForDeployNotification({
-        deploy: { 
-          repository: 'https://github.com/honeybadger-io/honeybadger-js', 
-          localUsername: 'BethanyBerkowitz', 
-        }, 
-        revision: 'revision123'
-      })
-
-      expect(result).equals('{"deploy":{"revision":"revision123","repository":"https://github.com/honeybadger-io/honeybadger-js","local_username":"BethanyBerkowitz"}}') 
-    })
-  });
-});
+})

@@ -1,4 +1,5 @@
-import { uploadSourcemaps, sendDeployNotification } from './hbUtils'
+import { sendDeployNotification } from './deploys'
+import { uploadSourcemaps } from './sourcemaps'
 import { cleanOptions } from './options'
 
 export {
