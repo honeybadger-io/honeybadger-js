@@ -85,7 +85,9 @@ jobs:
       run: npm ci
 
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      run: |
+        cd packages/js
+        npx playwright install --with-deps
 
     - name: Run integration tests
       env:
@@ -96,6 +98,13 @@ jobs:
         cd packages/js
         npm run test:integration
 
+    - name: Upload Playwright Report
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
 
   lint:
     runs-on: ubuntu-latest
