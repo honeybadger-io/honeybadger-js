@@ -18,16 +18,16 @@ export async function parseResErrorDetails(res: Response): Promise<string> {
 }
 
 function* generator (
-  promiseFactories:(() => Promise<unknown>)[]
-): Generator<[Promise<any>, number]> {
+  promiseFactories: (() => Promise<unknown>)[]
+): Generator<[Promise<unknown>, number]> {
   for (let i = 0; i < promiseFactories.length; i++) {
     yield [ promiseFactories[i](), i ]
   }
 }
 
 async function worker (
-  generator:Generator<[Promise<any>, number]>, 
-  results:unknown[]
+  generator: Generator<[Promise<unknown>, number]>, 
+  results: unknown[]
 ) {
   for (const [promise, index] of generator) {
     try {
@@ -44,8 +44,8 @@ async function worker (
  * Return value is formatted like Promise.allSettled([...])
 **/
 export async function settlePromiseWithWorkers (
-  promiseFactories:(() => Promise<unknown>)[],
-  workerCount:number
+  promiseFactories: (() => Promise<unknown>)[],
+  workerCount: number
 ): Promise<PromiseSettledResult<unknown>[]> {
   // The generator and the results are shared between workers, ensuring each promise is only resolved once
   const sharedGenerator = generator(promiseFactories)

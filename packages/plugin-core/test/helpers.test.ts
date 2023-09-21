@@ -5,7 +5,7 @@ import { settlePromiseWithWorkers } from '../src/helpers'
 describe('helpers', () => {
   describe('settlePromiseWithWorkers', () => {
     function asyncPromiseGenerator(
-      name:string,
+      name: string,
       timeout = 1,
       shouldResolve = true,
       traceCallback

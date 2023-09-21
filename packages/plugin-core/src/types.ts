@@ -1,5 +1,5 @@
 // All our plugin options
-export interface HbPluginOptions {
+export type HbPluginOptions = {
   apiKey: string;
   assetsUrl: string;
   endpoint: string;
@@ -16,13 +16,13 @@ export interface HbPluginOptions {
 // Options passed in by a user
 export type HbPluginUserOptions = Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
 
-export interface Deploy {
+export type Deploy = {
   repository?: string;
   localUsername?: string;
   environment?: string;
 }
 
-export interface DeployBody {
+export type DeployBody = {
   deploy: {
     revision: string;
     repository?: string;
@@ -31,7 +31,7 @@ export interface DeployBody {
   };
 }
 
-export interface SourcemapInfo {
+export type SourcemapInfo = {
   sourcemapFilename: string;
   sourcemapFilePath: string;
   jsFilename: string;
