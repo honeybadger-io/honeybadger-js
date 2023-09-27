@@ -17,7 +17,7 @@ export default function honeybadgerRollupPlugin(
     ) => {
       if (isNonProdEnv()) {
         if (!hbOptions.silent) {
-          console.info('Honeybadger will not sourcemaps in non-production environment.')
+          console.info('Honeybadger will not upload sourcemaps in non-production environment.')
         }
         return
       }
