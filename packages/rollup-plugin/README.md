@@ -44,6 +44,12 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   <dd>This package implements fetch retry functionality via the <a href="https://github.com/vercel/fetch-retry">fetch-retry</a> package. Retrying helps fix issues like `ECONNRESET` and `SOCKETTIMEOUT` errors.
   </dd>
 
+  <dt><code>workerCount</code> (optional &mdash; default: 5, min: 1)</dt>
+  <dd>Sourcemaps are uploaded in parallel by a configurable number of 
+  workers. Increase or decrease this value to configure how many sourcemaps
+  are being uploaded in parallel.</br>
+  Limited parallelism helps with connection issues in Docker environments.</dd>
+
   <dt><code>ignorePaths</code> (optional &mdash; default: [])</dt>
   <dd>An array of paths (glob patterns) to ignore when uploading sourcemaps. Uses <a href="https://github.com/micromatch/picomatch">picomatch</a> to match against paths. 
   </dd>
