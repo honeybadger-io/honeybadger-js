@@ -10,7 +10,8 @@ const hbPluginOptions = {
     repository: 'https://github.com/honeybadger-io/honeybadger-js', 
     localUsername: 'BethanyBerkowitz', 
     environment: 'production'
-  }
+  }, 
+  workerCount: 2
 }
 
 export default {

@@ -1,35 +1,16 @@
 import { expect } from 'chai'
-import { NormalizedOutputOptions, Plugin } from 'rollup'
+import 'mocha'
+import { NormalizedOutputOptions } from 'rollup'
 import * as td from 'testdouble'
-import { HbPluginOptions } from '../src/types'
 
 describe('Index', () => {
-  let honeybadgerRollupPlugin: (opts: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>) => Plugin
-  let cleanOptionsMock,
-    isNonProdEnvMock,
-    extractSourcemapDataFromBundleMock,
-    uploadSourcemapsMock,
-    sendDeployNotificationMock
+  let honeybadgerRollupPlugin
+  let core, rollupUtils
   const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
 
   beforeEach(async () => {
-    cleanOptionsMock = td.func()
-    isNonProdEnvMock = td.func()
-    extractSourcemapDataFromBundleMock = td.func()
-    uploadSourcemapsMock = td.func()
-    sendDeployNotificationMock = td.func()
-
-    td.replace('../src/options', {
-      cleanOptions: cleanOptionsMock
-    })
-    td.replace('../src/rollupUtils', {
-      extractSourcemapDataFromBundle: extractSourcemapDataFromBundleMock,
-      isNonProdEnv: isNonProdEnvMock
-    })
-    td.replace('../src/hbUtils', {
-      uploadSourcemaps: uploadSourcemapsMock,
-      sendDeployNotification: sendDeployNotificationMock
-    })
+    core = td.replace('@honeybadger-io/plugin-core')
+    rollupUtils = td.replace('../src/rollupUtils')
 
     const indexModule = await import('../src/index')
     honeybadgerRollupPlugin = indexModule.default
@@ -42,7 +23,7 @@ describe('Index', () => {
   it('cleans the options, returns the expected format for a plugin', () => {
     const plugin = honeybadgerRollupPlugin(options)
 
-    td.verify(cleanOptionsMock(options))
+    td.verify(core.cleanOptions(options))
     expect(plugin.name).to.equal('honeybadger')
     expect(plugin.writeBundle).to.be.a('function')
   })
@@ -54,69 +35,69 @@ describe('Index', () => {
     const sourcemapData = [{ sourcemapFilename: 'index.map.js' }]
 
     it('should upload sourcemaps', async () => {
-      td.when(isNonProdEnvMock()).thenReturn(false)
-      td.when(extractSourcemapDataFromBundleMock(outputOptions, bundle, undefined)).thenReturn(sourcemapData)
-      td.when(cleanOptionsMock(options)).thenReturn(options)
+      td.when(rollupUtils.isNonProdEnv()).thenReturn(false)
+      td.when(rollupUtils.extractSourcemapDataFromBundle(outputOptions, bundle, undefined)).thenReturn(sourcemapData)
+      td.when(core.cleanOptions(options)).thenReturn(options)
 
       const plugin = honeybadgerRollupPlugin(options)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
 
-      td.verify(uploadSourcemapsMock(sourcemapData, options))
+      td.verify(core.uploadSourcemaps(sourcemapData, options))
     })
 
     it('should send deploy notification if deploy is true', async () => {
       const deployTrueOpt = { ...options, deploy: true }
-      td.when(isNonProdEnvMock()).thenReturn(false)
-      td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
-      td.when(cleanOptionsMock(deployTrueOpt)).thenReturn(deployTrueOpt)
+      td.when(rollupUtils.isNonProdEnv()).thenReturn(false)
+      td.when(rollupUtils.extractSourcemapDataFromBundle({ outputOptions, bundle })).thenReturn(sourcemapData)
+      td.when(core.cleanOptions(deployTrueOpt)).thenReturn(deployTrueOpt)
 
       const plugin = honeybadgerRollupPlugin(deployTrueOpt)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
 
-      td.verify(sendDeployNotificationMock(deployTrueOpt))
+      td.verify(core.sendDeployNotification(deployTrueOpt))
     })
 
     it('should send deploy notification if deploy is an object', async () => {
       const deployObjOpt = { ...options, deploy: { localUsername: 'me' } }
-      td.when(isNonProdEnvMock()).thenReturn(false)
-      td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
-      td.when(cleanOptionsMock(deployObjOpt)).thenReturn(deployObjOpt)
+      td.when(rollupUtils.isNonProdEnv()).thenReturn(false)
+      td.when(rollupUtils.extractSourcemapDataFromBundle({ outputOptions, bundle })).thenReturn(sourcemapData)
+      td.when(core.cleanOptions(deployObjOpt)).thenReturn(deployObjOpt)
 
       const plugin = honeybadgerRollupPlugin(deployObjOpt)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
 
-      td.verify(sendDeployNotificationMock(deployObjOpt))
+      td.verify(core.sendDeployNotification(deployObjOpt))
     })
 
     it('should not send deploy notification if deploy is false', async () => {
       const deployFalseOpt = { ...options, deploy: false }
-      td.when(isNonProdEnvMock()).thenReturn(false)
-      td.when(extractSourcemapDataFromBundleMock({ outputOptions, bundle })).thenReturn(sourcemapData)
-      td.when(cleanOptionsMock(deployFalseOpt)).thenReturn(deployFalseOpt)
+      td.when(rollupUtils.isNonProdEnv()).thenReturn(false)
+      td.when(rollupUtils.extractSourcemapDataFromBundle({ outputOptions, bundle })).thenReturn(sourcemapData)
+      td.when(core.cleanOptions(deployFalseOpt)).thenReturn(deployFalseOpt)
 
       const plugin = honeybadgerRollupPlugin(deployFalseOpt)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
 
       // Verify not called
-      td.verify(sendDeployNotificationMock(), { times: 0, ignoreExtraArgs: true })
+      td.verify(core.sendDeployNotification(), { times: 0, ignoreExtraArgs: true })
     })
 
     it('should do nothing in non-prod environments', async () => {
-      td.when(isNonProdEnvMock()).thenReturn(true)
-      td.when(cleanOptionsMock(options)).thenReturn(options)
+      td.when(rollupUtils.isNonProdEnv()).thenReturn(true)
+      td.when(core.cleanOptions(options)).thenReturn(options)
 
       const plugin = honeybadgerRollupPlugin(options)
       //@ts-ignore
       await plugin.writeBundle(outputOptions, bundle)
 
       // Verify these were not called
-      td.verify(extractSourcemapDataFromBundleMock(), { times: 0, ignoreExtraArgs: true })
-      td.verify(uploadSourcemapsMock(), { times: 0, ignoreExtraArgs: true })
-      td.verify(sendDeployNotificationMock(), { times: 0, ignoreExtraArgs: true })
+      td.verify(rollupUtils.extractSourcemapDataFromBundle(), { times: 0, ignoreExtraArgs: true })
+      td.verify(core.uploadSourcemaps(), { times: 0, ignoreExtraArgs: true })
+      td.verify(rollupUtils.extractSourcemapDataFromBundle(), { times: 0, ignoreExtraArgs: true })
     })
   })
 
