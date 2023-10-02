@@ -4,7 +4,7 @@
   "description": "",
   "main": "handler.js",
   "dependencies": {
-    "@honeybadger-io/js": "^4.2.0",
+    "@honeybadger-io/js": "^6.5.1",
     "serverless-plugin-include-dependencies": "^5.0.0"
   },
   "devDependencies": {},
