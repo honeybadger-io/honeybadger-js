@@ -174,7 +174,6 @@ if $USE_HERMES; then
 	# react native <= 0.68
 	HERMES_PATH_2="$NODE_MODULES/hermes-engine/$OS_BIN/hermesc"
 
-	
 	if [ -f "$HERMES_PATH_1" ]; then
 		HERMES_EXECUTABLE="$HERMES_PATH_1"
 	elif [ -f "$HERMES_PATH_2" ]; then
@@ -183,9 +182,6 @@ if $USE_HERMES; then
 		echo "Error: The Hermes compiler executable for Android was not found in the expected locations."
 		exit 1
 	fi
-
-	
-	echo "Generating Hermes Android source map ..."
 
 	#
 	# compile the Android code to bytecode and generate the Hermes sourcemap
@@ -209,39 +205,42 @@ if $USE_HERMES; then
 
 
 	#
-	# Need to find the Hermes compiler executable for iOS.
+	# For iOS, we're no longer using the hermes output concatenation, 
+	# even for hermes builds, as it produces incorrect sourcemaps.
 	#
 
-	HERMES_EXECUTABLE="$PROJECT_ROOT_DIR/ios/Pods/hermes-engine/destroot/bin/hermesc"
+	# HERMES_EXECUTABLE="$PROJECT_ROOT_DIR/ios/Pods/hermes-engine/destroot/bin/hermesc"
 
-	if [ ! -f "$HERMES_EXECUTABLE" ]; then
-		echo "Error: The Hermes compiler executable for iOS was not found in the expected location: $HERMES_EXECUTABLE . Did you run pod install in the ios/ directory?"
-		exit 1
-	fi
+	# if [ ! -f "$HERMES_EXECUTABLE" ]; then
+	# 	echo "Error: The Hermes compiler executable for iOS was not found in the expected location: $HERMES_EXECUTABLE . Did you run pod install in the ios/ directory?"
+	# 	exit 1
+	# fi
 
-	
-	echo "Generating Hermes iOS source map ..."
+	# echo "Generating Hermes iOS source map ..."
 
 	#
 	# Compile the iOS code to bytecode and generate the Hermes sourcemap.
 	# 
 
-	"$HERMES_EXECUTABLE" \
-		-O \
-		-emit-binary \
-		-output-source-map \
-		-out="$IOS_COMPILER_BUNDLE" \
-		"$IOS_PACKAGER_BUNDLE" > /dev/null 2>&1
+	# "$HERMES_EXECUTABLE" \
+	# 	-O \
+	# 	-emit-binary \
+	# 	-output-source-map \
+	# 	-out="$IOS_COMPILER_BUNDLE" \
+	# 	"$IOS_PACKAGER_BUNDLE" > /dev/null 2>&1
 
 	#
 	# merge the two iOS sourcemaps
 	#
 
-	node "$NODE_MODULES/react-native/scripts/compose-source-maps.js" \
-		"$IOS_PACKAGER_SOURCE_MAP" \
-		"$IOS_COMPILER_SOURCE_MAP" \
-		-o "$IOS_FINAL_SOURCE_MAP" > /dev/null 2>&1
+	# node "$NODE_MODULES/react-native/scripts/compose-source-maps.js" \
+	# 	"$IOS_PACKAGER_SOURCE_MAP" \
+	# 	"$IOS_COMPILER_SOURCE_MAP" \
+	# 	-o "$IOS_FINAL_SOURCE_MAP" > /dev/null 2>&1
 
+
+	# Same operation for hermes builds on iOS as with --no-hermes; see note above.
+	mv "$IOS_PACKAGER_SOURCE_MAP" "$IOS_FINAL_SOURCE_MAP"
 
 	#
 	# cleanup
@@ -253,9 +252,9 @@ if $USE_HERMES; then
 		"$ANDROID_COMPILER_BUNDLE" \
 		"$ANDROID_COMPILER_SOURCE_MAP" \
 		"$IOS_PACKAGER_BUNDLE" \
-		"$IOS_PACKAGER_SOURCE_MAP" \
-		"$IOS_COMPILER_BUNDLE" \
-		"$IOS_COMPILER_SOURCE_MAP"
+		"$IOS_PACKAGER_SOURCE_MAP" # \
+		# "$IOS_COMPILER_BUNDLE" \
+		# "$IOS_COMPILER_SOURCE_MAP"
 
 else
 
@@ -304,7 +303,7 @@ curl https://api.honeybadger.io/v1/source_maps \
 curl https://api.honeybadger.io/v1/source_maps \
 	-F api_key="$API_KEY" \
 	-F revision="$REVISION" \
-	-F minified_url=main.jsbundle \
+	-F minified_url="*/main.jsbundle" \
 	-F source_map=@"$IOS_FINAL_SOURCE_MAP" \
 	-F minified_file=@"$EMPTY_FILE" > /dev/null 2>&1
 	
