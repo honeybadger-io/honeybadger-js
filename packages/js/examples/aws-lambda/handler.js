@@ -1,6 +1,7 @@
 'use strict';
 
 const { honeybadgerWrapper } = require('./honeybadger')
+const Honeybadger = require('@honeybadger-io/js')
 
 const formatJSONResponse = (response) => {
   return {
@@ -93,5 +94,23 @@ module.exports = {
       message: "You summoned the timeoutWarning handler! Nothing was sent to Honeybadger. POST with { 'body': { 'timeout': 'yes' } } to run the function until it times out.",
       event,
     });
+  }),
+  tryCatchNotifyContinue: honeybadgerWrapper(async (event) => {
+    const tryCatchNotifyContinue = async () => {
+      throw new Error('try-catch-notify-continue');
+    }
+
+    try {
+      await tryCatchNotifyContinue();
+    } catch (err) {
+      // Honeybadger.notify(err); // this will not work
+      await Honeybadger.notifyAsync(err);
+    }
+
+    return formatJSONResponse({
+      message: 'You summoned the tryCatchNotifyContinue handler! An error report should have been sent to Honeybadger, but the process is still running.',
+      event,
+    });
+
   }),
 }
