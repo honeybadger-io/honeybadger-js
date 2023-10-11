@@ -1,14 +1,12 @@
 /* eslint-env mocha */
 
-import chai from 'chai'
+import { expect } from 'chai'
 import * as sinon from 'sinon'
 import nock from 'nock'
 
 import { promises as fs } from 'fs'
 // eslint-disable-next-line import/default
 import HoneybadgerSourceMapPlugin from '../src/HoneybadgerSourceMapPlugin'
-
-const expect = chai.expect
 
 const TEST_ENDPOINT = 'https://api.honeybadger.io'
 const SOURCEMAP_PATH = '/v1/source_maps'
@@ -22,7 +20,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
     apiKey: 'abcd1234',
     assetsUrl: 'https://cdn.example.com/assets', 
     endpoint: `${TEST_ENDPOINT}${SOURCEMAP_PATH}`,
-    deployEndpoint: `${TEST_ENDPOINT}${DEPLOY_PATH}`
+    deployEndpoint: `${TEST_ENDPOINT}${DEPLOY_PATH}`,
   }
 
   beforeEach(function () {
@@ -32,10 +30,12 @@ describe('HoneybadgerSourceMapPlugin', function () {
       }
     }
     plugin = new HoneybadgerSourceMapPlugin(options)
+    nock.disableNetConnect()
   })
 
   afterEach(function () {
     sinon.restore()
+    nock.cleanAll()
   })
 
   describe('constructor', function () {
