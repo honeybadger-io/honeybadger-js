@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.7.0...@honeybadger-io/rollup-plugin@5.8.0) (2023-10-02)
+
+
+### Features
+
+* **rollup:** add configurable parallelism to sourcemap upload ([#1195](https://github.com/honeybadger-io/honeybadger-js/issues/1195)) ([85981bc](https://github.com/honeybadger-io/honeybadger-js/commit/85981bc4be95ff9a61b1ba303e65b35437f30f0b))
+
+
+
 ## [5.7.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.6.1...@honeybadger-io/rollup-plugin@5.7.0) (2023-09-27)
 
 

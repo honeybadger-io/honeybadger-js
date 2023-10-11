@@ -1,11 +1,9 @@
-import { cleanOptions } from './options'
 import { extractSourcemapDataFromBundle, isNonProdEnv } from './rollupUtils'
-import { sendDeployNotification, uploadSourcemaps } from './hbUtils'
-import type { HbPluginOptions } from './types'
+import { sendDeployNotification, uploadSourcemaps, cleanOptions, Types } from '@honeybadger-io/plugin-core'
 import type { OutputBundle, Plugin, NormalizedOutputOptions } from 'rollup'
 
 export default function honeybadgerRollupPlugin(
-  options: Partial<HbPluginOptions> & Pick<HbPluginOptions, 'apiKey' | 'assetsUrl'>
+  options: Types.HbPluginUserOptions
 ): Plugin {
   const hbOptions = cleanOptions(options)
 

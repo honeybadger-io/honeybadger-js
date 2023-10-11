@@ -1,8 +1,7 @@
 import path from 'node:path'
 import picomatch from 'picomatch'
-
+import { Types } from '@honeybadger-io/plugin-core'
 import type { OutputBundle, OutputAsset, OutputChunk, NormalizedOutputOptions } from 'rollup'
-import type { SourcemapInfo } from './types'
 
 /**
  * Extracts the data we need for sourcemap upload from the bundle
@@ -11,7 +10,7 @@ export function extractSourcemapDataFromBundle (
   outputOptions: NormalizedOutputOptions,
   bundle: OutputBundle,
   ignorePaths: Array<string> = []
-): SourcemapInfo[] {
+): Types.SourcemapInfo[] {
   const sourceMaps = Object.values(bundle).filter(isSourcemap)
 
   return sourceMaps.map(sourcemap => {
@@ -30,7 +29,7 @@ function isSourcemap(file: OutputAsset | OutputChunk): file is OutputAsset {
   return !!json.sourcesContent && json.sourcesContent.length > 0
 }
 
-function isNotIgnored(sourceMapInfo: SourcemapInfo, ignorePaths: Array<string>) {
+function isNotIgnored(sourceMapInfo: Types.SourcemapInfo, ignorePaths: Array<string>) {
   const isMatch = picomatch.isMatch(sourceMapInfo.jsFilePath, ignorePaths, { basename: true })
 
   return !isMatch
@@ -38,7 +37,7 @@ function isNotIgnored(sourceMapInfo: SourcemapInfo, ignorePaths: Array<string>) 
 
 function formatSourcemapData(
   outputOptions: NormalizedOutputOptions,
-  sourcemap: OutputAsset): SourcemapInfo {
+  sourcemap: OutputAsset): Types.SourcemapInfo {
   // This fileName could include a path like 'subfolder/foo.js.map'
   const sourcemapFilename = sourcemap.fileName
   const sourcemapFilePath = path.resolve(outputOptions.dir || '', sourcemapFilename)
