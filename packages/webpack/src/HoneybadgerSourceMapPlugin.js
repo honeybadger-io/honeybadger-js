@@ -13,7 +13,6 @@ const PLUGIN_NAME = 'HoneybadgerSourceMapPlugin'
 
 class HoneybadgerSourceMapPlugin {
   constructor (options) {
-    this.cleanOptions = cleanOptions
     this.sendDeployNotification = sendDeployNotification
     this.uploadSourceMaps = uploadSourcemaps
     this.options = cleanOptions(options)
