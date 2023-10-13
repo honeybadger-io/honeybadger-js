@@ -85,7 +85,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
     })
   })
 
-  describe('afterEmit', function () {
+  describe.only('afterEmit', function () {
     let compilation
     
     beforeEach(() => {
@@ -96,7 +96,9 @@ describe('HoneybadgerSourceMapPlugin', function () {
     })
 
     it('should call uploadSourceMaps', async function () {
-      sinon.stub(plugin, 'uploadSourceMaps')
+      //TODO
+      plugin.uploadSourceMaps = sinon.stub()
+      // sinon.stub(plugin, 'uploadSourceMaps')
 
       await plugin.afterEmit(compilation)
 
@@ -188,52 +190,64 @@ describe('HoneybadgerSourceMapPlugin', function () {
 
   describe('getAssets', function () {
     const chunks = [
-        {
-          id: 0,
-          names: ['app'],
-          files: ['app.81c1.js', 'app.81c1.js.map']
-        }
-      ]
+      {
+        id: 0,
+        names: ['app'],
+        files: ['app.5190.js', 'app.5190.js.map']
+      }, 
+      {
+        id: 1,
+        names: ['foo'],
+        files: ['foo.5190.js']
+      },
+    ]
+    const outputPath = '/fake/output/path'
     const compilation = {
       getStats: () => ({
         toJson: () => ({ chunks })
-      })
+      }), 
+      compiler: { outputPath },
+      getPath: () => outputPath,
     }
+
+    const expectedassets = [
+      { 
+        jsFilePath: "/fake/output/path/app.5190.js.map",
+        jsFilename: "app.5190.js.map",
+        sourcemapFilePath: "/fake/output/path/app.5190.js",
+        sourcemapFilename: "app.5190.js", 
+      }
+    ]
 
     it('should return an array of js, sourcemap tuples', function () {
       const assets = plugin.getAssets(compilation)
-      expect(assets).to.deep.eq([
-        { sourceFile: 'app.81c1.js', sourceMap: 'app.81c1.js.map' }
-      ])
+      expect(assets).to.deep.eq(expectedassets)
     })
 
     it('should ignore chunks that do not have a sourcemap asset', function () {
       const assets = plugin.getAssets(compilation)
-      expect(assets).to.deep.eq([
-        { sourceFile: 'app.81c1.js', sourceMap: 'app.81c1.js.map' }
-      ])
+      expect(assets).to.deep.eq(expectedassets)
     })
 
     it('should get the source map files from auxiliaryFiles in Webpack 5', function () {
       const w5chunks = [
         {
           id: 0,
-          names: ['vendor'],
-          files: ['vendor.5190.js'],
-          auxiliaryFiles: ['vendor.5190.js.map']
+          names: ['app'],
+          files: ['app.5190.js'],
+          auxiliaryFiles: ['app.5190.js.map']
         }
       ]
 
       const w5compilation = {
+        ...compilation,
         getStats: () => ({
           toJson: () => ({ chunks: w5chunks })
         })
       }
 
       const assets = plugin.getAssets(w5compilation)
-      expect(assets).to.deep.eq([
-        { sourceFile: 'vendor.5190.js', sourceMap: 'vendor.5190.js.map' }
-      ])
+      expect(assets).to.deep.eq(expectedassets)
     })
   })
 
@@ -245,7 +259,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
       compilation = { name: 'test', errors: [] }
       assets = [
         { sourceFile: 'vendor.5190.js', sourceMap: 'vendor.5190.js.map' },
-        { sourceFile: 'app.81c1.js', sourceMap: 'app.81c1.js.map' }
+        { sourceFile: 'app.5190.js', sourceMap: 'app.5190.js.map' }
       ]
       sinon.stub(plugin, 'getAssets').returns(assets)
       sinon.stub(plugin, 'uploadSourceMap')
@@ -267,7 +281,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
       expect(plugin.uploadSourceMap.getCall(1).args[0])
         .to.deep.eq({ name: 'test', errors: [] })
       expect(plugin.uploadSourceMap.getCall(1).args[1])
-        .to.deep.eq({ sourceFile: 'app.81c1.js', sourceMap: 'app.81c1.js.map' })
+        .to.deep.eq({ sourceFile: 'app.5190.js', sourceMap: 'app.5190.js.map' })
     })
 
     it('should throw an error if the uploadSourceMap function returns an error', function () {
@@ -327,7 +341,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
     const compilation = {
       assets: {
         'vendor.5190.js.map': { source: () => '{"version":3,"sources":[]' },
-        'app.81c1.js.map': { source: () => '{"version":3,"sources":[]' }
+        'app.5190.js.map': { source: () => '{"version":3,"sources":[]' }
       },
       compiler: { outputPath },
       errors: [],

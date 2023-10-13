@@ -3,7 +3,7 @@ import FormData from 'form-data'
 import { Buffer } from 'buffer'
 import { Response, FetchError } from 'node-fetch'
 
-describe('hbUtils', () => {
+describe('sourcemaps', () => {
   const fetchMock = td.func()  
   const hbOptions = {
     endpoint: 'https://honeybadger.io/api/sourcemaps/test',
