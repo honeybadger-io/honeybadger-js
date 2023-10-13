@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "open ./dist/index.html",
+    "start": "open ./index.html",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"
   },
