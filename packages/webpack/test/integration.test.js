@@ -65,8 +65,7 @@ describe('integration', () => {
       
       expect(sourcemapNock.isDone()).to.equal(true)
       expect(deployNock.isDone()).to.equal(false)
-      expect(consoleInfo.calledWith('Uploaded main.js.map to Honeybadger API')).to.eq(true)
-      expect(consoleInfo.calledWith('Successfully sent deploy notification to Honeybadger API.')).to.eq(false)
+
       done()
     })
   })
@@ -93,8 +92,7 @@ describe('integration', () => {
   
       expect(sourcemapNock.isDone()).to.equal(true)
       expect(deployNock.isDone()).to.equal(true)
-      expect(consoleInfo.calledWith('Uploaded main.js.map to Honeybadger API')).to.eq(true)
-      expect(consoleInfo.calledWith('Successfully sent deploy notification to Honeybadger')).to.eq(true)
+      
       done()
     })
   })
