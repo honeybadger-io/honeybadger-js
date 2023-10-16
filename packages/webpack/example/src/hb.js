@@ -1,7 +1,8 @@
 const Honeybadger = require('@honeybadger-io/js');
 
 Honeybadger.configure({
-  apiKey: (prompt('Enter the API key for your Honeybadger project:')),
+  apiKey: process.env.HONEYBADGER_API_KEY,
+  revision: process.env.HONEYBADGER_REVISION,
 })
 
 export default Honeybadger
