@@ -1,6 +1,6 @@
 const path = require('path')
 const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
-const { EnvironmentPlugin } = require("webpack")
+const { EnvironmentPlugin } = require('webpack')
 
 module.exports = {
   // Entry here would normally just be the `index.js` file, however
