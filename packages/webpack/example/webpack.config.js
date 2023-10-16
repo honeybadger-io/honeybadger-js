@@ -2,10 +2,16 @@ const path = require('path');
 const HoneybadgerSourceMapPlugin = require('@honeybadger-io/webpack')
 
 module.exports = {
-  entry: './src/index.js',
+  // Entry here would just needs to be the `index.js` file, however
+  // adding multiple entry points allows us to test multiple source map
+  // uploads
+  entry: {
+    index: './src/index.js',
+    hb: './src/hb.js',
+  },
   mode: 'production',
   output: {
-    filename: 'index.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
   devtool: 'source-map',

@@ -1,8 +1,4 @@
-const Honeybadger = require('@honeybadger-io/js');
-
-Honeybadger.configure({
-  apiKey: (prompt('Enter the API key for your Honeybadger project:')),
-})
+import Honeybadger from './hb'
 
 function notifyButton() {
   const button = document.createElement('button');
