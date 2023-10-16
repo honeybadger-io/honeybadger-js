@@ -12,7 +12,10 @@ module.exports = {
   plugins: [new HoneybadgerSourceMapPlugin({
     apiKey: process.env.HONEYBADGER_API_KEY,
     assetsUrl: 'https://cdn.example.com/assets',
-    revision: 'main',
-    deploy: true
+    revision: 'capybara',
+    deploy: {
+      environment: 'test', 
+      localUsername: 'hbTestUser',
+    }
   })]
 };

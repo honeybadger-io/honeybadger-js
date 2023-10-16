@@ -14,7 +14,6 @@ const SOURCEMAP_PATH = '/v1/source_maps'
 const DEPLOY_PATH = '/v1/deploys'
 
 describe('integration', () => {
-  let consoleInfo 
   let sourcemapNock
   let deployNock
   const baseWebpackConfig = {
@@ -35,7 +34,6 @@ describe('integration', () => {
   }
 
   beforeEach(() => {
-    consoleInfo = sinon.stub(console, 'info')
     nock.disableNetConnect()
     sourcemapNock = nock(TEST_ENDPOINT)
       .post(SOURCEMAP_PATH)
@@ -92,7 +90,7 @@ describe('integration', () => {
   
       expect(sourcemapNock.isDone()).to.equal(true)
       expect(deployNock.isDone()).to.equal(true)
-      
+
       done()
     })
   })

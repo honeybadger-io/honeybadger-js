@@ -51,15 +51,15 @@ describe('HoneybadgerSourceMapPlugin', function () {
       }
       const plugin = new HoneybadgerSourceMapPlugin(options)
       expect(plugin.options).to.deep.equal({
-        apiKey: "other-api-key",
-        assetsUrl: "https://cdn.example.com/assets",
+        apiKey: 'other-api-key',
+        assetsUrl: 'https://cdn.example.com/assets',
         deploy: false,
-        deployEndpoint: "https://api.honeybadger.io/v1/deploys",
-        endpoint: "https://my-random-endpoint.com",
+        deployEndpoint: 'https://api.honeybadger.io/v1/deploys',
+        endpoint: 'https://my-random-endpoint.com',
         ignoreErrors: false,
         ignorePaths: [],
         retries: 3,
-        revision: "main",
+        revision: 'main',
         silent: false,
         workerCount: 5,
       })
@@ -94,10 +94,10 @@ describe('HoneybadgerSourceMapPlugin', function () {
       }, 
     ]
     const assets = [{ 
-      sourcemapFilePath: "/fake/output/path/app.5190.js.map",
-      sourcemapFilename: "app.5190.js.map",
-      jsFilePath: "/fake/output/path/app.5190.js",
-      jsFilename: "app.5190.js", 
+      sourcemapFilePath: '/fake/output/path/app.5190.js.map',
+      sourcemapFilename: 'app.5190.js.map',
+      jsFilePath: '/fake/output/path/app.5190.js',
+      jsFilename: 'app.5190.js', 
     }]
     const outputPath = '/fake/output/path'
 
@@ -216,10 +216,10 @@ describe('HoneybadgerSourceMapPlugin', function () {
 
     const expectedAssets = [
       { 
-        sourcemapFilePath: "/fake/output/path/app.5190.js.map",
-        sourcemapFilename: "app.5190.js.map",
-        jsFilePath: "/fake/output/path/app.5190.js",
-        jsFilename: "app.5190.js", 
+        sourcemapFilePath: '/fake/output/path/app.5190.js.map',
+        sourcemapFilename: 'app.5190.js.map',
+        jsFilePath: '/fake/output/path/app.5190.js',
+        jsFilename: 'app.5190.js', 
       }
     ]
 

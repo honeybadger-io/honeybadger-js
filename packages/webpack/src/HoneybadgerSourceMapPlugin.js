@@ -49,7 +49,6 @@ class HoneybadgerSourceMapPlugin {
     compiler.hooks.afterEmit.tapPromise(PLUGIN_NAME, this.afterEmit.bind(this))
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getAssetPath (compilation, name) {
     if (!name) { return '' }
     return join(
