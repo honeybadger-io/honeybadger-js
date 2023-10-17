@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.13](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.12...@honeybadger-io/gatsby-plugin-honeybadger@6.0.13) (2023-10-09)
+
+**Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
+
+
+
+
+
 ## [6.0.12](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.11...@honeybadger-io/gatsby-plugin-honeybadger@6.0.12) (2023-09-25)
 
 **Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger

@@ -29,6 +29,9 @@
   "bugs": {
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
+  "files": [
+    "dist/**"
+  ],
   "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/webpack",
   "devDependencies": {
     "@babel/cli": "^7.14.5",
