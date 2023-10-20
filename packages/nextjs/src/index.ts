@@ -4,9 +4,10 @@ import HoneybadgerSourceMapPlugin from '@honeybadger-io/webpack'
 import type { WebpackConfigContext } from 'next/dist/server/config-shared'
 import { HoneybadgerNextJsConfig, NextJsRuntime, HoneybadgerWebpackPluginOptions } from './types'
 
+const URL_DOCS_SOURCE_MAPS_UPLOAD = 'https://docs.honeybadger.io/lib/javascript/integration/nextjs/#source-map-upload-and-tracking-deploys'
 let _silent = true
-function log(type: 'error' | 'debug', msg: string): void {
-  if (type === 'error' || !_silent) {
+function log(type: 'error' | 'warn' | 'debug', msg: string): void {
+  if (['error', 'warn'].includes(type) || !_silent) {
     console[type]('[HoneybadgerNextJs]', msg)
   }
 }
@@ -15,6 +16,11 @@ function shouldUploadSourceMaps(honeybadgerNextJsConfig: HoneybadgerNextJsConfig
   const { dev } = context
 
   if (honeybadgerNextJsConfig.disableSourceMapUpload) {
+    return false
+  }
+
+  if (!honeybadgerNextJsConfig.webpackPluginOptions || !honeybadgerNextJsConfig.webpackPluginOptions.apiKey) {
+    log('warn', `skipping source map upload; here's how to enable: ${URL_DOCS_SOURCE_MAPS_UPLOAD}`)
     return false
   }
 
@@ -159,8 +165,15 @@ function getWebpackPluginOptions(honeybadgerNextJsConfig: HoneybadgerNextJsConfi
   }
 }
 
-export function setupHoneybadger(config, honeybadgerNextJsConfig: HoneybadgerNextJsConfig) {
-  _silent = honeybadgerNextJsConfig?.silent ?? true
+export function setupHoneybadger(config, honeybadgerNextJsConfig?: HoneybadgerNextJsConfig) {
+  if (!honeybadgerNextJsConfig) {
+    honeybadgerNextJsConfig = {
+      silent: true,
+      disableSourceMapUpload: false,
+    }
+  }
+
+  _silent = honeybadgerNextJsConfig.silent ?? true
 
   return {
     ...config,
