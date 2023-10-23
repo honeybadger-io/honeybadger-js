@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.7.7...@honeybadger-io/nextjs@5.8.0) (2023-10-23)
+
+
+### Features
+
+* **nextjs:** simplify default configuration ([#1228](https://github.com/honeybadger-io/honeybadger-js/issues/1228)) ([9c80547](https://github.com/honeybadger-io/honeybadger-js/commit/9c805470e0abae5404be76557d35dd98f1f8162b))
+
+
+
 ## [5.7.7](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.7.6...@honeybadger-io/nextjs@5.7.7) (2023-10-09)
 
 **Note:** Version bump only for package @honeybadger-io/nextjs
