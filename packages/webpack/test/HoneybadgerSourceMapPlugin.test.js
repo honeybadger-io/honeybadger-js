@@ -190,6 +190,17 @@ describe('HoneybadgerSourceMapPlugin', function () {
       expect(compilation.errors.length).to.be.eq(1)
       expect(compilation.errors[0]).to.be.an.instanceof(Error)
     })
+
+    it('should not send a deploy notification if there are compilation errors', async function () {
+      sinon.stub(plugin, 'uploadSourceMaps')
+        .callsFake(() => { throw new Error() })
+      sinon.stub(plugin, 'sendDeployNotification')
+
+      await plugin.afterEmit(compilation)
+
+      expect(plugin.uploadSourceMaps.callCount).to.eq(1)
+      expect(plugin.sendDeployNotification.callCount).to.eq(0)
+    })
   })
 
   describe('getAssets', function () {
