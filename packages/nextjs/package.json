@@ -38,7 +38,7 @@
   },
   "peerDependencies": {
     "@honeybadger-io/react": ">= 5.x",
-    "next": "13.x"
+    "next": ">= 13.x"
   },
   "dependencies": {
     "@honeybadger-io/js": "^6.5.3",
