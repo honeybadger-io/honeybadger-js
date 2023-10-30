@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/plugin-core",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Shared functionality used by Honeybadger's javascript build plugins",
   "files": [
     "dist/**"
