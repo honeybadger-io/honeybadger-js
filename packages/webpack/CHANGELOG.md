@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.1.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/webpack@6.0.0...@honeybadger-io/webpack@6.1.0) (2023-10-30)
+
+
+### Features
+
+* **webpack:** rely on plugin-core ([#1211](https://github.com/honeybadger-io/honeybadger-js/issues/1211)) ([6730df8](https://github.com/honeybadger-io/honeybadger-js/commit/6730df8e44042164a9262f67c3e429151e10d6b5))
+
+
+
 ## 6.0.0 (2023-10-23)
 
 ## 5.1.7 (2023-03-20)
