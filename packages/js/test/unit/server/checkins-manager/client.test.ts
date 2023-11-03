@@ -14,7 +14,7 @@ describe('CheckinsClient', () => {
     const projectId = '11111'
     const request = nock('https://app.honeybadger.io')
       .get(`/v2/projects/${projectId}/check_ins`)
-      .reply(201, {
+      .reply(200, {
         results: [
           {
             id: 'uuid',
@@ -39,7 +39,7 @@ describe('CheckinsClient', () => {
     const request = nock('https://app.honeybadger.io')
       .get(`/v2/projects/${projectId}/check_ins`)
       .once()
-      .reply(201, {
+      .reply(200, {
         results: [
           {
             id: 'uuid',
