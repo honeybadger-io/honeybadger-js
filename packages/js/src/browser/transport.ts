@@ -12,10 +12,20 @@ function objectEntries<T, U extends keyof T> (obj: T): Array<[U, T[U]]> {
 }
 
 export class BrowserTransport implements Types.Transport {
-  async send (options: Types.TransportOptions, payload?: Types.NoticeTransportPayload | undefined): Promise<{ statusCode: number, body: string }> {
+  private headers: Record<string, string> = {}
+
+  constructor(headers: Record<string, string> = {}) {
+    this.headers = headers
+  }
+
+  defaultHeaders() {
+    return this.headers
+  }
+
+  async send<T>(options: Types.TransportOptions, payload?: T): Promise<{ statusCode: number, body: string }> {
     const headerArray = options.headers ? objectEntries(options.headers) : []
 
-    const headers: HeadersInit = {}
+    const headers: HeadersInit = this.defaultHeaders()
 
     headerArray.forEach(([key, value]) => {
       if (key != null && value != null) {

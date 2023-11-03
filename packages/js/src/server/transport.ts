@@ -1,13 +1,23 @@
 import { Types, Util } from '@honeybadger-io/core'
 import { URL } from 'url';
-import http from 'http';
-import https from 'https';
 import { getStats } from './util';
+import * as http from 'http';
+import * as https from 'https';
 
 const { sanitize } = Util
 
 export class ServerTransport implements Types.Transport {
-  send(options: Types.TransportOptions, payload?: Types.NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }> {
+  private readonly headers: Record<string, string> = {}
+
+  constructor(headers: Record<string, string> = {}) {
+    this.headers = headers
+  }
+
+  defaultHeaders() {
+    return this.headers
+  }
+
+  send<T>(options: Types.TransportOptions, payload?: T): Promise<{ statusCode: number; body: string; }> {
     const { protocol, hostname, pathname } = new URL(options.endpoint)
     const transport = (protocol === 'http:' ? http : https)
 
@@ -29,7 +39,10 @@ export class ServerTransport implements Types.Transport {
         // See https://github.com/honeybadger-io/honeybadger-js/issues/825#issuecomment-1193113433
         const httpOptions = {
           method: options.method,
-          headers: options.headers,
+          headers: {
+            ...this.defaultHeaders(),
+            ...options.headers
+          },
           path: pathname,
           protocol,
           hostname,
@@ -62,7 +75,7 @@ export class ServerTransport implements Types.Transport {
     })
   }
 
-  private isNoticePayload(payload?: Types.NoticeTransportPayload | undefined): payload is Types.NoticeTransportPayload {
+  private isNoticePayload(payload?: unknown): payload is Types.NoticeTransportPayload {
     return payload && (payload as Types.NoticeTransportPayload).error !== undefined
   }
 

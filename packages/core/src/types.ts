@@ -124,7 +124,7 @@ export type ProcessStats = {
 }
 
 export type TransportOptions = {
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   headers?: Record<string, number | string | string[] | undefined>,
   endpoint: string,
   maxObjectDepth?: number,
@@ -162,7 +162,8 @@ export type NoticeTransportPayload = {
 }
 
 export interface Transport {
-  send(options: TransportOptions, payload?: NoticeTransportPayload | undefined): Promise<{ statusCode: number; body: string; }>
+  defaultHeaders: () => Record<string, string>
+  send<T>(options: TransportOptions, payload?: T): Promise<{ statusCode: number; body: string; }>
 }
 
 export interface HoneybadgerStore {
