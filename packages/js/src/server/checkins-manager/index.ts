@@ -9,10 +9,8 @@ export class CheckinsManager {
 
   constructor(config: CheckinsConfig, client?: CheckinsClient) {
     this.config = config
-    const transport = new ServerTransport({
-      'Authorization': `Basic ${Buffer.from(`${config.personalAuthToken}:`).toString('base64')}`
-    })
-    this.client = client ?? new CheckinsClient(transport, config.logger)
+    const transport = new ServerTransport()
+    this.client = client ?? new CheckinsClient(config, transport)
   }
 
   public async sync(): Promise<Checkin[]> {

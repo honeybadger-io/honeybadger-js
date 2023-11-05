@@ -6,7 +6,10 @@ import { ServerTransport } from '../../../../src/server/transport';
 
 describe('CheckinsClient', () => {
   it('should create a client', () => {
-    const client = new CheckinsClient(new ServerTransport(), nullLogger())
+    const client = new CheckinsClient({
+      logger: nullLogger(),
+      personalAuthToken: '123',
+    }, new ServerTransport())
     expect(client).toBeInstanceOf(CheckinsClient)
   })
 
@@ -20,18 +23,21 @@ describe('CheckinsClient', () => {
             id: 'uuid',
             name: 'a check-in',
             schedule_type: 'simple',
-            report_period: 'weekly',
+            report_period: '1 week',
           }
         ]
       })
-    const client = new CheckinsClient(new ServerTransport(), nullLogger())
+    const client = new CheckinsClient({
+      logger: nullLogger(),
+      personalAuthToken: '123',
+    }, new ServerTransport())
     const checkins = await client.listForProject(projectId)
     expect(request.isDone()).toBe(true)
     expect(checkins).toHaveLength(1)
     expect(checkins[0].id).toEqual('uuid')
     expect(checkins[0].name).toEqual('a check-in')
     expect(checkins[0].scheduleType).toEqual('simple')
-    expect(checkins[0].reportPeriod).toEqual('weekly')
+    expect(checkins[0].reportPeriod).toEqual('1 week')
   })
 
   it('should return list of checkins from cache for the same project', async () => {
@@ -45,11 +51,14 @@ describe('CheckinsClient', () => {
             id: 'uuid',
             name: 'a check-in',
             schedule_type: 'simple',
-            report_period: 'weekly',
+            report_period: '1 week',
           }
         ]
       })
-    const client = new CheckinsClient(new ServerTransport(), nullLogger())
+    const client = new CheckinsClient({
+      logger: nullLogger(),
+      personalAuthToken: '123',
+    }, new ServerTransport())
     const checkins = await client.listForProject(projectId)
     expect(request.isDone()).toBe(true)
     const checkinsAgain = await client.listForProject(projectId)
@@ -67,15 +76,18 @@ describe('CheckinsClient', () => {
         id: 'uuid',
         name: 'a check-in',
         schedule_type: 'simple',
-        report_period: 'weekly',
+        report_period: '1 week',
       })
-    const client = new CheckinsClient(new ServerTransport(), nullLogger())
+    const client = new CheckinsClient({
+      logger: nullLogger(),
+      personalAuthToken: '123',
+    }, new ServerTransport())
     const checkin = await client.get(projectId, checkinId)
     expect(request.isDone()).toBe(true)
     expect(checkin.id).toEqual('uuid')
     expect(checkin.name).toEqual('a check-in')
     expect(checkin.scheduleType).toEqual('simple')
-    expect(checkin.reportPeriod).toEqual('weekly')
+    expect(checkin.reportPeriod).toEqual('1 week')
   })
 
   it('should create a checkin', async () => {
@@ -86,7 +98,7 @@ describe('CheckinsClient', () => {
       projectId,
       name: 'a check-in',
       scheduleType: 'simple',
-      reportPeriod: 'weekly',
+      reportPeriod: '1 week',
     })
 
     const payload = checkinToBeSaved.asRequestPayload()
@@ -97,13 +109,16 @@ describe('CheckinsClient', () => {
         id: checkinId,
         ...payload,
       })
-    const client = new CheckinsClient(new ServerTransport(), nullLogger())
+    const client = new CheckinsClient({
+      logger: nullLogger(),
+      personalAuthToken: '123',
+    }, new ServerTransport())
     const checkin = await client.create(checkinToBeSaved)
     expect(request.isDone()).toBe(true)
     expect(checkin.id).toEqual(checkinId)
     expect(checkin.name).toEqual('a check-in')
     expect(checkin.scheduleType).toEqual('simple')
-    expect(checkin.reportPeriod).toEqual('weekly')
+    expect(checkin.reportPeriod).toEqual('1 week')
   })
 
   it('should update a checkin', async () => {
@@ -115,7 +130,7 @@ describe('CheckinsClient', () => {
       id: checkinId,
       name: 'a check-in',
       scheduleType: 'simple',
-      reportPeriod: 'weekly',
+      reportPeriod: '1 week',
     })
 
     const payload = checkinToBeUpdated.asRequestPayload()
@@ -126,13 +141,16 @@ describe('CheckinsClient', () => {
         id: checkinId,
         ...payload,
       })
-    const client = new CheckinsClient(new ServerTransport(), nullLogger())
+    const client = new CheckinsClient({
+      logger: nullLogger(),
+      personalAuthToken: '123',
+    }, new ServerTransport())
     const checkin = await client.update(checkinToBeUpdated)
     expect(request.isDone()).toBe(true)
     expect(checkin.id).toEqual(checkinId)
     expect(checkin.name).toEqual('a check-in')
     expect(checkin.scheduleType).toEqual('simple')
-    expect(checkin.reportPeriod).toEqual('weekly')
+    expect(checkin.reportPeriod).toEqual('1 week')
   })
 
   it('should remove a checkin', async () => {
@@ -144,7 +162,7 @@ describe('CheckinsClient', () => {
       id: checkinId,
       name: 'a check-in',
       scheduleType: 'simple',
-      reportPeriod: 'weekly',
+      reportPeriod: '1 week',
     })
 
     const request = nock('https://app.honeybadger.io')
@@ -152,7 +170,10 @@ describe('CheckinsClient', () => {
       .once()
       .reply(204)
 
-    const client = new CheckinsClient(new ServerTransport(), nullLogger())
+    const client = new CheckinsClient({
+      logger: nullLogger(),
+      personalAuthToken: '123',
+    }, new ServerTransport())
 
     await client.remove(checkinToBeRemoved)
     expect(request.isDone()).toBe(true)

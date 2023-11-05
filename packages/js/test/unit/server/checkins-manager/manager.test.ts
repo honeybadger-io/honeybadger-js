@@ -33,7 +33,7 @@ describe('CheckinsManager', () => {
         {
           projectId: '11111',
           name: 'a check-in',
-          reportPeriod: 'weekly',
+          reportPeriod: '1 week',
           gracePeriod: '5 minutes'
         },
       ] as CheckinDto[]
@@ -54,7 +54,7 @@ describe('CheckinsManager', () => {
           projectId,
           name: 'a check-in',
           scheduleType: 'simple',
-          reportPeriod: 'weekly',
+          reportPeriod: '1 week',
           gracePeriod: '5 minutes'
         },
         {
@@ -120,7 +120,7 @@ describe('CheckinsManager', () => {
           projectId,
           name: 'a check-in',
           scheduleType: 'simple',
-          reportPeriod: 'weekly',
+          reportPeriod: '1 week',
           gracePeriod: '15 minutes' // the value to update
         },
         {
@@ -142,7 +142,7 @@ describe('CheckinsManager', () => {
             id: simpleCheckinId,
             name: 'a check-in',
             schedule_type: 'simple',
-            report_period: 'weekly',
+            report_period: '1 week',
             grace_period: '5 minutes'
           },
           {
@@ -201,7 +201,7 @@ describe('CheckinsManager', () => {
           projectId,
           name: 'a check-in',
           scheduleType: 'simple',
-          reportPeriod: 'weekly',
+          reportPeriod: '1 week',
           gracePeriod: '5 minutes'
         },
       ]
@@ -216,7 +216,7 @@ describe('CheckinsManager', () => {
             id: simpleCheckinId,
             name: 'a check-in',
             schedule_type: 'simple',
-            report_period: 'weekly',
+            report_period: '1 week',
             grace_period: '5 minutes'
           },
           {

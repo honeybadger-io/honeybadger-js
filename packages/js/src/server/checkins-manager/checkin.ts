@@ -18,7 +18,7 @@ export class Checkin implements CheckinDto {
      */
   private deleted: boolean
 
-  constructor(props: Partial<CheckinDto> = {}) {
+  constructor(props: CheckinDto) {
     this.id = props.id
     this.name = props.name
     this.slug = props.slug
@@ -108,8 +108,9 @@ export class Checkin implements CheckinDto {
         && this.cronTimezone === other.cronTimezone
   }
 
-  public static fromResponsePayload(payload: CheckinResponsePayload) {
+  public static fromResponsePayload(projectId: string, payload: CheckinResponsePayload) {
     return new Checkin({
+      projectId,
       id: payload.id,
       name: payload.name,
       slug: payload.slug,
