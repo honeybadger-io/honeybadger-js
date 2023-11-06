@@ -82,20 +82,19 @@ class Honeybadger extends Client {
   }
 
   async checkIn(idOrName: string): Promise<void> {
-    const id = await this.getCheckinId(idOrName)
-    return this.__transport
-      .send({
-        method: 'GET',
-        endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
-        logger: this.logger,
-      })
-      .then(() => {
-        this.logger.info('CheckIn sent')
-        return Promise.resolve()
-      })
-      .catch(err => {
-        this.logger.error(`CheckIn[${idOrName}] failed: an unknown error occurred.`, `message=${err.message}`)
-      })
+    try {
+      const id = await this.getCheckinId(idOrName)
+      await this.__transport
+        .send({
+          method: 'GET',
+          endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
+          logger: this.logger,
+        })
+      this.logger.info('CheckIn sent')
+    }
+    catch (err) {
+      this.logger.error(`CheckIn[${idOrName}] failed: an unknown error occurred.`, `message=${err.message}`)
+    }
   }
 
   private async getCheckinId(idOrName: string): Promise<string> {
