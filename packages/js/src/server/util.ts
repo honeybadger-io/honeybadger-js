@@ -75,7 +75,7 @@ export async function getSourceFile(path: string): Promise<string> {
 }
 
 export function readConfigFromFileSystem(): Record<string, unknown> {
-  return readConfigForModule('honeybadger.server')
+  return readConfigForModule('honeybadger')
 }
 
 function readConfigForModule(moduleName: string): Record<string, unknown> {
