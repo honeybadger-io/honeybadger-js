@@ -33,8 +33,7 @@ export class CheckinsClient {
     })
 
     if (response.statusCode !== 200) {
-      this.logger.debug(`Failed to fetch checkins for project[${projectId}]: ${response.body}`)
-      throw new Error(`Failed to fetch checkins for project[${projectId}]`,)
+      throw new Error(`Failed to fetch checkins for project[${projectId}]: ${this.getErrorMessage(response.body)}`,)
     }
 
     const data: { results: CheckinResponsePayload[] } = JSON.parse(response.body)
@@ -57,8 +56,7 @@ export class CheckinsClient {
     })
 
     if (response.statusCode !== 200) {
-      this.logger.debug(`Failed to fetch checkin[${checkinId}] for project[${projectId}]: ${response.body}`)
-      throw new Error(`Failed to fetch checkin[${checkinId}] for project[${projectId}]`)
+      throw new Error(`Failed to fetch checkin[${checkinId}] for project[${projectId}]: ${this.getErrorMessage(response.body)}`)
     }
 
     const data: CheckinResponsePayload = JSON.parse(response.body)
@@ -81,8 +79,7 @@ export class CheckinsClient {
     }, { check_in: checkin.asRequestPayload() })
 
     if (response.statusCode !== 201) {
-      this.logger.debug(`Failed to create checkin[${checkin.name}] for project[${checkin.projectId}]: ${response.body}`)
-      throw new Error(`Failed to create checkin[${checkin.name}] for project[${checkin.projectId}]`)
+      throw new Error(`Failed to create checkin[${checkin.name}] for project[${checkin.projectId}]: ${this.getErrorMessage(response.body)}`)
     }
 
     const data: CheckinResponsePayload = JSON.parse(response.body)
@@ -105,8 +102,7 @@ export class CheckinsClient {
     }, { check_in: checkin.asRequestPayload() })
 
     if (response.statusCode !== 204) {
-      this.logger.debug(`Failed to update checkin[${checkin.name}] for project[${checkin.projectId}]: ${response.body}`)
-      throw new Error(`Failed to update checkin[${checkin.name}] for project[${checkin.projectId}]`)
+      throw new Error(`Failed to update checkin[${checkin.name}] for project[${checkin.projectId}]: ${this.getErrorMessage(response.body)}`)
     }
 
     return checkin
@@ -125,8 +121,7 @@ export class CheckinsClient {
     })
 
     if (response.statusCode !== 204) {
-      this.logger.debug(`Failed to remove checkin[${checkin.name}] for project[${checkin.projectId}]: ${response.body}`)
-      throw new Error(`Failed to remove checkin[${checkin.name}] for project[${checkin.projectId}]`)
+      throw new Error(`Failed to remove checkin[${checkin.name}] for project[${checkin.projectId}]: ${this.getErrorMessage(response.body)}`)
     }
   }
 
@@ -134,6 +129,21 @@ export class CheckinsClient {
     return {
       'Authorization': `Basic ${Buffer.from(`${this.config.personalAuthToken}:`).toString('base64')}`,
       'Content-Type': 'application/json'
+    }
+  }
+
+  private getErrorMessage(responseBody: string) {
+    if (!responseBody) {
+      return ''
+    }
+
+    try {
+      const jsonBody: { errors: string } = JSON.parse(responseBody)
+
+      return jsonBody.errors ?? ''
+    }
+    catch (e) {
+      return responseBody
     }
   }
 
