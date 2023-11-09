@@ -1,5 +1,4 @@
 import * as stackTraceParser from 'stacktrace-parser'
-import { Client } from './client'
 import {
   Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler, Config, BrowserConfig
 } from './types'
@@ -290,7 +289,7 @@ export function sanitize(obj, maxDepth = 8) {
   return safeSerialize(obj)
 }
 
-export function logger(client: Client): Logger {
+export function logger(client: { config: { debug: boolean; logger: Logger; } }): Logger {
   const log = (method: string) => {
     return function (...args: unknown[]) {
       if (method === 'debug') {

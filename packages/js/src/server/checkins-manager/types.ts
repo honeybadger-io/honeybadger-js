@@ -54,9 +54,10 @@ export type CheckinDto = {
 }
 
 export type CheckinsConfig = {
+    debug?: boolean
+    logger?: Types.Logger
     personalAuthToken: string
     checkins: CheckinDto[]
-    logger: Types.Logger
 }
 
 export type CheckinPayload = {

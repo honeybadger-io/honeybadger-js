@@ -1,20 +1,29 @@
+import { Util, Types } from '@honeybadger-io/core'
 import { CheckinsClient } from './client'
 import { CheckinsConfig } from './types'
 import { ServerTransport } from '../transport';
 import { Checkin } from './checkin';
 
 export class CheckinsManager {
-  private readonly config: CheckinsConfig
+
   private readonly client: CheckinsClient
+
+  config: Required<CheckinsConfig>
+  logger: Types.Logger
 
   constructor(config: Partial<CheckinsConfig>, client?: CheckinsClient) {
     this.config = {
+      debug: config.debug ?? false,
       personalAuthToken: config.personalAuthToken ?? undefined,
       checkins: config.checkins ?? [],
       logger: config.logger ?? console,
     }
     const transport = new ServerTransport()
-    this.client = client ?? new CheckinsClient(this.config, transport)
+    this.logger = Util.logger(this)
+    this.client = client ?? new CheckinsClient({
+      personalAuthToken: config.personalAuthToken,
+      logger: this.logger
+    }, transport)
   }
 
   public async sync(): Promise<Checkin[]> {

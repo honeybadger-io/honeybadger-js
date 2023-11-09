@@ -27,7 +27,7 @@ export class CheckinsClient {
 
     const response = await this.transport.send({
       method: 'GET',
-      headers: this.getAuthHeader(),
+      headers: this.getHeaders(),
       endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins`,
       logger: this.logger,
     })
@@ -51,7 +51,7 @@ export class CheckinsClient {
 
     const response = await this.transport.send({
       method: 'GET',
-      headers: this.getAuthHeader(),
+      headers: this.getHeaders(),
       endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins/${checkinId}`,
       logger: this.logger,
     })
@@ -75,7 +75,7 @@ export class CheckinsClient {
 
     const response = await this.transport.send({
       method: 'POST',
-      headers: this.getAuthHeader(),
+      headers: this.getHeaders(),
       endpoint: `${this.BASE_URL}/v2/projects/${checkin.projectId}/check_ins`,
       logger: this.logger,
     }, { check_in: checkin.asRequestPayload() })
@@ -99,7 +99,7 @@ export class CheckinsClient {
 
     const response = await this.transport.send({
       method: 'PUT',
-      headers: this.getAuthHeader(),
+      headers: this.getHeaders(),
       endpoint: `${this.BASE_URL}/v2/projects/${checkin.projectId}/check_ins/${checkin.id}`,
       logger: this.logger,
     }, { check_in: checkin.asRequestPayload() })
@@ -119,7 +119,7 @@ export class CheckinsClient {
 
     const response = await this.transport.send({
       method: 'DELETE',
-      headers: this.getAuthHeader(),
+      headers: this.getHeaders(),
       endpoint: `${this.BASE_URL}/v2/projects/${checkin.projectId}/check_ins/${checkin.id}`,
       logger: this.logger,
     })
@@ -130,9 +130,10 @@ export class CheckinsClient {
     }
   }
 
-  private getAuthHeader() {
+  private getHeaders() {
     return {
-      'Authorization': `Basic ${Buffer.from(`${this.config.personalAuthToken}:`).toString('base64')}`
+      'Authorization': `Basic ${Buffer.from(`${this.config.personalAuthToken}:`).toString('base64')}`,
+      'Content-Type': 'application/json'
     }
   }
 
