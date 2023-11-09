@@ -1,0 +1,15 @@
+{
+  "name": "checkins-manager",
+  "version": "1.0.0",
+  "description": "an example that demonstrates checkins configuration api",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@honeybadger-io/js": "file:../.."
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -7,10 +7,14 @@ export class CheckinsManager {
   private readonly config: CheckinsConfig
   private readonly client: CheckinsClient
 
-  constructor(config: CheckinsConfig, client?: CheckinsClient) {
-    this.config = config
+  constructor(config: Partial<CheckinsConfig>, client?: CheckinsClient) {
+    this.config = {
+      personalAuthToken: config.personalAuthToken ?? undefined,
+      checkins: config.checkins ?? [],
+      logger: config.logger ?? console,
+    }
     const transport = new ServerTransport()
-    this.client = client ?? new CheckinsClient(config, transport)
+    this.client = client ?? new CheckinsClient(this.config, transport)
   }
 
   public async sync(): Promise<Checkin[]> {

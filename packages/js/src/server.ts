@@ -1,7 +1,7 @@
 import os from 'os'
 import domain from 'domain'
 import { Client, Util, Types } from '@honeybadger-io/core'
-import { getSourceFile } from './server/util'
+import { getSourceFile, readConfigFromFileSystem } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception_plugin'
 import unhandledRejection from './server/integrations/unhandled_rejection_plugin'
 import { errorHandler, requestHandler } from './server/middleware'
@@ -164,6 +164,7 @@ const singleton = new Honeybadger({
     uncaughtException(),
     unhandledRejection()
   ],
+  ...(readConfigFromFileSystem() ?? {})
 })
 
 const NOTIFIER = {
