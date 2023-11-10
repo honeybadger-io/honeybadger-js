@@ -10,11 +10,10 @@ module.exports = {
       gracePeriod: '10 minutes'
     },
     {
-      name: 'Cron That Should Not Be Here',
-      slug: 'cron-that-should-not-be-here-custom-slug',
+      name: 'Hourly Notifications',
       projectId: '68958',
-      scheduleType: 'cron',
-      cronSchedule: '* * 5 * *',
+      scheduleType: 'simple',
+      reportPeriod: '1 hour',
       gracePeriod: '5 minutes'
     }
   ]

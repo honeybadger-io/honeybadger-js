@@ -69,14 +69,8 @@ export class Checkin implements CheckinDto {
     const payload: CheckinPayload = {
       name: this.name,
       schedule_type: this.scheduleType,
-    }
-
-    if (this.slug) {
-      payload.slug = this.slug
-    }
-
-    if (this.gracePeriod) {
-      payload.grace_period = this.gracePeriod
+      slug: this.slug ?? '', // default is empty string
+      grace_period: this.gracePeriod ?? '' // default is empty string
     }
 
     if (this.scheduleType === 'simple') {
@@ -84,9 +78,7 @@ export class Checkin implements CheckinDto {
     }
     else {
       payload.cron_schedule = this.cronSchedule
-      if (this.cronTimezone) {
-        payload.cron_timezone = this.cronTimezone
-      }
+      payload.cron_timezone = this.cronTimezone ?? '' // default is empty string
     }
 
     return payload

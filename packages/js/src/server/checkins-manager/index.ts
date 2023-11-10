@@ -63,21 +63,24 @@ export class CheckinsManager {
     // get all project ids from local checkins
     // for each project id, get all checkins from the API
     // if not found in local checkins, remove it
-    const projectIds = localCheckins.map((checkin) => checkin.projectId)
+    const projectIds = Array.from(new Set(localCheckins.map((checkin) => checkin.projectId)))
     const remoteCheckinsPerProject = await Promise.all(projectIds.map((projectId) => {
       return this.client.listForProject(projectId)
     }))
     const allRemoteCheckins = remoteCheckinsPerProject.flat()
+    console.log('allRemoteCheckins', allRemoteCheckins)
     const checkinsToRemove = allRemoteCheckins.filter((remoteCheckin) => {
       return !localCheckins.find((localCheckin) => {
         return localCheckin.name === remoteCheckin.name
       })
     })
+    console.log('checkinsToRemove', checkinsToRemove)
     const removed = await Promise.all(checkinsToRemove.map(async (checkin) => {
       await this.client.remove(checkin)
       checkin.markAsDeleted()
       return checkin
     }))
+    console.log('removed', removed)
 
     return [
       ...results,
