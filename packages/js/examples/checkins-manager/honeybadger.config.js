@@ -1,17 +1,17 @@
 module.exports = {
-  personalAuthToken: process.env.HONEYBADGER_PERSONAL_AUTH_TOKEN || 'UrCxXYNnp2s-U4KgqVXv',
+  personalAuthToken: process.env.HONEYBADGER_PERSONAL_AUTH_TOKEN,
   checkins: [
     {
       name: 'Weekly Exports',
       slug: 'weekly-exports-custom-slug',
-      projectId: '68958',
+      projectId: process.env.HONEYBADGER_PROJECT_ID,
       scheduleType: 'simple',
       reportPeriod: '1 week',
       gracePeriod: '10 minutes'
     },
     {
       name: 'Hourly Notifications',
-      projectId: '68958',
+      projectId: process.env.HONEYBADGER_PROJECT_ID,
       scheduleType: 'simple',
       reportPeriod: '1 hour',
       gracePeriod: '5 minutes'
