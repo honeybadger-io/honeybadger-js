@@ -91,13 +91,13 @@ export class Checkin implements CheckinDto {
    */
   public isInSync(other: Checkin) {
     return this.name === other.name
-        && this.slug === other.slug
         && this.projectId === other.projectId
         && this.scheduleType === other.scheduleType
         && this.reportPeriod === other.reportPeriod
-        && this.gracePeriod === other.gracePeriod
         && this.cronSchedule === other.cronSchedule
-        && this.cronTimezone === other.cronTimezone
+        && (this.slug ?? '') === (other.slug ?? '')
+        && (this.gracePeriod ?? '') === (other.gracePeriod ?? '')
+        && (this.cronTimezone ?? '') === (other.cronTimezone ?? '')
   }
 
   public static fromResponsePayload(projectId: string, payload: CheckinResponsePayload) {

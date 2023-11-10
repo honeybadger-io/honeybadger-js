@@ -32,15 +32,38 @@ export class CheckinsManager {
       throw new Error('personalAuthToken is required')
     }
 
-    const results: Checkin[] = []
+    const localCheckins = this.getLocalCheckins()
+    const createdOrUpdated = await this.createOrUpdate(localCheckins)
+    const removed = await this.remove(localCheckins)
 
+    return [
+      ...createdOrUpdated,
+      ...removed
+    ]
+  }
+
+  private getLocalCheckins(): Checkin[] {
     // create checkins from configuration and validate them
     const localCheckins = this.config.checkins.map((dto) => {
       const checkin = new Checkin(dto)
       checkin.validate()
+
       return checkin
     });
 
+    // validate that we have unique checkin names
+    // throw error if there are checkins with the same name and project id
+    const checkinNames = localCheckins.map((checkin) => `${checkin.projectId}_${checkin.name}`)
+    const uniqueCheckinNames = new Set(checkinNames)
+    if (checkinNames.length !== uniqueCheckinNames.size) {
+      throw new Error('check-in names must be unique per project')
+    }
+
+    return localCheckins
+  }
+
+  private async createOrUpdate(localCheckins: Checkin[]) {
+    const results = []
     // for each checkin from the localCheckins array, check if it exists in the API
     // if it does not exist, create it
     // if it exists, check if it needs to be updated
@@ -60,6 +83,10 @@ export class CheckinsManager {
       }
     }
 
+    return results
+  }
+
+  private async remove(localCheckins: Checkin[]) {
     // get all project ids from local checkins
     // for each project id, get all checkins from the API
     // if not found in local checkins, remove it
@@ -68,24 +95,17 @@ export class CheckinsManager {
       return this.client.listForProject(projectId)
     }))
     const allRemoteCheckins = remoteCheckinsPerProject.flat()
-    console.log('allRemoteCheckins', allRemoteCheckins)
     const checkinsToRemove = allRemoteCheckins.filter((remoteCheckin) => {
       return !localCheckins.find((localCheckin) => {
         return localCheckin.name === remoteCheckin.name
       })
     })
-    console.log('checkinsToRemove', checkinsToRemove)
-    const removed = await Promise.all(checkinsToRemove.map(async (checkin) => {
+
+    return Promise.all(checkinsToRemove.map(async (checkin) => {
       await this.client.remove(checkin)
       checkin.markAsDeleted()
+
       return checkin
     }))
-    console.log('removed', removed)
-
-    return [
-      ...results,
-      ...removed
-    ]
   }
-
 }

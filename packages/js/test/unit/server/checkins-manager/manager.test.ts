@@ -42,6 +42,84 @@ describe('CheckinsManager', () => {
     expect(manager.sync()).rejects.toThrow('scheduleType is required for each checkin')
   })
 
+  it('should throw if checkin names are not unique per project', () => {
+    const config: CheckinsConfig = {
+      logger: nullLogger(),
+      personalAuthToken: 'abc',
+      checkins: [
+        {
+          projectId: '11111',
+          name: 'a check-in',
+          scheduleType: 'simple',
+          reportPeriod: '1 week',
+          gracePeriod: '5 minutes'
+        },
+        {
+          projectId: '11111',
+          name: 'a check-in',
+          scheduleType: 'simple',
+          reportPeriod: '2 weeks',
+          gracePeriod: '5 minutes'
+        },
+      ] as CheckinDto[]
+    }
+    const manager = new CheckinsManager(config)
+    expect(manager.sync()).rejects.toThrow('check-in names must be unique per project')
+  })
+
+  it('should not throw if checkin names are not unique but have different project id', async () => {
+    const config: CheckinsConfig = {
+      logger: nullLogger(),
+      personalAuthToken: 'abc',
+      checkins: [
+        {
+          projectId: '11111',
+          name: 'a check-in',
+          scheduleType: 'simple',
+          reportPeriod: '1 week',
+          gracePeriod: '5 minutes'
+        },
+        {
+          projectId: '22222',
+          name: 'a check-in',
+          scheduleType: 'simple',
+          reportPeriod: '2 weeks',
+          gracePeriod: '5 minutes'
+        },
+      ] as CheckinDto[]
+    }
+
+    const listProjectCheckinsRequest1 = nock('https://app.honeybadger.io')
+      .get('/v2/projects/11111/check_ins')
+      .once()
+      .reply(200, {
+        results: [
+          {
+            id: 'abc',
+            ...(new Checkin(config.checkins[0]).asRequestPayload())
+          }
+        ]
+      })
+
+    const listProjectCheckinsRequest2 = nock('https://app.honeybadger.io')
+      .get('/v2/projects/22222/check_ins')
+      .once()
+      .reply(200, {
+        results: [
+          {
+            id: 'def',
+            ...(new Checkin(config.checkins[1]).asRequestPayload())
+          }
+        ]
+      })
+
+    const manager = new CheckinsManager(config)
+    const synchronizedCheckins = await manager.sync()
+    expect(listProjectCheckinsRequest1.isDone()).toBe(true)
+    expect(listProjectCheckinsRequest2.isDone()).toBe(true)
+    expect(synchronizedCheckins).toHaveLength(2)
+  })
+
   it('should create checkins from config', async () => {
     const projectId = '11111'
     const simpleCheckinId = '22222'
