@@ -67,6 +67,7 @@
     "express": "^4.17.1",
     "jest": "^27.4.4",
     "jest-fetch-mock": "^3.0.3",
+    "mock-fs": "^5.2.0",
     "nock": "^13.2.1",
     "rollup": "^2.77.0",
     "rollup-plugin-executable": "^1.6.3",
