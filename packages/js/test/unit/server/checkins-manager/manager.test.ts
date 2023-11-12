@@ -267,6 +267,56 @@ describe('CheckinsManager', () => {
     })
   })
 
+  it('should update checkins from config to unset optional values', async () => {
+    const projectId = '11111'
+    const simpleCheckinId = '22222'
+    const config: CheckinsConfig = {
+      logger: nullLogger(),
+      personalAuthToken: 'abc',
+      checkins: [
+        {
+          projectId,
+          name: 'a check-in',
+          scheduleType: 'simple',
+          reportPeriod: '1 week',
+        },
+      ]
+    }
+
+    const listProjectCheckinsRequest = nock('https://app.honeybadger.io')
+      .get(`/v2/projects/${projectId}/check_ins`)
+      .once()
+      .reply(200, {
+        results: [
+          {
+            id: simpleCheckinId,
+            name: 'a check-in',
+            slug: 'a-check-in',
+            schedule_type: 'simple',
+            report_period: '1 week',
+          }
+        ] as CheckinResponsePayload[]
+      })
+
+    const simpleCheckinPayload = new Checkin(config.checkins[0]).asRequestPayload()
+    const updateSimpleCheckinRequest = nock('https://app.honeybadger.io')
+      .put(`/v2/projects/${projectId}/check_ins/${simpleCheckinId}`, {
+        check_in: simpleCheckinPayload
+      })
+      .once()
+      .reply(204)
+
+    const manager = new CheckinsManager(config)
+    const synchronizedCheckins = await manager.sync()
+    expect(listProjectCheckinsRequest.isDone()).toBe(true)
+    expect(updateSimpleCheckinRequest.isDone()).toBe(true)
+    expect(synchronizedCheckins).toHaveLength(1)
+    expect(synchronizedCheckins[0]).toMatchObject({
+      ...config.checkins[0],
+      id: simpleCheckinId,
+    })
+  })
+
   it('should remove checkins that are not in config', async () => {
     const projectId = '11111'
     const simpleCheckinId = '22222'
