@@ -11,7 +11,9 @@ const sharedPlugins = [
     __VERSION__: pkg.version
   }),
   commonjs(),
-  resolve()
+  resolve({
+    preferBuiltins: true // Plugin node-resolve: preferring built-in module 'buffer' over local alternative
+  })
 ]
 
 export default [
@@ -42,7 +44,17 @@ export default [
   // Server build
   {
     input: 'build/src/server.js',
-    external: ['http', 'https', 'url', 'os', 'fs', 'util', 'domain', 'async_hooks'],
+    external: [
+      'http',
+      'https',
+      'url',
+      'os',
+      'fs',
+      'util',
+      'domain',
+      'async_hooks',
+      'cosmiconfig',
+    ],
     output: {
       file: pkg.main,
       format: 'cjs',

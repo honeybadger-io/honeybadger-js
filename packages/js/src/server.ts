@@ -1,17 +1,24 @@
 import os from 'os'
 import domain from 'domain'
 import { Client, Util, Types } from '@honeybadger-io/core'
-import { getSourceFile } from './server/util'
+import { getSourceFile, readConfigFromFileSystem } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception_plugin'
 import unhandledRejection from './server/integrations/unhandled_rejection_plugin'
 import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { ServerTransport } from './server/transport'
 import { StackedStore } from './server/stacked_store'
+import { CheckinsConfig } from './server/checkins-manager/types'
+import { CheckinsClient } from './server/checkins-manager/client';
 
 const { endpoint } = Util
 
+type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckinsConfig
+
 class Honeybadger extends Client {
+
+  private __checkinsClient: CheckinsClient
+
   /** @internal */
   protected __beforeNotifyHandlers: Types.BeforeNotifyHandler[] = [
     (notice?: Types.Notice) => {
@@ -31,27 +38,29 @@ class Honeybadger extends Client {
   public requestHandler: typeof requestHandler
   public lambdaHandler: typeof lambdaHandler
 
-  config: Types.Config | Types.ServerlessConfig
+  config: HoneybadgerServerConfig
 
-  constructor(opts: Partial<Types.Config | Types.ServerlessConfig> = {}) {
+  constructor(opts: Partial<HoneybadgerServerConfig> = {}) {
+    const transport = new ServerTransport()
     super({
       projectRoot: process.cwd(),
       hostname: os.hostname(),
       ...opts,
-    }, new ServerTransport())
+    }, transport)
 
     // serverless defaults
     const config = this.config as Types.ServerlessConfig
     config.reportTimeoutWarning = config.reportTimeoutWarning ?? true
     config.timeoutWarningThresholdMs = config.timeoutWarningThresholdMs || 50
 
+    this.__checkinsClient = new CheckinsClient(this.config, transport)
     this.__getSourceFileHandler = getSourceFile.bind(this)
     this.errorHandler = errorHandler.bind(this)
     this.requestHandler = requestHandler.bind(this)
     this.lambdaHandler = lambdaHandler.bind(this)
   }
 
-  factory(opts?: Partial<Types.Config | Types.ServerlessConfig>): this {
+  factory(opts?: Partial<HoneybadgerServerConfig>): this {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const clone = new Honeybadger(opts) as any
     clone.setNotifier(this.getNotifier())
@@ -59,7 +68,7 @@ class Honeybadger extends Client {
     return clone
   }
 
-  configure(opts: Partial<Types.Config | Types.ServerlessConfig> = {}): this {
+  configure(opts: Partial<HoneybadgerServerConfig> = {}): this {
     return super.configure(opts)
   }
 
@@ -72,20 +81,48 @@ class Honeybadger extends Client {
     throw new Error('Honeybadger.showUserFeedbackForm() is not supported on the server-side')
   }
 
-  checkIn(id: string): Promise<void> {
-    return this.__transport
-      .send({
-        method: 'GET',
-        endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
-        logger: this.logger,
-      })
-      .then(() => {
-        this.logger.info('CheckIn sent')
-        return Promise.resolve()
-      })
-      .catch(err => {
-        this.logger.error('CheckIn failed: an unknown error occurred.', `message=${err.message}`)
-      })
+  async checkIn(idOrName: string): Promise<void> {
+    try {
+      const id = await this.getCheckinId(idOrName)
+      await this.__transport
+        .send({
+          method: 'GET',
+          endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
+          logger: this.logger,
+        })
+      this.logger.info('CheckIn sent')
+    }
+    catch (err) {
+      this.logger.error(`CheckIn[${idOrName}] failed: an unknown error occurred.`, `message=${err.message}`)
+    }
+  }
+
+  private async getCheckinId(idOrName: string): Promise<string> {
+    if (!this.config.checkins || this.config.checkins.length === 0) {
+      return idOrName
+    }
+
+    const localCheckin = this.config.checkins.find(c => c.name === idOrName)
+    if (!localCheckin) {
+      return idOrName
+    }
+
+    if (localCheckin.id) {
+      return localCheckin.id
+    }
+
+    const projectCheckins = await this.__checkinsClient.listForProject(localCheckin.projectId)
+    const remoteCheckin = projectCheckins.find(c => c.name === localCheckin.name)
+    if (!remoteCheckin) {
+      this.logger.debug(`Checkin[${idOrName}] was not found on HB. This should not happen. Was the sync command executed?`)
+
+      return idOrName
+    }
+
+    // store the id locally, so subsequent checkins won't have to call the API
+    localCheckin.id = remoteCheckin.id
+
+    return localCheckin.id
   }
 
   // This method is intended for web frameworks.
@@ -127,6 +164,7 @@ const singleton = new Honeybadger({
     uncaughtException(),
     unhandledRejection()
   ],
+  ...(readConfigFromFileSystem() ?? {})
 })
 
 const NOTIFIER = {

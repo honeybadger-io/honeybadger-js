@@ -11,7 +11,11 @@ export function nullLogger(): Types.Logger {
 }
 
 export class TestTransport implements Types.Transport {
-  send(_options: Types.TransportOptions, _payload: Types.NoticeTransportPayload): Promise<{ statusCode: number; body: string }> {
+  defaultHeaders(): Record<string, string> {
+    return {};
+  }
+
+  send<T>(_options: Types.TransportOptions, _payload: T): Promise<{ statusCode: number; body: string }> {
     return Promise.resolve({ body: JSON.stringify({ id: 'uuid' }), statusCode: 201 });
   }
 }

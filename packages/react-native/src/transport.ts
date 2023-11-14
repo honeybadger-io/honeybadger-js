@@ -1,12 +1,16 @@
 import { Types, Util } from '@honeybadger-io/core'
 import { Platform } from 'react-native'
 import * as pkg from '../package.json'
+import fetch from 'jest-fetch-mock';
 
 export class Transport implements Types.Transport {
+  defaultHeaders(): Record<string, string> {
+    return {};
+  }
 
-  async send(
+  async send<T>(
     options: Types.TransportOptions,
-    payload?: Types.NoticeTransportPayload
+    payload?: T
   ): Promise<{ statusCode: number; body: string; }> {
 
     const params: RequestInit = {
@@ -49,9 +53,9 @@ export class Transport implements Types.Transport {
     return `${pkg.name} ${pkg.version}; ${rnVersionStr}; ${nativePlatform}`;
   }
 
-  private buildJsonBody(
+  private buildJsonBody<T>(
     options: Types.TransportOptions,
-    payload: Types.NoticeTransportPayload
+    payload: T
   ): string {
     const body = Util.sanitize(payload, options.maxObjectDepth)
     return JSON.stringify(body)
