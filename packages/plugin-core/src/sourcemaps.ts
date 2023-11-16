@@ -3,6 +3,7 @@ import originalFetch from 'node-fetch'
 import FormData from 'form-data'
 import { promises as fs } from 'fs'
 import fetchRetry from 'fetch-retry'
+import path from 'path'
 // @ts-expect-error
 const fetch = fetchRetry(originalFetch)
 
@@ -81,7 +82,9 @@ export async function buildBodyForSourcemapUpload(
 ): Promise<FormData> {
   const form = new FormData()
 
-  const minifiedUrl = new URL(sourcemapData.jsFilename, hbOptions.assetsUrl).href
+  const url = new URL(hbOptions.assetsUrl)
+  url.pathname = path.join(url.pathname, sourcemapData.jsFilename)
+  const minifiedUrl = url.href
 
   form.append('api_key', hbOptions.apiKey)
   form.append('minified_url', minifiedUrl)

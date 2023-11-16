@@ -224,5 +224,33 @@ describe('sourcemaps', () => {
         expect(str.match(pattern)).to.have.length(1)
       }) 
     })
+
+    it('should support assetsUrl with path', async () => {
+      const result = await sourcemaps.buildBodyForSourcemapUpload(testData, { ...hbOptions, assetsUrl: 'https://foo.bar/_next' })
+
+      expect(result).to.be.an.instanceOf(FormData)
+
+      const buf = result.getBuffer()
+      const str = buf.toString()
+
+      const expectedFields = [
+        ['api_key', 'test_key'], 
+        ['minified_url', 'https://foo.bar/_next/index.js'], 
+        ['revision', '12345'],    
+      ]
+      const expectedFiles = [
+        ['minified_file', 'index.js', 'application/javascript'], 
+        ['source_map', 'index.map.js', 'application/octet-stream']
+      ]
+
+      expectedFields.forEach(([key, value]) => {
+        const pattern = new RegExp(`Content-Disposition: form-data; name="${key}"\\s*${value}`)
+        expect(str.match(pattern)).to.have.length(1)
+      })  
+      expectedFiles.forEach(([key, fileName, type]) => {
+        const pattern = new RegExp(`Content-Disposition: form-data; name="${key}"; filename="${fileName}"\\s*Content-Type: ${type}`)
+        expect(str.match(pattern)).to.have.length(1)
+      }) 
+    })
   })
 })
