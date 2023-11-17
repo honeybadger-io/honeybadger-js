@@ -1,9 +1,32 @@
 import { Client as BaseClient } from '@honeybadger-io/core'
+import os from 'os';
+import path from 'path';
 import nock from 'nock'
 import Singleton from '../../src/server'
 import { nullLogger } from './helpers'
 import { CheckinDto, CheckinResponsePayload } from '../../src/server/checkins-manager/types';
 import { Checkin } from '../../src/server/checkins-manager/checkin';
+import { cosmiconfigSync } from 'cosmiconfig'
+
+const configPath = path.resolve(__dirname, '../../', 'honeybadger.config.js')
+jest.mock('cosmiconfig', () => ({
+  cosmiconfigSync: jest.fn().mockImplementation((_moduleName, _options) => {
+    return {
+      load: jest.fn(),
+      clearCaches: jest.fn(),
+      clearLoadCache: jest.fn(),
+      clearSearchCache: jest.fn(),
+      search: () => {
+        return {
+          isEmpty: true,
+          config: {},
+          filepath: null
+        }
+      }
+    }
+  })
+}))
+const mockCosmiconfig = cosmiconfigSync as jest.MockedFunction<typeof cosmiconfigSync>
 
 describe('server client', function () {
   let client: typeof Singleton
@@ -12,6 +35,126 @@ describe('server client', function () {
     client = Singleton.factory({
       logger: nullLogger(),
       environment: null,
+    })
+  })
+
+  afterEach(() => {
+    jest.resetAllMocks()
+  })
+
+  describe('configuration', function () {
+    it('creates a client with default configuration', function () {
+      const client = Singleton.factory()
+      expect(client.config).toMatchObject({
+        apiKey: null,
+        endpoint: 'https://api.honeybadger.io',
+        environment: null,
+        projectRoot: process.cwd(),
+        hostname: os.hostname(),
+        component: null,
+        action: null,
+        revision: null,
+        reportData: null,
+        breadcrumbsEnabled: true,
+        maxBreadcrumbs: 40,
+        maxObjectDepth: 8,
+        logger: console,
+        developmentEnvironments: ['dev', 'development', 'test'],
+        debug: false,
+        tags: null,
+        enableUncaught: true,
+        enableUnhandledRejection: true,
+        reportTimeoutWarning: true,
+        timeoutWarningThresholdMs: 50,
+        filters: ['creditcard', 'password'],
+        __plugins: [],
+      })
+    })
+
+    it('creates a client with constructor arguments', function () {
+      const opts = {
+        apiKey: 'testing',
+        environment: 'staging',
+        developmentEnvironments: ['staging', 'dev', 'local'],
+        tags: ['tag-1', 'tag-2']
+      }
+      const client = Singleton.factory(opts)
+      expect(client.config).toMatchObject(opts)
+    })
+
+    it('creates a client from a configuration file', function () {
+      const configFromFile = {
+        apiKey: 'testing',
+        personalAuthToken: 'p123',
+        environment: 'staging',
+        developmentEnvironments: ['staging', 'dev', 'local'],
+        tags: ['tag-1', 'tag-2'],
+        checkins: [
+          {
+            projectId: '11111',
+            name: 'a check-in',
+            scheduleType: 'simple',
+            reportPeriod: '1 week',
+            gracePeriod: '5 minutes'
+          }
+        ]
+      }
+      mockCosmiconfig.mockImplementation((_moduleName, _options) => {
+        return {
+          load: jest.fn(),
+          clearCaches: jest.fn(),
+          clearLoadCache: jest.fn(),
+          clearSearchCache: jest.fn(),
+          search: () => {
+            return {
+              config: configFromFile,
+              filepath: configPath
+            }
+          }
+        }
+      })
+      const client = Singleton.factory()
+      expect(client.config).toMatchObject(configFromFile)
+    })
+
+    it('creates a client from both a configuration file and constructor arguments', function () {
+      const configFromFile = {
+        apiKey: 'testing',
+        personalAuthToken: 'p123',
+        environment: 'staging',
+        developmentEnvironments: ['staging', 'dev', 'local'],
+        tags: ['tag-1', 'tag-2'],
+        checkins: [
+          {
+            projectId: '11111',
+            name: 'a check-in',
+            scheduleType: 'simple',
+            reportPeriod: '1 week',
+            gracePeriod: '5 minutes'
+          }
+        ]
+      }
+      mockCosmiconfig.mockImplementation((_moduleName, _options) => {
+        return {
+          load: jest.fn(),
+          clearCaches: jest.fn(),
+          clearLoadCache: jest.fn(),
+          clearSearchCache: jest.fn(),
+          search: () => {
+            return {
+              config: configFromFile,
+              filepath: configPath
+            }
+          }
+        }
+      })
+      const client = Singleton.factory({
+        apiKey: 'not-testing'
+      })
+      expect(client.config).toMatchObject({
+        ...configFromFile,
+        apiKey: 'not-testing'
+      })
     })
   })
 

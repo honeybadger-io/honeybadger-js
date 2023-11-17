@@ -12,6 +12,10 @@ import { CheckinsConfig } from './server/checkins-manager/types'
 import { CheckinsClient } from './server/checkins-manager/client';
 
 const { endpoint } = Util
+const DEFAULT_PLUGINS = [
+  uncaughtException(),
+  unhandledRejection()
+]
 
 type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckinsConfig
 
@@ -61,8 +65,13 @@ class Honeybadger extends Client {
   }
 
   factory(opts?: Partial<HoneybadgerServerConfig>): this {
+    const clone = new Honeybadger({
+      // fixme: this can create unwanted side-effects, needs to be tested thoroughly before enabling
+      // __plugins: DEFAULT_PLUGINS,
+      ...(readConfigFromFileSystem() ?? {}),
+      ...opts,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const clone = new Honeybadger(opts) as any
+    }) as any
     clone.setNotifier(this.getNotifier())
 
     return clone
@@ -160,10 +169,7 @@ class Honeybadger extends Client {
 }
 
 const singleton = new Honeybadger({
-  __plugins: [
-    uncaughtException(),
-    unhandledRejection()
-  ],
+  __plugins: DEFAULT_PLUGINS,
   ...(readConfigFromFileSystem() ?? {})
 })
 

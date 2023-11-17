@@ -79,8 +79,14 @@ export function readConfigFromFileSystem(): Record<string, unknown> {
 }
 
 function readConfigForModule(moduleName: string): Record<string, unknown> {
-  const fileExplorer = cosmiconfigSync(moduleName)
-  const result = fileExplorer.search()
+  try {
+    const fileExplorer = cosmiconfigSync(moduleName)
+    const result = fileExplorer.search()
 
-  return result?.config ?? null
+    return result?.config ?? null
+  }
+  catch (e) {
+    console.debug(`[Honeybadger] Could not read config for module ${moduleName}: ${e.message}`)
+    return null
+  }
 }
