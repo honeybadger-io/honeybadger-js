@@ -66,7 +66,8 @@ class Honeybadger extends Client {
 
   factory(opts?: Partial<HoneybadgerServerConfig>): this {
     const clone = new Honeybadger({
-      __plugins: DEFAULT_PLUGINS,
+      // fixme: this can create unwanted side-effects, needs to be tested thoroughly before enabling
+      // __plugins: DEFAULT_PLUGINS,
       ...(readConfigFromFileSystem() ?? {}),
       ...opts,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
