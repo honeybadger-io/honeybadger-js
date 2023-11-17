@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.6.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.5.3...@honeybadger-io/js@6.6.0) (2023-11-17)
+
+
+### Features
+
+* check-ins configuration api ([#1241](https://github.com/honeybadger-io/honeybadger-js/issues/1241)) ([866bb8d](https://github.com/honeybadger-io/honeybadger-js/commit/866bb8d2bffc39046976a7216cabeae573695b12))
+* **js:** read config from file ([#1250](https://github.com/honeybadger-io/honeybadger-js/issues/1250)) ([936374c](https://github.com/honeybadger-io/honeybadger-js/commit/936374c2edc0fab65ea852a0772c1d9b31b03656))
+
+
+
 ## [6.5.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.5.2...@honeybadger-io/js@6.5.3) (2023-10-23)
 
 **Note:** Version bump only for package @honeybadger-io/js
