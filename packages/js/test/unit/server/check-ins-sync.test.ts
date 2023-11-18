@@ -1,9 +1,9 @@
 import path from 'path'
-import { syncCheckins } from '../../../src/server/checkins-sync'
+import { syncCheckIns } from '../../../src/server/check-ins-sync'
 import { cosmiconfigSync } from 'cosmiconfig'
 import nock from 'nock';
-import { CheckinResponsePayload, CheckinsConfig } from '../../../src/server/checkins-manager/types';
-import { Checkin } from '../../../src/server/checkins-manager/checkin';
+import { CheckInResponsePayload, CheckInsConfig } from '../../../src/server/check-ins-manager/types';
+import { CheckIn } from '../../../src/server/check-ins-manager/check-in';
 
 const configPath = path.resolve(__dirname, '../../../', 'honeybadger.config.js')
 jest.mock('cosmiconfig', () => ({
@@ -11,7 +11,7 @@ jest.mock('cosmiconfig', () => ({
 }))
 const mockCosmiconfig = cosmiconfigSync as jest.MockedFunction<typeof cosmiconfigSync>
 
-describe('checkins-sync', () => {
+describe('check-ins-sync', () => {
   afterEach(() => {
     jest.resetAllMocks()
   })
@@ -32,7 +32,7 @@ describe('checkins-sync', () => {
         }
       }
     })
-    await expect(syncCheckins()).rejects.toThrow('Could not find a Honeybadger configuration file.')
+    await expect(syncCheckIns()).rejects.toThrow('Could not find a Honeybadger configuration file.')
   })
 
   it('should throw an error if personal auth token is not set', async () => {
@@ -51,10 +51,10 @@ describe('checkins-sync', () => {
         }
       }
     })
-    await expect(syncCheckins()).rejects.toThrow('personalAuthToken is required')
+    await expect(syncCheckIns()).rejects.toThrow('personalAuthToken is required')
   })
 
-  it('should not sync if checkins array is empty', async () => {
+  it('should not sync if check-ins array is empty', async () => {
     const consoleLogSpy = jest.spyOn(console, 'log')
     const consoleErrorSpy = jest.spyOn(console, 'error')
     mockCosmiconfig.mockImplementation((_moduleName, _options) => {
@@ -75,13 +75,13 @@ describe('checkins-sync', () => {
       }
     })
 
-    await syncCheckins()
+    await syncCheckIns()
     expect(consoleErrorSpy).not.toHaveBeenCalled()
     expect(consoleLogSpy).toHaveBeenCalledWith('No check-ins found to synchronize with Honeybadger.')
   })
 
-  it('should sync checkins', async () => {
-    const checkinsConfig: Partial<CheckinsConfig> = {
+  it('should sync checkIns', async () => {
+    const checkInsConfig: Partial<CheckInsConfig> = {
       personalAuthToken: '123',
       checkins: [
         {
@@ -104,26 +104,26 @@ describe('checkins-sync', () => {
         search: () => {
           return {
             isEmpty: false,
-            config: checkinsConfig,
+            config: checkInsConfig,
             filepath: configPath
           }
         }
       }
     })
-    const listProjectCheckinsRequest = nock('https://app.honeybadger.io')
-      .get(`/v2/projects/${checkinsConfig.checkins[0].projectId}/check_ins`)
+    const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
+      .get(`/v2/projects/${checkInsConfig.checkins[0].projectId}/check_ins`)
       .once()
       .reply(200, {
         results: [
           {
             id: '22222',
-            ...(new Checkin(checkinsConfig.checkins[0]).asRequestPayload())
+            ...(new CheckIn(checkInsConfig.checkins[0]).asRequestPayload())
           },
-        ] as CheckinResponsePayload[]
+        ] as CheckInResponsePayload[]
       })
 
-    await syncCheckins()
-    expect(listProjectCheckinsRequest.isDone()).toBe(true)
+    await syncCheckIns()
+    expect(listProjectCheckInsRequest.isDone()).toBe(true)
     expect(consoleErrorSpy).not.toHaveBeenCalled()
     expect(consoleLogSpy).toHaveBeenCalledWith('Check-ins were synchronized with Honeybadger.')
   })

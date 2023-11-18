@@ -1,20 +1,20 @@
 const { readConfigFromFileSystem } = require('./util');
-const { CheckinsManager } = require('./checkins-manager')
+const { CheckInsManager } = require('./check-ins-manager')
 
-export async function syncCheckins() {
+export async function syncCheckIns() {
   const config = readConfigFromFileSystem()
   if (!config) {
     throw new Error('Could not find a Honeybadger configuration file.')
   }
-  const checkinsManager = new CheckinsManager(config)
-  const checkins = await checkinsManager.sync()
-  if (!checkins.length) {
+  const checkInsManager = new CheckInsManager(config)
+  const checkIns = await checkInsManager.sync()
+  if (!checkIns.length) {
     console.log('No check-ins found to synchronize with Honeybadger.')
 
     return
   }
 
-  const table = checkins.map((c) => {
+  const table = checkIns.map((c) => {
     return {
       'Id': c.id,
       'Name': c.name,

@@ -8,8 +8,8 @@ import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { ServerTransport } from './server/transport'
 import { StackedStore } from './server/stacked_store'
-import { CheckinsConfig } from './server/checkins-manager/types'
-import { CheckinsClient } from './server/checkins-manager/client';
+import { CheckInsConfig } from './server/check-ins-manager/types'
+import { CheckInsClient } from './server/check-ins-manager/client';
 
 const { endpoint } = Util
 const DEFAULT_PLUGINS = [
@@ -17,11 +17,11 @@ const DEFAULT_PLUGINS = [
   unhandledRejection()
 ]
 
-type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckinsConfig
+type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckInsConfig
 
 class Honeybadger extends Client {
 
-  private __checkinsClient: CheckinsClient
+  private __checkInsClient: CheckInsClient
 
   /** @internal */
   protected __beforeNotifyHandlers: Types.BeforeNotifyHandler[] = [
@@ -57,7 +57,7 @@ class Honeybadger extends Client {
     config.reportTimeoutWarning = config.reportTimeoutWarning ?? true
     config.timeoutWarningThresholdMs = config.timeoutWarningThresholdMs || 50
 
-    this.__checkinsClient = new CheckinsClient(this.config, transport)
+    this.__checkInsClient = new CheckInsClient(this.config, transport)
     this.__getSourceFileHandler = getSourceFile.bind(this)
     this.errorHandler = errorHandler.bind(this)
     this.requestHandler = requestHandler.bind(this)
@@ -92,7 +92,7 @@ class Honeybadger extends Client {
 
   async checkIn(idOrName: string): Promise<void> {
     try {
-      const id = await this.getCheckinId(idOrName)
+      const id = await this.getCheckInId(idOrName)
       await this.__transport
         .send({
           method: 'GET',
@@ -106,32 +106,32 @@ class Honeybadger extends Client {
     }
   }
 
-  private async getCheckinId(idOrName: string): Promise<string> {
+  private async getCheckInId(idOrName: string): Promise<string> {
     if (!this.config.checkins || this.config.checkins.length === 0) {
       return idOrName
     }
 
-    const localCheckin = this.config.checkins.find(c => c.name === idOrName)
-    if (!localCheckin) {
+    const localCheckIn = this.config.checkins.find(c => c.name === idOrName)
+    if (!localCheckIn) {
       return idOrName
     }
 
-    if (localCheckin.id) {
-      return localCheckin.id
+    if (localCheckIn.id) {
+      return localCheckIn.id
     }
 
-    const projectCheckins = await this.__checkinsClient.listForProject(localCheckin.projectId)
-    const remoteCheckin = projectCheckins.find(c => c.name === localCheckin.name)
-    if (!remoteCheckin) {
+    const projectCheckIns = await this.__checkInsClient.listForProject(localCheckIn.projectId)
+    const remoteCheckIn = projectCheckIns.find(c => c.name === localCheckIn.name)
+    if (!remoteCheckIn) {
       this.logger.debug(`Checkin[${idOrName}] was not found on HB. This should not happen. Was the sync command executed?`)
 
       return idOrName
     }
 
-    // store the id locally, so subsequent checkins won't have to call the API
-    localCheckin.id = remoteCheckin.id
+    // store the id in-memory, so subsequent check-ins won't have to call the API
+    localCheckIn.id = remoteCheckIn.id
 
-    return localCheckin.id
+    return localCheckIn.id
   }
 
   // This method is intended for web frameworks.
