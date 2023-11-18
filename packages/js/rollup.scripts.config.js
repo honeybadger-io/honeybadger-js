@@ -4,10 +4,10 @@ import resolve from '@rollup/plugin-node-resolve'
 import path from 'path'
 
 export default {
-  input: 'build/src/server/checkins-sync-exec.js',
+  input: 'build/src/server/check-ins-sync-exec.js',
   output: [
     {
-      file: 'dist/server/checkins-sync-exec.js',
+      file: 'dist/server/check-ins-sync-exec.js',
       banner: '#!/usr/bin/env node', // rollup throws an error if this line is already in the js file
       exports: 'named',
       format: 'cjs',
