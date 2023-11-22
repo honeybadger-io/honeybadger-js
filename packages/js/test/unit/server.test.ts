@@ -4,8 +4,8 @@ import path from 'path';
 import nock from 'nock'
 import Singleton from '../../src/server'
 import { nullLogger } from './helpers'
-import { CheckinDto, CheckinResponsePayload } from '../../src/server/checkins-manager/types';
-import { Checkin } from '../../src/server/checkins-manager/checkin';
+import { CheckInDto, CheckInResponsePayload } from '../../src/server/check-ins-manager/types';
+import { CheckIn } from '../../src/server/check-ins-manager/check-in';
 import { cosmiconfigSync } from 'cosmiconfig'
 
 const configPath = path.resolve(__dirname, '../../', 'honeybadger.config.js')
@@ -429,7 +429,7 @@ describe('server client', function () {
   })
 
   describe('checkIn', function () {
-    it('sends a checkIn report using a checkin id', async function () {
+    it('sends a check-in report using a check-in id', async function () {
       client.configure({
         apiKey: 'testing',
         endpoint: 'http://api.honeybadger.io',
@@ -444,10 +444,10 @@ describe('server client', function () {
       expect(request.isDone()).toBe(true)
     })
 
-    it('sends a checkin report using a checkin name', async function () {
-      const checkinId = '123'
-      const checkinConfig: CheckinDto = {
-        name: 'a simple checkin',
+    it('sends a check-in report using a check-in name', async function () {
+      const checkInId = '123'
+      const checkInConfig: CheckInDto = {
+        name: 'a simple check-in',
         projectId: '1111',
         scheduleType: 'simple',
         reportPeriod: '1 day',
@@ -456,35 +456,35 @@ describe('server client', function () {
         apiKey: 'testing',
         personalAuthToken: 'testingToken',
         endpoint: 'http://api.honeybadger.io',
-        checkins: [checkinConfig]
+        checkins: [checkInConfig]
       })
 
-      const localCheckin = new Checkin(checkinConfig)
-      const listProjectCheckinsRequest = nock('https://app.honeybadger.io')
-        .get(`/v2/projects/${localCheckin.projectId}/check_ins`)
+      const localCheckIn = new CheckIn(checkInConfig)
+      const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
+        .get(`/v2/projects/${localCheckIn.projectId}/check_ins`)
         .once()
         .reply(200, {
           results: [
             {
-              ...new Checkin(checkinConfig).asRequestPayload(),
-              id: checkinId
+              ...new CheckIn(checkInConfig).asRequestPayload(),
+              id: checkInId
             },
-          ] as CheckinResponsePayload[]
+          ] as CheckInResponsePayload[]
         })
 
       const checkinRequest = nock('http://api.honeybadger.io')
-        .get(`/v1/check_in/${checkinId}`)
+        .get(`/v1/check_in/${checkInId}`)
         .reply(201)
 
-      await client.checkIn(checkinConfig.name)
-      expect(listProjectCheckinsRequest.isDone()).toBe(true)
+      await client.checkIn(checkInConfig.name)
+      expect(listProjectCheckInsRequest.isDone()).toBe(true)
       expect(checkinRequest.isDone()).toBe(true)
     })
 
-    it('sends a checkin report using a checkin name without calling the HB API', async function () {
-      const checkinId = '123'
-      const checkinConfig: CheckinDto = {
-        name: 'a simple checkin',
+    it('sends a check-in report using a check-in name without calling the HB API', async function () {
+      const checkInId = '123'
+      const checkInConfig: CheckInDto = {
+        name: 'a simple check-in',
         projectId: '1111',
         scheduleType: 'simple',
         reportPeriod: '1 day',
@@ -493,31 +493,31 @@ describe('server client', function () {
         apiKey: 'testing',
         personalAuthToken: 'testingToken',
         endpoint: 'http://api.honeybadger.io',
-        checkins: [checkinConfig]
+        checkins: [checkInConfig]
       })
 
-      const localCheckin = new Checkin(checkinConfig)
-      const listProjectCheckinsRequest = nock('https://app.honeybadger.io')
-        .get(`/v2/projects/${localCheckin.projectId}/check_ins`)
+      const localCheckIn = new CheckIn(checkInConfig)
+      const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
+        .get(`/v2/projects/${localCheckIn.projectId}/check_ins`)
         .once()
         .reply(200, {
           results: [
             {
-              ...new Checkin(checkinConfig).asRequestPayload(),
-              id: checkinId
+              ...new CheckIn(checkInConfig).asRequestPayload(),
+              id: checkInId
             },
-          ] as CheckinResponsePayload[]
+          ] as CheckInResponsePayload[]
         })
 
-      const checkinRequest = nock('http://api.honeybadger.io')
-        .get(`/v1/check_in/${checkinId}`)
+      const checkInRequest = nock('http://api.honeybadger.io')
+        .get(`/v1/check_in/${checkInId}`)
         .twice()
         .reply(201)
 
-      await client.checkIn(checkinConfig.name)
-      await client.checkIn(checkinConfig.name)
-      expect(listProjectCheckinsRequest.isDone()).toBe(true)
-      expect(checkinRequest.isDone()).toBe(true)
+      await client.checkIn(checkInConfig.name)
+      await client.checkIn(checkInConfig.name)
+      expect(listProjectCheckInsRequest.isDone()).toBe(true)
+      expect(checkInRequest.isDone()).toBe(true)
     })
   })
 

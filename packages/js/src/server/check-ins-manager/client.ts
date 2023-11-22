@@ -1,10 +1,10 @@
 import { Types } from '@honeybadger-io/core'
-import { Checkin } from './checkin'
-import { CheckinResponsePayload } from './types';
+import { CheckIn } from './check-in'
+import { CheckInResponsePayload } from './types';
 
-export class CheckinsClient {
+export class CheckInsClient {
   private readonly BASE_URL = 'https://app.honeybadger.io'
-  private readonly cache: Record<string, Checkin[]>
+  private readonly cache: Record<string, CheckIn[]>
   private readonly config: { personalAuthToken: string; logger: Types.Logger }
   private readonly logger: Types.Logger
   private readonly transport: Types.Transport
@@ -16,7 +16,7 @@ export class CheckinsClient {
     this.cache = {}
   }
 
-  public async listForProject(projectId: string): Promise<Checkin[]> {
+  public async listForProject(projectId: string): Promise<CheckIn[]> {
     if (this.cache[projectId]) {
       return this.cache[projectId]
     }
@@ -36,14 +36,14 @@ export class CheckinsClient {
       throw new Error(`Failed to fetch checkins for project[${projectId}]: ${this.getErrorMessage(response.body)}`,)
     }
 
-    const data: { results: CheckinResponsePayload[] } = JSON.parse(response.body)
-    const checkins = data.results.map((checkin) => Checkin.fromResponsePayload(projectId, checkin))
-    this.cache[projectId] = checkins
+    const data: { results: CheckInResponsePayload[] } = JSON.parse(response.body)
+    const checkIns = data.results.map((checkin) => CheckIn.fromResponsePayload(projectId, checkin))
+    this.cache[projectId] = checkIns
 
-    return checkins
+    return checkIns
   }
 
-  public async get(projectId: string, checkinId: string): Promise<Checkin> {
+  public async get(projectId: string, checkInId: string): Promise<CheckIn> {
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
@@ -51,22 +51,22 @@ export class CheckinsClient {
     const response = await this.transport.send({
       method: 'GET',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins/${checkinId}`,
+      endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins/${checkInId}`,
       logger: this.logger,
     })
 
     if (response.statusCode !== 200) {
-      throw new Error(`Failed to fetch checkin[${checkinId}] for project[${projectId}]: ${this.getErrorMessage(response.body)}`)
+      throw new Error(`Failed to fetch check-in[${checkInId}] for project[${projectId}]: ${this.getErrorMessage(response.body)}`)
     }
 
-    const data: CheckinResponsePayload = JSON.parse(response.body)
-    const checkin = Checkin.fromResponsePayload(projectId, data)
-    checkin.projectId = projectId
+    const data: CheckInResponsePayload = JSON.parse(response.body)
+    const checkIn = CheckIn.fromResponsePayload(projectId, data)
+    checkIn.projectId = projectId
 
-    return checkin
+    return checkIn
   }
 
-  public async create(checkin: Checkin): Promise<Checkin> {
+  public async create(checkIn: CheckIn): Promise<CheckIn> {
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
@@ -74,22 +74,22 @@ export class CheckinsClient {
     const response = await this.transport.send({
       method: 'POST',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${checkin.projectId}/check_ins`,
+      endpoint: `${this.BASE_URL}/v2/projects/${checkIn.projectId}/check_ins`,
       logger: this.logger,
-    }, { check_in: checkin.asRequestPayload() })
+    }, { check_in: checkIn.asRequestPayload() })
 
     if (response.statusCode !== 201) {
-      throw new Error(`Failed to create checkin[${checkin.name}] for project[${checkin.projectId}]: ${this.getErrorMessage(response.body)}`)
+      throw new Error(`Failed to create check-in[${checkIn.name}] for project[${checkIn.projectId}]: ${this.getErrorMessage(response.body)}`)
     }
 
-    const data: CheckinResponsePayload = JSON.parse(response.body)
-    const result = Checkin.fromResponsePayload(checkin.projectId, data)
-    result.projectId = checkin.projectId
+    const data: CheckInResponsePayload = JSON.parse(response.body)
+    const result = CheckIn.fromResponsePayload(checkIn.projectId, data)
+    result.projectId = checkIn.projectId
 
     return result
   }
 
-  public async update(checkin: Checkin): Promise<Checkin> {
+  public async update(checkIn: CheckIn): Promise<CheckIn> {
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
@@ -97,18 +97,18 @@ export class CheckinsClient {
     const response = await this.transport.send({
       method: 'PUT',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${checkin.projectId}/check_ins/${checkin.id}`,
+      endpoint: `${this.BASE_URL}/v2/projects/${checkIn.projectId}/check_ins/${checkIn.id}`,
       logger: this.logger,
-    }, { check_in: checkin.asRequestPayload() })
+    }, { check_in: checkIn.asRequestPayload() })
 
     if (response.statusCode !== 204) {
-      throw new Error(`Failed to update checkin[${checkin.name}] for project[${checkin.projectId}]: ${this.getErrorMessage(response.body)}`)
+      throw new Error(`Failed to update checkin[${checkIn.name}] for project[${checkIn.projectId}]: ${this.getErrorMessage(response.body)}`)
     }
 
-    return checkin
+    return checkIn
   }
 
-  public async remove(checkin: Checkin): Promise<void> {
+  public async remove(checkIn: CheckIn): Promise<void> {
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
@@ -116,12 +116,12 @@ export class CheckinsClient {
     const response = await this.transport.send({
       method: 'DELETE',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${checkin.projectId}/check_ins/${checkin.id}`,
+      endpoint: `${this.BASE_URL}/v2/projects/${checkIn.projectId}/check_ins/${checkIn.id}`,
       logger: this.logger,
     })
 
     if (response.statusCode !== 204) {
-      throw new Error(`Failed to remove checkin[${checkin.name}] for project[${checkin.projectId}]: ${this.getErrorMessage(response.body)}`)
+      throw new Error(`Failed to remove checkin[${checkIn.name}] for project[${checkIn.projectId}]: ${this.getErrorMessage(response.body)}`)
     }
   }
 

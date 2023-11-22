@@ -39,7 +39,7 @@
     }
   },
   "bin": {
-    "honeybadger-checkins-sync": "dist/server/checkins-sync-exec.js"
+    "honeybadger-checkins-sync": "dist/server/check-ins-sync-exec.js"
   },
   "scripts": {
     "build": "tsc --build tsconfig.json && rollup -c && rollup -c rollup.scripts.config.js && node ./scripts/copy-typedefs.js && node ./scripts/generate-feedback-form-assets.js",

@@ -1,6 +1,6 @@
-import { CheckinDto, CheckinPayload, CheckinResponsePayload } from './types'
+import { CheckInDto, CheckInPayload, CheckInResponsePayload } from './types'
 
-export class Checkin implements CheckinDto {
+export class CheckIn implements CheckInDto {
   id?: string
   projectId: string
   name: string
@@ -12,13 +12,13 @@ export class Checkin implements CheckinDto {
   cronTimezone?: string
 
   /**
-     * Only set when the checkin has been deleted
+     * Only set when the check-in has been deleted
      * after an update request.
      * Note: this property exists only locally.
      */
   private deleted: boolean
 
-  constructor(props: CheckinDto) {
+  constructor(props: CheckInDto) {
     this.id = props.id
     this.name = props.name
     this.slug = props.slug
@@ -41,15 +41,15 @@ export class Checkin implements CheckinDto {
 
   public validate() {
     if (!this.projectId) {
-      throw new Error('projectId is required for each checkin')
+      throw new Error('projectId is required for each check-in')
     }
 
     if (!this.name) {
-      throw new Error('name is required for each checkin')
+      throw new Error('name is required for each check-in')
     }
 
     if (!this.scheduleType) {
-      throw new Error('scheduleType is required for each checkin')
+      throw new Error('scheduleType is required for each check-in')
     }
 
     if (!['simple', 'cron'].includes(this.scheduleType)) {
@@ -57,16 +57,16 @@ export class Checkin implements CheckinDto {
     }
 
     if (this.scheduleType === 'simple' && !this.reportPeriod) {
-      throw new Error(`${this.name} [reportPeriod] is required for simple checkins`)
+      throw new Error(`${this.name} [reportPeriod] is required for simple check-ins`)
     }
 
     if (this.scheduleType === 'cron' && !this.cronSchedule) {
-      throw new Error(`${this.name} [cronSchedule] is required for cron checkins`)
+      throw new Error(`${this.name} [cronSchedule] is required for cron check-ins`)
     }
   }
 
   public asRequestPayload() {
-    const payload: CheckinPayload = {
+    const payload: CheckInPayload = {
       name: this.name,
       schedule_type: this.scheduleType,
       slug: this.slug ?? '', // default is empty string
@@ -85,11 +85,11 @@ export class Checkin implements CheckinDto {
   }
 
   /**
-   * Compares two checkins, usually the one from the API and the one from the config file.
-   * If the one in the config file does not match the checkin from the API,
+   * Compares two check-ins, usually the one from the API and the one from the config file.
+   * If the one in the config file does not match the check-in from the API,
    * then we issue an update request.
    */
-  public isInSync(other: Checkin) {
+  public isInSync(other: CheckIn) {
     return this.name === other.name
         && this.projectId === other.projectId
         && this.scheduleType === other.scheduleType
@@ -100,8 +100,8 @@ export class Checkin implements CheckinDto {
         && (this.cronTimezone ?? '') === (other.cronTimezone ?? '')
   }
 
-  public static fromResponsePayload(projectId: string, payload: CheckinResponsePayload) {
-    return new Checkin({
+  public static fromResponsePayload(projectId: string, payload: CheckInResponsePayload) {
+    return new CheckIn({
       projectId,
       id: payload.id,
       name: payload.name,

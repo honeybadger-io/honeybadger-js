@@ -1,6 +1,6 @@
 import { Types } from '@honeybadger-io/core';
 
-export type CheckinDto = {
+export type CheckInDto = {
     /**
      * Checkin identifier.
      */
@@ -53,14 +53,14 @@ export type CheckinDto = {
 
 }
 
-export type CheckinsConfig = {
+export type CheckInsConfig = {
     debug?: boolean
     logger?: Types.Logger
     personalAuthToken: string
-    checkins: CheckinDto[]
+    checkins: CheckInDto[]
 }
 
-export type CheckinPayload = {
+export type CheckInPayload = {
     name: string
     slug?: string
     schedule_type: 'simple' | 'cron'
@@ -70,8 +70,8 @@ export type CheckinPayload = {
     cron_timezone?: string
 }
 
-export type CheckinTransportPayload = {
-    check_in: CheckinPayload
+export type CheckInTransportPayload = {
+    check_in: CheckInPayload
 }
 
-export type CheckinResponsePayload = { id: string } & CheckinPayload
+export type CheckInResponsePayload = { id: string } & CheckInPayload

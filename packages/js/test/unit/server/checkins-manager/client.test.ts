@@ -1,19 +1,19 @@
-import { CheckinsClient } from '../../../../src/server/checkins-manager/client';
-import { Checkin } from '../../../../src/server/checkins-manager/checkin';
+import { CheckInsClient } from '../../../../src/server/check-ins-manager/client';
+import { CheckIn } from '../../../../src/server/check-ins-manager/check-in';
 import { nullLogger } from '../../helpers';
 import nock from 'nock';
 import { ServerTransport } from '../../../../src/server/transport';
 
 describe('CheckinsClient', () => {
   it('should create a client', () => {
-    const client = new CheckinsClient({
+    const client = new CheckInsClient({
       logger: nullLogger(),
       personalAuthToken: '123',
     }, new ServerTransport())
-    expect(client).toBeInstanceOf(CheckinsClient)
+    expect(client).toBeInstanceOf(CheckInsClient)
   })
 
-  it('should list checkins for a project', async () => {
+  it('should list check-ins for a project', async () => {
     const projectId = '11111'
     const request = nock('https://app.honeybadger.io')
       .get(`/v2/projects/${projectId}/check_ins`)
@@ -27,20 +27,20 @@ describe('CheckinsClient', () => {
           }
         ]
       })
-    const client = new CheckinsClient({
+    const client = new CheckInsClient({
       logger: nullLogger(),
       personalAuthToken: '123',
     }, new ServerTransport())
-    const checkins = await client.listForProject(projectId)
+    const checkIns = await client.listForProject(projectId)
     expect(request.isDone()).toBe(true)
-    expect(checkins).toHaveLength(1)
-    expect(checkins[0].id).toEqual('uuid')
-    expect(checkins[0].name).toEqual('a check-in')
-    expect(checkins[0].scheduleType).toEqual('simple')
-    expect(checkins[0].reportPeriod).toEqual('1 week')
+    expect(checkIns).toHaveLength(1)
+    expect(checkIns[0].id).toEqual('uuid')
+    expect(checkIns[0].name).toEqual('a check-in')
+    expect(checkIns[0].scheduleType).toEqual('simple')
+    expect(checkIns[0].reportPeriod).toEqual('1 week')
   })
 
-  it('should return list of checkins from cache for the same project', async () => {
+  it('should return list of check-ins from cache for the same project', async () => {
     const projectId = '11111'
     const request = nock('https://app.honeybadger.io')
       .get(`/v2/projects/${projectId}/check_ins`)
@@ -55,22 +55,22 @@ describe('CheckinsClient', () => {
           }
         ]
       })
-    const client = new CheckinsClient({
+    const client = new CheckInsClient({
       logger: nullLogger(),
       personalAuthToken: '123',
     }, new ServerTransport())
-    const checkins = await client.listForProject(projectId)
+    const checkIns = await client.listForProject(projectId)
+    const checkInsAgain = await client.listForProject(projectId)
+    expect(checkIns).toEqual(checkInsAgain);
     expect(request.isDone()).toBe(true)
-    const checkinsAgain = await client.listForProject(projectId)
-    expect(checkins).toEqual(checkinsAgain);
   })
 
-  it('should get a checkin', async () => {
+  it('should get a check-in', async () => {
     const projectId = '11111'
-    const checkinId = '22222'
+    const checkInId = '22222'
 
     const request = nock('https://app.honeybadger.io')
-      .get(`/v2/projects/${projectId}/check_ins/${checkinId}`)
+      .get(`/v2/projects/${projectId}/check_ins/${checkInId}`)
       .once()
       .reply(200, {
         id: 'uuid',
@@ -78,104 +78,104 @@ describe('CheckinsClient', () => {
         schedule_type: 'simple',
         report_period: '1 week',
       })
-    const client = new CheckinsClient({
+    const client = new CheckInsClient({
       logger: nullLogger(),
       personalAuthToken: '123',
     }, new ServerTransport())
-    const checkin = await client.get(projectId, checkinId)
+    const checkIn = await client.get(projectId, checkInId)
     expect(request.isDone()).toBe(true)
-    expect(checkin.id).toEqual('uuid')
-    expect(checkin.name).toEqual('a check-in')
-    expect(checkin.scheduleType).toEqual('simple')
-    expect(checkin.reportPeriod).toEqual('1 week')
+    expect(checkIn.id).toEqual('uuid')
+    expect(checkIn.name).toEqual('a check-in')
+    expect(checkIn.scheduleType).toEqual('simple')
+    expect(checkIn.reportPeriod).toEqual('1 week')
   })
 
-  it('should create a checkin', async () => {
+  it('should create a check-in', async () => {
     const projectId = '11111'
-    const checkinId = '22222'
+    const checkInId = '22222'
 
-    const checkinToBeSaved = new Checkin({
+    const checkInToBeSaved = new CheckIn({
       projectId,
       name: 'a check-in',
       scheduleType: 'simple',
       reportPeriod: '1 week',
     })
 
-    const payload = checkinToBeSaved.asRequestPayload()
+    const payload = checkInToBeSaved.asRequestPayload()
     const request = nock('https://app.honeybadger.io')
       .post(`/v2/projects/${projectId}/check_ins`, { check_in: payload })
       .once()
       .reply(201, {
-        id: checkinId,
+        id: checkInId,
         ...payload,
       })
-    const client = new CheckinsClient({
+    const client = new CheckInsClient({
       logger: nullLogger(),
       personalAuthToken: '123',
     }, new ServerTransport())
-    const checkin = await client.create(checkinToBeSaved)
+    const checkIn = await client.create(checkInToBeSaved)
     expect(request.isDone()).toBe(true)
-    expect(checkin.id).toEqual(checkinId)
-    expect(checkin.name).toEqual('a check-in')
-    expect(checkin.scheduleType).toEqual('simple')
-    expect(checkin.reportPeriod).toEqual('1 week')
+    expect(checkIn.id).toEqual(checkInId)
+    expect(checkIn.name).toEqual('a check-in')
+    expect(checkIn.scheduleType).toEqual('simple')
+    expect(checkIn.reportPeriod).toEqual('1 week')
   })
 
-  it('should update a checkin', async () => {
+  it('should update a check-in', async () => {
     const projectId = '11111'
-    const checkinId = '22222'
+    const checkInId = '22222'
 
-    const checkinToBeUpdated = new Checkin({
+    const checkInToBeUpdated = new CheckIn({
       projectId,
-      id: checkinId,
+      id: checkInId,
       name: 'a check-in',
       scheduleType: 'simple',
       reportPeriod: '1 week',
     })
 
-    const payload = checkinToBeUpdated.asRequestPayload()
+    const payload = checkInToBeUpdated.asRequestPayload()
     const request = nock('https://app.honeybadger.io')
-      .put(`/v2/projects/${projectId}/check_ins/${checkinId}`, { check_in: payload })
+      .put(`/v2/projects/${projectId}/check_ins/${checkInId}`, { check_in: payload })
       .once()
       .reply(204, {
-        id: checkinId,
+        id: checkInId,
         ...payload,
       })
-    const client = new CheckinsClient({
+    const client = new CheckInsClient({
       logger: nullLogger(),
       personalAuthToken: '123',
     }, new ServerTransport())
-    const checkin = await client.update(checkinToBeUpdated)
+    const checkIn = await client.update(checkInToBeUpdated)
     expect(request.isDone()).toBe(true)
-    expect(checkin.id).toEqual(checkinId)
-    expect(checkin.name).toEqual('a check-in')
-    expect(checkin.scheduleType).toEqual('simple')
-    expect(checkin.reportPeriod).toEqual('1 week')
+    expect(checkIn.id).toEqual(checkInId)
+    expect(checkIn.name).toEqual('a check-in')
+    expect(checkIn.scheduleType).toEqual('simple')
+    expect(checkIn.reportPeriod).toEqual('1 week')
   })
 
   it('should remove a checkin', async () => {
     const projectId = '11111'
-    const checkinId = '22222'
+    const checkInId = '22222'
 
-    const checkinToBeRemoved = new Checkin({
+    const checkInToBeRemoved = new CheckIn({
       projectId,
-      id: checkinId,
+      id: checkInId,
       name: 'a check-in',
       scheduleType: 'simple',
       reportPeriod: '1 week',
     })
 
     const request = nock('https://app.honeybadger.io')
-      .delete(`/v2/projects/${projectId}/check_ins/${checkinId}`)
+      .delete(`/v2/projects/${projectId}/check_ins/${checkInId}`)
       .once()
       .reply(204)
 
-    const client = new CheckinsClient({
+    const client = new CheckInsClient({
       logger: nullLogger(),
       personalAuthToken: '123',
     }, new ServerTransport())
 
-    await client.remove(checkinToBeRemoved)
+    await client.remove(checkInToBeRemoved)
     expect(request.isDone()).toBe(true)
   })
 })
