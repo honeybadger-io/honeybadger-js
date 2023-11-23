@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/plugin-core@1.2.0...@honeybadger-io/plugin-core@1.2.1) (2023-11-23)
+
+
+### Bug Fixes
+
+* **plugin-core:** support minified url creation with pathname in assetUrl ([#1248](https://github.com/honeybadger-io/honeybadger-js/issues/1248)) ([8ba9626](https://github.com/honeybadger-io/honeybadger-js/commit/8ba96268827dcf99f8cdba7f947d583dda07edd6))
+
+
+
 ## [1.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/plugin-core@1.1.0...@honeybadger-io/plugin-core@1.2.0) (2023-10-30)
 
 
