@@ -2,6 +2,7 @@ import * as stackTraceParser from 'stacktrace-parser'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 import { Notice } from '../src/types'
 import { makeBacktrace, DEFAULT_BACKTRACE_SHIFT } from '../src/util'
+import { ThrottledEventsLogger } from '../src/throttled_events_logger';
 
 class MyError extends Error {
   context = null
@@ -52,6 +53,17 @@ describe('client', function () {
 
     it('is chainable', function () {
       expect(client.configure({})).toEqual(client)
+    })
+
+    it('configures event logger from base config', function () {
+      client.configure({
+        apiKey: 'testing',
+      })
+
+      // @ts-ignore
+      expect(client.__eventsLogger).toBeInstanceOf(ThrottledEventsLogger)
+      // @ts-ignore
+      expect(client.__eventsLogger.config.apiKey).toEqual(client.config.apiKey)
     })
   })
 

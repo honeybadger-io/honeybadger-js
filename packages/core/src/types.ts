@@ -9,6 +9,7 @@ export interface Logger {
 }
 
 export interface EventsLogger {
+  configure: (opts: Partial<Config>) => void
   logEvent(data: Record<string, unknown>): void
 }
 

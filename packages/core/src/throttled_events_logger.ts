@@ -16,6 +16,12 @@ export class ThrottledEventsLogger implements EventsLogger {
     this.logger = this.originalLogger()
   }
 
+  configure(opts: Partial<Config>): void {
+    for (const k in opts) {
+      this.config[k] = opts[k]
+    }
+  }
+
   logEvent(data: Record<string, unknown>) {
     this.queue.push(data)
 
@@ -74,6 +80,8 @@ export class ThrottledEventsLogger implements EventsLogger {
   }
 
   /**
+   * todo: improve this
+   *
    * The EventsLogger overrides the console methods
    * so if we want to log something we need to use the original methods
    */
