@@ -368,9 +368,14 @@ export function instrument(object: Record<string, any>, name: string, replacemen
 }
 
 let _consoleAlreadyInstrumented = false
+
 const listeners = []
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function instrumentConsole(_window: any, handler: (method: string, args: unknown[]) => void): void {
+  if (!_window || !_window.console || !handler) {
+    return
+  }
+
   listeners.push(handler)
 
   if (_consoleAlreadyInstrumented) {
