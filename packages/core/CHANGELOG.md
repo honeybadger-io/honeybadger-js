@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.5.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.5.0...@honeybadger-io/core@6.5.1) (2023-11-28)
+
+
+### Bug Fixes
+
+* handle case where events logger did not receive new configuration ([#1259](https://github.com/honeybadger-io/honeybadger-js/issues/1259)) ([83df36b](https://github.com/honeybadger-io/honeybadger-js/commit/83df36be0e968c1bb3a6d7e3a383bc145572908a))
+
+
+
 ## [6.5.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.4.0...@honeybadger-io/core@6.5.0) (2023-11-28)
 
 
