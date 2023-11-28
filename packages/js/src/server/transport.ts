@@ -50,7 +50,8 @@ export class ServerTransport implements Types.Transport {
 
         let data: Buffer | undefined = undefined
         if (payload) {
-          data = Buffer.from(JSON.stringify(sanitize(payload, options.maxObjectDepth)), 'utf8')
+          const dataStr =  typeof payload === 'string' ? payload : JSON.stringify(sanitize(payload, options.maxObjectDepth))
+          data = Buffer.from(dataStr, 'utf8')
           httpOptions.headers['Content-Length'] = data.length
         }
 

@@ -3,6 +3,7 @@ import { encodeCookie, decodeCookie, preferCatch, globalThisOrWindow } from './b
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
+import events from './browser/integrations/events'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
 import { BrowserTransport } from './browser/transport'
@@ -20,7 +21,6 @@ const getProjectRoot = () => {
 
   return projectRoot
 }
-
 export const getUserFeedbackScriptUrl = (version: string) => {
   const majorMinorVersion = version.split('.').slice(0,2).join('.')
   return `https://js.honeybadger.io/v${majorMinorVersion}/honeybadger-feedback-form.js`
@@ -74,7 +74,9 @@ class Honeybadger extends Client {
       maxErrors: null,
       projectRoot: getProjectRoot(),
       ...opts
-    }, new BrowserTransport())
+    }, new BrowserTransport({
+      'User-Agent': userAgent(),
+    }))
   }
 
   configure(opts: Partial<Types.BrowserConfig> = {}): this {
@@ -251,21 +253,30 @@ class Honeybadger extends Client {
   }
 }
 
+const NOTIFIER = {
+  name: '@honeybadger-io/js',
+  url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js',
+  version: '__VERSION__'
+}
+
+const userAgent = () => {
+  if (typeof navigator !== undefined) {
+    return `Honeybadger JS Browser Client ${NOTIFIER.version}; ${navigator.userAgent}`
+  }
+
+  return `Honeybadger JS Browser Client ${NOTIFIER.version}; n/a; n/a`
+}
+
 const singleton = new Honeybadger({
   __plugins: [
     onError(),
     onUnhandledRejection(),
     timers(),
     eventListeners(),
-    breadcrumbs()
+    breadcrumbs(),
+    events(),
   ]
 })
-
-const NOTIFIER = {
-  name: '@honeybadger-io/js',
-  url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js',
-  version: '__VERSION__'
-}
 
 singleton.setNotifier(NOTIFIER)
 

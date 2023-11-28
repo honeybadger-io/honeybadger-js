@@ -3,7 +3,7 @@ import { Types, Util } from '@honeybadger-io/core'
 import { stringNameOfElement, stringSelectorOfElement, stringTextOfElement, localURLPathname, nativeFetch, globalThisOrWindow } from '../util'
 import Client from '../../browser'
 
-const { sanitize, instrument } = Util
+const { sanitize, instrument, instrumentConsole } = Util
 
 export default function (_window = globalThisOrWindow()): Types.Plugin {
   return {
@@ -32,26 +32,17 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
           }).join(' ')
         }
 
-        ['debug', 'info', 'warn', 'error', 'log'].forEach(level => {
-          instrument(_window.console, level, function (original) {
-            return function () {
-              const args = Array.prototype.slice.call(arguments)
-              const message = inspectArray(args)
-              const opts = {
-                category: 'log',
-                metadata: {
-                  level,
-                  arguments: sanitize(args, 3)
-                }
-              }
-
-              client.addBreadcrumb(message, opts)
-
-              if (typeof original === 'function') {
-                Function.prototype.apply.call(original, _window.console, arguments)
-              }
+        instrumentConsole(_window, (level, args) => {
+          const message = inspectArray(args)
+          const opts = {
+            category: 'log',
+            metadata: {
+              level,
+              arguments: sanitize(args, 3)
             }
-          })
+          }
+
+          client.addBreadcrumb(message, opts)
         })
       })();
 

@@ -32,6 +32,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "json-nd": "^1.0.0",
     "stacktrace-parser": "^0.1.10"
   },
   "devDependencies": {

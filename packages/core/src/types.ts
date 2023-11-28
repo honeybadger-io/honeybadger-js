@@ -8,6 +8,10 @@ export interface Logger {
   error(...args: unknown[]): unknown
 }
 
+export interface EventsLogger {
+  logEvent(data: Record<string, unknown>): void
+}
+
 export interface Config {
   apiKey?: string,
   endpoint: string,
@@ -21,6 +25,7 @@ export interface Config {
   debug: boolean
   reportData: boolean
   breadcrumbsEnabled: boolean | { dom?: boolean, network?: boolean, navigation?: boolean, console?: boolean}
+  eventsEnabled: boolean
   maxBreadcrumbs: number
   maxObjectDepth: number
   logger: Logger

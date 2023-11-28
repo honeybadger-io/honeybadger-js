@@ -39,8 +39,8 @@ export class BrowserTransport implements Types.Transport {
     }
 
     // GET methods cannot have a body.
-    if (options.method === 'POST') {
-      requestInit.body = payload ? JSON.stringify(sanitize(payload, options.maxObjectDepth)) : undefined
+    if (options.method === 'POST' && payload) {
+      requestInit.body = typeof payload === 'string' ? payload : JSON.stringify(sanitize(payload, options.maxObjectDepth))
     }
 
     const response = await globalThisOrWindow().fetch(options.endpoint, requestInit)

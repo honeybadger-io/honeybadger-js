@@ -12,8 +12,8 @@ import {
   filterUrl,
   formatCGIData,
   getSourceForBacktrace,
-  runAfterNotifyHandlers, 
-  endpoint, 
+  runAfterNotifyHandlers,
+  endpoint,
   getCauses,
 } from './util'
 import {
@@ -24,13 +24,15 @@ import {
   Notice,
   Noticeable,
   HoneybadgerStore,
-  BacktraceFrame, 
-  Transport, 
-  NoticeTransportPayload, 
-  UserFeedbackFormOptions, 
-  Notifier,
+  BacktraceFrame,
+  Transport,
+  NoticeTransportPayload,
+  UserFeedbackFormOptions,
+  Notifier, EventsLogger,
 } from './types'
 import { GlobalStore } from './store';
+import { ThrottledEventsLogger } from './throttled_events_logger';
+import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
 // Split at commas and spaces
 const TAG_SEPARATOR = /,|\s+/
@@ -47,6 +49,7 @@ export abstract class Client {
   protected __getSourceFileHandler: (path: string) => Promise<string>
 
   protected readonly __transport: Transport;
+  protected readonly __eventsLogger: EventsLogger;
 
   protected __notifier: Notifier = {
     name: '@honeybadger-io/core',
@@ -59,33 +62,13 @@ export abstract class Client {
 
   protected constructor(opts: Partial<Config> = {}, transport: Transport) {
     this.config = {
-      apiKey: null,
-      endpoint: 'https://api.honeybadger.io',
-      environment: null,
-      hostname: null,
-      projectRoot: null,
-      component: null,
-      action: null,
-      revision: null,
-      reportData: null,
-      breadcrumbsEnabled: true,
-      maxBreadcrumbs: 40,
-      maxObjectDepth: 8,
-      logger: console,
-      developmentEnvironments: ['dev', 'development', 'test'],
-      debug: false,
-      tags: null,
-      enableUncaught: true,
-      enableUnhandledRejection: true,
-      afterUncaught: () => true,
-      filters: ['creditcard', 'password'],
-      __plugins: [],
-
+      ...DEFAULT_CONFIG,
       ...opts,
     }
 
     this.__initStore();
     this.__transport = transport
+    this.__eventsLogger = new ThrottledEventsLogger(this.config, this.__transport)
     this.logger = logger(this)
   }
 
@@ -316,6 +299,10 @@ export abstract class Client {
     })
 
     return this
+  }
+
+  logEvent(data: Record<string, unknown>): void {
+    this.__eventsLogger.logEvent(data)
   }
 
   __getBreadcrumbs() {
