@@ -101,6 +101,7 @@ export abstract class Client {
     for (const k in opts) {
       this.config[k] = opts[k]
     }
+    this.__eventsLogger.configure(this.config)
     this.loadPlugins()
 
     return this
