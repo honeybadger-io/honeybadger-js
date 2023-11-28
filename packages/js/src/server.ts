@@ -17,10 +17,6 @@ const DEFAULT_PLUGINS = [
   unhandledRejection()
 ]
 
-const userAgent = () => {
-  return `Honeybadger JS Server Client ${NOTIFIER.version}, ${os.version()}; ${os.platform()}`
-}
-
 type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckInsConfig
 
 class Honeybadger extends Client {
@@ -174,16 +170,20 @@ class Honeybadger extends Client {
   }
 }
 
-const singleton = new Honeybadger({
-  __plugins: DEFAULT_PLUGINS,
-  ...(readConfigFromFileSystem() ?? {})
-})
-
 const NOTIFIER = {
   name: '@honeybadger-io/js',
   url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js',
   version: '__VERSION__'
 }
+
+const userAgent = () => {
+  return `Honeybadger JS Server Client ${NOTIFIER.version}, ${os.version()}; ${os.platform()}`
+}
+
+const singleton = new Honeybadger({
+  __plugins: DEFAULT_PLUGINS,
+  ...(readConfigFromFileSystem() ?? {})
+})
 
 singleton.setNotifier(NOTIFIER)
 

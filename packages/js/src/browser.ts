@@ -21,15 +21,6 @@ const getProjectRoot = () => {
 
   return projectRoot
 }
-
-const userAgent = () => {
-  if (typeof navigator !== undefined) {
-    return `Honeybadger JS Browser Client ${NOTIFIER.version}; ${navigator.userAgent}`
-  }
-
-  return `Honeybadger JS Browser Client ${NOTIFIER.version}; n/a; n/a`
-}
-
 export const getUserFeedbackScriptUrl = (version: string) => {
   const majorMinorVersion = version.split('.').slice(0,2).join('.')
   return `https://js.honeybadger.io/v${majorMinorVersion}/honeybadger-feedback-form.js`
@@ -262,6 +253,20 @@ class Honeybadger extends Client {
   }
 }
 
+const NOTIFIER = {
+  name: '@honeybadger-io/js',
+  url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js',
+  version: '__VERSION__'
+}
+
+const userAgent = () => {
+  if (typeof navigator !== undefined) {
+    return `Honeybadger JS Browser Client ${NOTIFIER.version}; ${navigator.userAgent}`
+  }
+
+  return `Honeybadger JS Browser Client ${NOTIFIER.version}; n/a; n/a`
+}
+
 const singleton = new Honeybadger({
   __plugins: [
     onError(),
@@ -272,12 +277,6 @@ const singleton = new Honeybadger({
     events(),
   ]
 })
-
-const NOTIFIER = {
-  name: '@honeybadger-io/js',
-  url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js',
-  version: '__VERSION__'
-}
 
 singleton.setNotifier(NOTIFIER)
 

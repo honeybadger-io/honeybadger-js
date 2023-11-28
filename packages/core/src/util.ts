@@ -346,7 +346,7 @@ export function isErrorObject(thing: unknown) {
  * @param {!Function} replacement
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function instrument(object: Record<string, any>, name: string, replacement: (unknown) => void): void {
+export function instrument(object: Record<string, any>, name: string, replacement: (unknown) => () => void): void {
   if (!object || !name || !replacement || !(name in object)) {
     return
   }
@@ -379,7 +379,7 @@ export function instrumentConsole(_window: any, handler: (method: string, args: 
   _consoleAlreadyInstrumented = true;
 
   ['debug', 'info', 'warn', 'error', 'log'].forEach(level => {
-    instrument(_window.console, level, function (original) {
+    instrument(_window.console, level, function hbLogger(original) {
       return function () {
         const args = Array.prototype.slice.call(arguments)
         listeners.forEach((listener) => {

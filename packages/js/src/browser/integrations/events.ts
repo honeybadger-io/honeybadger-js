@@ -7,6 +7,7 @@ const { instrumentConsole } = Util
 
 export default function (_window = globalThisOrWindow()): Types.Plugin {
   return {
+    shouldReloadOnConfigure: false,
     load: (client: typeof Client) => {
       function sendEventsToInsights() {
         return client.config.eventsEnabled
@@ -17,6 +18,10 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
       }
 
       instrumentConsole(_window, (level, args) => {
+        if (!sendEventsToInsights()) {
+          return
+        }
+
         // todo: send browser info
         client.logEvent({
           level,
