@@ -3,6 +3,7 @@ import { encodeCookie, decodeCookie, preferCatch, globalThisOrWindow } from './b
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
+import events from './browser/integrations/events'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
 import { BrowserTransport } from './browser/transport'
@@ -19,6 +20,14 @@ const getProjectRoot = () => {
   }
 
   return projectRoot
+}
+
+const userAgent = () => {
+  if (typeof navigator !== undefined) {
+    return `Honeybadger JS Browser Client ${NOTIFIER.version}; ${navigator.userAgent}`
+  }
+
+  return `Honeybadger JS Browser Client ${NOTIFIER.version}; n/a; n/a`
 }
 
 export const getUserFeedbackScriptUrl = (version: string) => {
@@ -74,7 +83,9 @@ class Honeybadger extends Client {
       maxErrors: null,
       projectRoot: getProjectRoot(),
       ...opts
-    }, new BrowserTransport())
+    }, new BrowserTransport({
+      'User-Agent': userAgent(),
+    }))
   }
 
   configure(opts: Partial<Types.BrowserConfig> = {}): this {
@@ -257,7 +268,8 @@ const singleton = new Honeybadger({
     onUnhandledRejection(),
     timers(),
     eventListeners(),
-    breadcrumbs()
+    breadcrumbs(),
+    events(),
   ]
 })
 

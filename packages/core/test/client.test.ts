@@ -61,7 +61,7 @@ describe('client', function () {
       expect(client.getPluginsLoaded()).toEqual(true)
     })
 
-    it('loads all plugins once and reloads as needed', function () {  
+    it('loads all plugins once and reloads as needed', function () {
       const plugin1 = { load: jest.fn() }
       const plugin2 = { load: jest.fn(), shouldReloadOnConfigure: false }
       const plugin3 = { load: jest.fn(), shouldReloadOnConfigure: true }

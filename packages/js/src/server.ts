@@ -17,6 +17,10 @@ const DEFAULT_PLUGINS = [
   unhandledRejection()
 ]
 
+const userAgent = () => {
+  return `Honeybadger JS Server Client ${NOTIFIER.version}, ${os.version()}; ${os.platform()}`
+}
+
 type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckInsConfig
 
 class Honeybadger extends Client {
@@ -45,7 +49,9 @@ class Honeybadger extends Client {
   config: HoneybadgerServerConfig
 
   constructor(opts: Partial<HoneybadgerServerConfig> = {}) {
-    const transport = new ServerTransport()
+    const transport = new ServerTransport({
+      'User-Agent': userAgent(),
+    })
     super({
       projectRoot: process.cwd(),
       hostname: os.hostname(),

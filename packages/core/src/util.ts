@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 import * as stackTraceParser from 'stacktrace-parser'
 import {
   Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler, Config, BrowserConfig
@@ -364,6 +365,39 @@ export function instrument(object: Record<string, any>, name: string, replacemen
     //   Error: TypeError: Cannot set property onunhandledrejection of [object Object] which has only a getter
     //   User-Agent: Mozilla/5.0 (Linux; Android 10; SAMSUNG SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/12.1 Chrome/79.0.3945.136 Mobile Safari/537.36
   }
+}
+
+let _consoleAlreadyInstrumented = false
+const listeners = []
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function instrumentConsole(_window: any, handler: (method: string, args: unknown[]) => void): void {
+  if (_consoleAlreadyInstrumented) {
+    listeners.push(handler)
+    return
+  }
+
+  _consoleAlreadyInstrumented = true;
+
+  ['debug', 'info', 'warn', 'error', 'log'].forEach(level => {
+    instrument(_window.console, level, function (original) {
+      return function () {
+        const args = Array.prototype.slice.call(arguments)
+        listeners.forEach((listener) => {
+          try {
+            listener(level, args)
+          }
+          catch (_e) {
+            // ignore
+            // should never reach here because instrument method already wraps with try/catch block
+          }
+        })
+
+        if (typeof original === 'function') {
+          Function.prototype.apply.call(original, _window.console, arguments)
+        }
+      }
+    })
+  })
 }
 
 export function endpoint(base: string, path: string): string {
