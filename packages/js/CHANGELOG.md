@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.7.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.6.1...@honeybadger-io/js@6.7.0) (2023-11-28)
+
+
+### Features
+
+* **events:** log events to Honeybadger Insights ([#1256](https://github.com/honeybadger-io/honeybadger-js/issues/1256)) ([827a465](https://github.com/honeybadger-io/honeybadger-js/commit/827a465e8f1649718f20ed44ff45e2a86d0fc3cf))
+
+
+
 ## [6.6.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.6.0...@honeybadger-io/js@6.6.1) (2023-11-23)
 
 **Note:** Version bump only for package @honeybadger-io/js
