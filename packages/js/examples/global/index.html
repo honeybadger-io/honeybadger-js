@@ -13,6 +13,7 @@
     Honeybadger.configure({
       apiKey: prompt("Enter the API key for your Honeybadger project:"),
       debug: true,
+      // eventsEnabled: true,
       breadcrumbsEnabled: true
     }).beforeNotify(function(notice) {
       notice.cookies = document.cookie;
