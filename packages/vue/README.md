@@ -30,7 +30,7 @@ notify Honeybadger of Vue context for errors that Vue handles. Some
 errors inside Vue code may propagate to the window onerror handler
 instead.
 
-In those cases, Honeybadger Javascript library's default error notifier
+In those cases, Honeybadger JavaScript library's default error notifier
 is invoked, which will contain a stack trace but none of the Vue
 variables.
 

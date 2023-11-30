@@ -29,7 +29,7 @@ notify Honeybadger of React context for errors that React handles. Some
 errors inside React code may propagate to the window onerror handler
 instead.
 
-In those cases, Honeybadger Javascript library's default error notifier
+In those cases, Honeybadger JavaScript library's default error notifier
 is invoked, which will contain a stack trace but none of the React
 variables.
 
