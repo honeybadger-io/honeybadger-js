@@ -1,32 +1,10 @@
 import { Client as BaseClient } from '@honeybadger-io/core'
 import os from 'os';
-import path from 'path';
 import nock from 'nock'
 import Singleton from '../../src/server'
 import { nullLogger } from './helpers'
 import { CheckInDto, CheckInResponsePayload } from '../../src/server/check-ins-manager/types';
 import { CheckIn } from '../../src/server/check-ins-manager/check-in';
-import { cosmiconfigSync } from 'cosmiconfig'
-
-const configPath = path.resolve(__dirname, '../../', 'honeybadger.config.js')
-jest.mock('cosmiconfig', () => ({
-  cosmiconfigSync: jest.fn().mockImplementation((_moduleName, _options) => {
-    return {
-      load: jest.fn(),
-      clearCaches: jest.fn(),
-      clearLoadCache: jest.fn(),
-      clearSearchCache: jest.fn(),
-      search: () => {
-        return {
-          isEmpty: true,
-          config: {},
-          filepath: null
-        }
-      }
-    }
-  })
-}))
-const mockCosmiconfig = cosmiconfigSync as jest.MockedFunction<typeof cosmiconfigSync>
 
 describe('server client', function () {
   let client: typeof Singleton
@@ -43,6 +21,24 @@ describe('server client', function () {
   })
 
   describe('configuration', function () {
+
+    const CONFIG_FROM_FILE = {
+      apiKey: 'testing',
+      personalAuthToken: 'p123',
+      environment: 'staging',
+      developmentEnvironments: ['staging', 'dev', 'local'],
+      tags: ['tag-1', 'tag-2'],
+      checkins: [
+        {
+          projectId: '11111',
+          name: 'a check-in',
+          scheduleType: 'simple',
+          reportPeriod: '1 week',
+          gracePeriod: '5 minutes'
+        }
+      ]
+    }
+
     it('creates a client with default configuration', function () {
       const client = Singleton.factory()
       expect(client.config).toMatchObject({
@@ -82,77 +78,21 @@ describe('server client', function () {
       expect(client.config).toMatchObject(opts)
     })
 
-    it('creates a client from a configuration file', function () {
-      const configFromFile = {
-        apiKey: 'testing',
-        personalAuthToken: 'p123',
-        environment: 'staging',
-        developmentEnvironments: ['staging', 'dev', 'local'],
-        tags: ['tag-1', 'tag-2'],
-        checkins: [
-          {
-            projectId: '11111',
-            name: 'a check-in',
-            scheduleType: 'simple',
-            reportPeriod: '1 week',
-            gracePeriod: '5 minutes'
-          }
-        ]
-      }
-      mockCosmiconfig.mockImplementation((_moduleName, _options) => {
-        return {
-          load: jest.fn(),
-          clearCaches: jest.fn(),
-          clearLoadCache: jest.fn(),
-          clearSearchCache: jest.fn(),
-          search: () => {
-            return {
-              config: configFromFile,
-              filepath: configPath
-            }
-          }
-        }
-      })
+    it.each(['honeybadger.config.ts', 'honeybadger.config.js'])('creates a client from %p', function (fileName) {
+      jest.doMock(`../../${fileName}`, () => CONFIG_FROM_FILE, { virtual: true })
+
       const client = Singleton.factory()
-      expect(client.config).toMatchObject(configFromFile)
+      expect(client.config).toMatchObject(CONFIG_FROM_FILE)
     })
 
     it('creates a client from both a configuration file and constructor arguments', function () {
-      const configFromFile = {
-        apiKey: 'testing',
-        personalAuthToken: 'p123',
-        environment: 'staging',
-        developmentEnvironments: ['staging', 'dev', 'local'],
-        tags: ['tag-1', 'tag-2'],
-        checkins: [
-          {
-            projectId: '11111',
-            name: 'a check-in',
-            scheduleType: 'simple',
-            reportPeriod: '1 week',
-            gracePeriod: '5 minutes'
-          }
-        ]
-      }
-      mockCosmiconfig.mockImplementation((_moduleName, _options) => {
-        return {
-          load: jest.fn(),
-          clearCaches: jest.fn(),
-          clearLoadCache: jest.fn(),
-          clearSearchCache: jest.fn(),
-          search: () => {
-            return {
-              config: configFromFile,
-              filepath: configPath
-            }
-          }
-        }
-      })
+      jest.doMock('../../honeybadger.config.js', () => CONFIG_FROM_FILE, { virtual: true })
+
       const client = Singleton.factory({
         apiKey: 'not-testing'
       })
       expect(client.config).toMatchObject({
-        ...configFromFile,
+        ...CONFIG_FROM_FILE,
         apiKey: 'not-testing'
       })
     })

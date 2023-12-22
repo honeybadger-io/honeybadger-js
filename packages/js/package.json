@@ -53,8 +53,7 @@
   "dependencies": {
     "@honeybadger-io/core": "^6.5.1",
     "@types/aws-lambda": "^8.10.89",
-    "@types/express": "^4.17.13",
-    "cosmiconfig": "^8.3.6"
+    "@types/express": "^4.17.13"
   },
   "devDependencies": {
     "@playwright/test": "1.38.1",

@@ -1,8 +1,8 @@
 import os from 'os'
 import fs from 'fs'
+import path from 'path'
 import { Types } from '@honeybadger-io/core'
 import { promisify } from 'util'
-import { cosmiconfigSync } from 'cosmiconfig';
 
 const readFile = promisify(fs.readFile)
 
@@ -74,19 +74,16 @@ export async function getSourceFile(path: string): Promise<string> {
   }
 }
 
-export function readConfigFromFileSystem(): Record<string, unknown> {
-  return readConfigForModule('honeybadger')
-}
-
-function readConfigForModule(moduleName: string): Record<string, unknown> {
-  try {
-    const fileExplorer = cosmiconfigSync(moduleName)
-    const result = fileExplorer.search()
-
-    return result?.config ?? null
+export function readConfigFromFileSystem(): Types.Config {
+  const options = ['honeybadger.config.js', 'honeybadger.config.ts']
+  let config = null
+  while (config === null && options.length > 0) {
+    const configPath = options.shift()
+    try {
+      config = require(path.join(process.cwd(), configPath))
+    }
+    catch (_e) { /* empty */ }
   }
-  catch (e) {
-    console.debug(`[Honeybadger] Could not read config for module ${moduleName}: ${e.message}`)
-    return null
-  }
+
+  return config
 }
