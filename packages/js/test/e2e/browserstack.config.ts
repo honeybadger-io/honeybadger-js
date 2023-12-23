@@ -10,6 +10,25 @@ const clientPlaywrightVersion = cp
   .trim()
   .split(' ')[1]
 
+const getGitBranchUsingCommand = () => {
+  return cp
+    .execSync('git rev-parse --abbrev-ref HEAD')
+    .toString()
+}
+
+const getBuildLabel = () => {
+  let branchName = process.env.GITHUB_REF_NAME
+  if (!branchName) {
+    branchName = getGitBranchUsingCommand()
+  }
+
+  if (branchName.startsWith('fatal: not a git repository')) {
+    branchName = new Date().toDateString()
+  }
+
+  return `honeybadger-playwright-browserstack-${branchName}`
+}
+
 export const bsLocal = new BrowserStackLocal.Local()
 
 export const BS_LOCAL_ARGS = {
@@ -23,14 +42,13 @@ const defaultCapabilities = {
   os: 'osx',
   os_version: 'catalina',
   name: 'Honeybadger Integration Tests',
-  build: 'honeybadger-playwright-browserstack',
+  build: getBuildLabel(),
   'browserstack.username': process.env.BROWSERSTACK_USERNAME,
   'browserstack.accessKey': process.env.BROWSERSTACK_ACCESS_KEY,
   'browserstack.local': true, // we are running a local web server, so we need this to be true
   'browserstack.networkLogs': true,
   'browserstack.debug': true, // visual logs
   'browserstack.console': 'verbose', // console logs
-  'browserstack.playwrightVersion': clientPlaywrightVersion,
   'client.playwrightVersion': clientPlaywrightVersion,
 }
 
