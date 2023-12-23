@@ -30,6 +30,7 @@ const defaultCapabilities = {
   'browserstack.networkLogs': true,
   'browserstack.debug': true, // visual logs
   'browserstack.console': 'verbose', // console logs
+  'browserstack.playwrightVersion': clientPlaywrightVersion,
   'client.playwrightVersion': clientPlaywrightVersion,
 }
 
