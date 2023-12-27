@@ -28,7 +28,7 @@ test.describe('Browser Integration', () => {
     if (isRunningOnBrowserStack(testInfo)) {
       const data = {
         action: 'setSessionName',
-        arguments: { name: testInfo.project.name }
+        arguments: { name: testInfo.project.name + ' ' + testInfo.title }
       }
       await page.evaluate(_ => {},`browserstack_executor: ${JSON.stringify(data)}`);
     }
