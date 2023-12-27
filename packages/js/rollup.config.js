@@ -10,7 +10,9 @@ const sharedPlugins = [
     exclude: 'node_modules/**',
     __VERSION__: pkg.version
   }),
-  commonjs(),
+  commonjs({
+    ignoreDynamicRequires: true,
+  }),
   resolve({
     preferBuiltins: true // Plugin node-resolve: preferring built-in module 'buffer' over local alternative
   })
