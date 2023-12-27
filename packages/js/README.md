@@ -50,6 +50,17 @@ Two more configuration files, `./test/e2e/global-setup.ts` and `./test/e2e/globa
 a local browserstack executable, needed to run the tests on Browserstack. This executable will only be executed if you are testing on Browserstack.
 Finally, the `./test/e2e/browserstack.config.ts` file contains the configuration and helper functions to run the tests on Browserstack.
 
+##### Troubleshooting
+Playwright recommends that integration tests should run on the latest browser versions.
+But we also use BrowserStack to run these tests on older browsers.
+This setup is a bit fragile and error logs are not always helpful
+
+If CI starts failing without clear reason, try the following:  
+Sometimes BrowserStack will resolve to a newer playwright version than the one we use in our tests.
+If this happens (compare input capabilities `client.playwrightVersion` and `browserstack.playwrightVersion` on a BrowserStack test session)
+first try to update `@playwright/test` and `browserstack-local` to their latest versions. 
+This is necessary because BrowserStack might select a newer playwright version to run the 
+tests on and unfortunately we don't have full control over this.
 
 ## Releasing
 
