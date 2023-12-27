@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.7.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.7.1...@honeybadger-io/js@6.7.2) (2023-12-27)
+
+
+### Bug Fixes
+
+* replace cosmiconfig with custom implementation ([#1268](https://github.com/honeybadger-io/honeybadger-js/issues/1268)) ([c2e1c3d](https://github.com/honeybadger-io/honeybadger-js/commit/c2e1c3da3eec22feb527312b4e1344041cd6e6a7))
+
+
+
 ## [6.7.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.7.0...@honeybadger-io/js@6.7.1) (2023-11-28)
 
 **Note:** Version bump only for package @honeybadger-io/js

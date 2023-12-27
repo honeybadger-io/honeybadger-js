@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.1.15](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.1.14...@honeybadger-io/react@6.1.15) (2023-12-27)
+
+**Note:** Version bump only for package @honeybadger-io/react
+
+
+
+
+
 ## [6.1.14](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.1.13...@honeybadger-io/react@6.1.14) (2023-12-04)
 
 **Note:** Version bump only for package @honeybadger-io/react
