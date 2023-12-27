@@ -10,6 +10,32 @@ const formatJSONResponse = (response) => {
   }
 }
 
+const shouldReport = (event) => {
+  if (!event.body)  {
+    return false;
+  }
+
+  let body = event.body;
+  if (typeof body === 'string') {
+    body = JSON.parse(body);
+  }
+
+  return body.report === 'yes';
+}
+
+const shouldTimeout = (event) => {
+  if (!event.body)  {
+    return false;
+  }
+
+  let body = event.body;
+  if (typeof body === 'string') {
+    body = JSON.parse(body);
+  }
+
+  return body.timeout === 'yes';
+}
+
 module.exports = {
   hello: async (event) => {
     const hbKey = !!process.env.HONEYBADGER_API_KEY;
@@ -26,7 +52,7 @@ module.exports = {
     });
   }),
   syncError: honeybadgerWrapper(async (event) => {
-    const willReport = event.body && event.body.report === 'yes';
+    const willReport = shouldReport(event);
     if (willReport) {
       throw new Error('sync-error');
     }
@@ -45,7 +71,7 @@ module.exports = {
       });
     }
 
-    const willReport = event.body && event.body.report === 'yes';
+    const willReport = shouldReport(event);
     await asyncThatThrows(willReport);
     return formatJSONResponse({
       message: "You summoned the async-error handler! Nothing was sent to Honeybadger. POST with { 'body': { 'report': 'yes' } } to report to Honeybadger.",
@@ -53,7 +79,7 @@ module.exports = {
     });
   }),
   callbackError: honeybadgerWrapper((event, context, callback) => {
-    const willReport = event.body && event.body.report === 'yes';
+    const willReport = shouldReport(event);
     if (willReport) {
       callback(new Error('callback-error'));
       return;
@@ -66,7 +92,7 @@ module.exports = {
     callback(null, resp);
   }),
   setTimeoutError: honeybadgerWrapper((event, context, callback) => {
-    const willReport = event.body && event.body.report === 'yes';
+    const willReport = shouldReport(event);
     setTimeout(() => {
       if (willReport) {
         throw new Error('set-timeout-error');
@@ -80,16 +106,16 @@ module.exports = {
     }, 300);
   }),
   timeoutWarning: honeybadgerWrapper(async (event) => {
-    const asyncThatResolvesAfterTimeout = async (shouldTimeout) => {
+    const asyncThatResolvesAfterTimeout = async (willTimeout) => {
       return new Promise((resolve, _reject) => {
         setTimeout(() => {
           resolve()
-        }, shouldTimeout ? (1000 * 60 * 20) : 200) // 20 minutes
+        }, willTimeout ? (1000 * 60 * 20) : 200) // 20 minutes
       });
     }
 
-    const shouldTimeout = event.body && event.body.timeout === 'yes';
-    await asyncThatResolvesAfterTimeout(shouldTimeout);
+    const willTimeout = shouldTimeout(event);
+    await asyncThatResolvesAfterTimeout(willTimeout);
     return formatJSONResponse({
       message: "You summoned the timeoutWarning handler! Nothing was sent to Honeybadger. POST with { 'body': { 'timeout': 'yes' } } to run the function until it times out.",
       event,
