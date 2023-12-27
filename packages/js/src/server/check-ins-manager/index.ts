@@ -14,6 +14,7 @@ export class CheckInsManager {
   constructor(config: Partial<CheckInsConfig>, client?: CheckInsClient) {
     this.config = {
       debug: config.debug ?? false,
+      apiKey: config.apiKey ?? undefined,
       personalAuthToken: config.personalAuthToken ?? undefined,
       checkins: config.checkins ?? [],
       logger: config.logger ?? console,
@@ -21,12 +22,18 @@ export class CheckInsManager {
     const transport = new ServerTransport()
     this.logger = Util.logger(this)
     this.client = client ?? new CheckInsClient({
+      apiKey: config.apiKey,
       personalAuthToken: config.personalAuthToken,
       logger: this.logger
     }, transport)
   }
 
   public async sync(): Promise<CheckIn[]> {
+    // check if api key is set
+    if (!this.config.apiKey || this.config.apiKey === '') {
+      throw new Error('apiKey is required')
+    }
+
     // check if personal auth token is set
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
@@ -51,12 +58,11 @@ export class CheckInsManager {
       return checkIn
     });
 
-    // validate that we have unique check-in names
-    // throw error if there are check-ins with the same name and project id
-    const checkInNames = localCheckIns.map((checkIn) => `${checkIn.projectId}_${checkIn.name}`)
-    const uniqueCheckInNames = new Set(checkInNames)
-    if (checkInNames.length !== uniqueCheckInNames.size) {
-      throw new Error('check-in names must be unique per project')
+    // validate that we have unique check-in slugs
+    const checkInSlugs = localCheckIns.map((checkIn) => checkIn.slug)
+    const uniqueCheckInSlugs = new Set(checkInSlugs)
+    if (checkInSlugs.length !== uniqueCheckInSlugs.size) {
+      throw new Error('check-in slugs must be unique')
     }
 
     return localCheckIns
@@ -64,19 +70,20 @@ export class CheckInsManager {
 
   private async createOrUpdate(localCheckIns: CheckIn[]) {
     const results = []
+    const projectId = await this.client.getProjectId(this.config.apiKey)
+    const remoteCheckins = await this.client.listForProject(projectId)
     // for each check-in from the localCheckIns array, check if it exists in the API
     // if it does not exist, create it
     // if it exists, check if it needs to be updated
     for (const localCheckIn of localCheckIns) {
-      const projectCheckIns = await this.client.listForProject(localCheckIn.projectId)
-      const remoteCheckIn = projectCheckIns.find((checkIn) => {
-        return checkIn.name === localCheckIn.name
+      const remoteCheckIn = remoteCheckins.find((checkIn) => {
+        return checkIn.slug === localCheckIn.slug
       })
       if (!remoteCheckIn) {
-        results.push(await this.client.create(localCheckIn));
+        results.push(await this.client.create(projectId, localCheckIn));
       } else if (!localCheckIn.isInSync(remoteCheckIn)) {
         localCheckIn.id = remoteCheckIn.id;
-        results.push(await this.client.update(localCheckIn));
+        results.push(await this.client.update(projectId, localCheckIn));
       } else {
         // no change - still need to add to results
         results.push(remoteCheckIn);
@@ -87,22 +94,19 @@ export class CheckInsManager {
   }
 
   private async remove(localCheckIns: CheckIn[]) {
-    // get all project ids from local check-ins
-    // for each project id, get all check-ins from the API
+    const projectId = await this.client.getProjectId(this.config.apiKey)
+    const remoteCheckins = await this.client.listForProject(projectId)
+
+    // get all check-ins from the API
     // if not found in local check-ins, remove it
-    const projectIds = Array.from(new Set(localCheckIns.map((checkIn) => checkIn.projectId)))
-    const remoteCheckInsPerProject = await Promise.all(projectIds.map((projectId) => {
-      return this.client.listForProject(projectId)
-    }))
-    const allRemoteCheckIns = remoteCheckInsPerProject.flat()
-    const checkInsToRemove = allRemoteCheckIns.filter((remoteCheckIn) => {
+    const checkInsToRemove = remoteCheckins.filter((remoteCheckIn) => {
       return !localCheckIns.find((localCheckIn) => {
-        return localCheckIn.name === remoteCheckIn.name
+        return localCheckIn.slug === remoteCheckIn.slug
       })
     })
 
     return Promise.all(checkInsToRemove.map(async (checkIn) => {
-      await this.client.remove(checkIn)
+      await this.client.remove(projectId, checkIn)
       checkIn.markAsDeleted()
 
       return checkIn

@@ -92,9 +92,9 @@ class Honeybadger extends Client {
     throw new Error('Honeybadger.showUserFeedbackForm() is not supported on the server-side')
   }
 
-  async checkIn(idOrName: string): Promise<void> {
+  async checkIn(idOrSlug: string): Promise<void> {
     try {
-      const id = await this.getCheckInId(idOrName)
+      const id = await this.getCheckInId(idOrSlug)
       await this.__transport
         .send({
           method: 'GET',
@@ -104,30 +104,31 @@ class Honeybadger extends Client {
       this.logger.info('CheckIn sent')
     }
     catch (err) {
-      this.logger.error(`CheckIn[${idOrName}] failed: an unknown error occurred.`, `message=${err.message}`)
+      this.logger.error(`CheckIn[${idOrSlug}] failed: an unknown error occurred.`, `message=${err.message}`)
     }
   }
 
-  private async getCheckInId(idOrName: string): Promise<string> {
+  private async getCheckInId(idOrSlug: string): Promise<string> {
     if (!this.config.checkins || this.config.checkins.length === 0) {
-      return idOrName
+      return idOrSlug
     }
 
-    const localCheckIn = this.config.checkins.find(c => c.name === idOrName)
+    const localCheckIn = this.config.checkins.find(c => c.slug === idOrSlug)
     if (!localCheckIn) {
-      return idOrName
+      return idOrSlug
     }
 
     if (localCheckIn.id) {
       return localCheckIn.id
     }
 
-    const projectCheckIns = await this.__checkInsClient.listForProject(localCheckIn.projectId)
-    const remoteCheckIn = projectCheckIns.find(c => c.name === localCheckIn.name)
+    const projectId = await this.__checkInsClient.getProjectId(this.config.apiKey)
+    const projectCheckIns = await this.__checkInsClient.listForProject(projectId)
+    const remoteCheckIn = projectCheckIns.find(c => c.slug === localCheckIn.slug)
     if (!remoteCheckIn) {
-      this.logger.debug(`Checkin[${idOrName}] was not found on HB. This should not happen. Was the sync command executed?`)
+      this.logger.debug(`Checkin[${idOrSlug}] was not found on HB. This should not happen. Was the sync command executed?`)
 
-      return idOrName
+      return idOrSlug
     }
 
     // store the id in-memory, so subsequent check-ins won't have to call the API

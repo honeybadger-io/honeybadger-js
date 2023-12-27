@@ -12,32 +12,27 @@ describe('check-ins-sync', () => {
     await expect(syncCheckIns()).rejects.toThrow('Could not find a Honeybadger configuration file.')
   })
 
-  it('should throw an error if personal auth token is not set', async () => {
+  it('should throw an error if api key is not set', async () => {
     jest.doMock('../../../honeybadger.config.js', () => ({}), { virtual: true })
+
+    await expect(syncCheckIns()).rejects.toThrow('apiKey is required')
+  })
+
+  it('should throw an error if personal auth token is not set', async () => {
+    jest.doMock('../../../honeybadger.config.js', () => ({
+      apiKey: 'hbp_123',
+    }), { virtual: true })
 
     await expect(syncCheckIns()).rejects.toThrow('personalAuthToken is required')
   })
 
-  it('should not sync if check-ins array is empty', async () => {
-    jest.doMock('../../../honeybadger.config.js', () => ({
-      personalAuthToken: '123'
-    }), { virtual: true })
-
-    const consoleLogSpy = jest.spyOn(console, 'log')
-    const consoleErrorSpy = jest.spyOn(console, 'error')
-
-    await syncCheckIns()
-    expect(consoleErrorSpy).not.toHaveBeenCalled()
-    expect(consoleLogSpy).toHaveBeenCalledWith('No check-ins found to synchronize with Honeybadger.')
-  })
-
   it('should sync checkIns', async () => {
     const checkInsConfig: Partial<CheckInsConfig> = {
+      apiKey: 'hbp_123',
       personalAuthToken: '123',
       checkins: [
         {
-          projectId: '11111',
-          name: 'a check-in',
+          slug: 'a-check-in',
           scheduleType: 'simple',
           reportPeriod: '1 week',
           gracePeriod: '5 minutes'
@@ -49,8 +44,19 @@ describe('check-ins-sync', () => {
     const consoleLogSpy = jest.spyOn(console, 'log')
     const consoleErrorSpy = jest.spyOn(console, 'error')
 
+    const getProjectIdRequest = nock('https://app.honeybadger.io')
+      .get(`/v2/project_keys/${checkInsConfig.apiKey}`)
+      .once()
+      .reply(200, {
+        id: checkInsConfig.apiKey,
+        project: {
+          id: '11111',
+          name: 'Test',
+        }
+      })
+
     const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
-      .get(`/v2/projects/${checkInsConfig.checkins[0].projectId}/check_ins`)
+      .get('/v2/projects/11111/check_ins')
       .once()
       .reply(200, {
         results: [
@@ -62,6 +68,7 @@ describe('check-ins-sync', () => {
       })
 
     await syncCheckIns()
+    expect(getProjectIdRequest.isDone()).toBe(true)
     expect(listProjectCheckInsRequest.isDone()).toBe(true)
     expect(consoleErrorSpy).not.toHaveBeenCalled()
     expect(consoleLogSpy).toHaveBeenCalledWith('Check-ins were synchronized with Honeybadger.')

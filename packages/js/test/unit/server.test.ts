@@ -387,8 +387,7 @@ describe('server client', function () {
     it('sends a check-in report using a check-in name', async function () {
       const checkInId = '123'
       const checkInConfig: CheckInDto = {
-        name: 'a simple check-in',
-        projectId: '1111',
+        slug: 'a-simple-check-in',
         scheduleType: 'simple',
         reportPeriod: '1 day',
       }
@@ -400,13 +399,24 @@ describe('server client', function () {
       })
 
       const localCheckIn = new CheckIn(checkInConfig)
+      const getProjectIdRequest = nock('https://app.honeybadger.io')
+        .get('/v2/project_keys/testing')
+        .once()
+        .reply(200, {
+          id: 'testing',
+          project: {
+            id: '11111',
+            name: 'Test',
+          }
+        })
+
       const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
-        .get(`/v2/projects/${localCheckIn.projectId}/check_ins`)
+        .get('/v2/projects/11111/check_ins')
         .once()
         .reply(200, {
           results: [
             {
-              ...new CheckIn(checkInConfig).asRequestPayload(),
+              ...localCheckIn.asRequestPayload(),
               id: checkInId
             },
           ] as CheckInResponsePayload[]
@@ -416,7 +426,8 @@ describe('server client', function () {
         .get(`/v1/check_in/${checkInId}`)
         .reply(201)
 
-      await client.checkIn(checkInConfig.name)
+      await client.checkIn(checkInConfig.slug)
+      expect(getProjectIdRequest.isDone()).toBe(true)
       expect(listProjectCheckInsRequest.isDone()).toBe(true)
       expect(checkinRequest.isDone()).toBe(true)
     })
@@ -424,8 +435,7 @@ describe('server client', function () {
     it('sends a check-in report using a check-in name without calling the HB API', async function () {
       const checkInId = '123'
       const checkInConfig: CheckInDto = {
-        name: 'a simple check-in',
-        projectId: '1111',
+        slug: 'a-simple-check-in',
         scheduleType: 'simple',
         reportPeriod: '1 day',
       }
@@ -437,13 +447,24 @@ describe('server client', function () {
       })
 
       const localCheckIn = new CheckIn(checkInConfig)
+      const getProjectIdRequest = nock('https://app.honeybadger.io')
+        .get('/v2/project_keys/testing')
+        .once()
+        .reply(200, {
+          id: 'testing',
+          project: {
+            id: '11111',
+            name: 'Test',
+          }
+        })
+
       const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
-        .get(`/v2/projects/${localCheckIn.projectId}/check_ins`)
+        .get('/v2/projects/11111/check_ins')
         .once()
         .reply(200, {
           results: [
             {
-              ...new CheckIn(checkInConfig).asRequestPayload(),
+              ...localCheckIn.asRequestPayload(),
               id: checkInId
             },
           ] as CheckInResponsePayload[]
@@ -454,8 +475,9 @@ describe('server client', function () {
         .twice()
         .reply(201)
 
-      await client.checkIn(checkInConfig.name)
-      await client.checkIn(checkInConfig.name)
+      await client.checkIn(checkInConfig.slug)
+      await client.checkIn(checkInConfig.slug)
+      expect(getProjectIdRequest.isDone()).toBe(true)
       expect(listProjectCheckInsRequest.isDone()).toBe(true)
       expect(checkInRequest.isDone()).toBe(true)
     })

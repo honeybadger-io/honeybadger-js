@@ -9,12 +9,12 @@ export type CheckInDto = {
     /**
      * Checkin name.
      */
-    name: string
+    name?: string
 
     /**
      * Checkin slug.
      */
-    slug?: string
+    slug: string
 
     /**
      * Valid values are "simple" or "cron".
@@ -45,24 +45,19 @@ export type CheckInDto = {
      * Valid timezone values are listed here {@link https://docs.honeybadger.io/api/check-ins/timezones here}.
      */
     cronTimezone?: string
-
-    /**
-     * The project ID that this checkin belongs to.
-     */
-    projectId: string
-
 }
 
 export type CheckInsConfig = {
     debug?: boolean
     logger?: Types.Logger
+    apiKey: string
     personalAuthToken: string
     checkins: CheckInDto[]
 }
 
 export type CheckInPayload = {
-    name: string
-    slug?: string
+    name?: string
+    slug: string
     schedule_type: 'simple' | 'cron'
     report_period?: string
     grace_period?: string
