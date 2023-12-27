@@ -31,7 +31,9 @@ export default {
     '@honeybadger-io/core'
   ],
   plugins: [
-    commonjs(),
+    commonjs({
+      ignoreDynamicRequires: true,
+    }),
     resolve({
       preferBuiltins: true, // Plugin node-resolve: preferring built-in module 'buffer' over local alternative
     }),

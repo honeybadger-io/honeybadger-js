@@ -1,79 +1,30 @@
-import path from 'path'
 import { syncCheckIns } from '../../../src/server/check-ins-sync'
-import { cosmiconfigSync } from 'cosmiconfig'
-import nock from 'nock';
-import { CheckInResponsePayload, CheckInsConfig } from '../../../src/server/check-ins-manager/types';
-import { CheckIn } from '../../../src/server/check-ins-manager/check-in';
-
-const configPath = path.resolve(__dirname, '../../../', 'honeybadger.config.js')
-jest.mock('cosmiconfig', () => ({
-  cosmiconfigSync: jest.fn()
-}))
-const mockCosmiconfig = cosmiconfigSync as jest.MockedFunction<typeof cosmiconfigSync>
+import nock from 'nock'
+import { CheckInResponsePayload, CheckInsConfig } from '../../../src/server/check-ins-manager/types'
+import { CheckIn } from '../../../src/server/check-ins-manager/check-in'
 
 describe('check-ins-sync', () => {
   afterEach(() => {
-    jest.resetAllMocks()
+    jest.resetModules()
   })
 
   it('should throw an error if config file is not found', async () => {
-    mockCosmiconfig.mockImplementation((_moduleName, _options) => {
-      return {
-        load: jest.fn(),
-        clearCaches: jest.fn(),
-        clearLoadCache: jest.fn(),
-        clearSearchCache: jest.fn(),
-        search: () => {
-          return {
-            isEmpty: true,
-            config: null,
-            filepath: null
-          }
-        }
-      }
-    })
     await expect(syncCheckIns()).rejects.toThrow('Could not find a Honeybadger configuration file.')
   })
 
   it('should throw an error if personal auth token is not set', async () => {
-    mockCosmiconfig.mockImplementation((_moduleName, _options) => {
-      return {
-        load: jest.fn(),
-        clearCaches: jest.fn(),
-        clearLoadCache: jest.fn(),
-        clearSearchCache: jest.fn(),
-        search: () => {
-          return {
-            isEmpty: false,
-            config: {},
-            filepath: configPath
-          }
-        }
-      }
-    })
+    jest.doMock('../../../honeybadger.config.js', () => ({}), { virtual: true })
+
     await expect(syncCheckIns()).rejects.toThrow('personalAuthToken is required')
   })
 
   it('should not sync if check-ins array is empty', async () => {
+    jest.doMock('../../../honeybadger.config.js', () => ({
+      personalAuthToken: '123'
+    }), { virtual: true })
+
     const consoleLogSpy = jest.spyOn(console, 'log')
     const consoleErrorSpy = jest.spyOn(console, 'error')
-    mockCosmiconfig.mockImplementation((_moduleName, _options) => {
-      return {
-        load: jest.fn(),
-        clearCaches: jest.fn(),
-        clearLoadCache: jest.fn(),
-        clearSearchCache: jest.fn(),
-        search: () => {
-          return {
-            isEmpty: false,
-            config: {
-              personalAuthToken: '123'
-            },
-            filepath: configPath
-          }
-        }
-      }
-    })
 
     await syncCheckIns()
     expect(consoleErrorSpy).not.toHaveBeenCalled()
@@ -93,23 +44,11 @@ describe('check-ins-sync', () => {
         },
       ]
     }
+    jest.doMock('../../../honeybadger.config.js', () => checkInsConfig, { virtual: true })
+
     const consoleLogSpy = jest.spyOn(console, 'log')
     const consoleErrorSpy = jest.spyOn(console, 'error')
-    mockCosmiconfig.mockImplementation((_moduleName, _options) => {
-      return {
-        load: jest.fn(),
-        clearCaches: jest.fn(),
-        clearLoadCache: jest.fn(),
-        clearSearchCache: jest.fn(),
-        search: () => {
-          return {
-            isEmpty: false,
-            config: checkInsConfig,
-            filepath: configPath
-          }
-        }
-      }
-    })
+
     const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
       .get(`/v2/projects/${checkInsConfig.checkins[0].projectId}/check_ins`)
       .once()
