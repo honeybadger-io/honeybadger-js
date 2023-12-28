@@ -40,8 +40,10 @@ export class CheckInsManager {
     }
 
     const localCheckIns = this.getLocalCheckIns()
-    const createdOrUpdated = await this.createOrUpdate(localCheckIns)
-    const removed = await this.remove(localCheckIns)
+    const projectId = await this.client.getProjectId(this.config.apiKey)
+    const remoteCheckIns = await this.client.listForProject(projectId)
+    const createdOrUpdated = await this.createOrUpdate(projectId, localCheckIns, remoteCheckIns)
+    const removed = await this.remove(projectId, localCheckIns, remoteCheckIns)
 
     return [
       ...createdOrUpdated,
@@ -68,15 +70,13 @@ export class CheckInsManager {
     return localCheckIns
   }
 
-  private async createOrUpdate(localCheckIns: CheckIn[]) {
+  private async createOrUpdate(projectId: string, localCheckIns: CheckIn[], remoteCheckIns: CheckIn[]) {
     const results = []
-    const projectId = await this.client.getProjectId(this.config.apiKey)
-    const remoteCheckins = await this.client.listForProject(projectId)
     // for each check-in from the localCheckIns array, check if it exists in the API
     // if it does not exist, create it
     // if it exists, check if it needs to be updated
     for (const localCheckIn of localCheckIns) {
-      const remoteCheckIn = remoteCheckins.find((checkIn) => {
+      const remoteCheckIn = remoteCheckIns.find((checkIn) => {
         return checkIn.slug === localCheckIn.slug
       })
       if (!remoteCheckIn) {
@@ -93,13 +93,10 @@ export class CheckInsManager {
     return results
   }
 
-  private async remove(localCheckIns: CheckIn[]) {
-    const projectId = await this.client.getProjectId(this.config.apiKey)
-    const remoteCheckins = await this.client.listForProject(projectId)
-
+  private async remove(projectId: string, localCheckIns: CheckIn[], remoteCheckIns: CheckIn[]) {
     // get all check-ins from the API
     // if not found in local check-ins, remove it
-    const checkInsToRemove = remoteCheckins.filter((remoteCheckIn) => {
+    const checkInsToRemove = remoteCheckIns.filter((remoteCheckIn) => {
       return !localCheckIns.find((localCheckIn) => {
         return localCheckIn.slug === remoteCheckIn.slug
       })

@@ -8,22 +8,13 @@ export class CheckInsClient {
   private readonly logger: Types.Logger
   private readonly transport: Types.Transport
 
-  private projectId: string | null
-  private cache: CheckIn[] | null
-
   constructor(config: Pick<CheckInsConfig, 'apiKey' | 'personalAuthToken' | 'logger'>, transport: Types.Transport) {
     this.transport = transport
     this.config = config
     this.logger = config.logger
-    this.cache = null
-    this.projectId = null
   }
 
   public async getProjectId(projectApiKey: string): Promise<string> {
-    if (this.projectId) {
-      return this.projectId
-    }
-
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
@@ -40,16 +31,11 @@ export class CheckInsClient {
     }
 
     const data: { project: { id: string; name: string; created_at: string; } } = JSON.parse(response.body)
-    this.projectId = data?.project?.id
 
-    return this.projectId
+    return data?.project?.id
   }
 
   public async listForProject(projectId: string): Promise<CheckIn[]> {
-    if (this.cache !== null) {
-      return this.cache
-    }
-
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
@@ -66,9 +52,8 @@ export class CheckInsClient {
     }
 
     const data: { results: CheckInResponsePayload[] } = JSON.parse(response.body)
-    this.cache = data.results.map((checkin) => CheckIn.fromResponsePayload(checkin))
 
-    return this.cache
+    return data.results.map((checkin) => CheckIn.fromResponsePayload(checkin))
   }
 
   public async get(projectId: string, checkInId: string): Promise<CheckIn> {
@@ -108,10 +93,8 @@ export class CheckInsClient {
     }
 
     const data: CheckInResponsePayload = JSON.parse(response.body)
-    const checkin = CheckIn.fromResponsePayload(data)
-    this.cache?.push(checkin)
 
-    return checkin
+    return CheckIn.fromResponsePayload(data)
   }
 
   public async update(projectId: string, checkIn: CheckIn): Promise<CheckIn> {
@@ -130,9 +113,6 @@ export class CheckInsClient {
       throw new Error(`Failed to update checkin[${checkIn.slug}] for project[${projectId}]: ${this.getErrorMessage(response.body)}`)
     }
 
-    const cached = this.cache?.find(c => c.slug === checkIn.slug)
-    cached?.update(checkIn)
-
     return checkIn
   }
 
@@ -150,10 +130,6 @@ export class CheckInsClient {
 
     if (response.statusCode !== 204) {
       throw new Error(`Failed to remove checkin[${checkIn.slug}] for project[${projectId}]: ${this.getErrorMessage(response.body)}`)
-    }
-
-    if (this.cache) {
-      this.cache = this.cache.filter(c => c.slug !== checkIn.slug)
     }
   }
 

@@ -62,32 +62,6 @@ describe('CheckinsClient', () => {
     expect(checkIns[0].reportPeriod).toEqual('1 week')
   })
 
-  it('should return list of check-ins from cache for the same project', async () => {
-    const projectId = '11111'
-    const request = nock('https://app.honeybadger.io')
-      .get(`/v2/projects/${projectId}/check_ins`)
-      .once()
-      .reply(200, {
-        results: [
-          {
-            id: 'uuid',
-            slug: 'a-check-in',
-            schedule_type: 'simple',
-            report_period: '1 week',
-          }
-        ]
-      })
-    const client = new CheckInsClient({
-      logger: nullLogger(),
-      apiKey: 'hbp_123',
-      personalAuthToken: '123',
-    }, new ServerTransport())
-    const checkIns = await client.listForProject(projectId)
-    const checkInsAgain = await client.listForProject(projectId)
-    expect(checkIns).toEqual(checkInsAgain);
-    expect(request.isDone()).toBe(true)
-  })
-
   it('should get a check-in', async () => {
     const projectId = '11111'
     const checkInId = '22222'

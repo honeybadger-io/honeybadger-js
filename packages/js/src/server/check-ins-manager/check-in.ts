@@ -59,17 +59,6 @@ export class CheckIn implements CheckInDto {
     }
   }
 
-  public update(other: CheckIn) {
-    this.id = other.id
-    this.slug = other.slug
-    this.name = other.name
-    this.scheduleType = other.scheduleType
-    this.reportPeriod = other.reportPeriod
-    this.gracePeriod = other.gracePeriod
-    this.cronSchedule = other.cronSchedule
-    this.cronTimezone = other.cronTimezone
-  }
-
   public asRequestPayload() {
     const payload: CheckInPayload = {
       name: this.name,
