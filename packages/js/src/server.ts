@@ -93,48 +93,45 @@ class Honeybadger extends Client {
   }
 
   async checkIn(idOrSlug: string): Promise<void> {
+    if (this.isCheckInSlug(idOrSlug)) {
+      return this.checkInWithSlug(idOrSlug)
+    }
+
+    return this.checkInWithId(idOrSlug)
+  }
+
+  private async checkInWithSlug(slug: string): Promise<void> {
     try {
-      const id = await this.getCheckInId(idOrSlug)
+      await this.__transport
+        .send({
+          method: 'GET',
+          endpoint: endpoint(this.config.endpoint, `v1/check_in/${this.config.apiKey}/${slug}`),
+          logger: this.logger,
+        })
+      this.logger.info(`Check-In with slug[${slug}] sent`)
+    }
+    catch (err) {
+      this.logger.error(`CheckIn with slug[${slug}] failed: an unknown error occurred.`, `message=${err.message}`)
+    }
+  }
+
+  private async checkInWithId(id: string): Promise<void> {
+    try {
       await this.__transport
         .send({
           method: 'GET',
           endpoint: endpoint(this.config.endpoint, `v1/check_in/${id}`),
           logger: this.logger,
         })
-      this.logger.info('CheckIn sent')
+      this.logger.info(`Check-In with id[${id}] sent`)
     }
     catch (err) {
-      this.logger.error(`CheckIn[${idOrSlug}] failed: an unknown error occurred.`, `message=${err.message}`)
+      this.logger.error(`Check-In with id[${id}] failed: an unknown error occurred.`, `message=${err.message}`)
     }
   }
 
-  private async getCheckInId(idOrSlug: string): Promise<string> {
-    if (!this.config.checkins || this.config.checkins.length === 0) {
-      return idOrSlug
-    }
-
-    const localCheckIn = this.config.checkins.find(c => c.slug === idOrSlug)
-    if (!localCheckIn) {
-      return idOrSlug
-    }
-
-    if (localCheckIn.id) {
-      return localCheckIn.id
-    }
-
-    const projectId = await this.__checkInsClient.getProjectId(this.config.apiKey)
-    const projectCheckIns = await this.__checkInsClient.listForProject(projectId)
-    const remoteCheckIn = projectCheckIns.find(c => c.slug === localCheckIn.slug)
-    if (!remoteCheckIn) {
-      this.logger.debug(`Checkin[${idOrSlug}] was not found on HB. This should not happen. Was the sync command executed?`)
-
-      return idOrSlug
-    }
-
-    // store the id in-memory, so subsequent check-ins won't have to call the API
-    localCheckIn.id = remoteCheckIn.id
-
-    return localCheckIn.id
+  private isCheckInSlug(idOrSlug: string): boolean {
+    return this.config.checkins?.some(c => c.slug === idOrSlug) ?? false
   }
 
   // This method is intended for web frameworks.

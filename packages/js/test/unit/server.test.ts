@@ -3,8 +3,7 @@ import os from 'os';
 import nock from 'nock'
 import Singleton from '../../src/server'
 import { nullLogger } from './helpers'
-import { CheckInDto, CheckInResponsePayload } from '../../src/server/check-ins-manager/types';
-import { CheckIn } from '../../src/server/check-ins-manager/check-in';
+import { CheckInDto } from '../../src/server/check-ins-manager/types';
 
 describe('server client', function () {
   let client: typeof Singleton
@@ -384,102 +383,26 @@ describe('server client', function () {
       expect(request.isDone()).toBe(true)
     })
 
-    it('sends a check-in report using a check-in name', async function () {
-      const checkInId = '123'
+    it('sends a check-in report using a check-in slug', async function () {
+      const apiKey = 'testing'
       const checkInConfig: CheckInDto = {
         slug: 'a-simple-check-in',
         scheduleType: 'simple',
         reportPeriod: '1 day',
       }
       client.configure({
-        apiKey: 'testing',
+        apiKey,
         personalAuthToken: 'testingToken',
         endpoint: 'http://api.honeybadger.io',
         checkins: [checkInConfig]
       })
-
-      const localCheckIn = new CheckIn(checkInConfig)
-      const getProjectIdRequest = nock('https://app.honeybadger.io')
-        .get('/v2/project_keys/testing')
-        .once()
-        .reply(200, {
-          id: 'testing',
-          project: {
-            id: '11111',
-            name: 'Test',
-          }
-        })
-
-      const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
-        .get('/v2/projects/11111/check_ins')
-        .once()
-        .reply(200, {
-          results: [
-            {
-              ...localCheckIn.asRequestPayload(),
-              id: checkInId
-            },
-          ] as CheckInResponsePayload[]
-        })
 
       const checkinRequest = nock('http://api.honeybadger.io')
-        .get(`/v1/check_in/${checkInId}`)
+        .get(`/v1/check_in/${apiKey}/${checkInConfig.slug}`)
         .reply(201)
 
       await client.checkIn(checkInConfig.slug)
-      expect(getProjectIdRequest.isDone()).toBe(true)
-      expect(listProjectCheckInsRequest.isDone()).toBe(true)
       expect(checkinRequest.isDone()).toBe(true)
-    })
-
-    it('sends a check-in report using a check-in name without calling the HB API', async function () {
-      const checkInId = '123'
-      const checkInConfig: CheckInDto = {
-        slug: 'a-simple-check-in',
-        scheduleType: 'simple',
-        reportPeriod: '1 day',
-      }
-      client.configure({
-        apiKey: 'testing',
-        personalAuthToken: 'testingToken',
-        endpoint: 'http://api.honeybadger.io',
-        checkins: [checkInConfig]
-      })
-
-      const localCheckIn = new CheckIn(checkInConfig)
-      const getProjectIdRequest = nock('https://app.honeybadger.io')
-        .get('/v2/project_keys/testing')
-        .once()
-        .reply(200, {
-          id: 'testing',
-          project: {
-            id: '11111',
-            name: 'Test',
-          }
-        })
-
-      const listProjectCheckInsRequest = nock('https://app.honeybadger.io')
-        .get('/v2/projects/11111/check_ins')
-        .once()
-        .reply(200, {
-          results: [
-            {
-              ...localCheckIn.asRequestPayload(),
-              id: checkInId
-            },
-          ] as CheckInResponsePayload[]
-        })
-
-      const checkInRequest = nock('http://api.honeybadger.io')
-        .get(`/v1/check_in/${checkInId}`)
-        .twice()
-        .reply(201)
-
-      await client.checkIn(checkInConfig.slug)
-      await client.checkIn(checkInConfig.slug)
-      expect(getProjectIdRequest.isDone()).toBe(true)
-      expect(listProjectCheckInsRequest.isDone()).toBe(true)
-      expect(checkInRequest.isDone()).toBe(true)
     })
   })
 
