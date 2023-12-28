@@ -8,9 +8,30 @@ describe('CheckinsClient', () => {
   it('should create a client', () => {
     const client = new CheckInsClient({
       logger: nullLogger(),
+      apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
     expect(client).toBeInstanceOf(CheckInsClient)
+  })
+
+  it('should get project id from an api key', async () => {
+    const request = nock('https://app.honeybadger.io')
+      .get('/v2/project_keys/hbp_123')
+      .reply(200, {
+        project: {
+          id: '11111',
+          name: 'a project',
+        }
+      })
+
+    const client = new CheckInsClient({
+      logger: nullLogger(),
+      apiKey: 'hbp_123',
+      personalAuthToken: '123',
+    }, new ServerTransport())
+    const projectId = await client.getProjectId('hbp_123')
+    expect(request.isDone()).toBe(true)
+    expect(projectId).toEqual('11111')
   })
 
   it('should list check-ins for a project', async () => {
@@ -21,7 +42,7 @@ describe('CheckinsClient', () => {
         results: [
           {
             id: 'uuid',
-            name: 'a check-in',
+            slug: 'a-check-in',
             schedule_type: 'simple',
             report_period: '1 week',
           }
@@ -29,40 +50,16 @@ describe('CheckinsClient', () => {
       })
     const client = new CheckInsClient({
       logger: nullLogger(),
+      apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
     const checkIns = await client.listForProject(projectId)
     expect(request.isDone()).toBe(true)
     expect(checkIns).toHaveLength(1)
     expect(checkIns[0].id).toEqual('uuid')
-    expect(checkIns[0].name).toEqual('a check-in')
+    expect(checkIns[0].slug).toEqual('a-check-in')
     expect(checkIns[0].scheduleType).toEqual('simple')
     expect(checkIns[0].reportPeriod).toEqual('1 week')
-  })
-
-  it('should return list of check-ins from cache for the same project', async () => {
-    const projectId = '11111'
-    const request = nock('https://app.honeybadger.io')
-      .get(`/v2/projects/${projectId}/check_ins`)
-      .once()
-      .reply(200, {
-        results: [
-          {
-            id: 'uuid',
-            name: 'a check-in',
-            schedule_type: 'simple',
-            report_period: '1 week',
-          }
-        ]
-      })
-    const client = new CheckInsClient({
-      logger: nullLogger(),
-      personalAuthToken: '123',
-    }, new ServerTransport())
-    const checkIns = await client.listForProject(projectId)
-    const checkInsAgain = await client.listForProject(projectId)
-    expect(checkIns).toEqual(checkInsAgain);
-    expect(request.isDone()).toBe(true)
   })
 
   it('should get a check-in', async () => {
@@ -74,18 +71,19 @@ describe('CheckinsClient', () => {
       .once()
       .reply(200, {
         id: 'uuid',
-        name: 'a check-in',
+        slug: 'a-check-in',
         schedule_type: 'simple',
         report_period: '1 week',
       })
     const client = new CheckInsClient({
       logger: nullLogger(),
+      apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
     const checkIn = await client.get(projectId, checkInId)
     expect(request.isDone()).toBe(true)
     expect(checkIn.id).toEqual('uuid')
-    expect(checkIn.name).toEqual('a check-in')
+    expect(checkIn.slug).toEqual('a-check-in')
     expect(checkIn.scheduleType).toEqual('simple')
     expect(checkIn.reportPeriod).toEqual('1 week')
   })
@@ -95,8 +93,7 @@ describe('CheckinsClient', () => {
     const checkInId = '22222'
 
     const checkInToBeSaved = new CheckIn({
-      projectId,
-      name: 'a check-in',
+      slug: 'a-check-in',
       scheduleType: 'simple',
       reportPeriod: '1 week',
     })
@@ -111,12 +108,13 @@ describe('CheckinsClient', () => {
       })
     const client = new CheckInsClient({
       logger: nullLogger(),
+      apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
-    const checkIn = await client.create(checkInToBeSaved)
+    const checkIn = await client.create(projectId, checkInToBeSaved)
     expect(request.isDone()).toBe(true)
     expect(checkIn.id).toEqual(checkInId)
-    expect(checkIn.name).toEqual('a check-in')
+    expect(checkIn.slug).toEqual('a-check-in')
     expect(checkIn.scheduleType).toEqual('simple')
     expect(checkIn.reportPeriod).toEqual('1 week')
   })
@@ -126,9 +124,8 @@ describe('CheckinsClient', () => {
     const checkInId = '22222'
 
     const checkInToBeUpdated = new CheckIn({
-      projectId,
       id: checkInId,
-      name: 'a check-in',
+      slug: 'a-check-in',
       scheduleType: 'simple',
       reportPeriod: '1 week',
     })
@@ -143,12 +140,13 @@ describe('CheckinsClient', () => {
       })
     const client = new CheckInsClient({
       logger: nullLogger(),
+      apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
-    const checkIn = await client.update(checkInToBeUpdated)
+    const checkIn = await client.update(projectId, checkInToBeUpdated)
     expect(request.isDone()).toBe(true)
     expect(checkIn.id).toEqual(checkInId)
-    expect(checkIn.name).toEqual('a check-in')
+    expect(checkIn.slug).toEqual('a-check-in')
     expect(checkIn.scheduleType).toEqual('simple')
     expect(checkIn.reportPeriod).toEqual('1 week')
   })
@@ -158,9 +156,8 @@ describe('CheckinsClient', () => {
     const checkInId = '22222'
 
     const checkInToBeRemoved = new CheckIn({
-      projectId,
       id: checkInId,
-      name: 'a check-in',
+      slug: 'a-check-in',
       scheduleType: 'simple',
       reportPeriod: '1 week',
     })
@@ -172,10 +169,11 @@ describe('CheckinsClient', () => {
 
     const client = new CheckInsClient({
       logger: nullLogger(),
+      apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
 
-    await client.remove(checkInToBeRemoved)
+    await client.remove(projectId, checkInToBeRemoved)
     expect(request.isDone()).toBe(true)
   })
 })
