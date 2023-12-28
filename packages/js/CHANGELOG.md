@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.7.2...@honeybadger-io/js@6.8.0) (2023-12-28)
+
+
+### Features
+
+* make project-id redundant for check-ins configuration api ([#1274](https://github.com/honeybadger-io/honeybadger-js/issues/1274)) ([4ffe44a](https://github.com/honeybadger-io/honeybadger-js/commit/4ffe44a946312ea0135d3a66cca4e56e4086a051))
+
+
+
 ## [6.7.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.7.1...@honeybadger-io/js@6.7.2) (2023-12-27)
 
 
