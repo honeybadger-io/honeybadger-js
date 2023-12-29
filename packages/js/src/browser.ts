@@ -260,7 +260,7 @@ const NOTIFIER = {
 }
 
 const userAgent = () => {
-  if (typeof navigator !== undefined) {
+  if (typeof navigator !== 'undefined') {
     return `Honeybadger JS Browser Client ${NOTIFIER.version}; ${navigator.userAgent}`
   }
 
