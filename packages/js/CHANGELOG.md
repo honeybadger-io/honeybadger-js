@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.8.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.8.0...@honeybadger-io/js@6.8.1) (2023-12-29)
+
+
+### Bug Fixes
+
+* improve check for navigator ([#1276](https://github.com/honeybadger-io/honeybadger-js/issues/1276)) ([aa7e1ec](https://github.com/honeybadger-io/honeybadger-js/commit/aa7e1ec93dd783dbf6d0203a8d21517547b1bbdf))
+
+
+
 ## [6.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.7.2...@honeybadger-io/js@6.8.0) (2023-12-28)
 
 
