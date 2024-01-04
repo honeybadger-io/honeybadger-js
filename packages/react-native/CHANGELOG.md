@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.3.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.3.2...@honeybadger-io/react-native@6.3.3) (2024-01-04)
+
+
+### Bug Fixes
+
+* **react-native:** remove wrong jest import ([#1280](https://github.com/honeybadger-io/honeybadger-js/issues/1280)) ([ec9498a](https://github.com/honeybadger-io/honeybadger-js/commit/ec9498a0554d85fe011a25dfb98af98d118d81de))
+
+
+
+
+
 ## [6.3.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.3.1...@honeybadger-io/react-native@6.3.2) (2023-11-28)
 
 **Note:** Version bump only for package @honeybadger-io/react-native
