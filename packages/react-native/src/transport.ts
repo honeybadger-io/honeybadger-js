@@ -1,7 +1,6 @@
 import { Types, Util } from '@honeybadger-io/core'
 import { Platform } from 'react-native'
 import * as pkg from '../package.json'
-import fetch from 'jest-fetch-mock';
 
 export class Transport implements Types.Transport {
   defaultHeaders(): Record<string, string> {

@@ -8,6 +8,10 @@
     "plugin:import/typescript"
   ],
   "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint",
+    "eslint-plugin-local-rules"
+  ],
   "rules": {
     "quotes": [
       "error",
@@ -32,16 +36,14 @@
       {
         "argsIgnorePattern": "^_"
       }
-    ]
+    ],
+    "local-rules/no-test-imports": "error"
   },
   "settings": {
     "import/ignore": [
       "node_modules/react-native/index\\.js$"
     ]
   },
-  "plugins": [
-    "@typescript-eslint"
-  ],
   "env":
   {
     "jest": true,
