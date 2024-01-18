@@ -55,7 +55,6 @@ export default [
       'util',
       'domain',
       'async_hooks',
-      'cosmiconfig',
     ],
     output: {
       file: pkg.main,

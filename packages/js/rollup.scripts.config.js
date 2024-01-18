@@ -27,7 +27,6 @@ export default {
     'util',
     'http',
     'https',
-    'cosmiconfig',
     '@honeybadger-io/core'
   ],
   plugins: [
