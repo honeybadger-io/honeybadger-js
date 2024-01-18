@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.8.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.8.2...@honeybadger-io/js@6.8.3) (2024-01-18)
+
+
+### Bug Fixes
+
+* remove unused cosmiconfig dependency ([#1289](https://github.com/honeybadger-io/honeybadger-js/issues/1289)) ([669e269](https://github.com/honeybadger-io/honeybadger-js/commit/669e269390bbcf60fb530087ecd9d3ac34612bb3))
+
+
+
+
+
 ## [6.8.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.8.1...@honeybadger-io/js@6.8.2) (2024-01-04)
 
 **Note:** Version bump only for package @honeybadger-io/js
