@@ -1,0 +1,46 @@
+{
+  "name": "@honeybadger-io/esbuild",
+  "version": "0.0.1",
+  "description": "Esbuild plugin to upload source maps to Honeybadger's API - http://docs.honeybadger.io/guides/source-maps.html",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/honeybadger-io/honeybadger-js.git"
+  },
+  "keywords": [
+    "esbuild",
+    "sourcemap",
+    "source map",
+    "minified js",
+    "honeybadger",
+    "honey badger"
+  ],
+  "author": "Honeybadger.io <support@honeybadger.io> (https://www.honeybadger.io/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/esbuild",
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@honeybadger-io/core": "^6.5.1",
+    "@honeybadger-io/plugin-core": "^1.2.1"
+  },
+  "peerDependencies": {
+    "esbuild": "*"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
