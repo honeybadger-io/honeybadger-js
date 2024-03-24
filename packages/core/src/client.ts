@@ -302,8 +302,12 @@ export abstract class Client {
     return this
   }
 
-  logEvent(data: Record<string, unknown>): void {
-    this.__eventsLogger.logEvent(data)
+  event(type: string, data: Record<string, unknown>): void {
+    this.__eventsLogger.log({
+      event_type: type,
+      ts: new Date().toISOString(),
+      ...data
+    })
   }
 
   __getBreadcrumbs() {

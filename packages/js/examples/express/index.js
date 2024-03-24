@@ -4,10 +4,12 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-const Honeybadger = require('@honeybadger-io/js')
+const Honeybadger = require('../../dist/server/honeybadger')
 Honeybadger.configure({
   apiKey: process.env.HONEYBADGER_API_KEY,
-  reportData: true
+  reportData: true,
+  eventsEnabled: true,
+  debug: true,
 })
 
 app.use(Honeybadger.requestHandler)
@@ -48,6 +50,16 @@ app.get('/checkin/:id', (req, res) => {
     .then(() => {
       res.send('Done!')
     })
+})
+
+app.get('/event', (req, res) => {
+  // should send an event to Honeybadger, with type 'test-event'
+  Honeybadger.event('test-event', { message: 'Event sent!', source: 'Honeybadger.event', path: req.url })
+
+  // should send an event to Honeybadger, with type 'log'
+  console.log('Event sent!', { source: 'console.log' , path: req.url })
+
+  res.send('Done. Check your Honeybadger Insights page!')
 })
 
 app.use(Honeybadger.errorHandler)

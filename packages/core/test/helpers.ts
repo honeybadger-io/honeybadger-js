@@ -29,6 +29,10 @@ export class TestClient extends BaseClient {
     throw new Error('Method not implemented.');
   }
 
+  public eventsLogger() {
+    return this.__eventsLogger;
+  }
+
   protected showUserFeedbackForm(_options: UserFeedbackFormOptions): Promise<void> {
     throw new Error('Method not implemented.');
   }

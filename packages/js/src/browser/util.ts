@@ -1,3 +1,7 @@
+import { Util } from '@honeybadger-io/core';
+
+const { globalThisOrWindow } = Util;
+
 /**
  * Converts an HTMLElement into a human-readable string.
  * @param {!HTMLElement} element
@@ -187,18 +191,3 @@ export const preferCatch = (function() {
   }
   return preferCatch
 })()
-
-/** globalThis has fairly good support. But just in case, lets check its defined.
- * @see {https://caniuse.com/?search=globalThis}
- */
-export function globalThisOrWindow () {
-  if (typeof globalThis !== 'undefined') {
-    return globalThis
-  }
-
-  if (typeof self !== 'undefined') {
-    return self
-  }
-
-  return window
-}

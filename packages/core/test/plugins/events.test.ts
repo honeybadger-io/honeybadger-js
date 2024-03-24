@@ -1,5 +1,5 @@
-import { nullLogger, TestClient, TestTransport } from '../../helpers';
-import eventsLogger from '../../../../src/browser/integrations/events';
+import { nullLogger, TestClient, TestTransport } from '../helpers'
+import eventsLogger from '../../src/plugins/events'
 
 const consoleMocked = () => {
   return {
@@ -12,16 +12,14 @@ const consoleMocked = () => {
 }
 
 describe('window.console integration for events logging', function () {
-  let client: TestClient, mockLogEvent, mockConsole
+  let client: TestClient, mockConsole
 
   beforeEach(function () {
     jest.clearAllMocks()
     client = new TestClient({
       logger: nullLogger()
     }, new TestTransport())
-    mockLogEvent = jest.fn()
     mockConsole = consoleMocked()
-    client.logEvent = mockLogEvent
   })
 
   it('should skip install by default', function () {
@@ -39,10 +37,17 @@ describe('window.console integration for events logging', function () {
   })
 
   it('should send events to Honeybadger', async function () {
+    const eventsLoggerSpy = jest.spyOn(client.eventsLogger(), 'log')
     client.config.eventsEnabled = true
     const window = { console: mockConsole }
     eventsLogger(<never>window).load(client)
     mockConsole.log('testing')
-    expect(mockLogEvent.mock.calls.length).toBe(1)
+    expect(eventsLoggerSpy).toHaveBeenCalledWith({
+      event_type: 'log',
+      ts: expect.any(String),
+      severity: 'log',
+      message: 'testing',
+      args: []
+    })
   })
 })

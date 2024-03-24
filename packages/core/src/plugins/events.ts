@@ -1,14 +1,12 @@
 /* eslint-disable prefer-rest-params */
-import { Types, Util } from '@honeybadger-io/core'
-import Client from '../../browser'
-import { globalThisOrWindow } from '../util';
+import { Client } from '../client'
+import { globalThisOrWindow, instrumentConsole } from '../util';
+import { Plugin } from '../types'
 
-const { instrumentConsole } = Util
-
-export default function (_window = globalThisOrWindow()): Types.Plugin {
+export default function (_window = globalThisOrWindow()): Plugin {
   return {
     shouldReloadOnConfigure: false,
-    load: (client: typeof Client) => {
+    load: (client: Client) => {
       function sendEventsToInsights() {
         return client.config.eventsEnabled
       }
@@ -22,10 +20,10 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
           return
         }
 
-        // todo: send browser info
-        client.logEvent({
-          level,
-          args
+        client.event('log', {
+          severity: level,
+          message: args[0],
+          args: args.slice(1)
         })
       })
     }

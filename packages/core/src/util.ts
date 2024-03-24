@@ -564,3 +564,18 @@ function getSourceCodeSnippet(fileData: string, lineNumber: number, sourceRadius
 export function isBrowserConfig(config: BrowserConfig | Config): config is BrowserConfig {
   return (config as BrowserConfig).async !== undefined
 }
+
+/** globalThis has fairly good support. But just in case, lets check its defined.
+ * @see {https://caniuse.com/?search=globalThis}
+ */
+export function globalThisOrWindow () {
+  if (typeof globalThis !== 'undefined') {
+    return globalThis
+  }
+
+  if (typeof self !== 'undefined') {
+    return self
+  }
+
+  return window
+}
