@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import { Client } from '../client'
 import { globalThisOrWindow, instrumentConsole } from '../util';
-import { Plugin } from '../types'
+import { EventPayload, Plugin } from '../types'
 
 export default function (_window = globalThisOrWindow()): Plugin {
   return {
@@ -20,11 +20,23 @@ export default function (_window = globalThisOrWindow()): Plugin {
           return
         }
 
-        client.event('log', {
+        if (args.length === 0) {
+          return
+        }
+
+        const data: Record<string, unknown> = {
           severity: level,
-          message: args[0],
-          args: args.slice(1)
-        })
+        }
+
+        if (typeof args[0] === 'string') {
+          data.message = args[0]
+          data.args = args.slice(1)
+        }
+        else {
+          data.args = args
+        }
+
+        client.event('log', data)
       })
     }
   }
