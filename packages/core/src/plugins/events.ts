@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import { Client } from '../client'
 import { globalThisOrWindow, instrumentConsole } from '../util';
-import { EventPayload, Plugin } from '../types'
+import { Plugin } from '../types'
 
 export default function (_window = globalThisOrWindow()): Plugin {
   return {
