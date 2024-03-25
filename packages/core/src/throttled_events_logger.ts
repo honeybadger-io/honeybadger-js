@@ -4,11 +4,11 @@ import { endpoint } from './util'
 import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
 export class ThrottledEventsLogger implements EventsLogger {
-  private queue: Record<string, any>[] = []
+  private queue: EventPayload[] = []
   private isProcessing = false
   private logger: Logger
 
-  constructor(private config: Partial<Config>, private transport: Transport) {
+  constructor(private readonly config: Partial<Config>, private transport: Transport) {
     this.config = {
       ...DEFAULT_CONFIG,
       ...config,

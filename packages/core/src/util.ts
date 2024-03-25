@@ -579,3 +579,24 @@ export function globalThisOrWindow () {
 
   return window
 }
+
+const _deprecatedMethodCalls: Record<string, number> = {}
+/**
+ * Logs a deprecation warning, every X calls to the method.
+ */
+export function logDeprecatedMethod(logger: Logger, oldMethod: string, newMethod: string, callCountThreshold = 100) {
+  const key = `${oldMethod}-${newMethod}`
+  if (typeof _deprecatedMethodCalls[key] === 'undefined') {
+    _deprecatedMethodCalls[key] = 0
+  }
+
+  if (_deprecatedMethodCalls[key] % callCountThreshold !== 0) {
+    _deprecatedMethodCalls[key]++
+    return
+  }
+
+  const msg = `Deprecation warning: ${oldMethod} has been deprecated; please use ${newMethod} instead.`
+  logger.warn(msg)
+
+  _deprecatedMethodCalls[key]++
+}
