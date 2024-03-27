@@ -1,14 +1,14 @@
-import { Transport, Config, EventsLogger, Logger } from './types'
+import { Transport, Config, EventsLogger, Logger, EventPayload } from './types'
 import { NdJson } from 'json-nd'
 import { endpoint } from './util'
 import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
 export class ThrottledEventsLogger implements EventsLogger {
-  private queue: Record<string, unknown>[] = []
+  private queue: EventPayload[] = []
   private isProcessing = false
   private logger: Logger
 
-  constructor(private config: Partial<Config>, private transport: Transport) {
+  constructor(private readonly config: Partial<Config>, private transport: Transport) {
     this.config = {
       ...DEFAULT_CONFIG,
       ...config,
@@ -22,8 +22,8 @@ export class ThrottledEventsLogger implements EventsLogger {
     }
   }
 
-  logEvent(data: Record<string, unknown>) {
-    this.queue.push(data)
+  log(payload: EventPayload) {
+    this.queue.push(payload)
 
     if (!this.isProcessing) {
       this.processQueue()
@@ -82,8 +82,9 @@ export class ThrottledEventsLogger implements EventsLogger {
   /**
    * todo: improve this
    *
-   * The EventsLogger overrides the console methods
-   * so if we want to log something we need to use the original methods
+   * The EventsLogger overrides the console methods to enable automatic instrumentation
+   * of console logs to the Honeybadger API.
+   * So if we want to log something in here we need to use the original methods.
    */
   private originalLogger() {
     return {

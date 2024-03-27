@@ -9,6 +9,7 @@ export const CONFIG = {
   revision: null,
   reportData: null,
   breadcrumbsEnabled: true,
+  // we could decide the value of eventsEnabled based on `env` and `developmentEnvironments`
   eventsEnabled: false,
   maxBreadcrumbs: 40,
   maxObjectDepth: 8,

@@ -3,6 +3,7 @@ import { nullLogger, TestClient, TestTransport } from './helpers'
 import { Notice } from '../src/types'
 import { makeBacktrace, DEFAULT_BACKTRACE_SHIFT } from '../src/util'
 import { ThrottledEventsLogger } from '../src/throttled_events_logger';
+import { NdJson } from 'json-nd';
 
 class MyError extends Error {
   context = null
@@ -1025,6 +1026,44 @@ describe('client', function () {
 
       expect(payload.breadcrumbs.enabled).toEqual(false)
       expect(payload.breadcrumbs.trail).toEqual([])
+    })
+  })
+
+  describe('event', function () {
+    it('sends an event with only a payload object', function (done) {
+      const transport = client.transport();
+      const transportSpy = jest.spyOn(transport, 'send')
+      const timestamp = new Date().toISOString()
+      const expectedRequestPayload = {
+        ts: timestamp,
+        message: 'expected message'
+      }
+      client.event(expectedRequestPayload)
+
+      setTimeout(() => {
+        expect(transportSpy).toHaveBeenCalledWith(expect.anything(), NdJson.stringify([expectedRequestPayload]))
+        done()
+      })
+    })
+
+    it('sends an event with an event type and a payload object', function (done) {
+      const transport = client.transport();
+      const transportSpy = jest.spyOn(transport, 'send')
+      const timestamp = new Date().toISOString()
+      const payload = {
+        ts: timestamp,
+        message: 'expected message'
+      }
+      client.event('expected event', payload)
+
+      setTimeout(() => {
+        const expectedRequestPayload = {
+          event_type: 'expected event',
+          ...payload
+        }
+        expect(transportSpy).toHaveBeenCalledWith(expect.anything(), NdJson.stringify([expectedRequestPayload]))
+        done()
+      })
     })
   })
 

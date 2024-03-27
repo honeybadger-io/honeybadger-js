@@ -21,7 +21,7 @@ describe('ThrottledEventsLogger', () => {
     const consoleLogSpy = jest.spyOn(console, 'debug')
     const transport = new TestTransport()
     const eventsLogger = new ThrottledEventsLogger({ debug: true }, transport)
-    eventsLogger.logEvent({ name: 'foo' })
+    eventsLogger.log({ event_type: 'event', ts: new Date().toISOString(), name: 'foo' })
     await wait(100)
     // @ts-ignore
     expect(eventsLogger.queue.length).toBe(0)
@@ -35,11 +35,11 @@ describe('ThrottledEventsLogger', () => {
     const transport = new TestTransport()
     const transportSpy = jest.spyOn(transport, 'send')
     const eventsLogger = new ThrottledEventsLogger({ debug: true }, transport)
-    const event1 = { name: 'foo' }
-    const event2 = { name: 'foo', nested: { value: { play: 1 } } }
-    eventsLogger.logEvent(event1)
-    eventsLogger.logEvent(event2)
-    eventsLogger.logEvent(event1)
+    const event1 = { event_type: 'event', ts: new Date().toISOString(), name: 'foo' }
+    const event2 = { event_type: 'event', ts: new Date().toISOString(), name: 'foo', nested: { value: { play: 1 } } }
+    eventsLogger.log(event1)
+    eventsLogger.log(event2)
+    eventsLogger.log(event1)
     await wait(200)
     // @ts-ignore
     expect(eventsLogger.queue.length).toBe(0)
