@@ -311,7 +311,13 @@ export abstract class Client {
     this.event('log', data)
   }
 
-  event(type: string, data: Record<string, unknown>): void {
+  event(data: Record<string, unknown>): void;
+  event(type: string, data: Record<string, unknown>): void;
+  event(type: string | Record<string, unknown>, data?: Record<string, unknown>): void {
+    if (typeof type === 'object') {
+      data = type
+      type = type['event_type'] as string ?? undefined
+    }
     this.__eventsLogger.log({
       event_type: type,
       ts: new Date().toISOString(),

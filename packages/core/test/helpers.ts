@@ -16,6 +16,12 @@ export class TestTransport implements Transport {
     return {};
   }
   send<T>(_options: TransportOptions, _payload: T): Promise<{ statusCode: number; body: string }> {
+    if (typeof _payload === 'string') {
+      // sending an event
+      return Promise.resolve({ body: '', statusCode: 200 });
+    }
+
+    // sending a notice
     return Promise.resolve({ body: JSON.stringify({ id: 'uuid' }), statusCode: 201 });
   }
 }
@@ -31,6 +37,10 @@ export class TestClient extends BaseClient {
 
   public eventsLogger() {
     return this.__eventsLogger;
+  }
+
+  public transport() {
+    return this.__transport;
   }
 
   protected showUserFeedbackForm(_options: UserFeedbackFormOptions): Promise<void> {

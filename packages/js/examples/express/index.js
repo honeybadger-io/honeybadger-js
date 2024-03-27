@@ -54,7 +54,11 @@ app.get('/checkin/:id', (req, res) => {
 
 app.get('/event', (req, res) => {
   // should send an event to Honeybadger, with type 'test-event'
-  Honeybadger.event('test-event', { message: 'Event sent!', source: 'Honeybadger.event', path: req.url })
+  Honeybadger.event('button_click', {
+    action: 'buy_now',
+    user_id: 123,
+    product_id: 456
+  })
 
   // should send an event to Honeybadger, with type 'log'
   console.log('Event sent!', { source: 'console.log' , path: req.url })
