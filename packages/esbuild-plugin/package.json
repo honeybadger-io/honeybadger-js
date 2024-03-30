@@ -34,7 +34,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@honeybadger-io/core": "^6.5.1",
+    "@honeybadger-io/core": "^6.6.0",
     "@honeybadger-io/plugin-core": "^1.2.1"
   },
   "peerDependencies": {

@@ -2,7 +2,7 @@ import { Util } from '@honeybadger-io/core'
 import { cleanOptions, sendDeployNotification, uploadSourcemaps, Types } from '@honeybadger-io/plugin-core'
 import type { Message, OutputFile, PluginBuild } from 'esbuild';
 import { promises } from 'fs'
-import { dirname, basename } from 'path'
+import { dirname, basename, join } from 'path'
 
 const writeFile = promises.writeFile
 const mkdir = promises.mkdir
@@ -61,6 +61,10 @@ export class HoneybadgerSourceMapPlugin {
     }
 
     await Promise.all(writeFileTasks)
+
+    const assets = this.getAssets(outputFiles)
+
+    await uploadSourcemaps(assets, this.options)
   }
 
   private getAssets(outputFiles: OutputFile[]): Types.SourcemapInfo[] {
@@ -72,15 +76,18 @@ export class HoneybadgerSourceMapPlugin {
 
       const sourcemapFilename = basename(file.path)
       const sourcemapFilePath = dirname(file.path)
+      const jsFilename = sourcemapFilename.replace('.map', '')
+
       const sourceMapInfo = {
         sourcemapFilename,
-        sourcemapFilePath,
-        jsFilename:sourcemapFilename.replace('.map', ''),
-        jsFilePath: sourcemapFilePath
+        sourcemapFilePath: join(sourcemapFilePath, sourcemapFilename),
+        jsFilename,
+        jsFilePath: join(sourcemapFilePath, jsFilename)
       }
 
       assets.push(sourceMapInfo)
     }
+
     return assets
   }
 

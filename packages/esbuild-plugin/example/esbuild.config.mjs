@@ -1,6 +1,15 @@
 import * as esbuild from 'esbuild'
 import * as fs from 'fs'
-import {basename, dirname} from 'path'
+import { basename, dirname, join } from 'path'
+import { uploadSourcemaps, cleanOptions } from '@honeybadger-io/plugin-core'
+
+const hbOptions = cleanOptions({
+    apiKey: process.env.HONEYBADGER_API_KEY,
+    assetsUrl: 'https://example.com/public',
+    revision: 'esbuild-plugin-example',
+})
+
+console.log(hbOptions)
 
 const hbPlugin = {
     name: 'hb',
@@ -23,6 +32,7 @@ const hbPlugin = {
 
             const assets = getAssets(result.outputFiles)
             console.log(assets)
+            await uploadSourcemaps(assets, hbOptions)
         })
     }
 }
@@ -36,11 +46,12 @@ function getAssets(outputFiles) {
 
         const sourcemapFilename = basename(file.path)
         const sourcemapFilePath = dirname(file.path)
+        const jsFilename = sourcemapFilename.replace('.map', '')
         const sourceMapInfo = {
             sourcemapFilename,
-            sourcemapFilePath,
-            jsFilename:sourcemapFilename.replace('.map', ''),
-            jsFilePath: sourcemapFilePath
+            sourcemapFilePath: join(sourcemapFilePath, sourcemapFilename),
+            jsFilename,
+            jsFilePath: join(sourcemapFilePath, jsFilename)
         }
 
         assets.push(sourceMapInfo)
