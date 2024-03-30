@@ -1,5 +1,17 @@
 import { fake } from 'sinon'
-import { merge, mergeNotice, objectIsEmpty, runBeforeNotifyHandlers, runAfterNotifyHandlers, shallowClone, sanitize, logger, filter, filterUrl } from '../src/util'
+import {
+  merge,
+  mergeNotice,
+  objectIsEmpty,
+  runBeforeNotifyHandlers,
+  runAfterNotifyHandlers,
+  shallowClone,
+  sanitize,
+  logger,
+  filter,
+  filterUrl,
+  logDeprecatedMethod
+} from '../src/util'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 
 describe('utils', function () {
@@ -304,6 +316,36 @@ describe('utils', function () {
       ).toEqual(
         { obj: '[ERROR] Error: expected error' }
       )
+    })
+  })
+
+  describe('logDeprecatedMethod', function () {
+    it('should log a deprecation warning', function () {
+      const console = nullLogger()
+      const warnSpy = jest.spyOn(console, 'warn')
+      logDeprecatedMethod(console, 'deprecatedMethod', 'newMethod');
+      expect(warnSpy).toHaveBeenNthCalledWith(1, 'Deprecation warning: deprecatedMethod has been deprecated; please use newMethod instead.')
+    });
+
+    it('should log a deprecation warning only once even if called multiple times', function () {
+      const console = nullLogger()
+      const warnSpy = jest.spyOn(console, 'warn')
+      logDeprecatedMethod(console, 'deprecatedMethod2', 'newMethod2', 5);
+      logDeprecatedMethod(console, 'deprecatedMethod2', 'newMethod2', 5);
+      logDeprecatedMethod(console, 'deprecatedMethod2', 'newMethod2', 5);
+      logDeprecatedMethod(console, 'deprecatedMethod2', 'newMethod2', 5);
+      logDeprecatedMethod(console, 'deprecatedMethod2', 'newMethod2', 5);
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('should log two deprecation warnings if the method is called more than the specified call count', function () {
+      const console = nullLogger()
+      const warnSpy = jest.spyOn(console, 'warn')
+      logDeprecatedMethod(console, 'deprecatedMethod3', 'newMethod3', 3);
+      logDeprecatedMethod(console, 'deprecatedMethod3', 'newMethod3', 3);
+      logDeprecatedMethod(console, 'deprecatedMethod3', 'newMethod3', 3);
+      logDeprecatedMethod(console, 'deprecatedMethod3', 'newMethod3', 3);
+      expect(warnSpy).toHaveBeenCalledTimes(2)
     })
   })
 })

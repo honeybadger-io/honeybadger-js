@@ -1,7 +1,6 @@
 import { Types, Util } from '@honeybadger-io/core'
-import { globalThisOrWindow } from './util'
 
-const { sanitize } = Util
+const { sanitize, globalThisOrWindow } = Util
 
 /**
  * Helper function to get typesafe Object.entries()

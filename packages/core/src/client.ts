@@ -7,6 +7,7 @@ import {
   runBeforeNotifyHandlers,
   shallowClone,
   logger,
+  logDeprecatedMethod,
   generateStackTrace,
   filter,
   filterUrl,
@@ -302,8 +303,26 @@ export abstract class Client {
     return this
   }
 
+  /**
+   * @deprecated Use {@link event} instead.
+   */
   logEvent(data: Record<string, unknown>): void {
-    this.__eventsLogger.logEvent(data)
+    logDeprecatedMethod(this.logger, 'Honeybadger.logEvent', 'Honeybadger.event')
+    this.event('log', data)
+  }
+
+  event(data: Record<string, unknown>): void;
+  event(type: string, data: Record<string, unknown>): void;
+  event(type: string | Record<string, unknown>, data?: Record<string, unknown>): void {
+    if (typeof type === 'object') {
+      data = type
+      type = type['event_type'] as string ?? undefined
+    }
+    this.__eventsLogger.log({
+      event_type: type,
+      ts: new Date().toISOString(),
+      ...data
+    })
   }
 
   __getBreadcrumbs() {

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.9.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.8.3...@honeybadger-io/js@6.9.0) (2024-03-27)
+
+
+### Features
+
+* events api improvements ([#1319](https://github.com/honeybadger-io/honeybadger-js/issues/1319)) ([339cfe9](https://github.com/honeybadger-io/honeybadger-js/commit/339cfe9d88464668e488bd99321a0b685e8dbb37))
+
+
+
+
+
 ## [6.8.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.8.2...@honeybadger-io/js@6.8.3) (2024-01-18)
 
 
