@@ -1,8 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import { Types, Util } from '@honeybadger-io/core'
 import Client from '../../browser'
-import { globalThisOrWindow } from '../util'
-const { instrument, makeNotice } = Util
+const { instrument, makeNotice, globalThisOrWindow } = Util
 
 let ignoreOnError = 0
 let currentTimeout

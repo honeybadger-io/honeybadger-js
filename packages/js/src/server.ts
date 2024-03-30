@@ -1,6 +1,6 @@
 import os from 'os'
 import domain from 'domain'
-import { Client, Util, Types } from '@honeybadger-io/core'
+import { Client, Util, Types, Plugins as CorePlugins } from '@honeybadger-io/core'
 import { getSourceFile, readConfigFromFileSystem } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception_plugin'
 import unhandledRejection from './server/integrations/unhandled_rejection_plugin'
@@ -14,7 +14,8 @@ import { CheckInsClient } from './server/check-ins-manager/client';
 const { endpoint } = Util
 const DEFAULT_PLUGINS = [
   uncaughtException(),
-  unhandledRejection()
+  unhandledRejection(),
+  CorePlugins.events(),
 ]
 
 type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckInsConfig

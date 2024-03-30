@@ -564,3 +564,39 @@ function getSourceCodeSnippet(fileData: string, lineNumber: number, sourceRadius
 export function isBrowserConfig(config: BrowserConfig | Config): config is BrowserConfig {
   return (config as BrowserConfig).async !== undefined
 }
+
+/** globalThis has fairly good support. But just in case, lets check its defined.
+ * @see {https://caniuse.com/?search=globalThis}
+ */
+export function globalThisOrWindow () {
+  if (typeof globalThis !== 'undefined') {
+    return globalThis
+  }
+
+  if (typeof self !== 'undefined') {
+    return self
+  }
+
+  return window
+}
+
+const _deprecatedMethodCalls: Record<string, number> = {}
+/**
+ * Logs a deprecation warning, every X calls to the method.
+ */
+export function logDeprecatedMethod(logger: Logger, oldMethod: string, newMethod: string, callCountThreshold = 100) {
+  const key = `${oldMethod}-${newMethod}`
+  if (typeof _deprecatedMethodCalls[key] === 'undefined') {
+    _deprecatedMethodCalls[key] = 0
+  }
+
+  if (_deprecatedMethodCalls[key] % callCountThreshold !== 0) {
+    _deprecatedMethodCalls[key]++
+    return
+  }
+
+  const msg = `Deprecation warning: ${oldMethod} has been deprecated; please use ${newMethod} instead.`
+  logger.warn(msg)
+
+  _deprecatedMethodCalls[key]++
+}
