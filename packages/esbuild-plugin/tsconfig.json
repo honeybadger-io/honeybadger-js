@@ -4,7 +4,8 @@
     "src/**/*.ts"
   ],
   "compilerOptions": {
-    "rootDir": "./",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "allowSyntheticDefaultImports": true
   },
   "references": [

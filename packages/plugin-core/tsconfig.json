@@ -2,13 +2,14 @@
   "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*.ts"
-  ], 
+  ],
   "compilerOptions": {
-    "rootDir": "src", 
-    "allowSyntheticDefaultImports": true, 
+    "composite": true,
+    "rootDir": "src",
+    "allowSyntheticDefaultImports": true,
     "target": "ES2015",
-		"declaration": true,
-		"declarationDir": "dist/dts",
+    "declaration": true,
+    "declarationDir": "dist/dts",
     "moduleResolution": "node",
   },
 }

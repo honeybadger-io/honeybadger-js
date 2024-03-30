@@ -11,16 +11,23 @@ const PLUGIN_NAME = 'HoneybadgerSourceMapPlugin'
 
 export class HoneybadgerSourceMapPlugin {
 
-  private idSeed = 0;
+  private static idSeed = 0
 
-  constructor(private readonly options: Types.HbPluginOptions) {
+  private readonly options: Types.HbPluginOptions
+
+  constructor(options: Types.HbPluginUserOptions) {
     this.options = cleanOptions(options)
   }
   setup() {
     const self = this;
+
     return {
       name: PLUGIN_NAME,
       setup(build: PluginBuild) {
+        if (self.isNonProdEnv()) {
+          return
+        }
+
         // need to set write to false to get the outputFiles
         build.initialOptions.write = false
 
@@ -29,15 +36,16 @@ export class HoneybadgerSourceMapPlugin {
             await self.writeOutputFiles(result.outputFiles)
 
             const assets = self.getAssets(result.outputFiles)
+
             await uploadSourcemaps(assets, self.options)
             if (self.options.deploy) {
               await sendDeployNotification(self.options)
             }
           } catch (err) {
             const esBuildError = self.handleError(err)
-            if (!this.options.ignoreErrors) {
+            if (!self.options.ignoreErrors) {
               result.errors.push(esBuildError)
-            } else if (!this.options.silent) {
+            } else if (!self.options.silent) {
               result.errors.push(esBuildError)
             }
           }
@@ -61,10 +69,6 @@ export class HoneybadgerSourceMapPlugin {
     }
 
     await Promise.all(writeFileTasks)
-
-    const assets = this.getAssets(outputFiles)
-
-    await uploadSourcemaps(assets, this.options)
   }
 
   private getAssets(outputFiles: OutputFile[]): Types.SourcemapInfo[] {
@@ -91,6 +95,10 @@ export class HoneybadgerSourceMapPlugin {
     return assets
   }
 
+  private isNonProdEnv(): boolean {
+    return !!process.env.NODE_ENV && process.env.NODE_ENV !== 'production'
+  }
+
   private handleError(error: Error): Message {
     const stackTrace = Util.makeBacktrace(error.stack)
     const location = {
@@ -110,7 +118,7 @@ export class HoneybadgerSourceMapPlugin {
     }
 
     return {
-      id: `${PLUGIN_NAME}_${this.idSeed++}`,
+      id: `${PLUGIN_NAME}_${HoneybadgerSourceMapPlugin.idSeed++}`,
       pluginName: PLUGIN_NAME,
       text: error.message,
       location,
