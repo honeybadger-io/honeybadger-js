@@ -409,7 +409,7 @@ describe('server client', function () {
   describe('__plugins', function () {
     it('exported singleton includes plugins', function () {
       Singleton.configure({ apiKey: 'foo' })
-      expect(Singleton.config.__plugins.length).toBe(2)
+      expect(Singleton.config.__plugins.length).toBe(3)
     })
 
     it('clients produced via factory don\'t include plugins', function () {

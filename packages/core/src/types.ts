@@ -10,8 +10,13 @@ export interface Logger {
 
 export interface EventsLogger {
   configure: (opts: Partial<Config>) => void
-  logEvent(data: Record<string, unknown>): void
+  log(data: EventPayload): void
 }
+
+export type EventPayload = {
+  event_type: string;
+  ts: string; // ISO Date string
+} & Record<string, unknown>
 
 export interface Config {
   apiKey?: string,
