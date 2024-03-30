@@ -1,14 +1,13 @@
-import { Types, Util, Client } from '@honeybadger-io/core'
-import { encodeCookie, decodeCookie, preferCatch, globalThisOrWindow } from './browser/util'
+import { Types, Util, Client, Plugins as CorePlugins } from '@honeybadger-io/core'
+import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandledRejection from './browser/integrations/onunhandledrejection'
 import breadcrumbs from './browser/integrations/breadcrumbs'
-import events from './browser/integrations/events'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
 import { BrowserTransport } from './browser/transport'
 
-const { merge, filter, objectIsExtensible } = Util
+const { merge, filter, objectIsExtensible, globalThisOrWindow } = Util
 
 const getProjectRoot = () => {
   const global = globalThisOrWindow()
@@ -274,7 +273,7 @@ const singleton = new Honeybadger({
     timers(),
     eventListeners(),
     breadcrumbs(),
-    events(),
+    CorePlugins.events(),
   ]
 })
 

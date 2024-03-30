@@ -1,9 +1,8 @@
 /* eslint-disable prefer-rest-params */
 import { Types, Util } from '@honeybadger-io/core'
 import Client from '../../browser'
-import { globalThisOrWindow } from '../util'
 
-const { instrument } = Util
+const { instrument, globalThisOrWindow } = Util
 
 export default function (_window = globalThisOrWindow()): Types.Plugin {
   return {
