@@ -1,9 +1,9 @@
 /* eslint-disable prefer-rest-params */
 import { Types, Util } from '@honeybadger-io/core'
-import { stringNameOfElement, stringSelectorOfElement, stringTextOfElement, localURLPathname, nativeFetch, globalThisOrWindow } from '../util'
+import { stringNameOfElement, stringSelectorOfElement, stringTextOfElement, localURLPathname, nativeFetch } from '../util'
 import Client from '../../browser'
 
-const { sanitize, instrument, instrumentConsole } = Util
+const { sanitize, instrument, instrumentConsole, globalThisOrWindow } = Util
 
 export default function (_window = globalThisOrWindow()): Types.Plugin {
   return {
