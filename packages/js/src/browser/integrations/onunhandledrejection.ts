@@ -1,9 +1,8 @@
 /* eslint-disable prefer-rest-params */
 import { Types, Util } from '@honeybadger-io/core'
 import Client from '../../browser'
-import { globalThisOrWindow } from '../util'
 
-const { instrument } = Util
+const { instrument, globalThisOrWindow } = Util
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function (_window: any = globalThisOrWindow()): Types.Plugin {
