@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/rollup-plugin",
-  "version": "5.8.3",
+  "version": "5.8.4",
   "description": "A rollup plugin to upload sourcemaps to Honeybadger",
   "directories": {
     "example": "examples"
