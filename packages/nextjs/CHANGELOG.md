@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.8.14](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.8.13...@honeybadger-io/nextjs@5.8.14) (2024-04-01)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
 ## [5.8.13](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.8.12...@honeybadger-io/nextjs@5.8.13) (2024-03-27)
 
 **Note:** Version bump only for package @honeybadger-io/nextjs
