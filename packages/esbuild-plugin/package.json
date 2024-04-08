@@ -27,7 +27,7 @@
   "files": [
     "dist/**"
   ],
-  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/esbuild",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/esbuild-plugin",
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "esbuild": "^0.20.0",
