@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { HoneybadgerSourceMapPlugin } from './index'
+import { honeybadgerSourceMapPlugin } from './index'
 import { Types, sendDeployNotification, uploadSourcemaps } from '@honeybadger-io/plugin-core';
 import { build } from 'esbuild';
 
@@ -12,7 +12,7 @@ jest.mock('@honeybadger-io/plugin-core', () => {
 })
 
 function runEsbuild(options: Types.HbPluginUserOptions) {
-  const plugin = new HoneybadgerSourceMapPlugin(options)
+  const plugin = honeybadgerSourceMapPlugin(options)
 
   return build({
     entryPoints: [join(__dirname, 'testFixtures/index.js')],
@@ -21,7 +21,7 @@ function runEsbuild(options: Types.HbPluginUserOptions) {
     sourcemap: true,
     target: ['chrome58'],
     outfile: join(__dirname, 'testFixtures/build/out.js'),
-    plugins: [plugin.setup()]
+    plugins: [plugin]
   })
 }
 
@@ -38,8 +38,7 @@ describe('index', function () {
   })
 
   it('should create an esbuild plugin', function () {
-    const plugin = new HoneybadgerSourceMapPlugin(options)
-    const esbuildPlugin = plugin.setup()
+    const esbuildPlugin = honeybadgerSourceMapPlugin(options)
     expect(esbuildPlugin.name).toBe('HoneybadgerSourceMapPlugin')
     expect(esbuildPlugin.setup).toBeInstanceOf(Function)
   })

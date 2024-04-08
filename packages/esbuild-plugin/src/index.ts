@@ -1,6 +1,6 @@
 import { Util } from '@honeybadger-io/core'
 import { cleanOptions, sendDeployNotification, uploadSourcemaps, Types } from '@honeybadger-io/plugin-core'
-import type { Message, OutputFile, PluginBuild } from 'esbuild';
+import type { Message, OutputFile, PluginBuild } from 'esbuild'
 import { promises } from 'fs'
 import { dirname, basename, join } from 'path'
 
@@ -9,7 +9,7 @@ const mkdir = promises.mkdir
 
 const PLUGIN_NAME = 'HoneybadgerSourceMapPlugin'
 
-export class HoneybadgerSourceMapPlugin {
+class HoneybadgerSourceMapPlugin {
 
   private static idSeed = 0
 
@@ -126,4 +126,8 @@ export class HoneybadgerSourceMapPlugin {
       detail: error
     }
   }
+}
+
+export function honeybadgerSourceMapPlugin(options: Types.HbPluginUserOptions) {
+  return new HoneybadgerSourceMapPlugin(options).setup()
 }
