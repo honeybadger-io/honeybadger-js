@@ -9,7 +9,7 @@ const hbOptions = {
 
 esbuild
   .build({
-    entryPoints: ['src/app.tsx'],
+    entryPoints: ['src/index.tsx'],
     bundle: true,
     minify: true,
     format: 'cjs',
