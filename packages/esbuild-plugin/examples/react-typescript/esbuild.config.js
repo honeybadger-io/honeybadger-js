@@ -3,8 +3,9 @@ const { honeybadgerSourceMapPlugin } = require('../../dist/index.js')
 
 const hbOptions = {
   apiKey: process.env.HONEYBADGER_API_KEY,
-  assetsUrl: 'https://example.com/public',
-  revision: 'esbuild-plugin-react-typescript-example',
+  assetsUrl: process.env.HONEYBADGER_ASSETS_URL,
+  revision: process.env.HONEYBADGER_REVISION,
+  environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
 }
 
 esbuild
@@ -15,6 +16,7 @@ esbuild
     format: 'cjs',
     sourcemap: true,
     outfile: 'dist/output.js',
+    loader: { '.js': 'jsx', 'tsx': '.jsx' },
     plugins: [honeybadgerSourceMapPlugin(hbOptions)]
   // external: ['react', 'react-dom'],
   })
