@@ -16,7 +16,7 @@ esbuild
     format: 'cjs',
     sourcemap: true,
     outfile: 'dist/output.js',
-    loader: { '.js': 'jsx', 'tsx': '.jsx' },
+    loader: { '.js': 'jsx', 'tsx': 'jsx' },
     plugins: [honeybadgerSourceMapPlugin(hbOptions)]
   // external: ['react', 'react-dom'],
   })
