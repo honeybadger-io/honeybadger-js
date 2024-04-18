@@ -17,5 +17,9 @@
     "esbuild": "^0.20.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "dependencies": {
+    "@honeybadger-io/js": "^6.9.1",
+    "@honeybadger-io/react": "^6.1.21"
   }
 }
