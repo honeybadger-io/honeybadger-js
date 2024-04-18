@@ -12,3 +12,5 @@ browserstack.err
 
 # for use with direnv
 .envrc
+
+.rollup.cache
