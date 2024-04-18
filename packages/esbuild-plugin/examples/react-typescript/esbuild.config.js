@@ -27,7 +27,7 @@ esbuild
   // external: ['react', 'react-dom'],
   })
   .then(() => {
-    console.log('Build complete')
+    console.log('Build complete. 🎉')
   })
   .catch((err) => {
     console.error(err)
