@@ -4,7 +4,7 @@ export default function BuggyComponent() {
   const [hasError, setHasError] = React.useState(false)
 
   if (hasError) {
-    throw Error('oops.')
+    throw Error('testing error boundary')
   }
   return (
     <div>
