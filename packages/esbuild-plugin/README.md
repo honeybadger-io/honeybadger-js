@@ -78,7 +78,8 @@ import { honeybadgerSourceMapPlugin } from '@honeybadger-io/esbuild-plugin'
 // See plugin params above
 const hbPluginOptions = {
   apiKey: 'your_key_here', 
-  assetsUrl: 'https://yoursite.foo'
+  assetsUrl: 'https://yoursite.foo', 
+  revision: 'v1.0.0',
 }
 
 esbuild
