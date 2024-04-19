@@ -1,6 +1,6 @@
 # Honeybadger JavaScript Build Plugin
 
-Shared library for uploading sourcemaps and sending deploy notifications to Honeybadger. 
+Shared library for uploading source maps and sending deploy notifications to Honeybadger. 
 
 ## Usage
 

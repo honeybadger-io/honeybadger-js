@@ -1,7 +1,7 @@
 # Honeybadger's esbuild Source Map Plugin
 
 [esbuild](https://esbuild.github.io/) plugin to upload JavaScript
-sourcemaps and optionally send deployment notifications to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/).
+source maps and optionally send deployment notifications to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/).
 
 ## Installation
 
@@ -28,8 +28,8 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   <dd>The base URL to production assets (scheme://host/path)<code>*</code><a href="https://docs.honeybadger.io/api/reporting-source-maps/#wildcards">wildcards</a> are supported. The plugin combines <code>assetsUrl</code> with the generated minified js file name to build the API parameter <code>minified_url</code></dd>
 
   <dt><code>endpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/source_maps")</dt>
-  <dd>Where to upload your sourcemaps to. Perhaps you have a self hosted
-  sourcemap server you would like to upload your sourcemaps to instead
+  <dd>Where to upload your source maps to. Perhaps you have a self hosted
+  source map server you would like to upload your source maps to instead
   of Honeybadger.</dd>
 
   <dt><code>revision</code> (optional &mdash; default: "main")</dt>
@@ -43,13 +43,13 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   </dd>
 
   <dt><code>workerCount</code> (optional &mdash; default: 5, min: 1)</dt>
-  <dd>Sourcemaps are uploaded in parallel by a configurable number of 
-  workers. Increase or decrease this value to configure how many sourcemaps
+  <dd>Source maps are uploaded in parallel by a configurable number of 
+  workers. Increase or decrease this value to configure how many source maps
   are being uploaded in parallel.</br>
   Limited parallelism helps with connection issues in Docker environments.</dd>
 
   <dt><code>ignorePaths</code> (optional &mdash; default: [])</dt>
-  <dd>An array of paths (glob patterns) to ignore when uploading sourcemaps. Uses <a href="https://github.com/micromatch/picomatch">picomatch</a> to match against paths. 
+  <dd>An array of paths (glob patterns) to ignore when uploading source maps. Uses <a href="https://github.com/micromatch/picomatch">picomatch</a> to match against paths. 
   </dd>
 
   <dt><code>deployEndpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/deploys")</dt>
@@ -57,7 +57,7 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
 
   <dt><code>deploy</code> (optional &mdash; default: false)</dt>
   <dd>
-  Configuration for <a href="https://docs.honeybadger.io/api/reporting-deployments/">deployment notifications</a>. To disable deployment notifications, ignore this option. To enable deployment notifications, set this to <code>true</code>, or to an object containing any of the fields below. Your deploy's <code>revision</code> will be set to the same value as for your sourcemaps (see above). 
+  Configuration for <a href="https://docs.honeybadger.io/api/reporting-deployments/">deployment notifications</a>. To disable deployment notifications, ignore this option. To enable deployment notifications, set this to <code>true</code>, or to an object containing any of the fields below. Your deploy's <code>revision</code> will be set to the same value as for your source maps (see above). 
 
   <dl>
     <dt><code>environment</code></dt>
@@ -90,7 +90,7 @@ esbuild
         format: 'cjs',
         sourcemap: true,
         outfile: 'dist/output.js',
-        plugins: [honeybadgerSourceMapPlugin(hbOptions)]
+        plugins: [honeybadgerSourceMapPlugin(hbPluginOptions)]
     })
     .then(() => {
         console.log('Build complete')

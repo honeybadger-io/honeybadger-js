@@ -6,7 +6,7 @@
 [![npm dt](https://img.shields.io/npm/dt/@honeybadger-io/webpack)](https://www.npmjs.com/package/@honeybadger-io/webpack)
 
 [Webpack](https://webpack.js.org/) plugin to upload JavaScript
-sourcemaps to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). You can also send [deployment notifications](https://docs.honeybadger.io/api/deployments.html).
+source maps to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). You can also send [deployment notifications](https://docs.honeybadger.io/api/deployments.html).
 
 Word Up! to the [thredUP](https://github.com/thredup) development team for a
 similar webpack plugin they have authored.
@@ -35,8 +35,8 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   <dd>The base URL to production assets (scheme://host/path)<code>*</code><a href="https://docs.honeybadger.io/api/reporting-source-maps/#wildcards">wildcards</a> are supported. The plugin combines <code>assetsUrl</code> with the generated minified js file name to build the API parameter <code>minified_url</code></dd>
 
   <dt><code>endpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/source_maps")</dt>
-  <dd>Where to upload your sourcemaps to. Perhaps you have a self hosted
-  sourcemap server you would like to upload your sourcemaps to instead
+  <dd>Where to upload your source maps to. Perhaps you have a self hosted
+  source map server you would like to upload your source maps to instead
   of honeybadger.</dd>
 
   <dt><code>revision</code> (optional &mdash; default: "main")</dt>
@@ -56,8 +56,8 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   </dd>
 
   <dt><code>workerCount</code> (optional &mdash; default: 5, min: 1)</dt>
-  <dd>Sourcemaps are uploaded in parallel by a configurable number of 
-  workers. Increase or decrease this value to configure how many sourcemaps
+  <dd>Source maps are uploaded in parallel by a configurable number of 
+  workers. Increase or decrease this value to configure how many source maps
   are being uploaded in parallel.</br>
   Limited parallelism helps with connection issues in Docker environments.</dd>
 

@@ -68,11 +68,11 @@ You must add the following environment values when deploying:
 
 ## Notes
 
-- By default, neither sourcemaps nor error tracking is enabled in development mode (see Configuration).
+- By default, neither source maps nor error tracking is enabled in development mode (see Configuration).
 
 - The build output will contain warning about unhandled Promise rejections. This is caused by the test pages, and is expected.
 
-- `@honeybadger-io/webpack` is added to `dependencies` (rather than `devDependencies`) because when used with SSR (ex. heroku), this plugin is used during production for sending the generated sourcemaps to Honeybadger.
+- `@honeybadger-io/webpack` is added to `dependencies` (rather than `devDependencies`) because when used with SSR (ex. heroku), this plugin is used during production for sending the generated source maps to Honeybadger.
 
 - See the [Honeybadger webpack plugin docs](https://github.com/honeybadger-io/honeybadger-webpack#configuration) and the [Using Source Maps guide](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps.html) for more info about source map upload.
 
