@@ -1,0 +1,11 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# 1.1.0 (2024-04-19)
+
+
+### Features
+
+* esbuild plugin ([#1318](https://github.com/honeybadger-io/honeybadger-js/issues/1318)) ([40ea7b4](https://github.com/honeybadger-io/honeybadger-js/commit/40ea7b4f9c27aecfd5a8051323fca3ab72c7a07a))
