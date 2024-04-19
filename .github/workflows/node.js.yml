@@ -75,7 +75,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '14.x'
+        node-version: '18.x'
         cache: 'npm'
         cache-dependency-path: |
           package-lock.json
@@ -115,16 +115,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
+          node-version: '18.x'
           cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            packages/js/examples/aws-lambda-typescript/package-lock.json
-            packages/vue/examples/vue2/package-lock.json
-            packages/vue/examples/vue3/package-lock.json
-            packages/react-native/example/package-lock.json
-            packages/nextjs/examples/app-router/package-lock.json
-            packages/nextjs/examples/pages-router/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Build
         run: npm ci

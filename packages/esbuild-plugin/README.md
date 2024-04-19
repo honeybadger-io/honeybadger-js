@@ -1,18 +1,16 @@
-# Honeybadger's Rollup Source Map Plugin
+# Honeybadger's esbuild Source Map Plugin
 
-[Rollup](https://rollupjs.org/) plugin to upload JavaScript
-source maps and optionally send deployment notifications to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/). 
-
-Supports rollup version 3. If you use rollup version 2, you can either upgrade or [send your source maps to Honeybadger's API](https://docs.honeybadger.io/api/reporting-source-maps/) directly.
+[esbuild](https://esbuild.github.io/) plugin to upload JavaScript
+source maps and optionally send deployment notifications to [Honeybadger](https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/).
 
 ## Installation
 
 ```
 # npm
-npm install @honeybadger-io/rollup-plugin --save-dev
+npm install @honeybadger-io/esbuild-plugin --save-dev
 
 # yarn
-yarn add @honeybadger-io/rollup-plugin --dev
+yarn add @honeybadger-io/esbuild-plugin --dev
 ```
 
 
@@ -72,54 +70,35 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   </dd>
 </dl>
 
-### rollup.config.js
-Set `output.sourcemap` to `true` or `'hidden'`. Add the honeybadger plugin to the plugins array.
+### esbuild.config.js
+Set `sourcemap` to `true`. Add the honeybadger plugin to the plugins array.
 ```javascript
-import honeybadgerRollupPlugin from '@honeybadger-io/rollup-plugin'
+import { honeybadgerSourceMapPlugin } from '@honeybadger-io/esbuild-plugin'
 
 // See plugin params above
 const hbPluginOptions = {
   apiKey: 'your_key_here', 
-  assetsUrl: 'https://yoursite.foo'
+  assetsUrl: 'https://yoursite.foo', 
+  revision: 'v1.0.0',
 }
 
-export default {
-  input: 'src/index.js', 
-  output: { 
-    dir: 'dist', 
-    sourcemap: true // Must be true or 'hidden'
-  }, 
-  plugins: [ honeybadgerRollupPlugin(hbPluginOptions) ],
-}
-```
-
-### Using Vite: vite.config.js
-If you're using Vite, you'll set up `vite.config.js` instead of `rollup.config.js`. 
-
-Set `build.sourcemap` to `true` or `'hidden'`. Add the honeybadger 
-plugin to `rollupOptions.plugins`. 
-
-**Note:** Be careful not to add it to the top-level vite plugins without additional config, or it will upload source maps on `serve` rather than just on `build`. 
-
-```javascript
-import honeybadgerRollupPlugin from '@honeybadger-io/rollup-plugin'
-import { defineConfig } from 'vite'
-
-// See plugin params above
-const hbPluginOptions = {
-  apiKey: 'your_key_here', 
-  assetsUrl: 'https://yoursite.foo'
-}
-
-export default defineConfig({
-  plugins: [], // Not here
-  build: {
-    sourcemap: true, // Must be true or 'hidden'
-    rollupOptions: {
-      plugins: [ honeybadgerRollupPlugin(hbPluginOptions) ]
-    }
-  }
-})
+esbuild
+    .build({
+        entryPoints: ['src/index.ts'],
+        bundle: true,
+        minify: true,
+        format: 'cjs',
+        sourcemap: true,
+        outfile: 'dist/output.js',
+        plugins: [honeybadgerSourceMapPlugin(hbPluginOptions)]
+    })
+    .then(() => {
+        console.log('Build complete')
+    })
+    .catch((err) => {
+        console.error(err)
+        process.exit(1)
+    });
 ```
 
 ## Development
@@ -128,7 +107,7 @@ export default defineConfig({
 2. Run the tests with `npm test`
 3. Build with `npm run build`
 
-See the `/examples` folder for projects to test against. 
+See the `/examples` folder for projects to test against.
 
 ## License
 

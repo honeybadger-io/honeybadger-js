@@ -57,13 +57,13 @@ npx honeybadger-upload-sourcemaps --apiKey <your project API key> --revision <bu
 
 The `--apiKey` param is your Honeybadger API key for the project. The `--revision` param should match the revision param of the `Honeybadger.init` call inside your application. This is done so that reported errors are correctly matched up against the generated source maps.
 
-As of version 0.70, React Native uses Hermes as the default JavaScript engine. The source maps tool assumes that your project uses Hermes. If you are building against an earlier version of React Native, or are explicitly not using Hermes, add the `--no-hermes` flag to the sourcemaps tool, like so:
+As of version 0.70, React Native uses Hermes as the default JavaScript engine. The source maps tool assumes that your project uses Hermes. If you are building against an earlier version of React Native, or are explicitly not using Hermes, add the `--no-hermes` flag to the source maps tool, like so:
 
 ```shell
 npx honeybadger-upload-sourcemaps --no-hermes --apiKey <your project API key> --revision <build revision>
 ```
 
-If you just want to generate the sourcemaps without uploading them to Honeybadger, you can use the `--skip-upload` flag.
+If you just want to generate the source maps without uploading them to Honeybadger, you can use the `--skip-upload` flag.
 
 ```shell
 npx honeybadger-upload-sourcemaps --skip-upload --apiKey <your project API key> --revision <build revision>
