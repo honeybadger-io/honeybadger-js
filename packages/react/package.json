@@ -37,7 +37,7 @@
     "@types/react-test-renderer": "^18.0.0",
     "@types/sinon": "^10.0.11",
     "cross-env": "^7.0.0",
-    "gh-pages": "^4.0.0",
+    "gh-pages": "^5.0.0",
     "husky": "^8.0.0",
     "jest-fetch-mock": "^3.0.3",
     "react": "^18.1.0",
