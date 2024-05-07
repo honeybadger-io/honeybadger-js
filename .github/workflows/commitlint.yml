@@ -22,14 +22,19 @@ jobs:
       - name: Install deps
         run: npm ci --ignore-scripts
       - name: Verify PR title is in the correct format
+        env:
+            TITLE: ${{ github.event.pull_request.title }}
         run: |
-          echo "${{ github.event.pull_request.title }}" | npx commitlint -V
+          echo $TITLE | npx commitlint -V
 
   needs-migration-docs-check:
     runs-on: ubuntu-latest
     steps:
       - name: Echo event name
-        run: echo "${{ github.event_name }}:${{ github.event.pull_request.title }}"
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          EVENT: ${{ github.event_name }}
+        run: echo "$EVENT:$TITLE"
 
       - name: Check PR name for breaking changes
         if: github.event_name == 'pull_request' && ( contains(github.event.pull_request.title, '!') || contains(github.event.pull_request.title, 'BREAKING CHANGE') )
