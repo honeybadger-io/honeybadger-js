@@ -31,9 +31,12 @@ You can refer to the README of each package for more information and instruction
 - [@honeybadger-io/rollup-plugin](./packages/rollup-plugin)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin.svg)](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin)  
   Rollup/Vite plugin to upload source maps to Honeybadger
+- [@honeybadger-io/esbuild-plugin](./packages/esbuild-plugin)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fesbuild-plugin.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fesbuild-plugin)  
+  Esbuild plugin to upload source maps to Honeybadger
 - [@honeybadger-io/plugin-core](./packages/plugin-core)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fplugin-core.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fplugin-core)  
-  Utility functions shared between rollup, webpack and other plugins
+  Utility functions shared between rollup, webpack, esbuild and other plugins
 
 ## Documentation and Support
 
