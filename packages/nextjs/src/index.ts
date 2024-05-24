@@ -165,6 +165,50 @@ function getWebpackPluginOptions(honeybadgerNextJsConfig: HoneybadgerNextJsConfi
   }
 }
 
+function getNextJsVersionInstalled(): [major: string, minor: string, patch: string] | null {
+  try {
+    return require('next/package.json').version?.split('.')
+  } catch (e) {
+    return null
+  }
+}
+
+/**
+ * NextJs will report a warning if the `serverExternalPackages` option is not present.
+ * This is because @honeybadger-io/js will try to require configuration files dynamically (https://github.com/honeybadger-io/honeybadger-js/pull/1268).
+ *
+ * First reported here: https://github.com/honeybadger-io/honeybadger-js/issues/1351
+ */
+function addServerExternalPackagesOption(config) {
+  // this should be available in the upcoming version of Next.js (14.3.0)
+  if (config.serverExternalPackages && Array.isArray(config.serverExternalPackages)) {
+    log('debug', 'adding @honeybadger-io/js to serverExternalPackages')
+    config.serverExternalPackages.push('@honeybadger-io/js')
+    return
+  }
+
+  if (config.experimental?.serverComponentsExternalPackages && Array.isArray(config.experimental?.serverComponentsExternalPackages)) {
+    log('debug', 'adding @honeybadger-io/js to experimental.serverComponentsExternalPackages')
+    config.experimental.serverComponentsExternalPackages.push('@honeybadger-io/js')
+    return
+  }
+
+  const nextJsVersion = getNextJsVersionInstalled();
+  if (nextJsVersion) {
+    if (+nextJsVersion[0] >= 14 && +nextJsVersion[1] >= 3) {
+      log('debug', 'adding serverExternalPackages option with value ["@honeybadger-io/js"]')
+      config.serverExternalPackages = ['@honeybadger-io/js']
+    }
+    else {
+      log('debug', 'adding experimental.serverComponentsExternalPackages option with value ["@honeybadger-io/js"]')
+      if (!config.experimental) {
+        config.experimental = {}
+      }
+      config.experimental.serverComponentsExternalPackages = ['@honeybadger-io/js']
+    }
+  }
+}
+
 export function setupHoneybadger(config, honeybadgerNextJsConfig?: HoneybadgerNextJsConfig) {
   if (!honeybadgerNextJsConfig) {
     honeybadgerNextJsConfig = {
@@ -174,6 +218,8 @@ export function setupHoneybadger(config, honeybadgerNextJsConfig?: HoneybadgerNe
   }
 
   _silent = honeybadgerNextJsConfig.silent ?? true
+
+  addServerExternalPackagesOption(config)
 
   return {
     ...config,
