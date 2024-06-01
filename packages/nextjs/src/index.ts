@@ -67,13 +67,13 @@ function mergeWithExistingWebpackConfig(nextJsWebpackConfig, honeybadgerNextJsCo
 }
 
 async function injectHoneybadgerConfigToEntry(originalEntry, projectDir: string, configType: NextJsRuntime) {
+  const result = typeof originalEntry === 'function' ? await originalEntry() : { ...originalEntry }
   const hbConfigFile = getHoneybadgerConfigFile(projectDir, configType)
   if (!hbConfigFile) {
-    return originalEntry
+    return result
   }
 
   const hbConfigFileRelativePath = `./${hbConfigFile}`
-  const result = typeof originalEntry === 'function' ? await originalEntry() : { ...originalEntry }
   if (!Object.keys(result).length) {
     log('debug', `no entry points for configType[${configType}]`)
   }
