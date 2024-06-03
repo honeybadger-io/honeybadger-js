@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.9.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.9.1...@honeybadger-io/nextjs@5.9.2) (2024-06-03)
+
+
+### Bug Fixes
+
+* **nextjs:** return the correct result if file is missing ([#1356](https://github.com/honeybadger-io/honeybadger-js/issues/1356)) ([9ac2db8](https://github.com/honeybadger-io/honeybadger-js/commit/9ac2db82530ddc4a72c2df38f3cb2ddafd0c1754))
+
+
+
+
+
 ## [5.9.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.9.0...@honeybadger-io/nextjs@5.9.1) (2024-05-27)
 
 
