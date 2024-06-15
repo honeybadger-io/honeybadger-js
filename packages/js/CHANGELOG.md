@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.9.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.9.1...@honeybadger-io/js@6.9.2) (2024-06-15)
+
+
+### Bug Fixes
+
+* **js:** remove logger.debug from transport layer ([#1360](https://github.com/honeybadger-io/honeybadger-js/issues/1360)) ([0092f9a](https://github.com/honeybadger-io/honeybadger-js/commit/0092f9a12919eb0cbbd64b83e52a711d73e3fdb5))
+
+
+
+
+
 ## [6.9.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.9.0...@honeybadger-io/js@6.9.1) (2024-04-01)
 
 **Note:** Version bump only for package @honeybadger-io/js
