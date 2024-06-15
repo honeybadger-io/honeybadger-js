@@ -56,7 +56,6 @@ export class ServerTransport implements Types.Transport {
         }
 
         const req = transport.request(httpOptions, (res) => {
-          options.logger.debug(`statusCode: ${res.statusCode}`)
 
           let body = ''
           res.on('data', (chunk) => {
