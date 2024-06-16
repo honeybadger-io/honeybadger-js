@@ -18,6 +18,7 @@
     "test": "lerna run test --stream",
     "install": "lerna bootstrap",
     "lint": "npx eslint .",
-    "release": "lerna publish --conventional-commits --changelog-preset conventional-changelog-angular --yes --create-release github --loglevel silly"
+    "release": "lerna publish --conventional-commits --changelog-preset conventional-changelog-angular --yes --create-release github --loglevel silly",
+    "clean": "./scripts/clean-repo.sh"
   }
 }
