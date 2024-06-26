@@ -1,13 +1,11 @@
 import commonjs from '@rollup/plugin-commonjs'
-import executable from 'rollup-plugin-executable'
 import path from 'path'
 
 export default {
-  input: 'build/copy-config-files-exec.js',
+  input: 'build/copy-config-files.js',
   output: [
     {
-      file: 'dist/copy-config-files-exec.js',
-      banner: '#!/usr/bin/env node', // rollup throws an error if this line is already in the js file
+      file: 'dist/copy-config-files.js',
       exports: 'named',
       format: 'cjs',
       sourcemap: true,
@@ -23,6 +21,5 @@ export default {
   ],
   plugins: [
     commonjs(),
-    executable(),
   ]
 }

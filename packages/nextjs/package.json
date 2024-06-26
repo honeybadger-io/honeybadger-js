@@ -20,10 +20,11 @@
   "files": [
     "dist",
     "src",
-    "templates"
+    "templates",
+    "scripts"
   ],
   "bin": {
-    "honeybadger-copy-config-files": "dist/copy-config-files-exec.js"
+    "honeybadger-copy-config-files": "scripts/copy-config-files-bin.js"
   },
   "repository": {
     "type": "git",
@@ -53,7 +54,6 @@
     "next": "^13.2.3",
     "rollup": "^2.70.2",
     "rollup-plugin-copy": "^3.4.0",
-    "rollup-plugin-executable": "^1.6.3",
     "ts-jest": "^29.1.1",
     "typescript": "^4.6.3"
   },
