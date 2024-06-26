@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.9.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.9.1...@honeybadger-io/rollup-plugin@5.9.2) (2024-06-26)
+
+
+### Bug Fixes
+
+* **js:** bin files as javascript ([#1363](https://github.com/honeybadger-io/honeybadger-js/issues/1363)) ([17b75ba](https://github.com/honeybadger-io/honeybadger-js/commit/17b75ba466bf6db4c50b07b187908a46c58b83f2))
+
+
+
+
+
 ## [5.9.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.9.0...@honeybadger-io/rollup-plugin@5.9.1) (2024-06-17)
 
 **Note:** Version bump only for package @honeybadger-io/rollup-plugin
