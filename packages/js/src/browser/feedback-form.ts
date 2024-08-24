@@ -1,21 +1,16 @@
 import { Types, Util } from '@honeybadger-io/core'
 const { globalThisOrWindow } = Util
 
-export const getUserFeedbackScriptUrl = (version: string) => {
-  const majorMinorVersion = version.split('.').slice(0,2).join('.')
-  return `https://js.honeybadger.io/v${majorMinorVersion}/honeybadger-feedback-form.js`
-}
-
 export class BrowserFeedbackForm {
 
   private readonly config: Types.BrowserConfig
   private readonly logger: Types.Logger
-  private readonly pluginVersion: string
+  private readonly scriptUrl: string
 
-  constructor(config: Types.BrowserConfig, logger: Types.Logger, pluginVersion: string) {
+  constructor(config: Types.BrowserConfig, logger: Types.Logger, scriptUrl: string) {
     this.config = config
     this.logger = logger
-    this.pluginVersion = pluginVersion
+    this.scriptUrl = scriptUrl
   }
 
   /* ROLLUP_STRIP_CODE_CHROME_EXTENSION_START */
@@ -54,7 +49,7 @@ export class BrowserFeedbackForm {
 
   private appendUserFeedbackScriptTag(window: typeof globalThis, options: Types.UserFeedbackFormOptions = {}) {
     const script = window.document.createElement('script')
-    script.setAttribute('src', this.getUserFeedbackSubmitUrl())
+    script.setAttribute('src', this.scriptUrl)
     script.setAttribute('async', 'true')
     if (options.onLoad) {
       script.onload = options.onLoad
@@ -64,7 +59,7 @@ export class BrowserFeedbackForm {
 
   private isUserFeedbackScriptUrlAlreadyVisible() {
     const global = globalThisOrWindow()
-    const feedbackScriptUrl =this.getUserFeedbackSubmitUrl()
+    const feedbackScriptUrl = this.scriptUrl
     for (let i = 0; i < global.document.scripts.length; i++) {
       const script = global.document.scripts[i]
       if (script.src === feedbackScriptUrl) {
@@ -73,10 +68,6 @@ export class BrowserFeedbackForm {
     }
 
     return false
-  }
-
-  private getUserFeedbackSubmitUrl() {
-    return getUserFeedbackScriptUrl(this.pluginVersion)
   }
   /* ROLLUP_STRIP_CODE_CHROME_EXTENSION_END */
 }

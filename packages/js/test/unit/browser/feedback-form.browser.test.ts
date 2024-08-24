@@ -1,6 +1,5 @@
 import fetch from 'jest-fetch-mock';
-import Singleton from '../../../src/browser';
-import { getUserFeedbackScriptUrl } from '../../../src/browser/feedback-form';
+import Singleton, { getUserFeedbackScriptUrl } from '../../../src/browser';
 import { nullLogger } from '../helpers';
 
 describe('showUserFeedbackForm', function () {

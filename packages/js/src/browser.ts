@@ -22,6 +22,11 @@ const getProjectRoot = () => {
   return projectRoot
 }
 
+export const getUserFeedbackScriptUrl = (version: string) => {
+  const majorMinorVersion = version.split('.').slice(0,2).join('.')
+  return `https://js.honeybadger.io/v${majorMinorVersion}/honeybadger-feedback-form.js`
+}
+
 interface WrappedFunc {
   (): (...args: unknown[]) => unknown
   ___hb: WrappedFunc
@@ -96,8 +101,12 @@ class Honeybadger extends Client {
   }
 
   public async showUserFeedbackForm(options: Types.UserFeedbackFormOptions = {}) {
-    const form = new BrowserFeedbackForm(this.config, this.logger, this.getVersion());
+    const form = new BrowserFeedbackForm(this.config, this.logger, this.getUserFeedbackSubmitUrl());
     form.show(this.__lastNoticeId, options);
+  }
+
+  private getUserFeedbackSubmitUrl() {
+    return getUserFeedbackScriptUrl(this.getVersion())
   }
 
   /** @internal */
