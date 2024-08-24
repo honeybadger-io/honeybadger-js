@@ -1,5 +1,4 @@
 import { test, expect, Page, TestInfo } from '@playwright/test'
-import { resolve } from 'path'
 import type Honeybadger from '../../honeybadger'
 import type { NoticeTransportPayload }  from '../../../core/src/types'
 
