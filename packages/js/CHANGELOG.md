@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.10.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.9.3...@honeybadger-io/js@6.10.0) (2024-08-25)
+
+
+### Features
+
+* chrome extension build ([#1386](https://github.com/honeybadger-io/honeybadger-js/issues/1386)) ([c2a8f34](https://github.com/honeybadger-io/honeybadger-js/commit/c2a8f3439800c2180fd050a3e46d13cacf693ebe))
+
+
+
+
+
 ## [6.9.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.9.2...@honeybadger-io/js@6.9.3) (2024-06-26)
 
 
