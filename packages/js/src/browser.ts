@@ -6,6 +6,7 @@ import breadcrumbs from './browser/integrations/breadcrumbs'
 import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
 import { BrowserTransport } from './browser/transport'
+import { BrowserFeedbackForm } from './browser/feedback-form';
 
 const { merge, filter, objectIsExtensible, globalThisOrWindow } = Util
 
@@ -20,6 +21,7 @@ const getProjectRoot = () => {
 
   return projectRoot
 }
+
 export const getUserFeedbackScriptUrl = (version: string) => {
   const majorMinorVersion = version.split('.').slice(0,2).join('.')
   return `https://js.honeybadger.io/v${majorMinorVersion}/honeybadger-feedback-form.js`
@@ -99,58 +101,8 @@ class Honeybadger extends Client {
   }
 
   public async showUserFeedbackForm(options: Types.UserFeedbackFormOptions = {}) {
-    if (!this.config || !this.config.apiKey) {
-      this.logger.debug('Client not initialized')
-      return
-    }
-
-    if (!this.__lastNoticeId) {
-      this.logger.debug("Can't show user feedback form without a notice already reported")
-      return
-    }
-
-    const global = globalThisOrWindow()
-    if (typeof global.document === 'undefined') {
-      this.logger.debug('global.document is undefined. Cannot attach script')
-      return
-    }
-
-    if (this.isUserFeedbackScriptUrlAlreadyVisible()) {
-      this.logger.debug('User feedback form is already visible')
-      return
-    }
-
-    global['honeybadgerUserFeedbackOptions'] = {
-      ...options,
-      apiKey: this.config.apiKey,
-      endpoint: this.config.userFeedbackEndpoint,
-      noticeId: this.__lastNoticeId
-    }
-
-    this.appendUserFeedbackScriptTag(global, options)
-  }
-
-  private appendUserFeedbackScriptTag(window: typeof globalThis, options: Types.UserFeedbackFormOptions = {}) {
-    const script = window.document.createElement('script')
-    script.setAttribute('src', this.getUserFeedbackSubmitUrl())
-    script.setAttribute('async', 'true')
-    if (options.onLoad) {
-      script.onload = options.onLoad
-    }
-    (global.document.head || global.document.body).appendChild(script)
-  }
-
-  private isUserFeedbackScriptUrlAlreadyVisible() {
-    const global = globalThisOrWindow()
-    const feedbackScriptUrl =this.getUserFeedbackSubmitUrl()
-    for (let i = 0; i < global.document.scripts.length; i++) {
-      const script = global.document.scripts[i]
-      if (script.src === feedbackScriptUrl) {
-        return true
-      }
-    }
-
-    return false
+    const form = new BrowserFeedbackForm(this.config, this.logger, this.getUserFeedbackSubmitUrl());
+    form.show(this.__lastNoticeId, options);
   }
 
   private getUserFeedbackSubmitUrl() {

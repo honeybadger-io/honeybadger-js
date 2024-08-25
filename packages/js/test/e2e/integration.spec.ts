@@ -1,5 +1,4 @@
 import { test, expect, Page, TestInfo } from '@playwright/test'
-import { resolve } from 'path'
 import type Honeybadger from '../../honeybadger'
 import type { NoticeTransportPayload }  from '../../../core/src/types'
 
@@ -329,10 +328,6 @@ test.describe('Browser Integration', () => {
 
   test('it shows user feedback form', async ({ page }) => {
     const handle = await page.evaluateHandle(_ => {
-    // @ts-ignore private access
-      window.Honeybadger.isUserFeedbackScriptUrlAlreadyVisible = () => false
-      // @ts-ignore private access
-      window.Honeybadger.appendUserFeedbackScriptTag = () => { }
       window.Honeybadger.afterNotify(() => {
         window.Honeybadger.showUserFeedbackForm()
       })
@@ -340,10 +335,6 @@ test.describe('Browser Integration', () => {
     })
     await handle.dispose()
 
-    const relativePath = '../../dist/browser/honeybadger-feedback-form.js'
-    await page.addScriptTag({
-      path: resolve(__dirname, relativePath)
-    })
     await page.waitForSelector('div#honeybadger-feedback')
 
     const { notices } = await page.evaluate<Results>('results')
@@ -358,10 +349,6 @@ test.describe('Browser Integration', () => {
 
   test('it shows user feedback form with custom labels', async ({ page }) => {
     const handle = await page.evaluateHandle(_ => {
-    // @ts-ignore private access
-      window.Honeybadger.isUserFeedbackScriptUrlAlreadyVisible = () => false
-      // @ts-ignore private access
-      window.Honeybadger.appendUserFeedbackScriptTag = () => { }
       window.Honeybadger.afterNotify(() => {
         window.Honeybadger.showUserFeedbackForm({
           messages: {
@@ -373,10 +360,6 @@ test.describe('Browser Integration', () => {
     })
     await handle.dispose()
 
-    const relativePath = '../../dist/browser/honeybadger-feedback-form.js'
-    await page.addScriptTag({
-      path: resolve(__dirname, relativePath)
-    })
     await page.waitForSelector('div#honeybadger-feedback')
 
     const { notices } = await page.evaluate<Results>('results')
@@ -391,10 +374,6 @@ test.describe('Browser Integration', () => {
 
   test('it sends user feedback for notice on submit', async ({ page }) => {
     const handle = await page.evaluateHandle(_ => {
-    // @ts-ignore private access
-      window.Honeybadger.isUserFeedbackScriptUrlAlreadyVisible = () => false
-      // @ts-ignore private access
-      window.Honeybadger.appendUserFeedbackScriptTag = () => { }
       window.Honeybadger.afterNotify(() => {
         window.Honeybadger.showUserFeedbackForm()
       })
@@ -402,10 +381,6 @@ test.describe('Browser Integration', () => {
     })
     await handle.dispose()
 
-    const relativePath = '../../dist/browser/honeybadger-feedback-form.js'
-    await page.addScriptTag({
-      path: resolve(__dirname, relativePath)
-    })
     await page.waitForSelector('div#honeybadger-feedback')
 
     const { notices } = await page.evaluate<Results>('results')
@@ -417,9 +392,9 @@ test.describe('Browser Integration', () => {
     const name = 'integration test'
     const email = 'integration-test@honeybadger.io'
     const comment = 'ci integration comment'
-    await page.type('#honeybadger-feedback-name', name)
-    await page.type('#honeybadger-feedback-email', email)
-    await page.type('#honeybadger-feedback-comment', comment)
+    await page.fill('#honeybadger-feedback-name', name)
+    await page.fill('#honeybadger-feedback-email', email)
+    await page.fill('#honeybadger-feedback-comment', comment)
     await page.click('#honeybadger-feedback-submit')
 
     const feedbackSubmitUrl = 'https://api.honeybadger.io/v2/feedback' +
@@ -437,10 +412,6 @@ test.describe('Browser Integration', () => {
 
   test('it closes user feedback form on cancel', async ({ page }) => {
     const handle = await page.evaluateHandle(_ => {
-    // @ts-ignore private access
-      window.Honeybadger.isUserFeedbackScriptUrlAlreadyVisible = () => false
-      // @ts-ignore private access
-      window.Honeybadger.appendUserFeedbackScriptTag = () => { }
       window.Honeybadger.afterNotify(() => {
         window.Honeybadger.showUserFeedbackForm()
       })
@@ -448,10 +419,6 @@ test.describe('Browser Integration', () => {
     })
     await handle.dispose()
 
-    const relativePath = '../../dist/browser/honeybadger-feedback-form.js'
-    await page.addScriptTag({
-      path: resolve(__dirname, relativePath)
-    })
     await page.waitForSelector('div#honeybadger-feedback')
 
     const { notices } = await page.evaluate<Results>('results')

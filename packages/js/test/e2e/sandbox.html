@@ -34,6 +34,8 @@
       debug: true
     })
 
+    Honeybadger.getUserFeedbackSubmitUrl = () => 'dist/browser/honeybadger-feedback-form.js'
+
     Honeybadger.__transport.send = function (options, payload) {
       results.notices.push(payload);
       return Promise.resolve({ statusCode: 201, body: JSON.stringify({id: 'test'}) })
