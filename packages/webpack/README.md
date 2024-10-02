@@ -37,7 +37,7 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   <dt><code>endpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/source_maps")</dt>
   <dd>Where to upload your source maps to. Perhaps you have a self hosted
   source map server you would like to upload your source maps to instead
-  of honeybadger.</dd>
+  of honeybadger. If you are using our EU stack, this should be set to "https://eu-api.honeybadger.io/v1/source_maps".</dd>
 
   <dt><code>revision</code> (optional &mdash; default: "main")</dt>
   <dd>The deploy revision (i.e. commit hash) that your source map applies to. This could also be a code version. For best results, set it to something unique every time your code changes. <a href="https://docs.honeybadger.io/lib/javascript/guides/using-source-maps.html#versioning-your-project">See the Honeybadger docs for examples.</a></dd>
@@ -60,6 +60,9 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
   workers. Increase or decrease this value to configure how many source maps
   are being uploaded in parallel.</br>
   Limited parallelism helps with connection issues in Docker environments.</dd>
+
+  <dt><code>deployEndpoint</code> (optional &mdash; default: "https://api.honeybadger.io/v1/deploys")</dt>
+  <dd>Where to send deployment notifications. If you are using our EU stack, this should be set to "https://eu-api.honeybadger.io/v1/deploys".</dd>
 
   <dt><code>deploy</code> (optional &mdash; default: false)</dt>
   <dd>
