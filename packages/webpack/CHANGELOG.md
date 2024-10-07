@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.2.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/webpack@6.2.1...@honeybadger-io/webpack@6.2.2) (2024-10-07)
+
+**Note:** Version bump only for package @honeybadger-io/webpack
+
+
+
+
+
 ## [6.2.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/webpack@6.2.0...@honeybadger-io/webpack@6.2.1) (2024-06-26)
 
 

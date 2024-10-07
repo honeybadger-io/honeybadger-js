@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/webpack",
-  "version": "6.2.1",
+  "version": "6.2.2",
   "description": "Webpack plugin to upload source maps to Honeybadger's API - http://docs.honeybadger.io/guides/source-maps.html",
   "main": "./dist/HoneybadgerSourceMapPlugin.js",
   "scripts": {
