@@ -14,7 +14,36 @@ export class BrowserFeedbackForm {
   }
 
   /* ROLLUP_STRIP_CODE_CHROME_EXTENSION_START */
+  private appendUserFeedbackTag(window: typeof globalThis, options: Types.UserFeedbackFormOptions = {}) {
+    const script = window.document.createElement('script')
+    script.setAttribute('src', this.scriptUrl)
+    script.setAttribute('async', 'true')
+    if (options.onLoad) {
+      script.onload = options.onLoad
+    }
+    (global.document.head || global.document.body).appendChild(script)
+  }
+
+  private isUserFeedbackUrlAlreadyVisible() {
+    const global = globalThisOrWindow()
+    const feedbackScriptUrl = this.scriptUrl
+    for (let i = 0; i < global.document.scripts.length; i++) {
+      const script = global.document.scripts[i]
+      if (script.src === feedbackScriptUrl) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  /* ROLLUP_STRIP_CODE_CHROME_EXTENSION_END */
   public show(lastNoticeId: string, options: Types.UserFeedbackFormOptions = {}) {
+    if (typeof(this.appendUserFeedbackTag) !== 'function') {
+      this.logger.debug('Feedback form is not available in this environment')
+      return
+    }
+
     if (!this.config || !this.config.apiKey) {
       this.logger.debug('Client not initialized')
       return
@@ -31,7 +60,7 @@ export class BrowserFeedbackForm {
       return
     }
 
-    if (this.isUserFeedbackScriptUrlAlreadyVisible()) {
+    if (this.isUserFeedbackUrlAlreadyVisible()) {
       this.logger.debug('User feedback form is already visible')
       return
     }
@@ -43,31 +72,6 @@ export class BrowserFeedbackForm {
       noticeId: lastNoticeId,
     }
 
-    this.appendUserFeedbackScriptTag(global, options)
-
+    this.appendUserFeedbackTag(global, options)
   }
-
-  private appendUserFeedbackScriptTag(window: typeof globalThis, options: Types.UserFeedbackFormOptions = {}) {
-    const script = window.document.createElement('script')
-    script.setAttribute('src', this.scriptUrl)
-    script.setAttribute('async', 'true')
-    if (options.onLoad) {
-      script.onload = options.onLoad
-    }
-    (global.document.head || global.document.body).appendChild(script)
-  }
-
-  private isUserFeedbackScriptUrlAlreadyVisible() {
-    const global = globalThisOrWindow()
-    const feedbackScriptUrl = this.scriptUrl
-    for (let i = 0; i < global.document.scripts.length; i++) {
-      const script = global.document.scripts[i]
-      if (script.src === feedbackScriptUrl) {
-        return true
-      }
-    }
-
-    return false
-  }
-  /* ROLLUP_STRIP_CODE_CHROME_EXTENSION_END */
 }
