@@ -57,7 +57,7 @@
     "@types/express": "^4.17.13"
   },
   "devDependencies": {
-    "@playwright/test": "1.39.0",
+    "@playwright/test": "1.48.0",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^5.0.2",
