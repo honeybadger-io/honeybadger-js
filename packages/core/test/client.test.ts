@@ -440,7 +440,7 @@ describe('client', function () {
 
     it('filters out top frames that come from @honeybadger-io (nodejs)', function () {
       const error = new Error('ENOENT: no such file or directory, open \'\'/tmp/file-123456\'\'')
-      error.stack = `Error: ENOENT: no such file or directory, open ''/tmp/file-67efc3cb2da4'' 
+      error.stack = `Error: ENOENT: no such file or directory, open ''/tmp/file-67efc3cb2da4''
             at generateStackTrace (/var/www/somebody/node_modules/@honeybadger-io/js/dist/server/honeybadger.js:563:15)
             at Honeybadger.Client.makeNotice (/var/www/somebody/node_modules/@honeybadger-io/js/dist/server/honeybadger.js:985:60)
             at Honeybadger.Client.notify (/var/www/somebody/node_modules/@honeybadger-io/js/dist/server/honeybadger.js:827:27)
@@ -751,6 +751,27 @@ describe('client', function () {
       expect(payload.request.context).toEqual({ expected_context_key: 'expected value' })
       expect(payload.request.params).toEqual({ expected_params_key: 'expected value' })
       expect(payload.server.revision).toEqual('expected revision')
+    })
+
+    it('can filter breadcrumbs', function () {
+      let notice
+
+      client.beforeNotify(function (n) {
+        notice = n
+        n.__breadcrumbs = n.__breadcrumbs?.filter(bc => {
+          return !bc.message.startsWith('[startup]')
+        })
+      })
+
+      try {
+        throw (new Error('expected message'))
+      } catch (e) {
+        client.addBreadcrumb('[startup] This is a breadcrumb that should be skipped')
+        client.notify(e)
+      }
+
+      const payload = client.getPayload(notice)
+      expect(payload.breadcrumbs).toEqual(1)
     })
 
     it('calls all beforeNotify handlers even if one returns false', function () {
