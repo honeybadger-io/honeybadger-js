@@ -17,10 +17,14 @@ The main page is shown by left clicking on the extension. To see the options pag
 
 In the <strong>Extensions</strong> page (`chrome://extensions`), click on the reload (↺) button.
 
-## Report an error
+## Reporting an error
 
-To report an error:
-1. Open `error-reporting.js` and replace `YOUR_API_KEY` with your Honeybadger.js API key.
-2. Make sure to reload the extension (see above).
-3. Open the Options page and click on the Report Error button.
-4. Check your Honeybadger.js dashboard. The error should show up after a few seconds. 
+There are multiple ways to report an error, showcasing the different execution contexts in a chrome extension:
+- An error is automatically reported from the background worker (`background.js`) as soon as it's loaded. This is how you know Honeybadger was loaded successfully in the worker.
+- An error is automatically reported from the content script (`content.js`) as soon as it's loaded. This is how you know Honeybadger was loaded successfully in the content script.
+- To report an error from the options page (`options.html` and `options.js`) or the popup (`popup.html` and `popup.js`):
+  1. Open `error-reporting.js` and replace `YOUR_API_KEY` with your Honeybadger.js API key.
+  2. Make sure to reload the extension (see above).
+  3. Open the Options page and click on the Report Error button.
+     Or click on the extension icon to open the popup and click on the Report Error button.
+  4. Check your Honeybadger.js dashboard. The error should show up after a few seconds. 
