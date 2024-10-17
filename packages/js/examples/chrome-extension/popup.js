@@ -24,8 +24,8 @@ function setPageBackgroundColor() {
 }
 
 // Button to throw an error and have it reported on Honeybadger
-const throwError = document.getElementById('throwError');
-throwError.addEventListener('click', async () => {
+const reportErrorButton = document.getElementById('reportErrorButton');
+reportErrorButton.addEventListener('click', async () => {
   // eslint-disable-next-line no-undef
   someUndefinedFunction();
 });
