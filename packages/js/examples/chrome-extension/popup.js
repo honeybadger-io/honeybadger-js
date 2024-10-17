@@ -1,5 +1,5 @@
 // Initialize button with user's preferred color
-let changeColor = document.getElementById('changeColor');
+const changeColor = document.getElementById('changeColor');
 
 chrome.storage.sync.get('color', ({ color }) => {
   changeColor.style.backgroundColor = color;
@@ -22,3 +22,10 @@ function setPageBackgroundColor() {
     document.body.style.backgroundColor = color;
   });
 }
+
+// Button to throw an error and have it reported on Honeybadger
+const throwError = document.getElementById('throwError');
+throwError.addEventListener('click', async () => {
+  // eslint-disable-next-line no-undef
+  someUndefinedFunction();
+});
