@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.10.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.10.0...@honeybadger-io/js@6.10.1) (2024-10-21)
+
+
+### Bug Fixes
+
+* **chrome-extension:** reorder code to maintain comments so that code strip will work ([#1407](https://github.com/honeybadger-io/honeybadger-js/issues/1407)) ([3ba3168](https://github.com/honeybadger-io/honeybadger-js/commit/3ba3168506a016cbf8a17c6301843a4900010ed6))
+
+
+
+
+
 # [6.10.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.9.3...@honeybadger-io/js@6.10.0) (2024-08-25)
 
 
