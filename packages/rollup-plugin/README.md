@@ -70,6 +70,9 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
     <dd>The name of the user that triggered this deploy, for example, "Jane"</dd>
   </dl>
   </dd>
+
+  <dt><code>developmentEnvironments</code> (optional &mdash; default: ["dev", "development", "test"])</dt>
+  <dd>Used to decide whether source maps should be uploaded or not.</dd>
 </dl>
 
 ### rollup.config.js

@@ -11,6 +11,7 @@ export type HbPluginOptions = {
   ignorePaths: Array<string>;
   ignoreErrors: boolean;
   workerCount: number;
+  developmentEnvironments: Array<string>;
 }
 
 // Options passed in by a user

@@ -19,7 +19,7 @@ class HoneybadgerSourceMapPlugin {
   }
 
   async afterEmit (compilation) {
-    if (this.isDevServerRunning()) {
+    if (this.isDevEnv(this.options.developmentEnvironments)) {
       if (!this.options.silent) {
         console.info('\nHoneybadgerSourceMapPlugin will not upload source maps because webpack-dev-server is running.')
       }
@@ -41,8 +41,12 @@ class HoneybadgerSourceMapPlugin {
     }
   }
 
-  isDevServerRunning () {
-    return process.env.WEBPACK_DEV_SERVER === 'true'
+  isDevEnv (devEnvironments) {
+    if (process.env.WEBPACK_DEV_SERVER === 'true') {
+      return true
+    }
+
+    return !!(devEnvironments && devEnvironments.includes(process.env.NODE_ENV));
   }
 
   apply (compiler) {

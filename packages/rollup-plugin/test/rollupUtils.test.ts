@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { extractSourcemapDataFromBundle, isNonProdEnv } from '../src/rollupUtils';
+import { extractSourcemapDataFromBundle, isDevEnv } from '../src/rollupUtils';
 import bundle from './fixtures/bundle'
 import path from 'node:path'
 import { NormalizedOutputOptions } from 'rollup';
@@ -91,7 +91,8 @@ describe('extractSourcemapDataFromBundle', () => {
   })
 })
 
-describe('isNonProdEnv', () => {
+describe('isDevEnv', () => {
+  const developmentEnvironments = ['development', 'test', 'staging']
   let restore
 
   beforeEach(() => {
@@ -99,21 +100,31 @@ describe('isNonProdEnv', () => {
   })
 
   afterEach(() => {
+    // @ts-expect-error
     process.env.NODE_ENV = restore
   })
 
   it('returns true if NODE_ENV is non-prod', () => {
+    // @ts-expect-error
     process.env.NODE_ENV = 'development'
-    expect(isNonProdEnv()).to.equal(true)
+    expect(isDevEnv(developmentEnvironments)).to.equal(true)
+  })
+
+  it('returns false if NODE_ENV is non-prod but not in developmentEnvironments array', () => {
+    // @ts-expect-error
+    process.env.NODE_ENV = 'staging'
+    expect(isDevEnv(developmentEnvironments)).to.equal(false)
   })
 
   it('returns false if NODE_ENV is missing', () => {
+    // @ts-expect-error
     delete process.env.NODE_ENV
-    expect(isNonProdEnv()).to.equal(false)
+    expect(isDevEnv(developmentEnvironments)).to.equal(false)
   })
 
   it('returns false if NODE_ENV is prod', () => {
+    // @ts-expect-error
     process.env.NODE_ENV = 'production'
-    expect(isNonProdEnv()).to.equal(false)
+    expect(isDevEnv(developmentEnvironments)).to.equal(false)
   })
 })

@@ -1,4 +1,4 @@
-import { extractSourcemapDataFromBundle, isNonProdEnv } from './rollupUtils'
+import { extractSourcemapDataFromBundle, isDevEnv } from './rollupUtils'
 import { sendDeployNotification, uploadSourcemaps, cleanOptions, Types } from '@honeybadger-io/plugin-core'
 import type { OutputBundle, Plugin, NormalizedOutputOptions } from 'rollup'
 
@@ -13,7 +13,7 @@ export default function honeybadgerRollupPlugin(
       outputOptions: NormalizedOutputOptions,
       bundle: OutputBundle
     ) => {
-      if (isNonProdEnv()) {
+      if (isDevEnv(hbOptions.developmentEnvironments)) {
         if (!hbOptions.silent) {
           console.info('Honeybadger will not upload sourcemaps in non-production environment.')
         }

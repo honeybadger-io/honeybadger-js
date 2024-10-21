@@ -77,6 +77,9 @@ These plugin parameters correspond to the Honeybadger [Source Map Upload API](ht
     <dd>The name of the user that triggered this deploy, for example, "Jane"</dd>
   </dl>
   </dd>
+
+  <dt><code>developmentEnvironments</code> (optional &mdash; default: ["dev", "development", "test"])</dt>
+  <dd>Source maps upload will be skipped when the environment matches any of the values in this array or the webpack dev server is running.</dd>
 </dl>
 
 ### Vanilla webpack.config.js

@@ -24,7 +24,7 @@ class HoneybadgerSourceMapPlugin {
     return {
       name: PLUGIN_NAME,
       setup(build: PluginBuild) {
-        if (self.isNonProdEnv()) {
+        if (self.isDevEnv(self.options.developmentEnvironments)) {
           return
         }
 
@@ -95,8 +95,12 @@ class HoneybadgerSourceMapPlugin {
     return assets
   }
 
-  private isNonProdEnv(): boolean {
-    return !!process.env.NODE_ENV && process.env.NODE_ENV !== 'production'
+  private isDevEnv(devEnvironments: string[]): boolean {
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === '') {
+      return false
+    }
+
+    return devEnvironments.includes(process.env.NODE_ENV)
   }
 
   private handleError(error: Error): Message {
