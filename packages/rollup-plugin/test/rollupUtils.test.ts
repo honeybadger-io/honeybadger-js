@@ -92,7 +92,7 @@ describe('extractSourcemapDataFromBundle', () => {
 })
 
 describe('isDevEnv', () => {
-  const developmentEnvironments = ['development', 'test', 'staging']
+  const developmentEnvironments = ['dev', 'development', 'test']
   let restore
 
   beforeEach(() => {
@@ -100,30 +100,25 @@ describe('isDevEnv', () => {
   })
 
   afterEach(() => {
-    // @ts-expect-error
     process.env.NODE_ENV = restore
   })
 
   it('returns true if NODE_ENV is non-prod', () => {
-    // @ts-expect-error
     process.env.NODE_ENV = 'development'
     expect(isDevEnv(developmentEnvironments)).to.equal(true)
   })
 
   it('returns false if NODE_ENV is non-prod but not in developmentEnvironments array', () => {
-    // @ts-expect-error
     process.env.NODE_ENV = 'staging'
     expect(isDevEnv(developmentEnvironments)).to.equal(false)
   })
 
   it('returns false if NODE_ENV is missing', () => {
-    // @ts-expect-error
     delete process.env.NODE_ENV
     expect(isDevEnv(developmentEnvironments)).to.equal(false)
   })
 
   it('returns false if NODE_ENV is prod', () => {
-    // @ts-expect-error
     process.env.NODE_ENV = 'production'
     expect(isDevEnv(developmentEnvironments)).to.equal(false)
   })

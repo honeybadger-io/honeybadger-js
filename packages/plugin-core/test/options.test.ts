@@ -9,6 +9,7 @@ import {
   DEFAULT_IGNORE_ERRORS,
   DEFAULT_WORKER_COUNT,
   MIN_WORKER_COUNT,
+  DEFAULT_DEVELOPMENT_ENVIRONMENTS,
 } from '../src/options';
 
 describe('Options', () => {
@@ -41,7 +42,7 @@ describe('Options', () => {
         workerCount: 0
       })
       expect(result.workerCount).to.equal(MIN_WORKER_COUNT)
-    }) 
+    })
 
     it('should merge in default options', () => {
       const result = cleanOptions({
@@ -62,6 +63,7 @@ describe('Options', () => {
         ignorePaths: [],
         ignoreErrors: DEFAULT_IGNORE_ERRORS,
         workerCount: DEFAULT_WORKER_COUNT,
+        developmentEnvironments: DEFAULT_DEVELOPMENT_ENVIRONMENTS,
       })
     })
   });
