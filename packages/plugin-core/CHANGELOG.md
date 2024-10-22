@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/plugin-core@1.3.1...@honeybadger-io/plugin-core@1.4.0) (2024-10-22)
+
+
+### Features
+
+* adds configurable dev environments for source map upload plugins ([#1412](https://github.com/honeybadger-io/honeybadger-js/issues/1412)) ([cae080b](https://github.com/honeybadger-io/honeybadger-js/commit/cae080ba861e1132730701f47f7d4e3c5ea1fa1b))
+
+
+
+
+
 ## [1.3.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/plugin-core@1.3.0...@honeybadger-io/plugin-core@1.3.1) (2024-06-26)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.10.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.9.3...@honeybadger-io/rollup-plugin@5.10.0) (2024-10-22)
+
+
+### Features
+
+* adds configurable dev environments for source map upload plugins ([#1412](https://github.com/honeybadger-io/honeybadger-js/issues/1412)) ([cae080b](https://github.com/honeybadger-io/honeybadger-js/commit/cae080ba861e1132730701f47f7d4e3c5ea1fa1b))
+
+
+
+
+
 ## [5.9.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.9.2...@honeybadger-io/rollup-plugin@5.9.3) (2024-10-07)
 
 **Note:** Version bump only for package @honeybadger-io/rollup-plugin
