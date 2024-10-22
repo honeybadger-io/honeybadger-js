@@ -11,6 +11,7 @@ export const DEFAULT_DEPLOY = false
 export const DEFAULT_DEPLOY_ENDPOINT = 'https://api.honeybadger.io/v1/deploys'
 export const DEFAULT_IGNORE_PATHS = []
 export const DEFAULT_IGNORE_ERRORS = false
+export const DEFAULT_DEVELOPMENT_ENVIRONMENTS = ['dev', 'development', 'test'];
 
 const required = [
   'apiKey',
@@ -27,6 +28,7 @@ const defaultOptions = {
   ignorePaths: DEFAULT_IGNORE_PATHS,
   ignoreErrors: DEFAULT_IGNORE_ERRORS,
   workerCount: DEFAULT_WORKER_COUNT,
+  developmentEnvironments: DEFAULT_DEVELOPMENT_ENVIRONMENTS
 }
 
 export function cleanOptions(
@@ -42,6 +44,11 @@ export function cleanOptions(
   // Validate ignorePaths
   if (options.ignorePaths && !Array.isArray(options.ignorePaths)) {
     throw new Error('ignorePaths must be an array')
+  }
+
+  // Validate developmentEnvironments
+  if (options.developmentEnvironments && !Array.isArray(options.developmentEnvironments)) {
+    throw new Error('developmentEnvironments must be an array')
   }
 
   // Don't allow excessive retries

@@ -6,7 +6,11 @@ import * as td from 'testdouble'
 describe('Index', () => {
   let honeybadgerRollupPlugin
   let core, rollupUtils
-  const options = { apiKey: 'test_key', assetsUrl: 'https://foo.bar' }
+  const options = {
+    apiKey: 'test_key',
+    assetsUrl: 'https://foo.bar',
+    developmentEnvironments: ['dev', 'development', 'test']
+  }
 
   beforeEach(async () => {
     core = td.replace('@honeybadger-io/plugin-core')
@@ -35,7 +39,7 @@ describe('Index', () => {
     const sourcemapData = [{ sourcemapFilename: 'index.map.js' }]
 
     it('should upload sourcemaps', async () => {
-      td.when(rollupUtils.isNonProdEnv()).thenReturn(false)
+      td.when(rollupUtils.isDevEnv(options.developmentEnvironments)).thenReturn(false)
       td.when(rollupUtils.extractSourcemapDataFromBundle(outputOptions, bundle, undefined)).thenReturn(sourcemapData)
       td.when(core.cleanOptions(options)).thenReturn(options)
 
@@ -48,7 +52,7 @@ describe('Index', () => {
 
     it('should send deploy notification if deploy is true', async () => {
       const deployTrueOpt = { ...options, deploy: true }
-      td.when(rollupUtils.isNonProdEnv()).thenReturn(false)
+      td.when(rollupUtils.isDevEnv(options.developmentEnvironments)).thenReturn(false)
       td.when(rollupUtils.extractSourcemapDataFromBundle({ outputOptions, bundle })).thenReturn(sourcemapData)
       td.when(core.cleanOptions(deployTrueOpt)).thenReturn(deployTrueOpt)
 
@@ -61,7 +65,7 @@ describe('Index', () => {
 
     it('should send deploy notification if deploy is an object', async () => {
       const deployObjOpt = { ...options, deploy: { localUsername: 'me' } }
-      td.when(rollupUtils.isNonProdEnv()).thenReturn(false)
+      td.when(rollupUtils.isDevEnv(options.developmentEnvironments)).thenReturn(false)
       td.when(rollupUtils.extractSourcemapDataFromBundle({ outputOptions, bundle })).thenReturn(sourcemapData)
       td.when(core.cleanOptions(deployObjOpt)).thenReturn(deployObjOpt)
 
@@ -74,7 +78,7 @@ describe('Index', () => {
 
     it('should not send deploy notification if deploy is false', async () => {
       const deployFalseOpt = { ...options, deploy: false }
-      td.when(rollupUtils.isNonProdEnv()).thenReturn(false)
+      td.when(rollupUtils.isDevEnv(options.developmentEnvironments)).thenReturn(false)
       td.when(rollupUtils.extractSourcemapDataFromBundle({ outputOptions, bundle })).thenReturn(sourcemapData)
       td.when(core.cleanOptions(deployFalseOpt)).thenReturn(deployFalseOpt)
 
@@ -87,7 +91,7 @@ describe('Index', () => {
     })
 
     it('should do nothing in non-prod environments', async () => {
-      td.when(rollupUtils.isNonProdEnv()).thenReturn(true)
+      td.when(rollupUtils.isDevEnv(options.developmentEnvironments)).thenReturn(true)
       td.when(core.cleanOptions(options)).thenReturn(options)
 
       const plugin = honeybadgerRollupPlugin(options)

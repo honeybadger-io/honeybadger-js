@@ -17,7 +17,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
 
   const options = {
     apiKey: 'abcd1234',
-    assetsUrl: 'https://cdn.example.com/assets', 
+    assetsUrl: 'https://cdn.example.com/assets',
     endpoint: `${TEST_ENDPOINT}${SOURCEMAP_PATH}`,
     deployEndpoint: `${TEST_ENDPOINT}${DEPLOY_PATH}`,
   }
@@ -62,6 +62,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
         revision: 'main',
         silent: false,
         workerCount: 5,
+        developmentEnvironments: ['dev', 'development', 'test']
       })
     })
   })
@@ -91,13 +92,13 @@ describe('HoneybadgerSourceMapPlugin', function () {
         id: 0,
         names: ['app'],
         files: ['app.5190.js', 'app.5190.js.map']
-      }, 
+      },
     ]
-    const assets = [{ 
+    const assets = [{
       sourcemapFilePath: '/fake/output/path/app.5190.js.map',
       sourcemapFilename: 'app.5190.js.map',
       jsFilePath: '/fake/output/path/app.5190.js',
-      jsFilename: 'app.5190.js', 
+      jsFilename: 'app.5190.js',
     }]
     const outputPath = '/fake/output/path'
 
@@ -141,7 +142,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
       }
       sinon.stub(plugin, 'uploadSourceMaps')
       sinon.stub(plugin, 'sendDeployNotification')
-      
+
       await plugin.afterEmit(compilation)
       expect(plugin.sendDeployNotification.callCount).to.eq(1)
       expect(plugin.sendDeployNotification.calledWith(plugin.options)).to.equal(true)
@@ -209,7 +210,7 @@ describe('HoneybadgerSourceMapPlugin', function () {
         id: 0,
         names: ['app'],
         files: ['app.5190.js', 'app.5190.js.map']
-      }, 
+      },
       {
         id: 1,
         names: ['foo'],
@@ -220,17 +221,17 @@ describe('HoneybadgerSourceMapPlugin', function () {
     const compilation = {
       getStats: () => ({
         toJson: () => ({ chunks })
-      }), 
+      }),
       compiler: { outputPath },
       getPath: () => outputPath,
     }
 
     const expectedAssets = [
-      { 
+      {
         sourcemapFilePath: '/fake/output/path/app.5190.js.map',
         sourcemapFilename: 'app.5190.js.map',
         jsFilePath: '/fake/output/path/app.5190.js',
-        jsFilename: 'app.5190.js', 
+        jsFilename: 'app.5190.js',
       }
     ]
 

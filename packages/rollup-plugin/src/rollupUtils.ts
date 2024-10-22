@@ -55,6 +55,10 @@ function formatSourcemapData(
  * In Rollup without Vite, it may or may not be available,
  * so if it's missing we'll assume prod
  */
-export function isNonProdEnv(): boolean {
-  return !!process.env.NODE_ENV && process.env.NODE_ENV !== 'production'
+export function isDevEnv(devEnvironments: string[]): boolean {
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === '') {
+    return false
+  }
+
+  return devEnvironments.includes(process.env.NODE_ENV)
 }
