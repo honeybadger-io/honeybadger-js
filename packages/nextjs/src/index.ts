@@ -195,7 +195,7 @@ function addServerExternalPackagesOption(config) {
 
   const nextJsVersion = getNextJsVersionInstalled();
   if (nextJsVersion) {
-    if (+nextJsVersion[0] >= 14 && +nextJsVersion[1] >= 3) {
+    if ((+nextJsVersion[0] === 14 && +nextJsVersion[1] >= 3) || +nextJsVersion[0] > 14) {
       log('debug', 'adding serverExternalPackages option with value ["@honeybadger-io/js"]')
       config.serverExternalPackages = ['@honeybadger-io/js']
     }
