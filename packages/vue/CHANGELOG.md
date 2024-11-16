@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.1.26...@honeybadger-io/vue@6.2.0) (2024-11-16)
+
+
+### Features
+
+* **vue:** add support for composition api ([#1416](https://github.com/honeybadger-io/honeybadger-js/issues/1416)) ([3d99dd4](https://github.com/honeybadger-io/honeybadger-js/commit/3d99dd45212e2bbe6c2549835db5f6042e87478d))
+
+
+
+
+
 ## [6.1.26](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.1.25...@honeybadger-io/vue@6.1.26) (2024-10-21)
 
 **Note:** Version bump only for package @honeybadger-io/vue
