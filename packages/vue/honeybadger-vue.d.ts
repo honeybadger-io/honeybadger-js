@@ -14,4 +14,5 @@ declare const HoneybadgerVue: {
   install(app: App, options?: Partial<Types.BrowserConfig>): void
 }
 
+export function useHoneybadger(): typeof Honeybadger;
 export default HoneybadgerVue
