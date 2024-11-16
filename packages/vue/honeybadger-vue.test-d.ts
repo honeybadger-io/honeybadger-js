@@ -2,7 +2,7 @@
 // See https://github.com/SamVerschueren/tsd#usage
 
 import { createApp } from 'vue'
-import HoneybadgerVue from '.'
+import HoneybadgerVue, { useHoneybadger } from '.'
 
 const config = {
   apiKey: 'project api key',
@@ -18,3 +18,11 @@ app.$honeybadger.setContext({
 }).notify('testing')
 
 app.$honeybadger.notify('testing')
+
+const honeybadger = useHoneybadger()
+honeybadger.setContext({
+  foo: 'bar'
+}).notify('testing')
+
+honeybadger.notify('testing')
+
