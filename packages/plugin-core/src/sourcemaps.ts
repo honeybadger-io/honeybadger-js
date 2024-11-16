@@ -7,6 +7,8 @@ import path from 'path'
 // @ts-expect-error
 const fetch = fetchRetry(originalFetch)
 
+const DOCS_VERSIONING_URL = 'https://docs.honeybadger.io/lib/javascript/guides/using-source-maps/#versioning-your-project';
+
 import type { HbPluginOptions, SourcemapInfo } from './types'
 
 /**
@@ -22,7 +24,7 @@ export async function uploadSourcemaps(sourcemapData: SourcemapInfo[], hbOptions
     () => { return uploadSourcemap(data, hbOptions) }
   ))
   const results = await settlePromiseWithWorkers(sourcemapUploadPromises, hbOptions.workerCount)
-  
+
   const fulfilled = results.filter((p): p is PromiseFulfilledResult<Response> => p.status === 'fulfilled')
   const rejected = results.filter((p): p is PromiseRejectedResult => p.status === 'rejected')
 
@@ -33,7 +35,9 @@ export async function uploadSourcemaps(sourcemapData: SourcemapInfo[], hbOptions
     const errorsStr = rejected.map(p => p.reason).join('\n')
     throw new Error(`Failed to upload ${rejected.length} sourcemap file(s) to Honeybadger\n${errorsStr}`)
   }
-  
+
+  console.info(`Note: For the error to be matched with a source map, the revisions must match. You can learn how to configure honeybadger.js to include the revision here: ${DOCS_VERSIONING_URL}`)
+
   return fulfilled.map(p => p.value)
 }
 
@@ -41,11 +45,11 @@ export async function uploadSourcemaps(sourcemapData: SourcemapInfo[], hbOptions
  * Executes an API call to upload a single sourcemap
  */
 export async function uploadSourcemap (
-  sourcemapData: SourcemapInfo, 
+  sourcemapData: SourcemapInfo,
   hbOptions: HbPluginOptions
 ): Promise<Response> {
   const body = await buildBodyForSourcemapUpload(sourcemapData, hbOptions)
-  
+
   let res: Response
 
   try {
@@ -64,7 +68,7 @@ export async function uploadSourcemap (
 
   if (res.ok) {
     if (!hbOptions.silent) {
-      console.info(`Successfully uploaded ${sourcemapData.sourcemapFilename} to Honeybadger`) 
+      console.info(`Successfully uploaded ${sourcemapData.sourcemapFilename} to Honeybadger`)
     }
     return res
   } else {
@@ -77,7 +81,7 @@ export async function uploadSourcemap (
  * Builds the form data for the sourcemap API call
  */
 export async function buildBodyForSourcemapUpload(
-  sourcemapData: SourcemapInfo, 
+  sourcemapData: SourcemapInfo,
   hbOptions: HbPluginOptions
 ): Promise<FormData> {
   const form = new FormData()
