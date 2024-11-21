@@ -36,7 +36,9 @@ export async function uploadSourcemaps(sourcemapData: SourcemapInfo[], hbOptions
     throw new Error(`Failed to upload ${rejected.length} sourcemap file(s) to Honeybadger\n${errorsStr}`)
   }
 
-  console.info(`Note: For the error to be matched with a source map, the revisions must match. You can learn how to configure honeybadger.js to include the revision here: ${DOCS_VERSIONING_URL}`)
+  if (!hbOptions.silent) {
+    console.info(`Note: For the error to be matched with a source map, the revisions must match. You can learn how to configure honeybadger.js to include the revision here: ${DOCS_VERSIONING_URL}`)
+  }
 
   return fulfilled.map(p => p.value)
 }
