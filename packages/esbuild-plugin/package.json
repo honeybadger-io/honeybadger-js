@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/esbuild-plugin",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Esbuild plugin to upload source maps to Honeybadger's API - http://docs.honeybadger.io/guides/source-maps.html",
   "main": "./dist/index.js",
   "scripts": {
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@honeybadger-io/core": "^6.6.0",
-    "@honeybadger-io/plugin-core": "^1.4.0"
+    "@honeybadger-io/plugin-core": "^1.4.1"
   },
   "peerDependencies": {
     "esbuild": "*"
