@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/nextjs",
-  "version": "5.9.8",
+  "version": "5.9.9",
   "description": "Next.js integration for Honeybadger",
   "keywords": [
     "nextjs",
@@ -38,12 +38,12 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "peerDependencies": {
-    "@honeybadger-io/react": ">= 5.x",
+    "@honeybadger-io/react": ">= 6.1.25",
     "next": ">= 13.x"
   },
   "dependencies": {
     "@honeybadger-io/js": "^6.10.1",
-    "@honeybadger-io/webpack": "^6.3.0"
+    "@honeybadger-io/webpack": "^6.3.1"
   },
   "devDependencies": {
     "@honeybadger-io/react": "^6.1.25",

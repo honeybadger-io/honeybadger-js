@@ -69,6 +69,10 @@ function install(vue, options) {
   }
 }
 
+export function useHoneybadger() {
+  return Honeybadger
+}
+
 export default {
   install
 }

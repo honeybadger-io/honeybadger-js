@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.10.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.10.0...@honeybadger-io/rollup-plugin@5.10.1) (2024-11-25)
+
+**Note:** Version bump only for package @honeybadger-io/rollup-plugin
+
+
+
+
+
 # [5.10.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.9.3...@honeybadger-io/rollup-plugin@5.10.0) (2024-10-22)
 
 
