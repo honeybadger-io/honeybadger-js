@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.9.10](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.9.9...@honeybadger-io/nextjs@5.9.10) (2024-12-09)
+
+
+### Bug Fixes
+
+* nextjs version comparison ([#1415](https://github.com/honeybadger-io/honeybadger-js/issues/1415)) ([62684da](https://github.com/honeybadger-io/honeybadger-js/commit/62684da16e58ea5c34ada3a23a12c2223898aacd))
+
+
+### Performance Improvements
+
+* **nextjs:** update dependencies ([#1420](https://github.com/honeybadger-io/honeybadger-js/issues/1420)) ([ed432bc](https://github.com/honeybadger-io/honeybadger-js/commit/ed432bc858333b8956a9f6bb0a4a8ff06cd1e5cb))
+
+
+
+
+
 ## [5.9.9](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.9.8...@honeybadger-io/nextjs@5.9.9) (2024-11-25)
 
 **Note:** Version bump only for package @honeybadger-io/nextjs
