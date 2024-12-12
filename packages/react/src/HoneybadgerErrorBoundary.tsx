@@ -1,7 +1,6 @@
 import React, { Component, ComponentType, ElementType, ReactNode } from 'react'
 import Honeybadger from '@honeybadger-io/js'
 import DefaultErrorComponent, { DefaultErrorComponentProps } from './DefaultErrorComponent'
-import PropTypes from 'prop-types';
 
 interface HoneybadgerErrorBoundaryProps {
   honeybadger: typeof Honeybadger
@@ -16,13 +15,6 @@ interface HoneybadgerErrorBoundaryState extends DefaultErrorComponentProps {
 
 export default class HoneybadgerErrorBoundary extends Component<HoneybadgerErrorBoundaryProps, HoneybadgerErrorBoundaryState> {
 
-  static propTypes = {
-    honeybadger: PropTypes.object.isRequired,
-    showUserFeedbackFormOnError: PropTypes.bool,
-    children: PropTypes.element,
-    ErrorComponent: PropTypes.oneOfType([PropTypes.element, PropTypes.func])
-  }
-
   static defaultProps = {
     showUserFeedbackFormOnError: false
   }
@@ -34,15 +26,19 @@ export default class HoneybadgerErrorBoundary extends Component<HoneybadgerError
       info: null,
       errorOccurred: false
     }
+
+  }
+
+  public static getDerivedStateFromError(error: Error): HoneybadgerErrorBoundaryState {
+    return { error: error, errorOccurred: true, info: null }
+  }
+
+  componentDidMount() {
     this.props.honeybadger.afterNotify((error, _notice) => {
       if (!error && this.props.showUserFeedbackFormOnError) {
         this.props.honeybadger.showUserFeedbackForm()
       }
     })
-  }
-
-  public static getDerivedStateFromError(error: Error): HoneybadgerErrorBoundaryState {
-    return { error: error, errorOccurred: true, info: null }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
