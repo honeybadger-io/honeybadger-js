@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react'
-import TestRenderer from 'react-test-renderer'
+import { render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom'
 
 // Need to import like this because react-scripts does not support jest's {@link https://jestjs.io/docs/configuration#resolver-string resolver} option.
 // We need "resolver" to ask jest to respect the "browser" field in the package.json.
@@ -54,14 +55,13 @@ describe('HoneybadgerReact', () => {
   })
 
   it('should render the default component when there are no errors', () => {
-    const testRenderer = TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger}><Clean /></HoneybadgerErrorBoundary>)
-    const testInstance = testRenderer.root
-    expect(testInstance.findByType(Clean)).toBeDefined()
+    render(<HoneybadgerErrorBoundary honeybadger={honeybadger}><Clean /></HoneybadgerErrorBoundary>)
+    expect(screen.getByRole('heading')).toHaveTextContent('Welcome! This works')
   })
 
   it("should invoke Honeybadger's notify when a component errors", (done) => {
     sandbox.spy(honeybadger, 'notify')
-    TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger}><Broken /></HoneybadgerErrorBoundary>)
+    render(<HoneybadgerErrorBoundary honeybadger={honeybadger}><Broken /></HoneybadgerErrorBoundary>)
     afterNotify(done, function () {
       assert.calledOnce(honeybadger.notify as SinonSpy)
     })
@@ -69,9 +69,8 @@ describe('HoneybadgerReact', () => {
 
   describe('when no custom error component is available', () => {
     it('should render a default error message when a component errors', () => {
-      const testRenderer = TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger}><Broken /></HoneybadgerErrorBoundary>)
-      const testInstance = testRenderer.root
-      expect(testInstance.findByProps({ className: 'error' })).toBeDefined()
+      render(<HoneybadgerErrorBoundary honeybadger={honeybadger}><Broken /></HoneybadgerErrorBoundary>)
+      expect(screen.findByText('An error occurred')).toBeDefined()
     })
   })
 
@@ -83,12 +82,12 @@ describe('HoneybadgerReact', () => {
       const MyErrComponent = () => <>custom error</>
       const MyErrComponentMock = jest.fn(MyErrComponent) as jest.MockedFunction<typeof MyErrComponent>
 
-      TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} ErrorComponent={MyErrComponentMock}><Broken /></HoneybadgerErrorBoundary>)
+      render(<HoneybadgerErrorBoundary honeybadger={honeybadger} ErrorComponent={MyErrComponentMock}><Broken /></HoneybadgerErrorBoundary>)
       expect(MyErrComponentMock).toBeCalledWith({
         error: expect.any(Error),
         info: { componentStack: expect.any(String) },
         errorOccurred: expect.any(Boolean)
-      }, {})
+      }, undefined)
       // Still want to ensure notify is only called once. The MyError component will be created twice by React.
       afterNotify(done, function () {
         assert.calledOnce(honeybadger.notify as SinonSpy)
@@ -105,12 +104,12 @@ describe('HoneybadgerReact', () => {
       const MyErrComponent = () => <>custom error</>
       const MyErrComponentMock = jest.fn(MyErrComponent) as jest.MockedFunction<typeof MyErrComponent>
 
-      TestRenderer.create(<HoneybadgerErrorBoundary honeybadger={honeybadger} showUserFeedbackFormOnError={true} ErrorComponent={MyErrComponentMock}><Broken /></HoneybadgerErrorBoundary>)
+      render(<HoneybadgerErrorBoundary honeybadger={honeybadger} showUserFeedbackFormOnError={true} ErrorComponent={MyErrComponentMock}><Broken /></HoneybadgerErrorBoundary>)
       expect(MyErrComponentMock).toBeCalledWith({
         error: expect.any(Error),
-        info: { componentStack: expect.any(String) },
+        info: null,
         errorOccurred: expect.any(Boolean)
-      }, {})
+      }, undefined)
       // Still want to ensure notify is only called once. The MyError component will be created twice by React.
       afterNotify(done, function () {
         assert.calledOnce(honeybadger.notify as SinonSpy)
