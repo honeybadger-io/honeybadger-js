@@ -1,17 +1,6 @@
-import React, { Component, ComponentType, ElementType, ReactNode } from 'react'
-import Honeybadger from '@honeybadger-io/js'
-import DefaultErrorComponent, { DefaultErrorComponentProps } from './DefaultErrorComponent'
-
-interface HoneybadgerErrorBoundaryProps {
-  honeybadger: typeof Honeybadger
-  showUserFeedbackFormOnError?: boolean
-  ErrorComponent?: ReactNode | ComponentType | ElementType
-  children?: ReactNode
-}
-
-interface HoneybadgerErrorBoundaryState extends DefaultErrorComponentProps {
-  errorOccurred: boolean
-}
+import React, { Component, ReactNode } from 'react'
+import DefaultErrorComponent from './DefaultErrorComponent'
+import { HoneybadgerErrorBoundaryProps, HoneybadgerErrorBoundaryState } from './types'
 
 export default class HoneybadgerErrorBoundary extends Component<HoneybadgerErrorBoundaryProps, HoneybadgerErrorBoundaryState> {
 
@@ -26,7 +15,6 @@ export default class HoneybadgerErrorBoundary extends Component<HoneybadgerError
       info: null,
       errorOccurred: false
     }
-
   }
 
   public static getDerivedStateFromError(error: Error): HoneybadgerErrorBoundaryState {
@@ -42,7 +30,6 @@ export default class HoneybadgerErrorBoundary extends Component<HoneybadgerError
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    this.setState({ errorOccurred: true, error: error, info: errorInfo })
     this.props.honeybadger.notify(error, { context: errorInfo as never })
   }
 

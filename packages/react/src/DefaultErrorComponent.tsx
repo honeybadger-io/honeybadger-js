@@ -1,32 +1,20 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types';
+import React from 'react'
+import { DefaultErrorComponentProps } from './types';
 
-export interface DefaultErrorComponentProps {
-  error: Error | null
-  info: React.ErrorInfo | null
-}
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export default class DefaultErrorComponent extends Component<DefaultErrorComponentProps, {}> {
-
-  static propTypes = {
-    error: PropTypes.object,
-    info: PropTypes.object
-  }
-
-  render() {
-    return (
-      <div className='error'>
-        <div>
-          An Error Occurred
-        </div>
-        <div>
-          {JSON.stringify(this.props.error, null, 2)}
-        </div>
-        <div>
-          {this.props.info ? JSON.stringify(this.props.info, null, 2) : ''}
-        </div>
+function DefaultErrorComponent({ error, info }: DefaultErrorComponentProps) {
+  return (
+    <div className='error'>
+      <div>
+        An Error Occurred
       </div>
-    )
-  }
+      <div>
+        {JSON.stringify(error, null, 2)}
+      </div>
+      <div>
+        {info ? JSON.stringify(info, null, 2) : ''}
+      </div>
+    </div>
+  )
 }
+
+export default DefaultErrorComponent;
