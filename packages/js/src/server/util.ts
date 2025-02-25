@@ -6,8 +6,8 @@ import { promisify } from 'util'
 
 const readFile = promisify(fs.readFile)
 
-export function fatallyLogAndExit(err: Error): never {
-  console.error('[Honeybadger] Exiting process due to uncaught exception')
+export function fatallyLogAndExit(err: Error, source: string): never {
+  console.error(`[Honeybadger] Exiting process due to ${source}`)
   console.error(err.stack || err)
   process.exit(1)
 }

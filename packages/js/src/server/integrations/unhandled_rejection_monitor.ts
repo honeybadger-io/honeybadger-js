@@ -23,7 +23,7 @@ export default class UnhandledRejectionMonitor {
         afterNotify: () => {
           this.__isReporting = false;
           if (!this.hasOtherUnhandledRejectionListeners()) {
-            fatallyLogAndExit(reason as Error)
+            fatallyLogAndExit(reason as Error, 'unhandled rejection')
           }
         }
       })
