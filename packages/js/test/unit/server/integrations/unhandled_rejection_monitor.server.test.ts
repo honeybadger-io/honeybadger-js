@@ -18,7 +18,7 @@ describe('UnhandledRejectionMonitor', () => {
   beforeEach(() => {
     // We just need a really basic client, so ignoring type issues here
     client = new TestClient(
-      { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger() }, 
+      { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger() },
       new TestTransport()
     ) as unknown as typeof Singleton
     unhandledRejectionMonitor = new UnhandledRejectionMonitor()
@@ -69,28 +69,28 @@ describe('UnhandledRejectionMonitor', () => {
     it('does nothing if our listener is not present', () => {
       process.on('unhandledRejection', (err) => { console.log(err) })
       expect(getListenerCount()).toBe(1)
-      
+
       unhandledRejectionMonitor.maybeRemoveListener()
       expect(getListenerCount()).toBe(1)
     })
   })
 
-  describe('__listener', () => {   
+  describe('__listener', () => {
     const promise = new Promise(() => true)
     const reason = 'Promise rejection reason'
 
-    it('calls notify and fatallyLogAndExit', (done) => {   
+    it('calls notify and fatallyLogAndExit', (done) => {
       unhandledRejectionMonitor.__listener(reason, promise)
       expect(notifySpy).toHaveBeenCalledTimes(1)
       expect(notifySpy).toHaveBeenCalledWith(
-        reason, 
+        reason,
         { component: 'unhandledRejection' },
         { afterNotify: expect.any(Function) }
       )
       client.afterNotify(() => {
-        expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(reason)
+        expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(reason, 'unhandled rejection')
         done()
-      }) 
+      })
     })
   })
 
