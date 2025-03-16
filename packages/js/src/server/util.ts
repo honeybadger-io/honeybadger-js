@@ -6,6 +6,11 @@ import { promisify } from 'util'
 
 const readFile = promisify(fs.readFile)
 
+export function fatallyLogAndExitGracefully(signal: NodeJS.Signals): never {
+  console.log(`[Honeybadger] Received ${signal}, exiting immediately`)
+  process.exit()
+}
+
 export function fatallyLogAndExit(err: Error, source: string): never {
   console.error(`[Honeybadger] Exiting process due to ${source}`)
   console.error(err.stack || err)

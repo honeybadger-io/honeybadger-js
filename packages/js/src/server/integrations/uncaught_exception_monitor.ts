@@ -20,6 +20,7 @@ export default class UncaughtExceptionMonitor {
   }
 
   makeListener() {
+    // noinspection UnnecessaryLocalVariableJS
     const honeybadgerUncaughtExceptionListener = (uncaughtError: Error) => {
       if (this.__isReporting || !this.__client) { return }
 
