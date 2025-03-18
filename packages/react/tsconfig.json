@@ -27,7 +27,8 @@
     "node_modules"
   ],
   "include": [
-    "./src/*.tsx"
+    "./src/*.tsx",
+    "./src/*.ts"
   ],
   "references": [
     {
