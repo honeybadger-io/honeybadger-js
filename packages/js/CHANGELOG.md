@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.11.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.10.1...@honeybadger-io/js@6.11.0) (2025-03-18)
+
+
+### Bug Fixes
+
+* **js:** improved, unambiguous error message ([#1428](https://github.com/honeybadger-io/honeybadger-js/issues/1428)) ([fbb5084](https://github.com/honeybadger-io/honeybadger-js/commit/fbb50849bddd5b74c5443c3f036418409a73986e))
+
+
+### Features
+
+* flush events on process exit ([#1430](https://github.com/honeybadger-io/honeybadger-js/issues/1430)) ([35c4f73](https://github.com/honeybadger-io/honeybadger-js/commit/35c4f73323badc022e32065e985a8f7b84733485))
+
+
+
+
+
 ## [6.10.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.10.0...@honeybadger-io/js@6.10.1) (2024-10-21)
 
 
