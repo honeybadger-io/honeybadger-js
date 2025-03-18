@@ -7,6 +7,8 @@ const NOTIFIER = {
   version: '__VERSION__'
 }
 
+const ANONYMOUS_COMPONENT = 'Anonymous Component'
+
 function shouldLogError (app, options) {
   if (app.config.warnHandler) {
     return true
@@ -19,6 +21,13 @@ function shouldLogError (app, options) {
 }
 
 function extractContext (vm) {
+  if (!vm) {
+    return {
+      isRoot: false,
+      name: ANONYMOUS_COMPONENT,
+    }
+  }
+
   const options = vm.$options || {}
   const name = options.name || options._componentTag
   const file = options.__file
