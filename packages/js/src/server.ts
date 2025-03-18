@@ -4,6 +4,7 @@ import { Client, Util, Types, Plugins as CorePlugins } from '@honeybadger-io/cor
 import { getSourceFile, readConfigFromFileSystem } from './server/util'
 import uncaughtException from './server/integrations/uncaught_exception_plugin'
 import unhandledRejection from './server/integrations/unhandled_rejection_plugin'
+import shutdown from './server/integrations/shutdown_plugin'
 import { errorHandler, requestHandler } from './server/middleware'
 import { lambdaHandler } from './server/aws_lambda'
 import { ServerTransport } from './server/transport'
@@ -15,6 +16,7 @@ const { endpoint } = Util
 const DEFAULT_PLUGINS = [
   uncaughtException(),
   unhandledRejection(),
+  shutdown(),
   CorePlugins.events(),
 ]
 

@@ -11,6 +11,7 @@ export interface Logger {
 export interface EventsLogger {
   configure: (opts: Partial<Config>) => void
   log(data: EventPayload): void
+  flushAsync(): Promise<void>
 }
 
 export type EventPayload = {

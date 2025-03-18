@@ -30,17 +30,19 @@ export class ThrottledEventsLogger implements EventsLogger {
     }
   }
 
+  flushAsync(): Promise<void> {
+    this.logger.debug('[Honeybadger] Flushing events')
+    return this.send();
+  }
+
   private processQueue() {
     if (this.queue.length === 0 || this.isProcessing) {
       return
     }
 
     this.isProcessing = true
-    const eventsData = this.queue.slice()
-    this.queue = []
 
-    const data = NdJson.stringify(eventsData)
-    this.makeHttpRequest(data)
+    this.send()
       .then(() => {
         setTimeout(() => {
           this.isProcessing = false
@@ -55,6 +57,18 @@ export class ThrottledEventsLogger implements EventsLogger {
           this.processQueue()
         }, 50)
       })
+  }
+
+  private async send(): Promise<void> {
+    if (this.queue.length === 0) {
+      return;
+    }
+
+    const eventsData = this.queue.slice()
+    this.queue = []
+
+    const data = NdJson.stringify(eventsData)
+    return this.makeHttpRequest(data)
   }
 
   private async makeHttpRequest(data: string): Promise<void> {
