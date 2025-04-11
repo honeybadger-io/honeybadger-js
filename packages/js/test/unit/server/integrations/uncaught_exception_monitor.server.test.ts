@@ -19,7 +19,7 @@ describe('UncaughtExceptionMonitor', () => {
   beforeEach(() => {
     // We just need a really basic client, so ignoring type issues here
     client = new TestClient(
-      { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger() }, 
+      { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger() },
       new TestTransport()
     ) as unknown as typeof Singleton
     uncaughtExceptionMonitor = new UncaughtExceptionMonitor()
@@ -83,27 +83,27 @@ describe('UncaughtExceptionMonitor', () => {
     it('does nothing if our listener is not present', () => {
       process.on('uncaughtException', (err) => { console.log(err) })
       expect(getListenerCount()).toBe(1)
-      
+
       uncaughtExceptionMonitor.maybeRemoveListener()
       expect(getListenerCount()).toBe(1)
     })
   })
 
-  describe('__listener', () => {   
-    const error = new Error('dang, broken again')  
+  describe('__listener', () => {
+    const error = new Error('dang, broken again')
 
     it('calls notify, afterUncaught, and fatallyLogAndExit', (done) => {
       uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).toHaveBeenCalledTimes(1)
       expect(notifySpy).toHaveBeenCalledWith(
-        error, 
+        error,
         { afterNotify: expect.any(Function) }
       )
       client.afterNotify(() => {
         expect(client.config.afterUncaught).toHaveBeenCalledWith(error)
-        expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(error)
+        expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(error, 'uncaught exception')
         done()
-      }) 
+      })
     })
 
     it('returns if it is already reporting', () => {
@@ -132,7 +132,7 @@ describe('UncaughtExceptionMonitor', () => {
       uncaughtExceptionMonitor.__handlerAlreadyCalled = true
       uncaughtExceptionMonitor.__listener(error)
       expect(notifySpy).not.toHaveBeenCalled()
-      expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(error)
+      expect(fatallyLogAndExitSpy).toHaveBeenCalledWith(error, 'uncaught exception')
     })
   })
 
@@ -140,7 +140,7 @@ describe('UncaughtExceptionMonitor', () => {
     it('returns true if there are user-added listeners', () => {
       uncaughtExceptionMonitor.maybeAddListener()
       process.on('uncaughtException', function domainUncaughtExceptionClear() {
-        return 
+        return
       })
       process.on('uncaughtException', function userAddedListener() {
         return
@@ -151,7 +151,7 @@ describe('UncaughtExceptionMonitor', () => {
     it('returns false if there are only our expected listeners', () => {
       uncaughtExceptionMonitor.maybeAddListener()
       process.on('uncaughtException', function domainUncaughtExceptionClear() {
-        return 
+        return
       })
       expect(uncaughtExceptionMonitor.hasOtherUncaughtExceptionListeners()).toBe(false)
     })

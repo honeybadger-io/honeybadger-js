@@ -17,13 +17,14 @@ export default class UnhandledRejectionMonitor {
   }
 
   makeListener() {
+    // noinspection UnnecessaryLocalVariableJS
     const honeybadgerUnhandledRejectionListener = (reason: unknown, _promise: Promise<unknown>) => {
       this.__isReporting = true;
       this.__client.notify(reason as Types.Noticeable, { component: 'unhandledRejection' }, {
         afterNotify: () => {
           this.__isReporting = false;
           if (!this.hasOtherUnhandledRejectionListeners()) {
-            fatallyLogAndExit(reason as Error)
+            fatallyLogAndExit(reason as Error, 'unhandled rejection')
           }
         }
       })

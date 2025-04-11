@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/react-native",
-  "version": "6.4.2",
+  "version": "6.4.3",
   "description": "Honeybadger.io for React Native.",
   "author": "Andrey Butov <andreybutov@antair.com> (https://andreybutov.com)",
   "license": "MIT",
@@ -48,6 +48,6 @@
     "node": ">=14"
   },
   "dependencies": {
-    "@honeybadger-io/core": "^6.6.0"
+    "@honeybadger-io/core": "^6.7.0"
   }
 }

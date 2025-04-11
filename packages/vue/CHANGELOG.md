@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.2.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.2.1...@honeybadger-io/vue@6.2.2) (2025-03-18)
+
+
+### Bug Fixes
+
+* **vue:** handle anonymous components ([#1431](https://github.com/honeybadger-io/honeybadger-js/issues/1431)) ([cc5c8dc](https://github.com/honeybadger-io/honeybadger-js/commit/cc5c8dcdc29de680b02e7515020384179c48f8b5))
+
+
+
+
+
+## [6.2.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.2.0...@honeybadger-io/vue@6.2.1) (2025-03-18)
+
+**Note:** Version bump only for package @honeybadger-io/vue
+
+
+
+
+
 # [6.2.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.1.26...@honeybadger-io/vue@6.2.0) (2024-11-16)
 
 

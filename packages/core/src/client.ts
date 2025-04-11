@@ -325,6 +325,14 @@ export abstract class Client {
     })
   }
 
+  /**
+   * This method currently flushes the event (Insights) queue.
+   * In the future, it should also flush the error queue (assuming an error throttler is implemented).
+   */
+  flushAsync(): Promise<void> {
+    return this.__eventsLogger.flushAsync();
+  }
+
   __getBreadcrumbs() {
     return this.__store.getContents('breadcrumbs').slice()
   }
