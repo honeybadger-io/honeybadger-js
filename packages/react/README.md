@@ -40,23 +40,21 @@ your own build environment may be just different enough to require some
 adjustments. If you find that our artifacts don't quite meet your needs,
 please [file an issue on GitHub](https://github.com/honeybadger-io/honeybadger-react/issues).
 
-## Example app
+## Example apps
 
-There's a minimal implementation of a honeybadger-react integration in the ./example
-folder. If you want to contribute a patch to honeybadger-react, it can be useful to have
-the demo app running.
+There are minimal implementations of a honeybadger-react integration in the ./examples
+folder. If you want to contribute a patch to @honeybadger-io/react, it can be useful to have
+the demo apps running.
 
 To run it, issue these commands from your shell:
 
 ```bash
-cd example
+cd examples/react-19
 npm install
 REACT_APP_HONEYBADGER_API_KEY=b425b636 npm run start
 ```
 
-This will serve the demo app with hot reload at localhost:3000
-
-For a detailed explanation on how hot reloading works, check out the [documentation](https://webpack.js.org/concepts/hot-module-replacement/).
+This will start the demo app with hot reload enabled.
 
 ## Development
 
