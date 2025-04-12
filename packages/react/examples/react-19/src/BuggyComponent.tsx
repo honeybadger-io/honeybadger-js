@@ -4,7 +4,7 @@ function BuggyComponent() {
   const [error, setError] = useState(false)
 
   function bug() {
-      setError(true)
+    setError(true)
   }
 
   if (error) {
@@ -12,9 +12,9 @@ function BuggyComponent() {
   }
 
   return (
-      <div>
-        <button onClick={bug}>Click here to trigger an error</button>
-      </div>
+    <div>
+      <button onClick={bug}>Click here to trigger an error</button>
+    </div>
   )
 }
 

@@ -1,6 +1,7 @@
 test/integration/
 packages/nextjs/examples/app-router
 packages/nextjs/examples/pages-router
+packages/js/examples/chrome-extension/vendor/honeybadger.ext.min.js
 dist
 build
 tmp
