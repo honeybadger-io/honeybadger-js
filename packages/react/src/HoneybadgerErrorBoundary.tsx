@@ -30,6 +30,7 @@ export default class HoneybadgerErrorBoundary extends Component<HoneybadgerError
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    this.setState({ error, info: errorInfo })
     this.props.honeybadger.notify(error, { context: errorInfo as never })
   }
 
