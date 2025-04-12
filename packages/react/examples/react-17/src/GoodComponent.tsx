@@ -1,6 +1,6 @@
-import {Component} from "react";
+import { Component } from 'react';
 
-export default class GoodComponent extends Component<{}, {}> {
+export default class GoodComponent extends Component<Record<string, never>, Record<string, never>> {
 
   render () {
     return (

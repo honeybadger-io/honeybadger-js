@@ -7,16 +7,16 @@ import { Honeybadger, HoneybadgerErrorBoundary } from '@honeybadger-io/react'
 import ReactDOM from 'react-dom'
 
 Honeybadger.configure({
-    apiKey: (process.env.REACT_APP_HONEYBADGER_API_KEY || (prompt('Enter the API key for your Honeybadger project:')) as string),
-    environment: 'production'
+  apiKey: (process.env.REACT_APP_HONEYBADGER_API_KEY || (prompt('Enter the API key for your Honeybadger project:')) as string),
+  environment: 'production'
 })
 
 ReactDOM.render(
-    // @ts-expect-error "refs" is missing
-    <HoneybadgerErrorBoundary honeybadger={Honeybadger}>
-        <App />
-    </HoneybadgerErrorBoundary>,
-    document.getElementById('root')
+  // @ts-expect-error "refs" is missing
+  <HoneybadgerErrorBoundary honeybadger={Honeybadger}>
+    <App />
+  </HoneybadgerErrorBoundary>,
+  document.getElementById('root')
 )
 
 // If you want to start measuring performance in your app, pass a function
