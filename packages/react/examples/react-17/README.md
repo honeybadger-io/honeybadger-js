@@ -2,6 +2,17 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Running the app with a local build of `@honeybadger-io/react`
+
+If you are making changes to the @honeybadger-io/react package and want to run the example app with your local version of the package, you can do so by following these steps:
+1. Run `npm run build` in the root of the monorepo. This should build the @honeybadger-io/react package and place the output in the `packages/react/dist` directory.
+2. Create the following folder structure in the example app: node_modules/@honeybadger-io/react and `packages/react/dist` and `packages/react/package.json` into this folder.
+3. This should do it.
+
+The reason you have to go through this is because the `@honeybadger-io/react` package installs React v19 
+as a dev dependency and the example app is using React v17.
+Obviously, this is not a problem when you are using the package from npm, but it is a problem when you are using the package from a local build.
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -39,8 +50,4 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).

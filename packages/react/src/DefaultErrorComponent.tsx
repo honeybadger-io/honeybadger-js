@@ -8,7 +8,7 @@ function DefaultErrorComponent({ error, info }: DefaultErrorComponentProps) {
         An Error Occurred
       </div>
       <div>
-        {JSON.stringify(error, null, 2)}
+        {error ? error.toString() : ''}
       </div>
       <div>
         {info ? JSON.stringify(info, null, 2) : ''}

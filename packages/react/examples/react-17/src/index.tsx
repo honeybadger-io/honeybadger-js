@@ -8,11 +8,13 @@ import ReactDOM from 'react-dom'
 
 Honeybadger.configure({
   apiKey: (process.env.REACT_APP_HONEYBADGER_API_KEY || (prompt('Enter the API key for your Honeybadger project:')) as string),
-  environment: 'production'
+  environment: 'production',
+  reportData: false,
 })
 
+
 ReactDOM.render(
-  // @ts-expect-error "refs" is missing
+  // @ts-expect-error Getting invalid component when react v17 (example app) and v19 (react package) are both installed
   <HoneybadgerErrorBoundary honeybadger={Honeybadger}>
     <App />
   </HoneybadgerErrorBoundary>,

@@ -2,9 +2,10 @@
   "name": "react-17",
   "version": "0.1.0",
   "private": true,
+  "dependencies-comment": "If you want to run this with the local package, follow the instructions in the README.md file.",
   "dependencies": {
-    "@honeybadger-io/js": "file:../../../js",
-    "@honeybadger-io/react": "file:../..",
+    "@honeybadger-io/js": "^6.11.0",
+    "@honeybadger-io/react": "^6.1.26",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",

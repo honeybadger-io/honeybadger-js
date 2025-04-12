@@ -36,7 +36,7 @@ export default class HoneybadgerErrorBoundary extends Component<HoneybadgerError
 
   private getErrorComponent(): ReactNode {
     return this.props.ErrorComponent
-      ? React.createElement(this.props.ErrorComponent as never, this.state)
+      ? React.createElement(this.props.ErrorComponent as never, { ...this.state })
       : <DefaultErrorComponent {...this.state} />
   }
 
