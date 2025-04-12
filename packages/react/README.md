@@ -46,7 +46,7 @@ There are minimal implementations of a honeybadger-react integration in the ./ex
 folder. If you want to contribute a patch to @honeybadger-io/react, it can be useful to have
 the demo apps running.
 
-To run it, issue these commands from your shell:
+To run the example app using React v19, issue these commands from your shell:
 
 ```bash
 cd examples/react-19
