@@ -1,6 +1,6 @@
 'use strict';
 
-const TEST_FILE_REGEX= /\.(spec|test)\.(js|ts|tsx)/
+const TEST_FILE_REGEX= /(spec|test(s?))\.(js|ts|tsx)/
 // we can add more modules here
 const TEST_MODULES_REGEX= /jest/
 

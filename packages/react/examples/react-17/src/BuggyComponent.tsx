@@ -1,8 +1,8 @@
-import {Component} from "react"
+import { Component } from 'react'
 
-export default class BuggyComponent extends Component<{}, { error: boolean }> {
+export default class BuggyComponent extends Component<Record<string, never>, { error: boolean }> {
 
-  constructor(props: {}) {
+  constructor(props: Record<string, never>) {
     super(props);
     this.bug = this.bug.bind(this)
     this.state = {
