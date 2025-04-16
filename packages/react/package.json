@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/react",
-  "version": "6.1.26",
+  "version": "6.1.27",
   "description": "React.js integration for honeybadger",
   "author": "Jason Truesdell <jason@yuzuten.com> (https://github.com/JasonTrue)",
   "license": "MIT",
@@ -29,8 +29,8 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-replace": "^5.0.2",
-    "@testing-library/react": "^16.1.0",
     "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@types/jest": "^29.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.2",

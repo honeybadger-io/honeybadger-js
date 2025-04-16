@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.1.27](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.1.26...@honeybadger-io/react@6.1.27) (2025-04-16)
+
+
+### Performance Improvements
+
+* **react:** react 19 support ([#1423](https://github.com/honeybadger-io/honeybadger-js/issues/1423)) ([dcb4bb2](https://github.com/honeybadger-io/honeybadger-js/commit/dcb4bb2dda34cefe589e91d7c078542b1d8b79a4))
+
+
+
+
+
 ## [6.1.26](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react@6.1.25...@honeybadger-io/react@6.1.26) (2025-03-18)
 
 **Note:** Version bump only for package @honeybadger-io/react
