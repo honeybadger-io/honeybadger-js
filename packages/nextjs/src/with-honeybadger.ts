@@ -6,7 +6,16 @@ function configure() {
     return;
   }
 
-  const projectRoot = process.cwd()
+  let projectRoot: string | undefined = undefined;
+  try {
+    // not available on edge runtime
+    projectRoot = process.cwd();
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    // do nothing
+  }
+
   Honeybadger
     .configure({
       apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
@@ -15,6 +24,10 @@ function configure() {
       projectRoot: 'webpack://_N_E/./'
     })
     .beforeNotify((notice) => {
+      if (!projectRoot) {
+        return
+      }
+
       notice?.backtrace.forEach((line) => {
         if (line.file) {
           line.file = line.file.replace(`${projectRoot}/.next/server`, `${process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL}/..`)
