@@ -1,4 +1,4 @@
-import { Honeybadger } from '@honeybadger-io/react'
+import Honeybadger from '@honeybadger-io/js'
 
 const projectRoot = process.cwd()
 Honeybadger
