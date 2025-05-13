@@ -11,6 +11,9 @@ Honeybadger
     // reportData: true,
   })
   .beforeNotify((notice) => {
+    if (!notice) {
+      return
+    }
     notice.backtrace.forEach((line) => {
       if (line.file) {
         line.file = line.file.replace(`${projectRoot}/.next/server`, `${process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL}/..`)
