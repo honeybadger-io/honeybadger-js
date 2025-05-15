@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.10.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.9.12...@honeybadger-io/nextjs@5.10.0) (2025-05-15)
+
+
+### Features
+
+* **nextjs:** withHoneybadger wrapper for route handlers and middleware ([#1435](https://github.com/honeybadger-io/honeybadger-js/issues/1435)) ([e610760](https://github.com/honeybadger-io/honeybadger-js/commit/e610760ed1fd2b840cddad883bd741d0135b28d0))
+
+
+
+
+
 ## [5.9.12](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.9.11...@honeybadger-io/nextjs@5.9.12) (2025-04-16)
 
 **Note:** Version bump only for package @honeybadger-io/nextjs

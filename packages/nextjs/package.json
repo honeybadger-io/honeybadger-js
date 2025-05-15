@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/nextjs",
-  "version": "5.9.12",
+  "version": "5.10.0",
   "description": "Next.js integration for Honeybadger",
   "keywords": [
     "nextjs",
