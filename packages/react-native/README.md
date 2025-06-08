@@ -63,6 +63,12 @@ As of version 0.70, React Native uses Hermes as the default JavaScript engine. T
 npx honeybadger-upload-sourcemaps --no-hermes --apiKey <your project API key> --revision <build revision>
 ```
 
+If your React Native project uses Expo, include the `--expo` param.
+
+```shell
+npx honeybadger-upload-sourcemaps --apiKey <your project API key> --revision <build revision> --expo
+```
+
 If you just want to generate the source maps without uploading them to Honeybadger, you can use the `--skip-upload` flag.
 
 ```shell

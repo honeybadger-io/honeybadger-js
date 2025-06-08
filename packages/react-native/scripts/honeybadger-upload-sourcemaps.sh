@@ -5,18 +5,21 @@
 # Generate and upload sourcemaps to Honeybadger
 #
 # USAGE:
-# npx honeybadger-upload-sourcemaps [--no-hermes] [--skip-upload] --apiKey <project-api-key> --revision <build-revision>
+# npx honeybadger-upload-sourcemaps [--expo] [--no-hermes] [--skip-upload] --apiKey <project-api-key> --revision <build-revision>
+#
+# For Expo projects, use the --expo flag. For vanilla React Native projects
+# leave that flag out.
 #
 # Hermes is enabled by default in React Native projects as of React Native 0.70.
-# This script assumes that Hermes is being used. If you are not using Hermes in 
+# This script assumes that Hermes is being used. If you are not using Hermes in
 # your React Native project, use the "--no-hermes" flag.
 #
-# If you just need to generate the sourcemaps without uploading them to 
+# If you just need to generate the sourcemaps without uploading them to
 # Honeybadger, use the --skip-upload flag.
 #
 # ----------------------------------------------------------------------------
 
-USAGE="npx honeybadger-upload-sourcemaps [--no-hermes] [--skip-upload] --apiKey <project-api-key> --revision <build-revision>"
+USAGE="npx honeybadger-upload-sourcemaps [--expo] [--no-hermes] [--skip-upload] --apiKey <project-api-key> --revision <build-revision>"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 PROJECT_ROOT_DIR="$SCRIPT_DIR/../.."
@@ -40,9 +43,11 @@ EMPTY_FILE="$PROJECT_ROOT_DIR/empty_file.txt"
 API_KEY=""
 REVISION=""
 USE_HERMES=true
+IS_EXPO_PROJECT=false
 SKIP_UPLOAD=false
 
 OS_BIN=""
+
 
 
 #
@@ -53,6 +58,10 @@ OS_BIN=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+    	--expo)
+    		IS_EXPO_PROJECT=true
+    		shift
+    		;;
         --no-hermes)
             USE_HERMES=false
             shift
@@ -111,7 +120,7 @@ fi
 
 
 #
-# Determine what the operating system is. This is needed to find the path 
+# Determine what the operating system is. This is needed to find the path
 # to the Hermes executable.
 #
 
@@ -136,29 +145,43 @@ if $USE_HERMES; then
 fi
 
 
+ENTRY_FILE="$PROJECT_ROOT_DIR/index.js"
+BUNDLE_COMMAND="react-native bundle"
+
+if $IS_EXPO_PROJECT; then
+    #ENTRY_FILE="$NODE_MODULES/expo/AppEntry.js"
+    ENTRY_FILE="$NODE_MODULES/expo-router/entry.js"
+    BUNDLE_COMMAND="expo export:embed"
+fi
+
+echo "Using entry file: $ENTRY_FILE"
+if [ ! -f "$ENTRY_FILE" ]; then
+    echo "Error: Entry file '$ENTRY_FILE' does not exist."
+    exit 1
+fi
+
 echo "Generating the Android source map ..."
 
-npx react-native bundle \
+npx $BUNDLE_COMMAND \
 	--platform android \
 	--dev false \
-	--entry-file "$PROJECT_ROOT_DIR/index.js" \
+	--entry-file "$ENTRY_FILE" \
 	--reset-cache \
 	--bundle-output "$ANDROID_PACKAGER_BUNDLE" \
 	--sourcemap-output "$ANDROID_PACKAGER_SOURCE_MAP" \
-	--minify false > /dev/null 2>&1
+	--minify false
 
 
 echo "Generating the iOS source map ..."
 
-npx react-native bundle \
+npx $BUNDLE_COMMAND \
 	--platform ios \
 	--dev false \
-	--entry-file index.js \
+	--entry-file "$ENTRY_FILE" \
 	--reset-cache \
 	--bundle-output "$IOS_PACKAGER_BUNDLE" \
 	--sourcemap-output "$IOS_PACKAGER_SOURCE_MAP" \
 	--minify false > /dev/null 2>&1
-
 
 if $USE_HERMES; then
 
@@ -205,7 +228,7 @@ if $USE_HERMES; then
 
 
 	#
-	# For iOS, we're no longer using the hermes output concatenation, 
+	# For iOS, we're no longer using the hermes output concatenation,
 	# even for hermes builds, as it produces incorrect sourcemaps.
 	#
 
@@ -220,7 +243,7 @@ if $USE_HERMES; then
 
 	#
 	# Compile the iOS code to bytecode and generate the Hermes sourcemap.
-	# 
+	#
 
 	# "$HERMES_EXECUTABLE" \
 	# 	-O \
@@ -306,7 +329,7 @@ curl https://api.honeybadger.io/v1/source_maps \
 	-F minified_url="*/main.jsbundle" \
 	-F source_map=@"$IOS_FINAL_SOURCE_MAP" \
 	-F minified_file=@"$EMPTY_FILE" > /dev/null 2>&1
-	
+
 #
 # Cleanup
 #
