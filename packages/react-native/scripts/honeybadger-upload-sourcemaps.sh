@@ -181,7 +181,7 @@ npx $BUNDLE_COMMAND \
 	--reset-cache \
 	--bundle-output "$ANDROID_PACKAGER_BUNDLE" \
 	--sourcemap-output "$ANDROID_PACKAGER_SOURCE_MAP" \
-	--minify false
+	--minify false > /dev/null 2>&1
 
 
 echo "Generating the iOS source map ..."
