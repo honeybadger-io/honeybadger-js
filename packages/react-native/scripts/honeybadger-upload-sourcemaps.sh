@@ -7,8 +7,8 @@
 # USAGE:
 # npx honeybadger-upload-sourcemaps [--expo] [--no-hermes] [--skip-upload] --apiKey <project-api-key> --revision <build-revision>
 #
-# For Expo projects, use the --expo flag. For vanilla React Native projects
-# leave that flag out.
+# For Expo projects, the script will automatically detect Expo by checking for app.json, app.config.js, or expo in package.json.
+# You can still use the --expo flag to explicitly specify Expo, or override auto-detection if needed.
 #
 # Hermes is enabled by default in React Native projects as of React Native 0.70.
 # This script assumes that Hermes is being used. If you are not using Hermes in
@@ -148,10 +148,22 @@ fi
 ENTRY_FILE="$PROJECT_ROOT_DIR/index.js"
 BUNDLE_COMMAND="react-native bundle"
 
+# Auto-detect Expo project if not explicitly set by flag
+if [ -f "$PROJECT_ROOT_DIR/app.json" ] || [ -f "$PROJECT_ROOT_DIR/app.config.js" ] || grep -q '"expo"' "$PROJECT_ROOT_DIR/package.json"; then
+  IS_EXPO_PROJECT=true
+  echo "Expo project detected automatically."
+fi
+
 if $IS_EXPO_PROJECT; then
-    #ENTRY_FILE="$NODE_MODULES/expo/AppEntry.js"
+  if [ -f "$NODE_MODULES/expo-router/entry.js" ]; then
     ENTRY_FILE="$NODE_MODULES/expo-router/entry.js"
-    BUNDLE_COMMAND="expo export:embed"
+  elif [ -f "$NODE_MODULES/expo/AppEntry.js" ]; then
+    ENTRY_FILE="$NODE_MODULES/expo/AppEntry.js"
+  else
+    echo "Error: Could not find Expo entry file (expo-router/entry.js or expo/AppEntry.js)."
+    exit 1
+  fi
+  BUNDLE_COMMAND="expo export:embed"
 fi
 
 echo "Using entry file: $ENTRY_FILE"
