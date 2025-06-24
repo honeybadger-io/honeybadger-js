@@ -143,6 +143,8 @@ Then run `npm install` within the example project.
 
 If you notice that your changes are not being picked up, there may be a caching issue. You can bust this by renaming the tarball to a unique name and re-installing it. 
 
+Additionall, if you are testing source maps and source map generation, you should probably run the react-native apps in release / production mode.
+
 ## License
 
 The Honeybadger React Native library is MIT-licensed. See the [MIT-LICENSE](./MIT-LICENSE) file in this folder for details.
