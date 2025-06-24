@@ -63,6 +63,12 @@ As of version 0.70, React Native uses Hermes as the default JavaScript engine. T
 npx honeybadger-upload-sourcemaps --no-hermes --apiKey <your project API key> --revision <build revision>
 ```
 
+If your React Native project uses Expo, include the `--expo` param.
+
+```shell
+npx honeybadger-upload-sourcemaps --apiKey <your project API key> --revision <build revision> --expo
+```
+
 If you just want to generate the source maps without uploading them to Honeybadger, you can use the `--skip-upload` flag.
 
 ```shell
@@ -136,6 +142,8 @@ This will generate a tarball. Install it in an example project by updating `pack
 Then run `npm install` within the example project. 
 
 If you notice that your changes are not being picked up, there may be a caching issue. You can bust this by renaming the tarball to a unique name and re-installing it. 
+
+Additionally, if you are testing source maps and source map generation, you should probably run the react-native apps in release / production mode.
 
 ## License
 
