@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.4.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.4.3...@honeybadger-io/react-native@6.4.4) (2025-06-24)
+
+
+### Bug Fixes
+
+* generate sourcemaps for expo projects ([#1439](https://github.com/honeybadger-io/honeybadger-js/issues/1439)) ([bd5edef](https://github.com/honeybadger-io/honeybadger-js/commit/bd5edef69f3424018a145dd7d532ee826c3218ad))
+
+
+
+
+
 ## [6.4.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.4.2...@honeybadger-io/react-native@6.4.3) (2025-03-18)
 
 **Note:** Version bump only for package @honeybadger-io/react-native
