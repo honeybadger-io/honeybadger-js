@@ -151,8 +151,9 @@ export async function getSourceForBacktrace(backtrace: BacktraceFrame[],
   while (backtrace.length) {
     const trace = backtrace.splice(0)[index]
 
-    const fileContent = await getSourceFileHandler(trace.file)
-    result[index] = getSourceCodeSnippet(fileContent, trace.number)
+    const fileContent = await getSourceFileHandler(trace.file)  
+    result[index] = getSourceCodeSnippet(fileContent, trace.number, trace.column, 2)
+    
     index++
   }
   return result
@@ -542,13 +543,39 @@ export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj))
 }
 
-function getSourceCodeSnippet(fileData: string, lineNumber: number, sourceRadius = 2): Record<string, string> {
+const THRESHOLD_COLUMN_NUMBER = 10000
+const THRESHOLD_LINE_LENGTH = 10000
+const THRESHOLD_FILE_SIZE = 200000 // 200KB threshold
+
+function getThresholdExceededSnippet(lineNumber: number) {
+  return { [lineNumber]: 'SOURCE_SIZE_TOO_LARGE' }
+}
+
+function getSourceCodeSnippet(fileData: string, lineNumber: number, columnNumber: number, sourceRadius = 2): Record<string, string> | null {
   if (!fileData) {
     return null
   }
+
+  // If column number is provided and very high, it's likely a bundled/minified file
+  if (columnNumber && columnNumber > THRESHOLD_COLUMN_NUMBER) {
+    return getThresholdExceededSnippet(lineNumber)
+  }
+
+  // If file is very large, it's likely bundled
+  if (fileData.length > THRESHOLD_FILE_SIZE) {
+    return getThresholdExceededSnippet(lineNumber)
+  }
+
   const lines = fileData.split('\n')
   // add one empty line because array index starts from 0, but error line number is counted from 1
   lines.unshift('')
+  
+  // Check if the target line is extremely long
+  const targetLine = lines[lineNumber]
+  if (targetLine && targetLine.length > THRESHOLD_LINE_LENGTH) {
+    return getThresholdExceededSnippet(lineNumber)
+  }
+
   const start = lineNumber - sourceRadius
   const end = lineNumber + sourceRadius
   const result = {}

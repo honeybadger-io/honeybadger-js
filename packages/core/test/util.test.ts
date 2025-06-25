@@ -10,7 +10,8 @@ import {
   logger,
   filter,
   filterUrl,
-  logDeprecatedMethod
+  logDeprecatedMethod,
+  getSourceForBacktrace
 } from '../src/util'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 
@@ -347,5 +348,107 @@ describe('utils', function () {
       logDeprecatedMethod(console, 'deprecatedMethod3', 'newMethod3', 3);
       expect(warnSpy).toHaveBeenCalledTimes(2)
     })
+  })
+
+  describe('getSourceForBacktrace minified/bundled detection', function () {
+    it('excludes files with high column numbers (bundled/minified)', async function () {
+      const mockGetSourceFile = async (path: string): Promise<string> => {
+        return 'normal source code content'
+      }
+
+      const backtrace = [{
+        file: '/path/to/bundled.js',
+        method: 'someFunction',
+        number: 1,
+        column: 141907
+      }]
+
+      const result = await getSourceForBacktrace(backtrace, mockGetSourceFile)
+      expect(result[0]['1']).toBe('SOURCE_SIZE_TOO_LARGE')
+    })
+
+    it('includes normal source files with reasonable column numbers', async function () {
+      const mockGetSourceFile = async (path: string): Promise<string> => {
+        const normalSource = [
+          'function example() {',
+          '  const someVariable = "this is a normal line"',
+          '  return someVariable',
+          '}',
+          '// This is a comment',
+          'console.log("test")'
+        ].join('\n')
+        return normalSource
+      }
+
+      const backtrace = [{
+        file: '/path/to/normal.js',
+        method: 'example',
+        number: 2,
+        column: 10
+      }]
+
+      const result = await getSourceForBacktrace(backtrace, mockGetSourceFile)
+      expect(result[0]).not.toBeNull()
+      expect(result[0]['1']).toBe('function example() {')
+      expect(result[0]['2']).toBe('  const someVariable = "this is a normal line"')
+      expect(result[0]['3']).toBe('  return someVariable')
+    })
+
+    it('handles empty or null file content gracefully', async function () {
+      const mockGetSourceFile = async (path: string): Promise<string> => {
+        return null
+      }
+
+      const backtrace = [{
+        file: '/path/to/missing.js',
+        method: 'someFunction',
+        number: 1,
+        column: 1
+      }]
+
+      const result = await getSourceForBacktrace(backtrace, mockGetSourceFile)
+      expect(result[0]).toBeNull()
+    })
+
+    it('detects large bundled files and excludes them', async function () {
+      const mockGetSourceFile = async (path: string): Promise<string> => {
+        const largeContent = 'console.log("test");\n'.repeat(50000)
+        return largeContent
+      }
+
+      const backtrace = [{
+        file: '/path/to/large-bundle.js',
+        method: 'someFunction',
+        number: 1000,
+        column: 10
+      }]
+
+      const result = await getSourceForBacktrace(backtrace, mockGetSourceFile)
+      expect(result[0]['1000']).toBe('SOURCE_SIZE_TOO_LARGE')
+    })
+
+    it('detects files with very long lines and excludes them', async function () {
+      const mockGetSourceFile = async (path: string): Promise<string> => {
+        const longLine = 'a'.repeat(10100)
+        const content = [
+          'function test() {',
+          `  const x = "${longLine}"`,
+          '  return x',
+          '}'
+        ].join('\n')
+        return content
+      }
+
+      const backtrace = [{
+        file: '/path/to/long-line.js',
+        method: 'test',
+        number: 2,
+        column: 10
+      }]
+
+      const result = await getSourceForBacktrace(backtrace, mockGetSourceFile)
+      expect(result[0]['2']).toBe('SOURCE_SIZE_TOO_LARGE')
+    })
+
   })
 })
