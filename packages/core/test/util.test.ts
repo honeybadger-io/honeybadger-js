@@ -352,7 +352,7 @@ describe('utils', function () {
 
   describe('getSourceForBacktrace minified/bundled detection', function () {
     it('excludes files with high column numbers (bundled/minified)', async function () {
-      const mockGetSourceFile = async (path: string): Promise<string> => {
+      const mockGetSourceFile = async (_path: string): Promise<string> => {
         return 'normal source code content'
       }
 
@@ -368,7 +368,7 @@ describe('utils', function () {
     })
 
     it('includes normal source files with reasonable column numbers', async function () {
-      const mockGetSourceFile = async (path: string): Promise<string> => {
+      const mockGetSourceFile = async (_path: string): Promise<string> => {
         const normalSource = [
           'function example() {',
           '  const someVariable = "this is a normal line"',
@@ -395,7 +395,7 @@ describe('utils', function () {
     })
 
     it('handles empty or null file content gracefully', async function () {
-      const mockGetSourceFile = async (path: string): Promise<string> => {
+      const mockGetSourceFile = async (_path: string): Promise<string> => {
         return null
       }
 
@@ -411,7 +411,7 @@ describe('utils', function () {
     })
 
     it('detects large bundled files and excludes them', async function () {
-      const mockGetSourceFile = async (path: string): Promise<string> => {
+      const mockGetSourceFile = async (_path: string): Promise<string> => {
         const largeContent = 'console.log("test");\n'.repeat(50000)
         return largeContent
       }
@@ -428,7 +428,7 @@ describe('utils', function () {
     })
 
     it('detects files with very long lines and excludes them', async function () {
-      const mockGetSourceFile = async (path: string): Promise<string> => {
+      const mockGetSourceFile = async (_path: string): Promise<string> => {
         const longLine = 'a'.repeat(10100)
         const content = [
           'function test() {',
