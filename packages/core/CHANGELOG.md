@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.7.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.7.0...@honeybadger-io/core@6.7.1) (2025-06-30)
+
+
+### Bug Fixes
+
+* exclude large source code from backtrace ([#1440](https://github.com/honeybadger-io/honeybadger-js/issues/1440)) ([51d2219](https://github.com/honeybadger-io/honeybadger-js/commit/51d2219a8bd8cc0aef917eba515a6f81f43ea364))
+
+
+
+
+
 # [6.7.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.6.0...@honeybadger-io/core@6.7.0) (2025-03-18)
 
 
