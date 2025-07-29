@@ -13,11 +13,17 @@ class HoneybadgerSourceMapPlugin {
 
   private static idSeed = 0
 
-  private readonly options: Types.HbPluginOptions
+  private readonly options: Types.HbPluginOptions & { overwriteOutputPath: string }
 
-  constructor(options: Types.HbPluginUserOptions) {
-    this.options = cleanOptions(options)
+  /**
+   *
+   * @param options These options will be passed to the plugin-core utility functions
+   * @param overwriteOutputPath Set this to overwrite the path to write the generated files
+   */
+  constructor(options: Types.HbPluginUserOptions, overwriteOutputPath: string = null) {
+    this.options = { ...cleanOptions(options), overwriteOutputPath }
   }
+
   setup() {
     const self = this;
 
@@ -59,13 +65,17 @@ class HoneybadgerSourceMapPlugin {
     const writeFileTasks: Promise<void>[] = []
 
     for (const file of outputFiles) {
-      createFolderTasks.push(mkdir(dirname(file.path), { recursive: true }))
+      const folderPath = this.options.overwriteOutputPath ?? dirname(file.path)
+      createFolderTasks.push(mkdir(folderPath, { recursive: true }))
     }
 
     await Promise.all(createFolderTasks)
 
     for (const file of outputFiles) {
-      writeFileTasks.push(writeFile(file.path, file.contents))
+      const filePath = this.options.overwriteOutputPath != null
+        ? join(this.options.overwriteOutputPath, basename(file.path))
+        : file.path
+      writeFileTasks.push(writeFile(filePath, file.contents))
     }
 
     await Promise.all(writeFileTasks)
@@ -79,14 +89,14 @@ class HoneybadgerSourceMapPlugin {
       }
 
       const sourcemapFilename = basename(file.path)
-      const sourcemapFilePath = dirname(file.path)
+      const sourcemapFolderPath = this.options.overwriteOutputPath ?? dirname(file.path)
       const jsFilename = sourcemapFilename.replace('.map', '')
 
       const sourceMapInfo = {
         sourcemapFilename,
-        sourcemapFilePath: join(sourcemapFilePath, sourcemapFilename),
+        sourcemapFilePath: join(sourcemapFolderPath, sourcemapFilename),
         jsFilename,
-        jsFilePath: join(sourcemapFilePath, jsFilename)
+        jsFilePath: join(sourcemapFolderPath, jsFilename)
       }
 
       assets.push(sourceMapInfo)
@@ -132,6 +142,6 @@ class HoneybadgerSourceMapPlugin {
   }
 }
 
-export function honeybadgerSourceMapPlugin(options: Types.HbPluginUserOptions) {
-  return new HoneybadgerSourceMapPlugin(options).setup()
+export function honeybadgerSourceMapPlugin(options: Types.HbPluginUserOptions, outputPath: string = null) {
+  return new HoneybadgerSourceMapPlugin(options, outputPath).setup()
 }
