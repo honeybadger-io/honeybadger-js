@@ -2,6 +2,7 @@ import { join } from 'path'
 import { honeybadgerSourceMapPlugin } from './index'
 import { Types, sendDeployNotification, uploadSourcemaps } from '@honeybadger-io/plugin-core';
 import { build } from 'esbuild';
+import { promises as fs } from 'fs';
 
 jest.mock('@honeybadger-io/plugin-core', () => {
   return {
@@ -11,8 +12,17 @@ jest.mock('@honeybadger-io/plugin-core', () => {
   }
 })
 
-function runEsbuild(options: Types.HbPluginUserOptions) {
-  const plugin = honeybadgerSourceMapPlugin(options)
+jest.mock('fs', () => {
+  return {
+    promises: {
+      writeFile: jest.fn(),
+      mkdir: jest.fn(),
+    }
+  }
+})
+
+function runEsbuild(options: Types.HbPluginUserOptions, outputPath?: string) {
+  const plugin = honeybadgerSourceMapPlugin(options, outputPath)
 
   return build({
     entryPoints: [join(__dirname, 'testFixtures/index.js')],
@@ -99,5 +109,21 @@ describe('index', function () {
 
     expect(uploadSourcemaps).not.toHaveBeenCalled()
     expect(sendDeployNotification).not.toHaveBeenCalled()
+  })
+
+  it('should write files to overwriteOutputPath when provided', async function () {
+    process.env.NODE_ENV = 'production'
+    const customOutputPath = '/custom/output/path'
+
+    await runEsbuild(options, customOutputPath)
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(customOutputPath, 'out.js'),
+      expect.any(Uint8Array)
+    )
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(customOutputPath, 'out.js.map'),
+      expect.any(Uint8Array)
+    )
   })
 })
