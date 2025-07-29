@@ -13,14 +13,14 @@ class HoneybadgerSourceMapPlugin {
 
   private static idSeed = 0
 
-  private readonly options: Types.HbPluginOptions & { overwriteOutputPath: string }
+  private readonly options: Types.HbPluginOptions & { overwriteOutputPath: string | undefined }
 
   /**
    *
    * @param options These options will be passed to the plugin-core utility functions
    * @param overwriteOutputPath Set this to overwrite the path to write the generated files
    */
-  constructor(options: Types.HbPluginUserOptions, overwriteOutputPath: string = null) {
+  constructor(options: Types.HbPluginUserOptions, overwriteOutputPath?: string) {
     this.options = { ...cleanOptions(options), overwriteOutputPath }
   }
 
@@ -72,7 +72,7 @@ class HoneybadgerSourceMapPlugin {
     await Promise.all(createFolderTasks)
 
     for (const file of outputFiles) {
-      const filePath = this.options.overwriteOutputPath != null
+      const filePath = this.options.overwriteOutputPath
         ? join(this.options.overwriteOutputPath, basename(file.path))
         : file.path
       writeFileTasks.push(writeFile(filePath, file.contents))
@@ -142,6 +142,6 @@ class HoneybadgerSourceMapPlugin {
   }
 }
 
-export function honeybadgerSourceMapPlugin(options: Types.HbPluginUserOptions, outputPath: string = null) {
-  return new HoneybadgerSourceMapPlugin(options, outputPath).setup()
+export function honeybadgerSourceMapPlugin(options: Types.HbPluginUserOptions, overwriteOutputPath?: string) {
+  return new HoneybadgerSourceMapPlugin(options, overwriteOutputPath).setup()
 }
