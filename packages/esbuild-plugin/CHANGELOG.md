@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/esbuild-plugin@1.2.3...@honeybadger-io/esbuild-plugin@1.3.0) (2025-07-29)
+
+
+### Features
+
+* **esbuild-plugin:** add support for custom output path ([#1446](https://github.com/honeybadger-io/honeybadger-js/issues/1446)) ([4971fb3](https://github.com/honeybadger-io/honeybadger-js/commit/4971fb386dca1fdd401c345829f5565f6a314a4e))
+
+
+
+
+
 ## [1.2.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/esbuild-plugin@1.2.2...@honeybadger-io/esbuild-plugin@1.2.3) (2025-06-30)
 
 **Note:** Version bump only for package @honeybadger-io/esbuild-plugin
