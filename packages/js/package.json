@@ -54,7 +54,7 @@
   "dependencies": {
     "@honeybadger-io/core": "^6.7.1",
     "@types/aws-lambda": "^8.10.89",
-    "@types/express": "^4.17.13"
+    "@types/express": "^5.0.3"
   },
   "devDependencies": {
     "@playwright/test": "1.51.0",
@@ -64,7 +64,7 @@
     "@types/jest": "^27.0.3",
     "@types/node": "^17.0.45",
     "browserstack-local": "^1.5.5",
-    "express": "^4.17.1",
+    "express": "^5.1.0",
     "jest": "^27.4.4",
     "jest-fetch-mock": "^3.0.3",
     "nock": "^13.2.1",
