@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.11.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.11.1...@honeybadger-io/js@6.11.2) (2025-08-11)
+
+
+### Performance Improvements
+
+* **js:** update express types ([#1448](https://github.com/honeybadger-io/honeybadger-js/issues/1448)) ([718fea2](https://github.com/honeybadger-io/honeybadger-js/commit/718fea245e0ac8f354af96bb82ebba75e14fc502))
+
+
+
+
+
 ## [6.11.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.11.0...@honeybadger-io/js@6.11.1) (2025-06-30)
 
 **Note:** Version bump only for package @honeybadger-io/js
