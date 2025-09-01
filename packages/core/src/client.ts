@@ -456,6 +456,8 @@ export abstract class Client {
       notice.__breadcrumbs = []
     }
 
+    const endpointUrl = endpoint(this.config.endpoint, '/v1/notices/js')
+
     return getSourceForBacktrace(originalBacktrace, this.__getSourceFileHandler)
       .then(async (sourcePerTrace) => {
         sourcePerTrace.forEach((source, index) => {
@@ -471,7 +473,7 @@ export abstract class Client {
               'Accept': 'text/json, application/json'
             },
             method: 'POST',
-            endpoint: endpoint(this.config.endpoint, '/v1/notices/js'),
+            endpoint: endpointUrl,
             maxObjectDepth: this.config.maxObjectDepth,
             logger: this.logger,
           }, payload)
@@ -487,7 +489,7 @@ export abstract class Client {
         runAfterNotifyHandlers(merge(notice, {
           id: uuid
         }), this.__afterNotifyHandlers)
-        this.logger.info(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
+        this.logger.info(`Error report sent to ⚡ ${endpointUrl}`)
 
         return true
       })
