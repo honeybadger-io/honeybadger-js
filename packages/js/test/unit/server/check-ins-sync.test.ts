@@ -12,14 +12,23 @@ describe('check-ins-sync', () => {
     await expect(syncCheckIns()).rejects.toThrow('Could not find a Honeybadger configuration file.')
   })
 
-  it('should throw an error if api key is not set', async () => {
+  it('should throw an error if app endpoint is not set', async () => {
     jest.doMock('../../../honeybadger.config.js', () => ({}), { virtual: true })
+
+    await expect(syncCheckIns()).rejects.toThrow('appEndpoint is required')
+  })
+
+  it('should throw an error if api key is not set', async () => {
+    jest.doMock('../../../honeybadger.config.js', () => ({
+      appEndpoint: 'https://app.honeybadger.io',
+    }), { virtual: true })
 
     await expect(syncCheckIns()).rejects.toThrow('apiKey is required')
   })
 
   it('should throw an error if personal auth token is not set', async () => {
     jest.doMock('../../../honeybadger.config.js', () => ({
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
     }), { virtual: true })
 
@@ -28,6 +37,7 @@ describe('check-ins-sync', () => {
 
   it('should sync checkIns', async () => {
     const checkInsConfig: Partial<CheckInsConfig> = {
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
       checkins: [

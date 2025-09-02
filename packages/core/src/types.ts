@@ -22,7 +22,8 @@ export type EventPayload = {
 export interface Config {
   apiKey?: string,
   endpoint: string,
-  developmentEnvironments: string[],
+  appEndpoint: string
+  developmentEnvironments: string[]
   environment?: string
   hostname?: string
   projectRoot?: string

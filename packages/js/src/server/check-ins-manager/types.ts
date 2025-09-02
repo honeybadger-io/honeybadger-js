@@ -51,6 +51,7 @@ export type CheckInsConfig = {
     debug?: boolean
     logger?: Types.Logger
     apiKey: string
+    appEndpoint: string
     personalAuthToken: string
     checkins: CheckInDto[]
 }
