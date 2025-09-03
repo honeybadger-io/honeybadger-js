@@ -10,7 +10,6 @@ import { lambdaHandler } from './server/aws_lambda'
 import { ServerTransport } from './server/transport'
 import { StackedStore } from './server/stacked_store'
 import { CheckInsConfig } from './server/check-ins-manager/types'
-import { CheckInsClient } from './server/check-ins-manager/client';
 
 const { endpoint } = Util
 const DEFAULT_PLUGINS = [
@@ -23,8 +22,6 @@ const DEFAULT_PLUGINS = [
 type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckInsConfig
 
 class Honeybadger extends Client {
-
-  private __checkInsClient: CheckInsClient
 
   /** @internal */
   protected __beforeNotifyHandlers: Types.BeforeNotifyHandler[] = [
@@ -62,7 +59,6 @@ class Honeybadger extends Client {
     config.reportTimeoutWarning = config.reportTimeoutWarning ?? true
     config.timeoutWarningThresholdMs = config.timeoutWarningThresholdMs || 50
 
-    this.__checkInsClient = new CheckInsClient(this.config, transport)
     this.__getSourceFileHandler = getSourceFile.bind(this)
     this.errorHandler = errorHandler.bind(this)
     this.requestHandler = requestHandler.bind(this)
