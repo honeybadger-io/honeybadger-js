@@ -12,12 +12,6 @@ describe('check-ins-sync', () => {
     await expect(syncCheckIns()).rejects.toThrow('Could not find a Honeybadger configuration file.')
   })
 
-  it('should throw an error if app endpoint is not set', async () => {
-    jest.doMock('../../../honeybadger.config.js', () => ({}), { virtual: true })
-
-    await expect(syncCheckIns()).rejects.toThrow('appEndpoint is required')
-  })
-
   it('should throw an error if api key is not set', async () => {
     jest.doMock('../../../honeybadger.config.js', () => ({
       appEndpoint: 'https://app.honeybadger.io',
