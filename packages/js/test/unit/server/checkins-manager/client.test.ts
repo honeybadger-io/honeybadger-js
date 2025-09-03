@@ -8,6 +8,7 @@ describe('CheckinsClient', () => {
   it('should create a client', () => {
     const client = new CheckInsClient({
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
@@ -26,6 +27,7 @@ describe('CheckinsClient', () => {
 
     const client = new CheckInsClient({
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
@@ -50,6 +52,7 @@ describe('CheckinsClient', () => {
       })
     const client = new CheckInsClient({
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
@@ -77,6 +80,7 @@ describe('CheckinsClient', () => {
       })
     const client = new CheckInsClient({
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
@@ -108,6 +112,7 @@ describe('CheckinsClient', () => {
       })
     const client = new CheckInsClient({
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
@@ -140,6 +145,7 @@ describe('CheckinsClient', () => {
       })
     const client = new CheckInsClient({
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())
@@ -169,6 +175,7 @@ describe('CheckinsClient', () => {
 
     const client = new CheckInsClient({
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
     }, new ServerTransport())

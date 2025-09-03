@@ -1,14 +1,13 @@
-import { Types } from '@honeybadger-io/core'
+import { Types, Util } from '@honeybadger-io/core'
 import { CheckIn } from './check-in'
 import { CheckInResponsePayload, CheckInsConfig } from './types';
 
 export class CheckInsClient {
-  private readonly BASE_URL = 'https://app.honeybadger.io'
-  private readonly config: Pick<CheckInsConfig, 'apiKey' | 'personalAuthToken' | 'logger'>
+  private readonly config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger'>
   private readonly logger: Types.Logger
   private readonly transport: Types.Transport
 
-  constructor(config: Pick<CheckInsConfig, 'apiKey' | 'personalAuthToken' | 'logger'>, transport: Types.Transport) {
+  constructor(config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger'>, transport: Types.Transport) {
     this.transport = transport
     this.config = config
     this.logger = config.logger
@@ -22,7 +21,7 @@ export class CheckInsClient {
     const response = await this.transport.send({
       method: 'GET',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/project_keys/${projectApiKey}`,
+      endpoint: Util.endpoint(this.config.appEndpoint, `v2/project_keys/${projectApiKey}`),
       logger: this.logger,
     })
 
@@ -43,7 +42,7 @@ export class CheckInsClient {
     const response = await this.transport.send({
       method: 'GET',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins`,
+      endpoint: Util.endpoint(this.config.appEndpoint, `v2/projects/${projectId}/check_ins`),
       logger: this.logger,
     })
 
@@ -64,7 +63,7 @@ export class CheckInsClient {
     const response = await this.transport.send({
       method: 'GET',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins/${checkInId}`,
+      endpoint: Util.endpoint(this.config.appEndpoint, `v2/projects/${projectId}/check_ins/${checkInId}`),
       logger: this.logger,
     })
 
@@ -84,7 +83,7 @@ export class CheckInsClient {
     const response = await this.transport.send({
       method: 'POST',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins`,
+      endpoint: Util.endpoint(this.config.appEndpoint, `v2/projects/${projectId}/check_ins`),
       logger: this.logger,
     }, { check_in: checkIn.asRequestPayload() })
 
@@ -105,7 +104,7 @@ export class CheckInsClient {
     const response = await this.transport.send({
       method: 'PUT',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins/${checkIn.id}`,
+      endpoint: Util.endpoint(this.config.appEndpoint, `v2/projects/${projectId}/check_ins/${checkIn.id}`),
       logger: this.logger,
     }, { check_in: checkIn.asRequestPayload() })
 
@@ -124,7 +123,7 @@ export class CheckInsClient {
     const response = await this.transport.send({
       method: 'DELETE',
       headers: this.getHeaders(),
-      endpoint: `${this.BASE_URL}/v2/projects/${projectId}/check_ins/${checkIn.id}`,
+      endpoint: Util.endpoint(this.config.appEndpoint, `v2/projects/${projectId}/check_ins/${checkIn.id}`),
       logger: this.logger,
     })
 

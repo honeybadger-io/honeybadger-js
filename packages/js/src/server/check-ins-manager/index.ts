@@ -1,4 +1,4 @@
-import { Util, Types } from '@honeybadger-io/core'
+import { Util, Types, Defaults } from '@honeybadger-io/core'
 import { CheckInsClient } from './client'
 import { CheckInsConfig } from './types'
 import { ServerTransport } from '../transport';
@@ -13,6 +13,7 @@ export class CheckInsManager {
 
   constructor(config: Partial<CheckInsConfig>, client?: CheckInsClient) {
     this.config = {
+      appEndpoint: config.appEndpoint ?? Defaults.CONFIG.appEndpoint,
       debug: config.debug ?? false,
       apiKey: config.apiKey ?? undefined,
       personalAuthToken: config.personalAuthToken ?? undefined,
@@ -22,6 +23,7 @@ export class CheckInsManager {
     const transport = new ServerTransport()
     this.logger = Util.logger(this)
     this.client = client ?? new CheckInsClient({
+      appEndpoint: config.appEndpoint,
       apiKey: config.apiKey,
       personalAuthToken: config.personalAuthToken,
       logger: this.logger
@@ -29,6 +31,11 @@ export class CheckInsManager {
   }
 
   public async sync(): Promise<CheckIn[]> {
+    // check if app endpoint is set
+    if (!this.config.appEndpoint || this.config.appEndpoint === '') {
+      throw new Error('appEndpoint is required')
+    }
+
     // check if api key is set
     if (!this.config.apiKey || this.config.apiKey === '') {
       throw new Error('apiKey is required')

@@ -487,7 +487,8 @@ export abstract class Client {
         runAfterNotifyHandlers(merge(notice, {
           id: uuid
         }), this.__afterNotifyHandlers)
-        this.logger.info(`Error report sent ⚡ https://app.honeybadger.io/notice/${uuid}`)
+        const noticeUrl = endpoint(this.config.appEndpoint, `notice/${uuid}`)
+        this.logger.info(`Error report sent ⚡ ${noticeUrl}`)
 
         return true
       })

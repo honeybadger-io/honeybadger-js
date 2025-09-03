@@ -1,6 +1,7 @@
 export const CONFIG = {
   apiKey: null,
   endpoint: 'https://api.honeybadger.io',
+  appEndpoint: 'https://app.honeybadger.io',
   environment: null,
   hostname: null,
   projectRoot: null,

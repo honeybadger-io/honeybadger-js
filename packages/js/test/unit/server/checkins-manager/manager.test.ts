@@ -8,6 +8,7 @@ describe('CheckinsManager', () => {
   it('should create a check-ins manager', () => {
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_abc',
       personalAuthToken: 'abc',
       checkins: []
@@ -16,9 +17,22 @@ describe('CheckinsManager', () => {
     expect(manager).toBeInstanceOf(CheckInsManager)
   })
 
+  it('should throw if app endpoint is not set', () => {
+    const config: CheckInsConfig = {
+      logger: nullLogger(),
+      appEndpoint: '',
+      apiKey: '',
+      personalAuthToken: '',
+      checkins: []
+    }
+    const manager = new CheckInsManager(config)
+    expect(manager.sync()).rejects.toThrow('appEndpoint is required')
+  })
+
   it('should throw if api key is not set', () => {
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: '',
       personalAuthToken: '',
       checkins: []
@@ -30,6 +44,7 @@ describe('CheckinsManager', () => {
   it('should throw if personal auth token is not set', () => {
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '',
       checkins: []
@@ -41,6 +56,7 @@ describe('CheckinsManager', () => {
   it('should throw if a check-in configuration is invalid', () => {
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_abc',
       personalAuthToken: 'abc',
       checkins: [
@@ -58,6 +74,7 @@ describe('CheckinsManager', () => {
   it('should throw if check-in slugs are not unique', () => {
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_abc',
       personalAuthToken: 'abc',
       checkins: [
@@ -79,12 +96,70 @@ describe('CheckinsManager', () => {
     expect(manager.sync()).rejects.toThrow('check-in slugs must be unique')
   })
 
+  it('should call the configured app endpoint', async () => {
+    const projectId = '11111'
+    const simpleCheckInId = '22222'
+    const config: CheckInsConfig = {
+      logger: nullLogger(),
+      appEndpoint: 'https://some.other.app/',
+      apiKey: 'hbp_abc',
+      personalAuthToken: 'abc',
+      checkins: [
+        {
+          slug: 'a-check-in',
+          scheduleType: 'simple',
+          reportPeriod: '1 week',
+          gracePeriod: '5 minutes'
+        }
+      ]
+    }
+
+    const getProjectIdRequest = nock('https://some.other.app')
+      .get(`/v2/project_keys/${config.apiKey}`)
+      .once()
+      .reply(200, {
+        id: config.apiKey,
+        project: {
+          id: projectId,
+          name: 'Test',
+        }
+      })
+
+    const listProjectCheckInsRequest = nock('https://some.other.app')
+      .get(`/v2/projects/${projectId}/check_ins`)
+      .once()
+      .reply(200, {
+        results: []
+      })
+
+    const simpleCheckInPayload = new CheckIn(config.checkins[0]).asRequestPayload()
+    const createSimpleCheckInRequest = nock('https://some.other.app')
+      .post(`/v2/projects/${projectId}/check_ins`, {
+        check_in: simpleCheckInPayload
+      })
+      .once()
+      .reply(201, {
+        id: simpleCheckInId,
+        ...simpleCheckInPayload
+      })
+
+    const manager = new CheckInsManager(config)
+    const synchronizedCheckIns = await manager.sync()
+    expect(getProjectIdRequest.isDone()).toBe(true)
+    expect(listProjectCheckInsRequest.isDone()).toBe(true)
+    expect(createSimpleCheckInRequest.isDone()).toBe(true)
+    expect(synchronizedCheckIns).toHaveLength(1)
+    expect(synchronizedCheckIns[0]).toMatchObject(config.checkins[0])
+    expect(synchronizedCheckIns[0].id).toEqual(simpleCheckInId)
+  })
+
   it('should create check-ins from config', async () => {
     const projectId = '11111'
     const simpleCheckInId = '22222'
     const cronCheckInId = '33333'
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_abc',
       personalAuthToken: 'abc',
       checkins: [
@@ -162,6 +237,7 @@ describe('CheckinsManager', () => {
     const cronCheckInId = '33333'
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_abc',
       personalAuthToken: 'abc',
       checkins: [
@@ -253,6 +329,7 @@ describe('CheckinsManager', () => {
     const simpleCheckInId = '22222'
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_abc',
       personalAuthToken: 'abc',
       checkins: [
@@ -307,6 +384,7 @@ describe('CheckinsManager', () => {
     const checkInIdToRemove = '33333'
     const config: CheckInsConfig = {
       logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_abc',
       personalAuthToken: 'abc',
       checkins: [
