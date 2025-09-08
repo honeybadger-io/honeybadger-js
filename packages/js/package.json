@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/js",
-  "version": "6.11.2",
+  "version": "6.11.3",
   "license": "MIT",
   "homepage": "https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/js",
   "author": {
@@ -52,7 +52,7 @@
     "postpublish": "./scripts/release-cdn.sh"
   },
   "dependencies": {
-    "@honeybadger-io/core": "^6.7.1",
+    "@honeybadger-io/core": "^6.7.2",
     "@types/aws-lambda": "^8.10.89",
     "@types/express": "^5.0.3"
   },
