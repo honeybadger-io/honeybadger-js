@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.12.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.12.0...@honeybadger-io/js@6.12.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* **js:** export check-in types in isomorphic d.ts file ([6654b6f](https://github.com/honeybadger-io/honeybadger-js/commit/6654b6f11b0d6e825002a29fdff8ab1fc536349e))
+
+
+
+
+
 # [6.12.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.11.3...@honeybadger-io/js@6.12.0) (2025-09-16)
 
 
