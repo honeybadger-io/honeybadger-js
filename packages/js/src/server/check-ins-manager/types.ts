@@ -31,7 +31,7 @@ export type CheckInDto = {
 
     /**
      * The amount of time to allow a job to not report before it's reported as missing.
-     * Valid values are the same as the report_report field.
+     * Valid values are the same as the reportPeriod field.
      */
     gracePeriod?: string
 

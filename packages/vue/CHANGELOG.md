@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.2.6](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.2.5...@honeybadger-io/vue@6.2.6) (2025-09-16)
+
+**Note:** Version bump only for package @honeybadger-io/vue
+
+
+
+
+
 ## [6.2.5](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/vue@6.2.4...@honeybadger-io/vue@6.2.5) (2025-09-08)
 
 **Note:** Version bump only for package @honeybadger-io/vue
