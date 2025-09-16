@@ -1,4 +1,5 @@
-import Honeybadger from '../dist/server/honeybadger'
+import { Defaults } from '@honeybadger-io/core'
+import Honeybadger, { CheckInsClient, CheckIn, ServerTransport } from '../dist/server/honeybadger'
 
 Honeybadger.configure({
   debug: false,
@@ -40,4 +41,33 @@ const client2 = Honeybadger.factory()
 client2.beforeNotify(() => {
   console.log('Notifying')
 })
-client2.notify('test')
+client2.notify('test');
+
+(async function () {
+  const checkInsClient = new CheckInsClient({
+    apiKey: 'project api key',
+    appEndpoint: Defaults.CONFIG.appEndpoint,
+    personalAuthToken: 'personal auth token',
+    logger: console
+  }, new ServerTransport())
+
+  await checkInsClient.get('project id', 'check-in id')
+
+  await checkInsClient.create('project id', new CheckIn({
+    name: 'a simple check-in',
+    slug: 'simple-check-in',
+    scheduleType: 'simple',
+    reportPeriod: '1 day',
+    gracePeriod: '5 minutes',
+  }))
+
+  await checkInsClient.create('project id', new CheckIn({
+    name: 'a cron check-in',
+    slug: 'cron-check-in',
+    scheduleType: 'cron',
+    cronSchedule: '* * * * 5',
+    cronTimezone: 'UTC',
+    gracePeriod: '5 minutes',
+  }))
+})()
+

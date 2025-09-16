@@ -186,4 +186,7 @@ singleton.setNotifier(NOTIFIER)
 
 export { Types } from '@honeybadger-io/core'
 
+export { CheckInsClient, CheckIn } from './server/check-ins-manager'
+export { ServerTransport } from './server/transport'
+
 export default singleton

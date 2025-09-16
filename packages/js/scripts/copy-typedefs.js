@@ -13,7 +13,7 @@ function copyFileSync( source, target ) {
     }
   }
 
-  fs.writeFileSync(targetFile, fs.readFileSync(source, 'utf8').replace(/'\.\//g, '\'./types/'));
+  fs.writeFileSync(targetFile, fs.readFileSync(source, 'utf8'));
 }
 
 function copyFolderRecursiveSync( source, target ) {
