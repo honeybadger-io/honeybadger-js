@@ -2,10 +2,10 @@ import { Util, Types, Defaults } from '@honeybadger-io/core'
 import { CheckInsClient } from './client'
 import { CheckInsConfig } from './types'
 import { ServerTransport } from '../transport'
-import { CheckIn } from './check-in';
+import { CheckIn } from './check-in'
 
 export { CheckInsClient } from './client'
-export { CheckIn } from './check-in';
+export { CheckIn } from './check-in'
 
 export class CheckInsManager {
 
