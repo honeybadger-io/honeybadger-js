@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.12.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.11.3...@honeybadger-io/js@6.12.0) (2025-09-16)
+
+
+### Features
+
+* **js:** make check-ins client public ([#1456](https://github.com/honeybadger-io/honeybadger-js/issues/1456)) ([63de374](https://github.com/honeybadger-io/honeybadger-js/commit/63de374689f9767a87594df0dcaa64567d2bb8c9))
+
+
+
+
+
 ## [6.11.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.11.2...@honeybadger-io/js@6.11.3) (2025-09-08)
 
 
