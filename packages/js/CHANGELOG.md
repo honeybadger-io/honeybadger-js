@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.12.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.12.1...@honeybadger-io/js@6.12.2) (2025-09-17)
+
+
+### Bug Fixes
+
+* **js:** honeybadger.checkInsApi ([#1457](https://github.com/honeybadger-io/honeybadger-js/issues/1457)) ([23c25bf](https://github.com/honeybadger-io/honeybadger-js/commit/23c25bf0324eeb5a01547c11c769fc0985f2d8aa))
+
+
+
+
+
 ## [6.12.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.12.0...@honeybadger-io/js@6.12.1) (2025-09-16)
 
 
