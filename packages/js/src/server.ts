@@ -10,6 +10,7 @@ import { lambdaHandler } from './server/aws_lambda'
 import { ServerTransport } from './server/transport'
 import { StackedStore } from './server/stacked_store'
 import { CheckInsConfig } from './server/check-ins-manager/types'
+import { CheckInsClient } from './server/check-ins-manager';
 
 const { endpoint } = Util
 const DEFAULT_PLUGINS = [
@@ -42,6 +43,8 @@ class Honeybadger extends Client {
   public requestHandler: typeof requestHandler
   public lambdaHandler: typeof lambdaHandler
 
+  public checkInsApi: CheckInsClient
+
   config: HoneybadgerServerConfig
 
   constructor(opts: Partial<HoneybadgerServerConfig> = {}) {
@@ -63,6 +66,7 @@ class Honeybadger extends Client {
     this.errorHandler = errorHandler.bind(this)
     this.requestHandler = requestHandler.bind(this)
     this.lambdaHandler = lambdaHandler.bind(this)
+    this.checkInsApi = new CheckInsClient(this.config, transport)
   }
 
   factory(opts?: Partial<HoneybadgerServerConfig>): this {
@@ -79,6 +83,13 @@ class Honeybadger extends Client {
   }
 
   configure(opts: Partial<HoneybadgerServerConfig> = {}): this {
+    this.checkInsApi.configure({
+      appEndpoint: opts.appEndpoint,
+      apiKey: opts.apiKey,
+      personalAuthToken: opts.personalAuthToken,
+      logger: opts.logger,
+    })
+
     return super.configure(opts)
   }
 
@@ -186,7 +197,6 @@ singleton.setNotifier(NOTIFIER)
 
 export { Types } from '@honeybadger-io/core'
 
-export { CheckInsClient, CheckIn } from './server/check-ins-manager'
-export { ServerTransport } from './server/transport'
+export { CheckIn } from './server/check-ins-manager/check-in'
 
 export default singleton

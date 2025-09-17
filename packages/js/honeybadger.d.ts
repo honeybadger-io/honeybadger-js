@@ -7,7 +7,4 @@ import Browser from './dist/browser/honeybadger'
 type Honeybadger = typeof Server & typeof Browser;
 declare const Honeybadger: Honeybadger;
 
-// only available on server side
-export { CheckIn, CheckInsClient, ServerTransport } from './dist/server/honeybadger'
-
 export = Honeybadger;

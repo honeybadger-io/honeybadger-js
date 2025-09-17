@@ -1,5 +1,5 @@
 import { Defaults } from '@honeybadger-io/core'
-import Honeybadger, { CheckInsClient, CheckIn, ServerTransport } from '../dist/server/honeybadger'
+import Honeybadger from '../dist/server/honeybadger'
 
 Honeybadger.configure({
   debug: false,
@@ -7,6 +7,8 @@ Honeybadger.configure({
   endpoint: 'https://api.honeybadger.io',
   projectRoot: 'webpack:///./',
   apiKey: 'project api key',
+  appEndpoint: Defaults.CONFIG.appEndpoint,
+  personalAuthToken: 'personal auth token',
   environment: 'production',
   hostname: 'badger01',
   revision: 'git SHA/project version',
@@ -50,53 +52,46 @@ client2.notify('test');
   // check-in with a slug
   await Honeybadger.checkIn('check-in-slug')
 
-  const checkInsClient = new CheckInsClient({
-    apiKey: 'project api key',
-    appEndpoint: Defaults.CONFIG.appEndpoint,
-    personalAuthToken: 'personal auth token',
-    logger: console
-  }, new ServerTransport())
+  await Honeybadger.checkInsApi.listForProject('project id')
 
-  await checkInsClient.listForProject('project id')
-
-  await checkInsClient.get('project id', 'check-in id')
+  await Honeybadger.checkInsApi.get('project id', 'check-in id')
 
   // name is optional, slug is required
-  await checkInsClient.create('project id', new CheckIn({
+  await Honeybadger.checkInsApi.create('project id', {
     name: 'a simple check-in',
     slug: 'simple-check-in',
     scheduleType: 'simple',
     reportPeriod: '1 day',
     gracePeriod: '5 minutes',
-  }))
+  })
 
   // name is optional, slug is required
-  await checkInsClient.create('project id', new CheckIn({
+  await Honeybadger.checkInsApi.create('project id', {
     name: 'a cron check-in',
     slug: 'cron-check-in',
     scheduleType: 'cron',
     cronSchedule: '* * * * 5',
     cronTimezone: 'UTC',
     gracePeriod: '5 minutes',
-  }))
+  })
 
   // slug is used to identify the check-in
-  await checkInsClient.update('project id', new CheckIn({
+  await Honeybadger.checkInsApi.update('project id', {
     name: 'a simple check-in',
     slug: 'simple-check-in',
     scheduleType: 'simple',
     reportPeriod: '1 day',
     gracePeriod: '15 minutes',
-  }))
+  })
 
   // need id to remove a check-in
-  await checkInsClient.remove('project id', new CheckIn({
+  await Honeybadger.checkInsApi.remove('project id', {
     id: 'check-in id',
     name: 'a simple check-in',
     slug: 'simple-check-in',
     scheduleType: 'simple',
     reportPeriod: '1 day',
     gracePeriod: '15 minutes',
-  }))
+  })
 })()
 

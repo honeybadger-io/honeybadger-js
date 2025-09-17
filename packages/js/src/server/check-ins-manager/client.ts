@@ -1,9 +1,9 @@
 import { Types, Util } from '@honeybadger-io/core'
 import { CheckIn } from './check-in'
-import { CheckInResponsePayload, CheckInsConfig } from './types';
+import { CheckInDto, CheckInResponsePayload, CheckInsConfig } from './types';
 
 export class CheckInsClient {
-  private readonly config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger'>
+  private config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger'>
   private readonly logger: Types.Logger
   private readonly transport: Types.Transport
 
@@ -11,6 +11,10 @@ export class CheckInsClient {
     this.transport = transport
     this.config = config
     this.logger = config.logger
+  }
+
+  public configure(config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger'>) {
+    this.config = config
   }
 
   public async getProjectId(projectApiKey: string): Promise<string> {
@@ -75,17 +79,18 @@ export class CheckInsClient {
     return CheckIn.fromResponsePayload(data)
   }
 
-  public async create(projectId: string, checkIn: CheckIn): Promise<CheckIn> {
+  public async create(projectId: string, checkIn: CheckIn | CheckInDto): Promise<CheckIn> {
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
 
+    const checkInTyped = checkIn instanceof CheckIn ? checkIn : new CheckIn(checkIn)
     const response = await this.transport.send({
       method: 'POST',
       headers: this.getHeaders(),
       endpoint: Util.endpoint(this.config.appEndpoint, `v2/projects/${projectId}/check_ins`),
       logger: this.logger,
-    }, { check_in: checkIn.asRequestPayload() })
+    }, { check_in: checkInTyped.asRequestPayload() })
 
     if (response.statusCode !== 201) {
       throw new Error(`Failed to create check-in[${checkIn.slug}] for project[${projectId}]: ${this.getErrorMessage(response.body)}`)
@@ -96,26 +101,27 @@ export class CheckInsClient {
     return CheckIn.fromResponsePayload(data)
   }
 
-  public async update(projectId: string, checkIn: CheckIn): Promise<CheckIn> {
+  public async update(projectId: string, checkIn: CheckIn | CheckInDto): Promise<CheckIn> {
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
 
+    const checkInTyped = checkIn instanceof CheckIn ? checkIn : new CheckIn(checkIn)
     const response = await this.transport.send({
       method: 'PUT',
       headers: this.getHeaders(),
       endpoint: Util.endpoint(this.config.appEndpoint, `v2/projects/${projectId}/check_ins/${checkIn.id}`),
       logger: this.logger,
-    }, { check_in: checkIn.asRequestPayload() })
+    }, { check_in: checkInTyped.asRequestPayload() })
 
     if (response.statusCode !== 204) {
       throw new Error(`Failed to update checkin[${checkIn.slug}] for project[${projectId}]: ${this.getErrorMessage(response.body)}`)
     }
 
-    return checkIn
+    return checkInTyped
   }
 
-  public async remove(projectId: string, checkIn: CheckIn): Promise<void> {
+  public async remove(projectId: string, checkIn: CheckIn | CheckInDto): Promise<void> {
     if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
       throw new Error('personalAuthToken is required')
     }
