@@ -2,20 +2,20 @@
 
 ![Node CI](https://github.com/honeybadger-io/honeybadger-js/workflows/Node%20CI/badge.svg)
 
-Welcome! This is the monorepo which holds all [Honeybadger](https://honeybadger.io) packages for JavaScript.
-You can refer to the README of each package for more information and instructions:
+Welcome! This monorepo contains all [Honeybadger](https://honeybadger.io) packages for JavaScript.
+Refer to each package's README for more information and setup instructions:
 - [@honeybadger-io/core](./packages/core)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fcore.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fcore)  
-  The core package that integrates with Honeybadger API
+  The core package that integrates with the Honeybadger API
 - [@honeybadger-io/js](./packages/js)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fjs.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fjs)  
-  SDK for browser, nodejs and AWS Lambda 
+  SDK for browsers, Node.js, and AWS Lambda
 - [@honeybadger-io/webpack](./packages/webpack)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fwebpack)  
-  Webpack plugin to upload source maps to Honeybadger
+  Webpack plugin for uploading source maps to Honeybadger
 - [@honeybadger-io/vue](./packages/vue)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fvue.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fvue)  
-  SDK for vue.js integration
+  SDK for Vue.js integration
 - [@honeybadger-io/react](./packages/react)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Freact.svg)](https://badge.fury.io/js/%40honeybadger-io%2Freact)  
   SDK for React integration
@@ -30,22 +30,21 @@ You can refer to the README of each package for more information and instruction
   SDK for React Native integration
 - [@honeybadger-io/rollup-plugin](./packages/rollup-plugin)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin.svg)](https://badge.fury.io/js/%40honeybadger-io%2Frollup-plugin)  
-  Rollup/Vite plugin to upload source maps to Honeybadger
+  Rollup/Vite plugin for uploading source maps to Honeybadger
 - [@honeybadger-io/esbuild-plugin](./packages/esbuild-plugin)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fesbuild-plugin.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fesbuild-plugin)  
-  Esbuild plugin to upload source maps to Honeybadger
+  esbuild plugin for uploading source maps to Honeybadger
 - [@honeybadger-io/plugin-core](./packages/plugin-core)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fplugin-core.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fplugin-core)  
-  Utility functions shared between rollup, webpack, esbuild and other plugins
+  Utility functions shared by the Rollup, Webpack, and esbuild plugins
 
 ## Documentation and Support
 
-For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/lib/javascript/index.html).
+For comprehensive documentation and support, see our docs: https://docs.honeybadger.io/lib/javascript/index.html
 
 ## Changelog
 
-- [CHANGELOG.md](CHANGELOG.md) is updated when a new version is released (`npm run release`).
-  The root `CHANGELOG.md` has a collective changelog from changes in all the packages of the monorepo. Each package also has its own `CHANGELOG.md` with changes related only to itself.
+- Each package's `CHANGELOG.md` is updated when a new version is released (`npm run release`).
 
 - [Conventional Commits](https://www.conventionalcommits.org/) are enforced with a Git hook (via [husky](https://typicode.github.io/husky) + [commitlint](https://commitlint.js.org/)) in order to automate changelog generation.
 
@@ -74,25 +73,27 @@ We use [Lerna](https://lerna.js.org/) to manage the monorepo. It helps us:
 - Use `lerna add my-pkg --scope="@honeybadger-io/js"` to add `my-pkg` in the `@honeybadger-io/js` project. Or you can manually add to the target project's `package.json` file. You still need to run `npm install` from the root.
 - Use `lerna run` to execute commands for all projects. If the command is not found it will not be executed. You can filter the packages using `--scope`. For example, `lerna run test` will execute `npm run test` to all packages that have this script available.
 
-For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
+> [!TIP]
+> For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
 
 
 ### Troubleshooting TypeScript
 
-- Not seeing changes when working in `.ts` files? Make sure that you rebuild every time you make a change. Or enable "compile on save" with your IDE - [WebStorm(Jetbrains)](https://www.jetbrains.com/help/webstorm/compiling-typescript-to-javascript.html#ts_compiler_compile_code_automatically) / [VS Code](https://code.visualstudio.com/docs/typescript/typescript-compiling#_step-2-run-the-typescript-build).
-- If you are getting errors with Typescript, make sure that you do `npm run build`.
-  It's a prerequisite for [Typescript Project References](https://www.typescriptlang.org/docs/handbook/project-references.html#caveats-for-project-references).
+- Not seeing changes when working in `.ts` files? Make sure that you rebuild every time you make a change. Or enable "compile on save" with your IDE — [WebStorm (JetBrains)](https://www.jetbrains.com/help/webstorm/compiling-typescript-to-javascript.html#ts_compiler_compile_code_automatically) / [VS Code](https://code.visualstudio.com/docs/typescript/typescript-compiling#_step-2-run-the-typescript-build).
+- If you are getting errors with TypeScript, make sure that you run `npm run build`.
+  It's a prerequisite for [TypeScript Project References](https://www.typescriptlang.org/docs/handbook/project-references.html#caveats-for-project-references).
 
 ## Releasing
 
 Packages in the monorepo are released in [independent mode](https://lerna.js.org/docs/features/version-and-publish#independent-mode), meaning that Lerna will decide which packages to release and what version bump to apply based on the commits since the last release.
 
-Releasing is done using [Github actions](https://github.com/honeybadger-io/honeybadger-js/actions), which run `npm run release`. This command calls `lerna publish`, which does the following:
-- generates changelog based on the commit messages (see [Changelog](#changelog) above)
-- `npm version`
-- `npm publish`
+Releases are performed via [GitHub Actions](https://github.com/honeybadger-io/honeybadger-js/actions), which run `npm run release`. That command calls `lerna publish`, which:
+- generates the changelog based on commit messages (see [Changelog](#changelog) above)
+- runs `npm version`
+- runs `npm publish`
 
-*Note*: some packages may have a `postpublish` script, for example `@honeybadger-io/js` (found in `packages/js`) has a script to also publish to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront). 
+> [!NOTE] 
+> Some packages may have a `postpublish` script, for example `@honeybadger-io/js` (found in `packages/js`) has a script to also publish to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront). 
 
 ### Release Automation
 
@@ -100,7 +101,11 @@ The repository automatically releases new packages every week using the [**Publi
 
 You can manually trigger a new release using the [**Publish New Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`).
 
-*Note*: only users with _write_ permissions can trigger this workflow (i.e. Collaborators).
+> [!IMPORTANT]
+> NPM releases are authorized through NPM Trusted Publishing. Only one workflow can be configured as a Trusted Publisher at a time. Keep the scheduled workflow configured by default. If you need to manually trigger a different workflow, temporarily switch NPM Trusted Publishing to that workflow, and revert back to the scheduled workflow afterward.
+
+> [!WARNING]
+> Only users with _write_ permissions can trigger this workflow (i.e. Collaborators).
 
 #### Available Commands
 
