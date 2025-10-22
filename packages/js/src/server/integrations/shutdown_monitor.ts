@@ -43,7 +43,7 @@ export default class ShutdownMonitor {
 
   maybeAddListener() {
     for (const signal of ShutdownMonitor.KILL_SIGNALS) {
-      const signalListeners = process.listeners(signal);
+      const signalListeners = process.listeners(signal) || [];
       if (!signalListeners.includes(this.__listener)) {
         process.on(signal, this.__listener)
       }
@@ -52,7 +52,7 @@ export default class ShutdownMonitor {
 
   maybeRemoveListener() {
     for (const signal of ShutdownMonitor.KILL_SIGNALS) {
-      const signalListeners = process.listeners(signal);
+      const signalListeners = process.listeners(signal) || [];
       if (signalListeners.includes(this.__listener)) {
         process.removeListener(signal, this.__listener)
       }
@@ -60,8 +60,7 @@ export default class ShutdownMonitor {
   }
 
   hasOtherShutdownListeners(signal: NodeJS.Signals) {
-    const otherListeners = process
-      .listeners(signal)
+    const otherListeners = (process.listeners(signal) || [])
       .filter(listener => listener !== this.__listener)
 
     return otherListeners.length > 0;
