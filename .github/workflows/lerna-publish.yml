@@ -1,5 +1,7 @@
 name: Publish New Release
 on:
+  push:
+    branches: [ master ]
   workflow_dispatch:
   workflow_call:
     secrets:
@@ -62,13 +64,3 @@ jobs:
           HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
           HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
           BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
-
-      - name: Summary
-        if: success()
-        run: |
-          echo ":white_check_mark: Publish successful!" >> $GITHUB_STEP_SUMMARY
-
-      - name: Summary
-        if: failure()
-        run: |
-          echo ":warning: Publish failed. Did you set this workflow as Trusted Publisher in NPM?" >> $GITHUB_STEP_SUMMARY
