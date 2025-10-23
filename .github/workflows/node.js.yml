@@ -10,6 +10,10 @@ on:
       BROWSERSTACK_ACCESS_KEY:
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit:
     runs-on: ubuntu-latest
