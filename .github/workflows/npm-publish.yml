@@ -31,6 +31,14 @@ jobs:
 
       - name: Publish to NPM
         run: lerna publish from-package --yes --loglevel silly
+        env:
+          # the following are needed for the post-publish script of @honeybadger-io/js which pushes new version to CDN
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-east-1"
+          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
+          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
+          BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
 
       - name: Summary
         if: success()
