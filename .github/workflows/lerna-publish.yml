@@ -51,6 +51,9 @@ jobs:
           node-version: '20.x'
           cache: 'npm'
 
+      - name: Install latest NPM version (needed for trusted publishing)
+        run: npm install -g npm@latest
+
       - name: Install Deps
         run: npm ci
 
