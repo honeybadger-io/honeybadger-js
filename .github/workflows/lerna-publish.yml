@@ -16,6 +16,8 @@ on:
       BUNNY_API_KEY:
         required: true
 
+concurrency: ci-release
+
 permissions:
   id-token: write # Required for OIDC / NPM Trusted Publishing
   contents: write
