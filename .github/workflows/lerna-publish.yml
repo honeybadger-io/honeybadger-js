@@ -1,10 +1,10 @@
 name: Publish New Release
 on:
+  push:
+    branches: [ master ]
   workflow_dispatch:
   workflow_call:
     secrets:
-      NPM_AUTH_TOKEN:
-        required: true
       HONEYBADGER_DISTRIBUTION_ID:
         required: true
       HONEYBADGER_JS_S3_BUCKET:
@@ -13,26 +13,42 @@ on:
         required: true
       AWS_ACCESS_KEY_ID:
         required: true
-      LERNA_PUBLISH_PAT:
-        required: true
       BUNNY_API_KEY:
         required: true
 
+concurrency: ci-release
+
+permissions:
+  id-token: write # Required for OIDC / NPM Trusted Publishing
+  contents: write
+  pull-requests: write
+
 jobs:
+  ci:
+    uses: ./.github/workflows/node.js.yml
+    secrets: inherit
+
   publish:
     runs-on: ubuntu-latest
+    needs: [ci]
     steps:
-      - name: Git Checkout
-        uses: actions/checkout@v3
+      - uses: actions/create-github-app-token@v2
+        id: generate-token
         with:
-          token: ${{ secrets.LERNA_PUBLISH_PAT }}
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Git Checkout
+        uses: actions/checkout@v5
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
           fetch-depth: 0
           ref: master
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: '16.x'
+          node-version: '20.x'
           cache: 'npm'
 
       - name: Install Deps
@@ -43,15 +59,12 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - name: NPM Login
-        run: npm config set "//registry.npmjs.org/:_authToken" "${{ secrets.NPM_AUTH_TOKEN }}"
-
       - name: Publish Release
         run: npm run release
         env:
           # for lerna
-          GH_TOKEN: ${{ secrets.LERNA_PUBLISH_PAT }}
-          GITHUB_TOKEN: ${{ secrets.LERNA_PUBLISH_PAT }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: "us-east-1"

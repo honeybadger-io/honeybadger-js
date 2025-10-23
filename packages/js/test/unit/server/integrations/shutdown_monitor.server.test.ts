@@ -116,7 +116,7 @@ describe('ShutdownMonitor', () => {
 
     it('returns false if there are only our expected listeners', () => {
       shutdownMonitor.maybeAddListener()
-      expect(shutdownMonitor.hasOtherShutdownListeners()).toBe(false)
+      expect(shutdownMonitor.hasOtherShutdownListeners('SIGINT')).toBe(false)
     })
   })
 })

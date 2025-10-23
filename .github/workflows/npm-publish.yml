@@ -1,28 +1,41 @@
 # Run this workflow if the release to NPM failed with "Publish New Release"
 name: Publish Latest Release to NPM
+
 on:
   workflow_dispatch:
+
+permissions:
+  id-token: write  # Required for OIDC / NPM Trusted Publishing
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: master
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: '16.x'
+          node-version: '20.x'
           cache: 'npm'
 
       - name: Install Deps
         run: npm ci
 
-      - name: NPM Login
-        run: npm config set "//registry.npmjs.org/:_authToken" "${{ secrets.NPM_AUTH_TOKEN }}"
-
       - name: Publish to NPM
         run: lerna publish from-package --yes --loglevel silly
+
+      - name: Summary
+        if: success()
+        run: |
+          echo ":white_check_mark: Publish successful. Remember to revert NPM Trusted Publishing to the original workflow!" >> $GITHUB_STEP_SUMMARY
+
+      - name: Summary
+        if: failure()
+        run: |
+          echo ":warning: Publish failed. Did you set this workflow as Trusted Publisher in NPM?" >> $GITHUB_STEP_SUMMARY
+          
