@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/nextjs",
-  "version": "5.10.6",
+  "version": "5.10.7",
   "description": "Next.js integration for Honeybadger",
   "keywords": [
     "nextjs",
@@ -42,7 +42,7 @@
     "next": ">= 13.x"
   },
   "dependencies": {
-    "@honeybadger-io/js": "^6.12.2",
+    "@honeybadger-io/js": "^6.12.3",
     "@honeybadger-io/webpack": "^6.3.1"
   },
   "devDependencies": {
