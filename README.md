@@ -97,9 +97,7 @@ Releases are performed via [GitHub Actions](https://github.com/honeybadger-io/ho
 
 ### Release Automation
 
-The repository automatically releases new packages every week using the [**Publish New Release - Scheduled** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-scheduled-publish.yml) (`lerna-scheduled-publish.yml`).
-
-You can manually trigger a new release using the [**Publish New Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`).
+The repository automatically releases new packages when a PR is merged on master using the [**Publish New Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`).
 
 > [!IMPORTANT]
 > NPM releases are authorized through NPM Trusted Publishing. Only one workflow can be configured as a Trusted Publisher at a time. Keep the scheduled workflow configured by default. If you need to manually trigger a different workflow, temporarily switch NPM Trusted Publishing to that workflow, and revert back to the scheduled workflow afterward.
