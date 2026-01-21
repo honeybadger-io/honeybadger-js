@@ -30,13 +30,14 @@ export default function (_window: any = globalThisOrWindow()): Types.Plugin {
             const err = {
               name: reason.name,
               message: `UnhandledPromiseRejectionWarning: ${reason}`,
-              stack
+              stack,
+              originalError: reason
             }
             client.addBreadcrumb(
               `window.onunhandledrejection: ${err.name}`,
               {
                 category: 'error',
-                metadata: err
+                metadata: { name: err.name, message: err.message, stack: err.stack }
               }
             )
             client.notify(err)

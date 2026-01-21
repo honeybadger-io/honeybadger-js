@@ -88,6 +88,7 @@ export interface Notice {
   __breadcrumbs: BreadcrumbRecord[],
   afterNotify?: AfterNotifyHandler,
   cause?: Error|Record<string, unknown>,
+  originalError?: Error,
   [key: string]: unknown
 }
 

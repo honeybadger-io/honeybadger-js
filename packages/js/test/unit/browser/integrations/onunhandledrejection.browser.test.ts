@@ -40,4 +40,32 @@ describe('window.onunhandledrejection integration', function () {
       message: 'UnhandledPromiseRejectionWarning: Unspecified reason'
     }))
   })
+
+  it('preserves originalError when reason is an Error', function () {
+    const window = { onunhandledrejection: undefined }
+    onUnhandledRejection(window).load(client)
+    const reason = new Error('Test error')
+    window.onunhandledrejection({ reason })
+    expect(mockNotify.mock.calls.length).toBe(1)
+    expect(mockNotify.mock.calls[0][0].originalError).toBe(reason)
+  })
+
+  it('preserves custom properties on Error via originalError', function () {
+    const window = { onunhandledrejection: undefined }
+    onUnhandledRejection(window).load(client)
+
+    class CustomError extends Error {
+      skipReporting = true
+      errorType = 'CUSTOM'
+    }
+    const reason = new CustomError('Custom error')
+
+    window.onunhandledrejection({ reason })
+    expect(mockNotify.mock.calls.length).toBe(1)
+
+    const notifiedError = mockNotify.mock.calls[0][0]
+    expect(notifiedError.originalError).toBe(reason)
+    expect(notifiedError.originalError.skipReporting).toBe(true)
+    expect(notifiedError.originalError.errorType).toBe('CUSTOM')
+  })
 })
