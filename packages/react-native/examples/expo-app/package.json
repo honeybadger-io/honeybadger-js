@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@honeybadger-io/react-native": "latest",
-    "expo": "~49.0.2",
+    "expo": "~54.0.32",
     "expo-status-bar": "~1.6.0",
     "react": "18.2.0",
     "react-native": "^0.72.0",
