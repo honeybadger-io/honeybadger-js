@@ -4,6 +4,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "fastify": "^3.29.4"
+    "fastify": "^5.7.3"
   }
 }
