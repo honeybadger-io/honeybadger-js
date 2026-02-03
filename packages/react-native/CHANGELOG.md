@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.4.7](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.4.6...@honeybadger-io/react-native@6.4.7) (2026-02-03)
+
+
+### Bug Fixes
+
+* **react-native:** remove jcenter() for Android Gradle 9 compatibility ([#1488](https://github.com/honeybadger-io/honeybadger-js/issues/1488)) ([e2fd9cf](https://github.com/honeybadger-io/honeybadger-js/commit/e2fd9cf736557bfed7edaa4130271f4ebe489695))
+
+
+
+
+
 ## [6.4.6](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.4.5...@honeybadger-io/react-native@6.4.6) (2025-09-08)
 
 **Note:** Version bump only for package @honeybadger-io/react-native
