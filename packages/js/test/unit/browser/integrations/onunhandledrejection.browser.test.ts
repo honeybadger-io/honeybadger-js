@@ -41,16 +41,28 @@ describe('window.onunhandledrejection integration', function () {
     }))
   })
 
-  it('preserves originalError when reason is an Error', function () {
+  it('passes the Error directly to client.notify when reason is an Error', function () {
     const window = { onunhandledrejection: undefined }
     onUnhandledRejection(window).load(client)
     const reason = new Error('Test error')
     window.onunhandledrejection({ reason })
     expect(mockNotify.mock.calls.length).toBe(1)
-    expect(mockNotify.mock.calls[0][0].originalError).toBe(reason)
+    expect(mockNotify.mock.calls[0][0]).toBe(reason)
+    expect(reason.message).toBe('UnhandledPromiseRejectionWarning: Test error')
   })
 
-  it('preserves custom properties on Error via originalError', function () {
+  it('sets a fallback stack when the Error has no stack', function () {
+    const window = { onunhandledrejection: undefined }
+    onUnhandledRejection(window).load(client)
+    const reason = new Error('No stack')
+    reason.stack = ''
+    window.onunhandledrejection({ reason })
+    expect(mockNotify.mock.calls.length).toBe(1)
+    expect(mockNotify.mock.calls[0][0]).toBe(reason)
+    expect(reason.stack).toBe('No stack\n    at ? (unknown:0)')
+  })
+
+  it('preserves custom properties on Error subclasses passed directly', function () {
     const window = { onunhandledrejection: undefined }
     onUnhandledRejection(window).load(client)
 
@@ -64,8 +76,8 @@ describe('window.onunhandledrejection integration', function () {
     expect(mockNotify.mock.calls.length).toBe(1)
 
     const notifiedError = mockNotify.mock.calls[0][0]
-    expect(notifiedError.originalError).toBe(reason)
-    expect(notifiedError.originalError.skipReporting).toBe(true)
-    expect(notifiedError.originalError.errorType).toBe('CUSTOM')
+    expect(notifiedError).toBe(reason)
+    expect(notifiedError.skipReporting).toBe(true)
+    expect(notifiedError.errorType).toBe('CUSTOM')
   })
 })
