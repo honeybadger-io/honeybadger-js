@@ -20,26 +20,18 @@ export default function (_window: any = globalThisOrWindow()): Types.Plugin {
           const { reason } = promiseRejectionEvent
 
           if (reason instanceof Error) {
-            // simulate v8 stack
-            // const fileName = reason.fileName || 'unknown'
-            // const lineNumber = reason.lineNumber || 0
-            const fileName = 'unknown'
-            const lineNumber = 0
-            const stackFallback = `${reason.message}\n    at ? (${fileName}:${lineNumber})`
-            const stack = reason.stack || stackFallback
-            const err = {
-              name: reason.name,
-              message: `UnhandledPromiseRejectionWarning: ${reason}`,
-              stack
+            if (!reason.stack) {
+              reason.stack = `${reason.message}\n    at ? (unknown:0)`
             }
+            reason.message = `UnhandledPromiseRejectionWarning: ${reason.message}`
             client.addBreadcrumb(
-              `window.onunhandledrejection: ${err.name}`,
+              `window.onunhandledrejection: ${reason.name}`,
               {
                 category: 'error',
-                metadata: err
+                metadata: { name: reason.name, message: reason.message, stack: reason.stack }
               }
             )
-            client.notify(err)
+            client.notify(reason)
             return
           }
 

@@ -3,6 +3,7 @@ import {
   merge,
   mergeNotice,
   objectIsEmpty,
+  makeNotice,
   runBeforeNotifyHandlers,
   runAfterNotifyHandlers,
   shallowClone,
@@ -450,5 +451,35 @@ describe('utils', function () {
       expect(result[0]['2']).toBe('SOURCE_SIZE_TOO_LARGE')
     })
 
+  })
+
+  describe('makeNotice', function () {
+    it('sets originalError when input is an Error', function () {
+      const err = new Error('test')
+      const notice = makeNotice(err)
+      expect(notice.originalError).toBe(err)
+    })
+
+    it('sets originalError with custom Error subclass properties accessible', function () {
+      class CustomError extends Error {
+        skipReporting = true
+        errorCode = 42
+      }
+      const err = new CustomError('custom')
+      const notice = makeNotice(err)
+      expect(notice.originalError).toBe(err)
+      expect((notice.originalError as CustomError).skipReporting).toBe(true)
+      expect((notice.originalError as CustomError).errorCode).toBe(42)
+    })
+
+    it('does not set originalError when input is a plain object', function () {
+      const notice = makeNotice({ name: 'test', message: 'msg' })
+      expect(notice.originalError).toBeUndefined()
+    })
+
+    it('does not set originalError when input is a string', function () {
+      const notice = makeNotice('test message')
+      expect(notice.originalError).toBeUndefined()
+    })
   })
 })
