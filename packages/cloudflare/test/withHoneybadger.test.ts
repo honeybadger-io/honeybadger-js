@@ -1,5 +1,5 @@
 import type { ExecutionContext } from '@cloudflare/workers-types'
-import { withHoneybadger, getConfigFromEnv } from '../src/index'
+import { withHoneybadger } from '../src/index'
 
 jest.mock('@honeybadger-io/js', () => {
   const mockConfigure = jest.fn()
@@ -23,7 +23,7 @@ const mockSetContext = HoneybadgerMock.setContext as jest.Mock
 const mockNotifyAsync = HoneybadgerMock.notifyAsync as jest.Mock
 
 describe('withHoneybadger', () => {
-  const waitUntil = jest.fn((p: Promise<unknown>) => p)
+  const waitUntil = jest.fn((_p: Promise<unknown>) => {})
 
   const mockCtx = {
     waitUntil,
@@ -203,18 +203,5 @@ describe('withHoneybadger', () => {
       expect(wrapped.scheduled).toBeUndefined()
       expect(wrapped.queue).toBeUndefined()
     })
-  })
-})
-
-describe('getConfigFromEnv', () => {
-  it('returns apiKey and environment from env.HONEYBADGER_API_KEY', () => {
-    const env = { HONEYBADGER_API_KEY: 'hb-key-123' }
-    const config = getConfigFromEnv(env)
-    expect(config).toEqual({ apiKey: 'hb-key-123', environment: 'production' })
-  })
-
-  it('returns undefined apiKey when HONEYBADGER_API_KEY is missing', () => {
-    const config = getConfigFromEnv({})
-    expect(config.apiKey).toBeUndefined()
   })
 })

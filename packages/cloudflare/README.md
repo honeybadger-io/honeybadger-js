@@ -14,34 +14,18 @@ For full documentation and support, see [Honeybadger's JavaScript docs](https://
 ## Installation
 
 ```bash
-npm install @honeybadger-io/cloudflare @honeybadger-io/js
+npm install @honeybadger-io/cloudflare
 ```
 
 ## Usage
 
 Wrap your Worker's exported handler with `withHoneybadger`. Pass a `getConfig` function that receives your `env` and returns Honeybadger config overrides (e.g. `apiKey`, `environment`).
 
-### Default: `getConfigFromEnv`
-
-Use the helper to read `HONEYBADGER_API_KEY` from env:
-
-```typescript
-import { withHoneybadger, getConfigFromEnv } from '@honeybadger-io/cloudflare'
-
-export default withHoneybadger(getConfigFromEnv, {
-  async fetch(request, env, ctx) {
-    return new Response('Hello World')
-  },
-})
-```
-
 Set the API key via [Wrangler secrets](https://developers.cloudflare.com/workers/configuration/secrets/):
 
 ```bash
 wrangler secret put HONEYBADGER_API_KEY
 ```
-
-### Custom config
 
 Pass any `(env) => Partial<Config>` to control Honeybadger config from your env:
 

@@ -140,10 +140,3 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
 
   return handler
 }
-
-export const getConfigFromEnv = <Env extends { HONEYBADGER_API_KEY?: string }>(
-  env: Env
-): Partial<Types.Config> => ({
-    apiKey: env.HONEYBADGER_API_KEY,
-    environment: 'production',
-  })
