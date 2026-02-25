@@ -32,7 +32,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
       const fetchHandler = fn as NonNullable<ExportedHandler<Env>['fetch']>
       handler.fetch = async (request, env, ctx) => {
         const config = getConfig(env)
-        if (config.apiKey) {
+        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
           Honeybadger.configure(config)
           Honeybadger.setContext({ url: request.url, method: request.method })
         }
@@ -54,7 +54,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey) {
+        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
           Honeybadger.configure(config)
           Honeybadger.setContext({
             cron: controller.cron,
@@ -67,7 +67,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
           ctx.waitUntil(reportError(error))
           throw error
         }
-      }) as ExportedHandler<Env>['scheduled']
+      })
       continue
     }
 
@@ -79,7 +79,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey) {
+        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
           Honeybadger.configure(config)
           Honeybadger.setContext({
             queue: batch.queue,
@@ -92,7 +92,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
           ctx.waitUntil(reportError(error))
           throw error
         }
-      }) as ExportedHandler<Env>['queue']
+      })
       continue
     }
 
@@ -104,7 +104,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey) {
+        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
           Honeybadger.configure(config)
         }
         try {
@@ -113,7 +113,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
           ctx.waitUntil(reportError(error))
           throw error
         }
-      }) as ExportedHandler<Env>['email']
+      })
       continue
     }
 
@@ -125,7 +125,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey) {
+        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
           Honeybadger.configure(config)
         }
         try {
@@ -134,7 +134,7 @@ export function withHoneybadger<Env extends Record<string, unknown>>(
           ctx.waitUntil(reportError(error))
           throw error
         }
-      }) as ExportedHandler<Env>['tail']
+      })
     }
   }
 
