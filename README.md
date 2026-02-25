@@ -37,6 +37,9 @@ Refer to each package's README for more information and setup instructions:
 - [@honeybadger-io/plugin-core](./packages/plugin-core)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fplugin-core.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fplugin-core)  
   Utility functions shared by the Rollup, Webpack, and esbuild plugins
+- [@honeybadger-io/cloudflare](./packages/cloudflare)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fcloudflare.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fcloudflare)  
+  Error monitoring integration for Cloudflare Workers
 
 ## Documentation and Support
 
