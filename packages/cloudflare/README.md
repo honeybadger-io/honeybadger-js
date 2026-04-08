@@ -31,7 +31,7 @@ Pass any `(env) => Partial<Config>` to control Honeybadger config from your env:
 
 ```typescript
 import { withHoneybadger } from '@honeybadger-io/cloudflare'
-import type { Types } from '@honeybadger-io/js'
+import type { Types } from '@honeybadger-io/core'
 
 const getConfig = (env: Env): Partial<Types.Config> => ({
   apiKey: env.HONEYBADGER_API_KEY,

@@ -19,7 +19,7 @@ function reportError(error: unknown): Promise<void> {
   return Honeybadger.notifyAsync(noticeable)
 }
 
-export function withHoneybadger<Env extends Record<string, unknown>>(
+export function withHoneybadger<Env>(
   getConfig: (env: Env) => Partial<Types.Config>,
   handler: ExportedHandler<Env>
 ): ExportedHandler<Env> {
