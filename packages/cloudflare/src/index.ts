@@ -1,13 +1,5 @@
 import Honeybadger from '@honeybadger-io/js'
 import type { Types } from '@honeybadger-io/core'
-import type {
-  ExportedHandler,
-  ExecutionContext,
-  ForwardableEmailMessage,
-  MessageBatch,
-  ScheduledController,
-  TraceItem,
-} from '@cloudflare/workers-types'
 
 const HANDLER_NAMES = ['fetch', 'scheduled', 'queue', 'email', 'tail'] as const
 

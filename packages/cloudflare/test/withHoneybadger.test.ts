@@ -58,7 +58,7 @@ describe('withHoneybadger', () => {
       }
       const originalFetch = handler.fetch
       const wrapped = withHoneybadger(
-        (e) => ({ apiKey: e.HONEYBADGER_API_KEY }),
+        (e: typeof env) => ({ apiKey: e.HONEYBADGER_API_KEY }),
         handler
       )
       const request = new Request('https://example.com/')
@@ -112,7 +112,7 @@ describe('withHoneybadger', () => {
         fetch: jest.fn().mockResolvedValue(new Response('ok', { status: 200 })),
       }
       const wrapped = withHoneybadger(
-        (e) => ({ apiKey: e.HONEYBADGER_API_KEY }),
+        (e: typeof env) => ({ apiKey: e.HONEYBADGER_API_KEY }),
         handler
       )
       const request = new Request('https://example.com/')
@@ -133,7 +133,7 @@ describe('withHoneybadger', () => {
         fetch: jest.fn().mockResolvedValue(new Response('ok')),
       }
       const wrapped = withHoneybadger(
-        (e) => ({ apiKey: e.HONEYBADGER_API_KEY }),
+        (e: typeof env) => ({ apiKey: e.HONEYBADGER_API_KEY }),
         handler
       )
       const request = new Request('https://example.com/foo', { method: 'POST' })
