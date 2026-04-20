@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/cloudflare@0.2.0...@honeybadger-io/cloudflare@0.3.0) (2026-04-20)
+
+
+### Features
+
+* **cloudflare:** make @cloudflare/workers-types an optional peer dep ([#1491](https://github.com/honeybadger-io/honeybadger-js/issues/1491)) ([cfb0314](https://github.com/honeybadger-io/honeybadger-js/commit/cfb0314dc18219932ea336686703da4a60f1f877))
+
+
+
+
+
 # 0.2.0 (2026-04-17)
 
 
