@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/cloudflare@0.3.0...@honeybadger-io/cloudflare@0.3.1) (2026-04-27)
+
+
+### Bug Fixes
+
+* **cloudflare:** correctly skip reporting when apiKey is missing ([#1492](https://github.com/honeybadger-io/honeybadger-js/issues/1492)) ([934e3c0](https://github.com/honeybadger-io/honeybadger-js/commit/934e3c034f0138d3a2c63c97c60e3f29c5aff19c))
+
+
+
+
+
 # [0.3.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/cloudflare@0.2.0...@honeybadger-io/cloudflare@0.3.0) (2026-04-20)
 
 
