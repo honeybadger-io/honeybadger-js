@@ -3,8 +3,16 @@ import type { Types } from '@honeybadger-io/core'
 
 const HANDLER_NAMES = ['fetch', 'scheduled', 'queue', 'email', 'tail'] as const
 
+function isHbConfigured() {
+  if (Honeybadger.config.apiKey === null || Honeybadger.config.apiKey === undefined) {
+    return false;
+  }
+
+  return Honeybadger.config.apiKey.length > 0
+}
+
 function reportError(error: unknown): Promise<void> {
-  if (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0) {
+  if (!isHbConfigured()) {
     return Promise.resolve()
   }
   const noticeable = error instanceof Error ? error : new Error(String(error))
@@ -24,7 +32,7 @@ export function withHoneybadger<Env>(
       const fetchHandler = fn as NonNullable<ExportedHandler<Env>['fetch']>
       handler.fetch = async (request, env, ctx) => {
         const config = getConfig(env)
-        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
+        if (config.apiKey && !isHbConfigured()) {
           Honeybadger.configure(config)
           Honeybadger.setContext({ url: request.url, method: request.method })
         }
@@ -46,7 +54,7 @@ export function withHoneybadger<Env>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
+        if (config.apiKey && !isHbConfigured()) {
           Honeybadger.configure(config)
           Honeybadger.setContext({
             cron: controller.cron,
@@ -71,7 +79,7 @@ export function withHoneybadger<Env>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
+        if (config.apiKey && !isHbConfigured()) {
           Honeybadger.configure(config)
           Honeybadger.setContext({
             queue: batch.queue,
@@ -96,7 +104,7 @@ export function withHoneybadger<Env>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
+        if (config.apiKey && !isHbConfigured()) {
           Honeybadger.configure(config)
         }
         try {
@@ -117,7 +125,7 @@ export function withHoneybadger<Env>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey && (Honeybadger.config.apiKey === undefined || Honeybadger.config.apiKey.length === 0)) {
+        if (config.apiKey && !isHbConfigured()) {
           Honeybadger.configure(config)
         }
         try {
