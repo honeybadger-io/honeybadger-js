@@ -13,12 +13,17 @@
   "homepage": "https://github.com/honeybadger-io/honeybadger-js#readme",
   "license": "MIT",
   "main": "dist/index.js",
-  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/honeybadger-io/honeybadger-js.git"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "scripts": {
     "test": "jest --config jest.config.cjs",
