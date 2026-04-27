@@ -8,7 +8,7 @@ function isHbConfigured() {
     return false;
   }
 
-  return Honeybadger.config.apiKey.length === 0
+  return Honeybadger.config.apiKey.length > 0
 }
 
 function reportError(error: unknown): Promise<void> {
