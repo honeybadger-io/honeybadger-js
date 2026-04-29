@@ -167,4 +167,80 @@ describe('browser client', function () {
       expect(payload.notifier.name).toEqual('@honeybadger-io/js')
     })
   })
+
+  describe('ignoreBrowserExtensionErrors', function () {
+    beforeEach(function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+    })
+
+    it('is false by default', function () {
+      expect(client.config.ignoreBrowserExtensionErrors).toEqual(false)
+    })
+
+    it('does not filter errors from non-extension sources when enabled', function () {
+      client.configure({ ignoreBrowserExtensionErrors: true })
+      const result = client.notify({
+        message: 'test error',
+        backtrace: [{ file: 'https://example.com/app.js', method: 'foo', number: 1, column: 1 }]
+      })
+      expect(result).toEqual(true)
+    })
+
+    it('filters chrome-extension errors when enabled', function () {
+      client.configure({ ignoreBrowserExtensionErrors: true })
+      const result = client.notify({
+        message: 'test error',
+        backtrace: [{ file: 'chrome-extension://abcdefg/content.js', method: 'foo', number: 1, column: 1 }]
+      })
+      expect(result).toEqual(false)
+    })
+
+    it('filters moz-extension errors when enabled', function () {
+      client.configure({ ignoreBrowserExtensionErrors: true })
+      const result = client.notify({
+        message: 'test error',
+        backtrace: [{ file: 'moz-extension://abcdefg/content.js', method: 'foo', number: 1, column: 1 }]
+      })
+      expect(result).toEqual(false)
+    })
+
+    it('filters safari-extension errors when enabled', function () {
+      client.configure({ ignoreBrowserExtensionErrors: true })
+      const result = client.notify({
+        message: 'test error',
+        backtrace: [{ file: 'safari-extension://abcdefg/content.js', method: 'foo', number: 1, column: 1 }]
+      })
+      expect(result).toEqual(false)
+    })
+
+    it('filters safari-web-extension errors when enabled', function () {
+      client.configure({ ignoreBrowserExtensionErrors: true })
+      const result = client.notify({
+        message: 'test error',
+        backtrace: [{ file: 'safari-web-extension://abcdefg/content.js', method: 'foo', number: 1, column: 1 }]
+      })
+      expect(result).toEqual(false)
+    })
+
+    it('does not filter browser extension errors when disabled', function () {
+      client.configure({ ignoreBrowserExtensionErrors: false })
+      const result = client.notify({
+        message: 'test error',
+        backtrace: [{ file: 'chrome-extension://abcdefg/content.js', method: 'foo', number: 1, column: 1 }]
+      })
+      expect(result).toEqual(true)
+    })
+
+    it('does not filter errors with an empty backtrace when enabled', function () {
+      client.configure({ ignoreBrowserExtensionErrors: true })
+      const result = client.notify({
+        message: 'test error',
+        backtrace: []
+      })
+      // empty backtrace means no top frame, so it should not be filtered
+      expect(result).toEqual(true)
+    })
+  })
 })

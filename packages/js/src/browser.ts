@@ -57,6 +57,25 @@ class Honeybadger extends Client {
       this.__incrementErrorsCount()
 
       return true
+    },
+    (notice?: Types.Notice) => {
+      if (!this.config.ignoreBrowserExtensionErrors) {
+        return true
+      }
+
+      if (notice && notice.backtrace && notice.backtrace.length) {
+        const topFrame = notice.backtrace[0]
+        if (topFrame && typeof topFrame.file === 'string' &&
+            (topFrame.file.indexOf('chrome-extension://') === 0 ||
+             topFrame.file.indexOf('moz-extension://') === 0 ||
+             topFrame.file.indexOf('safari-extension://') === 0 ||
+             topFrame.file.indexOf('safari-web-extension://') === 0)) {
+          this.logger.debug('Dropping notice: browser extension error', notice)
+          return false
+        }
+      }
+
+      return true
     }
   ]
 
@@ -73,6 +92,7 @@ class Honeybadger extends Client {
       userFeedbackEndpoint: 'https://api.honeybadger.io/v2/feedback',
       async: true,
       maxErrors: null,
+      ignoreBrowserExtensionErrors: false,
       projectRoot: getProjectRoot(),
       ...opts
     }, new BrowserTransport({
