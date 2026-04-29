@@ -66,10 +66,10 @@ class Honeybadger extends Client {
       if (notice && notice.backtrace && notice.backtrace.length) {
         const topFrame = notice.backtrace[0]
         if (topFrame && typeof topFrame.file === 'string' &&
-            (topFrame.file.indexOf('chrome-extension://') === 0 ||
-             topFrame.file.indexOf('moz-extension://') === 0 ||
-             topFrame.file.indexOf('safari-extension://') === 0 ||
-             topFrame.file.indexOf('safari-web-extension://') === 0)) {
+            (topFrame.file.startsWith('chrome-extension://') ||
+             topFrame.file.startsWith('moz-extension://') ||
+             topFrame.file.startsWith('safari-extension://') ||
+             topFrame.file.startsWith('safari-web-extension://'))) {
           this.logger.debug('Dropping notice: browser extension error', notice)
           return false
         }
