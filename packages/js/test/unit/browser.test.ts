@@ -233,13 +233,14 @@ describe('browser client', function () {
       expect(result).toEqual(true)
     })
 
-    it('does not filter errors with an empty backtrace when enabled', function () {
+    it('does not filter errors when called with an empty backtrace input', function () {
       client.configure({ ignoreBrowserExtensionErrors: true })
       const result = client.notify({
         message: 'test error',
         backtrace: []
       })
-      // empty backtrace means no top frame, so it should not be filtered
+      // notify/makeNotice may populate a backtrace for this payload, so this verifies
+      // the resulting notice is still reported and not treated as an extension error.
       expect(result).toEqual(true)
     })
 
