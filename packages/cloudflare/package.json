@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/cloudflare",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Cloudflare Workers integration for Honeybadger",
   "keywords": [
     "cloudflare",
@@ -35,8 +35,8 @@
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
   },
   "dependencies": {
-    "@honeybadger-io/core": "^6.7.2",
-    "@honeybadger-io/js": "^6.12.3"
+    "@honeybadger-io/core": "^6.8.0",
+    "@honeybadger-io/js": "^6.13.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240208.0",
