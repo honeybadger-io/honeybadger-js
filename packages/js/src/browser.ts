@@ -45,25 +45,8 @@ class Honeybadger extends Client {
   /** @internal */
   protected __beforeNotifyHandlers: Types.BeforeNotifyHandler[] = [
     (notice?: Types.Notice) => {
-      if (this.__exceedsMaxErrors()) {
-        this.logger.debug('Dropping notice: max errors exceeded', notice)
-        return false
-      }
-
-      if (notice && !notice.url && typeof document !== 'undefined') {
-        notice.url = document.URL
-      }
-
-      this.__incrementErrorsCount()
-
-      return true
-    },
-    (notice?: Types.Notice) => {
-      if (!this.config.ignoreBrowserExtensionErrors) {
-        return true
-      }
-
-      if (notice && notice.backtrace && notice.backtrace.length) {
+      if (this.config.ignoreBrowserExtensionErrors &&
+          notice && notice.backtrace && notice.backtrace.length) {
         const topFrame = notice.backtrace[0]
         if (topFrame && typeof topFrame.file === 'string' &&
             (topFrame.file.startsWith('chrome-extension://') ||
@@ -74,6 +57,17 @@ class Honeybadger extends Client {
           return false
         }
       }
+
+      if (this.__exceedsMaxErrors()) {
+        this.logger.debug('Dropping notice: max errors exceeded', notice)
+        return false
+      }
+
+      if (notice && !notice.url && typeof document !== 'undefined') {
+        notice.url = document.URL
+      }
+
+      this.__incrementErrorsCount()
 
       return true
     }

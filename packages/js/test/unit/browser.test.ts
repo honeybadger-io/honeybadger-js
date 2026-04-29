@@ -242,5 +242,23 @@ describe('browser client', function () {
       // empty backtrace means no top frame, so it should not be filtered
       expect(result).toEqual(true)
     })
+
+    it('does not count ignored extension errors against maxErrors', function () {
+      client.configure({ ignoreBrowserExtensionErrors: true, maxErrors: 1 })
+
+      // This extension error should be ignored and NOT count against maxErrors
+      const extensionResult = client.notify({
+        message: 'extension error',
+        backtrace: [{ file: 'chrome-extension://abcdefg/content.js', method: 'foo', number: 1, column: 1 }]
+      })
+      expect(extensionResult).toEqual(false)
+
+      // The next real app error should still be reported (maxErrors not yet reached)
+      const appResult = client.notify({
+        message: 'real app error',
+        backtrace: [{ file: 'https://example.com/app.js', method: 'bar', number: 10, column: 1 }]
+      })
+      expect(appResult).toEqual(true)
+    })
   })
 })
