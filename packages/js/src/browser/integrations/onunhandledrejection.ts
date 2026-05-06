@@ -24,7 +24,7 @@ export default function (_window: any = globalThisOrWindow()): Types.Plugin {
             if (!notice.stack) {
               notice.stack = `${reason.message}\n    at ? (unknown:0)`
             }
-            notice.message = `UnhandledPromiseRejectionWarning: ${notice.message}`
+            notice.message = `UnhandledPromiseRejectionWarning: ${reason}`
             client.addBreadcrumb(
               `window.onunhandledrejection: ${notice.name}`,
               {

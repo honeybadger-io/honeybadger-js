@@ -49,7 +49,7 @@ describe('window.onunhandledrejection integration', function () {
     window.onunhandledrejection({ reason })
     expect(mockNotify.mock.calls.length).toBe(1)
     const notice = mockNotify.mock.calls[0][0]
-    expect(notice.message).toBe('UnhandledPromiseRejectionWarning: Test error')
+    expect(notice.message).toBe('UnhandledPromiseRejectionWarning: Error: Test error')
   })
 
   it('sets a fallback stack when the Error has no stack', function () {
