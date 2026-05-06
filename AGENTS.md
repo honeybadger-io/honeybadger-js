@@ -8,7 +8,7 @@ Reference for AI agents working in the `honeybadger-js` repository. Covers monor
 - Monorepo managed by [Lerna](https://lerna.js.org/) (v6) in **independent** versioning mode (`lerna.json`).
 - All packages live under `packages/*` and publish to npm under the `@honeybadger-io/*` scope.
 - Node `>= 14` for most packages (`>= 18` for `esbuild-plugin`). CI runs unit tests on Node 18 and lint/integration on Node 20.
-- Conventional Commits are enforced via commitlint and Husky; release tooling derives versions and changelogs from commit messages.
+- Conventional Commits are enforced in CI via the `commitlint.yml` workflow on PR titles; release tooling derives versions and changelogs from commit messages.
 
 ## Top-level layout
 
@@ -153,9 +153,9 @@ From the root: `npm run build` runs `lerna run build --stream` and respects TS p
 
 ## Commit messages and PR titles
 
-- Conventional Commits, enforced via Husky pre-commit hook and the `commitlint.yml` workflow on PR titles.
+- Conventional Commits, enforced in CI by the `commitlint.yml` workflow against the PR title. There is no local pre-commit hook (no `.husky/`), so individual commit messages on a feature branch aren't validated until merge — keep the PR title clean.
 - Allowed types follow `@commitlint/config-conventional` (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `build`, `ci`, `perf`, `revert`, `style`).
-- Use a scope when a change is package-specific, e.g. `feat(js): ...`, `fix(cloudflare): ...`, `chore(release): ...`. The scope drives which package gets versioned.
+- Use a scope when a change is package-specific, e.g. `feat(js): ...`, `fix(cloudflare): ...`, `chore(release): ...`. In Lerna independent mode, version bumps are driven by **which package directories changed**, not by the commit scope — the type (`feat`/`fix`/breaking) controls bump size, and the scope is mainly for changelog grouping and readability.
 - A `!` suffix or `BREAKING CHANGE:` footer triggers a major bump and is flagged by `commitlint.yml` with a reminder to add an upgrade guide.
 - The `[skip ci]` marker on the `chore(release): publish` commit prevents the release workflow from looping.
 
@@ -196,7 +196,7 @@ NPM Trusted Publishing is configured per-package; only one workflow can be the t
 - **Mind project references.** A change in `core` requires a rebuild before downstream packages typecheck cleanly. Run `npm run build` (or at minimum `lerna run build --scope @honeybadger-io/core` and any downstream).
 - **Match the package's existing tooling.** Don't introduce Jest into a Mocha package, or vice-versa, without strong reason. Don't add new build tools to a package that already has one — extend the existing config.
 - **Honor the lint rules.** Run `npm run lint` before completing a change. Note the custom `local-rules/no-test-imports` — keep all jest helpers behind `test/`.
-- **Conventional commits + scopes.** When changes touch a single package, scope the commit to that package so the release tooling versions it correctly. Cross-package refactors usually warrant separate commits per package.
+- **Conventional commits + scopes.** Lerna decides which packages to version from the files each commit touches — keep a commit confined to one package whenever practical, and scope it accordingly (`feat(js): ...`) so the generated changelog is readable. Cross-package refactors usually warrant separate commits per package for the same reason.
 - **Don't hand-edit `CHANGELOG.md` or version fields.** Both are owned by `lerna publish`.
 - **Don't run releases manually.** Releases are GitHub-Actions-driven. Local `lerna publish` is reserved for the new-package bootstrap case.
 - **Examples are non-build artifacts.** `packages/*/examples/` directories are documentation; they are not built by the package build, are mostly excluded from lint, and shouldn't import from the package's `dist/` — they should consume the published API.
