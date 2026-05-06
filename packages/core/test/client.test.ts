@@ -753,6 +753,27 @@ describe('client', function () {
       expect(payload.server.revision).toEqual('expected revision')
     })
 
+    it('exposes custom Error subclass properties via originalError', function () {
+      class UnauthenticatedError extends Error {
+        readonly skipReporting = true
+        readonly statusCode = 401
+      }
+
+      let notice: Notice
+      client.beforeNotify(function (n) {
+        notice = n
+        if ((n.originalError as UnauthenticatedError)?.skipReporting) {
+          return false
+        }
+      })
+
+      const err = new UnauthenticatedError('not authenticated')
+      expect(client.notify(err)).toEqual(false)
+      expect(notice.originalError).toBe(err)
+      expect((notice.originalError as UnauthenticatedError).skipReporting).toBe(true)
+      expect((notice.originalError as UnauthenticatedError).statusCode).toBe(401)
+    })
+
     it('calls all beforeNotify handlers even if one returns false', function () {
       client.configure({
         apiKey: undefined

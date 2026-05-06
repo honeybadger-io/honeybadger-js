@@ -324,7 +324,7 @@ export function makeNotice(thing: Noticeable): Partial<Notice> {
     notice = {}
   } else if (isErrorObject(thing)) {
     const e = thing as Error
-    notice = merge(thing as Record<string, unknown>, { name: e.name, message: e.message, stack: e.stack, cause: e.cause })
+    notice = merge(thing as Record<string, unknown>, { name: e.name, message: e.message, stack: e.stack, cause: e.cause, originalError: e })
   } else if (typeof thing === 'object') {
     notice = shallowClone(thing)
   } else {

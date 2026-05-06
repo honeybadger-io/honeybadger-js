@@ -1,5 +1,6 @@
 import onUnhandledRejection from '../../../../src/browser/integrations/onunhandledrejection'
 import { nullLogger, TestClient, TestTransport } from '../../helpers'
+import { Notice } from '@honeybadger-io/core/build/src/types';
 
 describe('window.onunhandledrejection integration', function () {
   let client, mockNotify
@@ -39,5 +40,44 @@ describe('window.onunhandledrejection integration', function () {
       name: 'window.onunhandledrejection',
       message: 'UnhandledPromiseRejectionWarning: Unspecified reason'
     }))
+  })
+
+  it('passes the Error directly to client.notify when reason is an Error', function () {
+    const window = { onunhandledrejection: undefined }
+    onUnhandledRejection(window).load(client)
+    const reason = new Error('Test error')
+    window.onunhandledrejection({ reason })
+    expect(mockNotify.mock.calls.length).toBe(1)
+    const notice = mockNotify.mock.calls[0][0]
+    expect(notice.message).toBe('UnhandledPromiseRejectionWarning: Error: Test error')
+  })
+
+  it('sets a fallback stack when the Error has no stack', function () {
+    const window = { onunhandledrejection: undefined }
+    onUnhandledRejection(window).load(client)
+    const reason = new Error('No stack')
+    reason.stack = ''
+    window.onunhandledrejection({ reason })
+    expect(mockNotify.mock.calls.length).toBe(1)
+    const notice = mockNotify.mock.calls[0][0]
+    expect(notice.stack).toBe('No stack\n    at ? (unknown:0)')
+  })
+
+  it('preserves custom properties on Error subclasses passed directly', function () {
+    const window = { onunhandledrejection: undefined }
+    onUnhandledRejection(window).load(client)
+
+    class CustomError extends Error {
+      skipReporting = true
+      errorType = 'CUSTOM'
+    }
+    const reason = new CustomError('Custom error')
+
+    window.onunhandledrejection({ reason })
+    expect(mockNotify.mock.calls.length).toBe(1)
+
+    const notifiedError: Notice = mockNotify.mock.calls[0][0]
+    expect((notifiedError.originalError as CustomError).skipReporting).toBe(true)
+    expect((notifiedError.originalError as CustomError).errorType).toBe('CUSTOM')
   })
 })
