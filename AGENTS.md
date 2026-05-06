@@ -92,7 +92,7 @@ Source organization conventions inside `src/`:
   - `no-var`.
   - Unused vars error unless prefixed with `_`.
 - Custom rule `local-rules/no-test-imports` (defined in `eslint-local-rules.js`): source files under `src/` may not import test files (`*.spec.*`, `*.test.*`) or test-only modules (anything with `jest` in the name, e.g. `jest-fetch-mock`). The autofix removes the offending import.
-- `.eslintignore` excludes `dist/`, `build/`, `tmp/`, `index.d.ts`, the Next.js example apps, and the bundled chrome-extension vendor file.
+- `.eslintignore` excludes `dist/`, `build/`, `tmp/`, `index.d.ts`, `test/integration/`, the Next.js example apps, and the bundled chrome-extension vendor file.
 
 ## Testing
 
