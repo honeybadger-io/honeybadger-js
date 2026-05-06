@@ -1,5 +1,6 @@
 import onUnhandledRejection from '../../../../src/browser/integrations/onunhandledrejection'
 import { nullLogger, TestClient, TestTransport } from '../../helpers'
+import { Notice } from '@honeybadger-io/core/build/src/types';
 
 describe('window.onunhandledrejection integration', function () {
   let client, mockNotify
@@ -47,8 +48,8 @@ describe('window.onunhandledrejection integration', function () {
     const reason = new Error('Test error')
     window.onunhandledrejection({ reason })
     expect(mockNotify.mock.calls.length).toBe(1)
-    expect(mockNotify.mock.calls[0][0]).toBe(reason)
-    expect(reason.message).toBe('UnhandledPromiseRejectionWarning: Test error')
+    const notice = mockNotify.mock.calls[0][0]
+    expect(notice.message).toBe('UnhandledPromiseRejectionWarning: Test error')
   })
 
   it('sets a fallback stack when the Error has no stack', function () {
@@ -58,8 +59,8 @@ describe('window.onunhandledrejection integration', function () {
     reason.stack = ''
     window.onunhandledrejection({ reason })
     expect(mockNotify.mock.calls.length).toBe(1)
-    expect(mockNotify.mock.calls[0][0]).toBe(reason)
-    expect(reason.stack).toBe('No stack\n    at ? (unknown:0)')
+    const notice = mockNotify.mock.calls[0][0]
+    expect(notice.stack).toBe('No stack\n    at ? (unknown:0)')
   })
 
   it('preserves custom properties on Error subclasses passed directly', function () {
@@ -75,9 +76,8 @@ describe('window.onunhandledrejection integration', function () {
     window.onunhandledrejection({ reason })
     expect(mockNotify.mock.calls.length).toBe(1)
 
-    const notifiedError = mockNotify.mock.calls[0][0]
-    expect(notifiedError).toBe(reason)
-    expect(notifiedError.skipReporting).toBe(true)
-    expect(notifiedError.errorType).toBe('CUSTOM')
+    const notifiedError: Notice = mockNotify.mock.calls[0][0]
+    expect((notifiedError.originalError as CustomError).skipReporting).toBe(true)
+    expect((notifiedError.originalError as CustomError).errorType).toBe('CUSTOM')
   })
 })

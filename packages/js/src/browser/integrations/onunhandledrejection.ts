@@ -2,7 +2,7 @@
 import { Types, Util } from '@honeybadger-io/core'
 import Client from '../../browser'
 
-const { instrument, globalThisOrWindow } = Util
+const { instrument, makeNotice, globalThisOrWindow } = Util
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function (_window: any = globalThisOrWindow()): Types.Plugin {
@@ -20,18 +20,19 @@ export default function (_window: any = globalThisOrWindow()): Types.Plugin {
           const { reason } = promiseRejectionEvent
 
           if (reason instanceof Error) {
-            if (!reason.stack) {
-              reason.stack = `${reason.message}\n    at ? (unknown:0)`
+            const notice = makeNotice(reason)
+            if (!notice.stack) {
+              notice.stack = `${reason.message}\n    at ? (unknown:0)`
             }
-            reason.message = `UnhandledPromiseRejectionWarning: ${reason.message}`
+            notice.message = `UnhandledPromiseRejectionWarning: ${notice.message}`
             client.addBreadcrumb(
-              `window.onunhandledrejection: ${reason.name}`,
+              `window.onunhandledrejection: ${notice.name}`,
               {
                 category: 'error',
-                metadata: { name: reason.name, message: reason.message, stack: reason.stack }
+                metadata: { name: notice.name, message: notice.message, stack: notice.stack }
               }
             )
-            client.notify(reason)
+            client.notify(notice)
             return
           }
 
