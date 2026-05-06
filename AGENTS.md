@@ -83,7 +83,7 @@ Source organization conventions inside `src/`:
 
 ## ESLint
 
-- Single root config in `.eslintrc` (no per-package overrides). Run from the root: `npm run lint`.
+- The root `.eslintrc` is the primary shared config for the repo; run repo-wide linting from the root with `npm run lint`. Some subdirectories, especially under `examples/`, also include local `.eslintrc.json` overrides.
 - Extends `eslint:recommended`, `@typescript-eslint/recommended`, `import/errors`, `import/warnings`, `import/typescript`.
 - Style rules to respect:
   - **Single quotes** (escape-aware).
