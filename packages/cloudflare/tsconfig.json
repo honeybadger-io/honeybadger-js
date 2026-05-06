@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "target": "ES2022", // Workers run modern V8. Drops the __awaiter/__generator down-level helpers; native async/await is emitted.
+    "module": "ESNext", // emits real import / export statements, matching "type": "module". This is what fixes the exports is not defined runtime error and the wrangler "has no exports" warning.
+    "moduleResolution": "Bundler", // pairs with module: ESNext; matches how esbuild/wrangler resolves.
+    "lib": ["ES2022"], // the base inherits no explicit lib, so it falls back to a target-derived default
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
+    "types": ["@cloudflare/workers-types", "jest", "node"]
+  }
+}

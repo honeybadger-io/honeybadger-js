@@ -95,7 +95,8 @@ export interface Notice {
 export interface BrowserConfig extends Config {
   userFeedbackEndpoint: string,
   async: boolean
-  maxErrors: number
+  maxErrors: number | null,
+  ignoreBrowserExtensionErrors: boolean
 }
 
 export type Noticeable = string | Error | Partial<Notice>

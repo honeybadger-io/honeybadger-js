@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.7.2...@honeybadger-io/core@6.8.0) (2026-04-29)
+
+
+### Features
+
+* **js:** add `ignoreBrowserExtensionErrors` option ([#1494](https://github.com/honeybadger-io/honeybadger-js/issues/1494)) ([2ff24ec](https://github.com/honeybadger-io/honeybadger-js/commit/2ff24ec8d3ed67b2db645a6b76cb0ad95e793dcc))
+
+
+
+
+
 ## [6.7.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.7.1...@honeybadger-io/core@6.7.2) (2025-09-08)
 
 

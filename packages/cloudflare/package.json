@@ -1,0 +1,59 @@
+{
+  "name": "@honeybadger-io/cloudflare",
+  "version": "0.3.2",
+  "description": "Cloudflare Workers integration for Honeybadger",
+  "keywords": [
+    "cloudflare",
+    "honeybadger"
+  ],
+  "files": [
+    "./dist"
+  ],
+  "author": "Pangratios Cosma <pangratios.cosma@honeybadger.io>",
+  "homepage": "https://github.com/honeybadger-io/honeybadger-js#readme",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/honeybadger-io/honeybadger-js.git"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "test": "jest --config jest.config.cjs",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "build:clean": "npm run clean && npm run build"
+  },
+  "bugs": {
+    "url": "https://github.com/honeybadger-io/honeybadger-js/issues"
+  },
+  "dependencies": {
+    "@honeybadger-io/core": "^6.8.0",
+    "@honeybadger-io/js": "^6.13.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240208.0",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": "^4"
+  },
+  "peerDependenciesMeta": {
+    "@cloudflare/workers-types": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -37,6 +37,9 @@ Refer to each package's README for more information and setup instructions:
 - [@honeybadger-io/plugin-core](./packages/plugin-core)  
   [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fplugin-core.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fplugin-core)  
   Utility functions shared by the Rollup, Webpack, and esbuild plugins
+- [@honeybadger-io/cloudflare](./packages/cloudflare)  
+  [![npm version](https://badge.fury.io/js/%40honeybadger-io%2Fcloudflare.svg)](https://badge.fury.io/js/%40honeybadger-io%2Fcloudflare)  
+  Error monitoring integration for Cloudflare Workers
 
 ## Documentation and Support
 
@@ -93,7 +96,7 @@ Releases are performed via [GitHub Actions](https://github.com/honeybadger-io/ho
 - runs `npm publish`
 
 > [!NOTE] 
-> Some packages may have a `postpublish` script, for example `@honeybadger-io/js` (found in `packages/js`) has a script to also publish to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront). 
+> Some packages may have a `postpublish` script, for example `@honeybadger-io/js` (found in `packages/js`) has a script to also publish to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront).
 
 ### Release Automation
 
@@ -107,7 +110,17 @@ The repository automatically releases new packages when a PR is merged on master
 
 #### Available Commands
 
-- `npm run release` - Calculates the next version, commits and publishes to NPM (and to our CDN). This command is executed from the [Publish New Release](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/lerna-publish.yml) workflow. 
+- `npm run release` - Calculates the next version, commits and publishes to NPM (and to our CDN). This command is executed from the [Publish New Release](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/lerna-publish.yml) workflow.
+
+### Releasing Package For The First Time
+
+If you are publishing a new package on NPM, the [**Publish New Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`)
+will fail with a 404 error message. This is because the workflow assumes Trusted Publishing has been set up for all packages, but since this is a new package, there's no way for Trusted Publishing to have been set up.
+Therefore, a manual release is required:
+- Allow the automated release workflow to fail. NPM publishing will fail, but changelog generation and GitHub release will be successful.
+- Then, check out the master branch locally and pull the latest changes.
+- `npm login`
+- `lerna publish from-package --yes --loglevel silly`
 
 ## License
 
