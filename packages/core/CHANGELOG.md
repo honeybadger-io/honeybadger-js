@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.9.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.8.0...@honeybadger-io/core@6.9.0) (2026-05-06)
+
+
+### Features
+
+* **core:** preserve original error on unhandled rejection ([#1495](https://github.com/honeybadger-io/honeybadger-js/issues/1495)) ([f705728](https://github.com/honeybadger-io/honeybadger-js/commit/f7057284f68f05648b0b88a42c71ec6d785c2a83))
+
+
+
+
+
 # [6.8.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.7.2...@honeybadger-io/core@6.8.0) (2026-04-29)
 
 
