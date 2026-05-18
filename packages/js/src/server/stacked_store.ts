@@ -14,7 +14,7 @@ export class StackedStore implements Types.HoneybadgerStore {
   private readonly globalStore: GlobalStore
 
   constructor(breadcrumbsLimit: number) {
-    this.contents = { context: {}, breadcrumbs: [] };
+    this.contents = { context: {}, eventContext: {}, breadcrumbs: [] };
     this.asyncStore = AsyncStore.create(this.contents, breadcrumbsLimit);
     this.globalStore = GlobalStore.create(this.contents, breadcrumbsLimit);
   }
@@ -34,6 +34,14 @@ export class StackedStore implements Types.HoneybadgerStore {
 
   setContext(context) {
     this.__activeStore().setContext(context);
+  }
+
+  setEventContext(eventContext) {
+    this.__activeStore().setEventContext(eventContext);
+  }
+
+  clearEventContext() {
+    this.__activeStore().clearEventContext();
   }
 
   addBreadcrumb(breadcrumb) {

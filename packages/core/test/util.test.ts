@@ -5,6 +5,8 @@ import {
   objectIsEmpty,
   makeNotice,
   runBeforeNotifyHandlers,
+  runBeforeEventHandlers,
+  resolveInsights,
   runAfterNotifyHandlers,
   shallowClone,
   sanitize,
@@ -14,6 +16,7 @@ import {
   logDeprecatedMethod,
   getSourceForBacktrace
 } from '../src/util'
+import { EventPayload } from '../src/types'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 
 describe('utils', function () {
@@ -138,6 +141,112 @@ describe('utils', function () {
       runBeforeNotifyHandlers(<never>notice, handlers)
       expect(notice.first).toEqual('first expected')
       expect(notice.second).toEqual('second expected')
+    })
+  })
+
+  describe('runBeforeEventHandlers', function () {
+    const makePayload = (): EventPayload => ({ event_type: 'test', ts: '2020-01-01T00:00:00.000Z' })
+
+    it('returns true when no handlers are present', async function () {
+      expect(await runBeforeEventHandlers(makePayload(), [])).toEqual(true)
+    })
+
+    it('returns true when all handlers pass', async function () {
+      const handlers = [
+        () => true,
+        () => undefined,
+        async () => true,
+      ]
+      expect(await runBeforeEventHandlers(makePayload(), handlers)).toEqual(true)
+    })
+
+    it('returns false when a sync handler returns false', async function () {
+      const handlers = [
+        () => true,
+        () => false,
+      ]
+      expect(await runBeforeEventHandlers(makePayload(), handlers)).toEqual(false)
+    })
+
+    it('returns false when an async handler resolves false', async function () {
+      const handlers = [
+        async () => false,
+      ]
+      expect(await runBeforeEventHandlers(makePayload(), handlers)).toEqual(false)
+    })
+
+    it('stops invoking handlers after the first false', async function () {
+      const calls: string[] = []
+      const handlers = [
+        () => { calls.push('a') },
+        () => { calls.push('b'); return false },
+        () => { calls.push('c') },
+      ]
+      await runBeforeEventHandlers(makePayload(), handlers)
+      expect(calls).toEqual(['a', 'b'])
+    })
+
+    it('runs handlers sequentially and observes mutations in order', async function () {
+      const payload = makePayload()
+      const handlers = [
+        (e) => { e.first = 'one' },
+        async (e) => { e.second = e.first + '-two' },
+      ]
+      await runBeforeEventHandlers(payload, handlers)
+      expect(payload.first).toEqual('one')
+      expect(payload.second).toEqual('one-two')
+    })
+  })
+
+  describe('resolveInsights', function () {
+    it('returns everything off when eventsEnabled is false', function () {
+      expect(resolveInsights({ eventsEnabled: false, insights: { enabled: true, console: true, http: true } }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('returns everything off when insights is false', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: false }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('returns everything off when insights is true shorthand (no sources opted in)', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: true }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('returns everything off when insights.enabled is false', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: false } }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('returns everything off when insights.enabled is true but no sub-flags', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: true } }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('returns console on when fully opted in', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: true, console: true } }))
+        .toEqual({ console: true, http: false })
+    })
+
+    it('returns http on when fully opted in', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: true, http: true } }))
+        .toEqual({ console: false, http: true })
+    })
+
+    it('returns both on when fully opted in', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: true, console: true, http: true } }))
+        .toEqual({ console: true, http: true })
+    })
+
+    it('footgun: insights.http without insights.enabled is off', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: { http: true } }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('footgun: insights.console without insights.enabled is off', function () {
+      expect(resolveInsights({ eventsEnabled: true, insights: { console: true } }))
+        .toEqual({ console: false, http: false })
     })
   })
 

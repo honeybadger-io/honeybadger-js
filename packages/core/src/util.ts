@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import * as stackTraceParser from 'stacktrace-parser'
 import {
-  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler, Config, BrowserConfig
+  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, BeforeEventHandler, AfterNotifyHandler, Config, BrowserConfig, EventPayload, InsightsConfig
 } from './types'
 
 export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
@@ -175,6 +175,44 @@ export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeN
   return {
     results,
     result
+  }
+}
+
+export async function runBeforeEventHandlers(
+  payload: EventPayload,
+  handlers: BeforeEventHandler[]
+): Promise<boolean> {
+  for (let i = 0, len = handlers.length; i < len; i++) {
+    const result = await handlers[i](payload)
+    if (result === false) {
+      return false
+    }
+  }
+  return true
+}
+
+export interface ResolvedInsights {
+  console: boolean
+  http: boolean
+}
+
+export function resolveInsights(config: Pick<Config, 'eventsEnabled' | 'insights'>): ResolvedInsights {
+  if (!config.eventsEnabled) {
+    return { console: false, http: false }
+  }
+
+  const insights = config.insights
+  if (insights === true) {
+    return { console: false, http: false }
+  }
+  if (!insights || (insights as InsightsConfig).enabled !== true) {
+    return { console: false, http: false }
+  }
+
+  const obj = insights as InsightsConfig
+  return {
+    console: obj.console ?? false,
+    http: obj.http ?? false,
   }
 }
 

@@ -22,6 +22,11 @@ describe('window.console integration for events logging', function () {
     mockConsole = consoleMocked()
   })
 
+  function enableConsoleInsights() {
+    client.config.eventsEnabled = true
+    client.config.insights = { enabled: true, console: true }
+  }
+
   it('should skip install by default', function () {
     const window = { console: mockConsole }
     eventsLogger(<never>window).load(client)
@@ -29,8 +34,23 @@ describe('window.console integration for events logging', function () {
     expect(window.console.log).toEqual(mockConsole.log)
   })
 
-  it('should skip install if console is not available', function () {
+  it('should skip install when eventsEnabled is true but insights.console is false', function () {
     client.config.eventsEnabled = true
+    const window = { console: mockConsole }
+    eventsLogger(<never>window).load(client)
+    expect(window.console.log).toEqual(mockConsole.log)
+  })
+
+  it('should skip install when insights.enabled is false even if insights.console is true', function () {
+    client.config.eventsEnabled = true
+    client.config.insights = { enabled: false, console: true }
+    const window = { console: mockConsole }
+    eventsLogger(<never>window).load(client)
+    expect(window.console.log).toEqual(mockConsole.log)
+  })
+
+  it('should skip install if console is not available', function () {
+    enableConsoleInsights()
     const window = {}
     eventsLogger(<never>window).load(client)
     expect(window['console']).toBeUndefined()
@@ -38,10 +58,12 @@ describe('window.console integration for events logging', function () {
 
   it('should send events to Honeybadger', async function () {
     const eventsLoggerSpy = jest.spyOn(client.eventsLogger(), 'log')
-    client.config.eventsEnabled = true
+    enableConsoleInsights()
     const window = { console: mockConsole }
     eventsLogger(<never>window).load(client)
     mockConsole.log('testing')
+    // client.event() runs beforeEvent handlers async, so flush microtasks before asserting.
+    await new Promise((resolve) => setTimeout(resolve, 0))
     expect(eventsLoggerSpy).toHaveBeenCalledWith({
       event_type: 'log',
       ts: expect.any(String),

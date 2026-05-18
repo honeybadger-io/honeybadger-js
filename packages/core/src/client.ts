@@ -5,6 +5,7 @@ import {
   makeNotice,
   makeBacktrace,
   runBeforeNotifyHandlers,
+  runBeforeEventHandlers,
   shallowClone,
   logger,
   logDeprecatedMethod,
@@ -21,6 +22,7 @@ import {
   Config,
   Logger,
   BeforeNotifyHandler,
+  BeforeEventHandler,
   AfterNotifyHandler,
   Notice,
   Noticeable,
@@ -28,6 +30,7 @@ import {
   BacktraceFrame,
   Transport,
   NoticeTransportPayload,
+  EventPayload,
   UserFeedbackFormOptions,
   Notifier, EventsLogger,
 } from './types'
@@ -46,6 +49,7 @@ export abstract class Client {
 
   protected __store: HoneybadgerStore = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
+  protected __beforeEventHandlers: BeforeEventHandler[] = []
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
   protected __getSourceFileHandler: (path: string) => Promise<string>
 
@@ -117,11 +121,16 @@ export abstract class Client {
   }
 
   protected __initStore() {
-    this.__store = new GlobalStore({ context: {}, breadcrumbs: [] }, this.config.maxBreadcrumbs);
+    this.__store = new GlobalStore({ context: {}, eventContext: {}, breadcrumbs: [] }, this.config.maxBreadcrumbs);
   }
 
   beforeNotify(handler: BeforeNotifyHandler): Client {
     this.__beforeNotifyHandlers.push(handler)
+    return this
+  }
+
+  beforeEvent(handler: BeforeEventHandler): Client {
+    this.__beforeEventHandlers.push(handler)
     return this
   }
 
@@ -134,6 +143,18 @@ export abstract class Client {
     if (typeof context === 'object' && context != null) {
       this.__store.setContext(context)
     }
+    return this
+  }
+
+  setEventContext(eventContext: Record<string, unknown>): Client {
+    if (typeof eventContext === 'object' && eventContext != null) {
+      this.__store.setEventContext(eventContext)
+    }
+    return this
+  }
+
+  clearEventContext(): Client {
+    this.__store.clearEventContext()
     return this
   }
 
@@ -318,11 +339,31 @@ export abstract class Client {
       data = type
       type = type['event_type'] as string ?? undefined
     }
-    this.__eventsLogger.log({
-      event_type: type,
+
+    if (!this.config.eventsEnabled) {
+      this.logger.debug('skipping event: eventsEnabled is false')
+      return
+    }
+
+    const eventContext = this.__store.getContents('eventContext') || {}
+    const payload: EventPayload = {
+      event_type: type as string,
       ts: new Date().toISOString(),
-      ...data
-    })
+      ...eventContext,
+      ...data,
+    }
+
+    runBeforeEventHandlers(payload, this.__beforeEventHandlers)
+      .then((shouldSend) => {
+        if (!shouldSend) {
+          this.logger.debug('skipping event: beforeEvent handler returned false')
+          return
+        }
+        this.__eventsLogger.log(payload)
+      })
+      .catch((err) => {
+        this.logger.error('beforeEvent handler threw; dropping event', err)
+      })
   }
 
   /**

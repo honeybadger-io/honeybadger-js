@@ -19,6 +19,12 @@ export type EventPayload = {
   ts: string; // ISO Date string
 } & Record<string, unknown>
 
+export interface InsightsConfig {
+  enabled?: boolean
+  console?: boolean
+  http?: boolean
+}
+
 export interface Config {
   apiKey?: string,
   endpoint: string,
@@ -34,6 +40,7 @@ export interface Config {
   reportData: boolean
   breadcrumbsEnabled: boolean | { dom?: boolean, network?: boolean, navigation?: boolean, console?: boolean}
   eventsEnabled: boolean
+  insights: boolean | InsightsConfig
   maxBreadcrumbs: number
   maxObjectDepth: number
   logger: Logger
@@ -52,6 +59,10 @@ export interface ServerlessConfig extends Config {
 
 export interface BeforeNotifyHandler {
   (notice?: Notice): boolean | void | Promise<boolean | void>
+}
+
+export interface BeforeEventHandler {
+  (event: EventPayload): boolean | void | Promise<boolean | void>
 }
 
 export interface AfterNotifyHandler {
@@ -196,6 +207,10 @@ export interface HoneybadgerStore {
 
   setContext(context: Record<string, unknown>): void
 
+  setEventContext(eventContext: Record<string, unknown>): void
+
+  clearEventContext(): void
+
   addBreadcrumb(breadcrumb: BreadcrumbRecord): void
 
   clear(): void
@@ -205,6 +220,7 @@ export interface HoneybadgerStore {
 
 export type StoreContents = {
   context: Record<string, unknown>,
+  eventContext: Record<string, unknown>,
   breadcrumbs: BreadcrumbRecord[]
 }
 

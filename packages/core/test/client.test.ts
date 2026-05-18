@@ -1051,6 +1051,10 @@ describe('client', function () {
   })
 
   describe('event', function () {
+    beforeEach(function () {
+      client.configure({ eventsEnabled: true })
+    })
+
     it('sends an event with only a payload object', function (done) {
       const transport = client.transport();
       const transportSpy = jest.spyOn(transport, 'send')
@@ -1064,7 +1068,7 @@ describe('client', function () {
       setTimeout(() => {
         expect(transportSpy).toHaveBeenCalledWith(expect.anything(), NdJson.stringify([expectedRequestPayload]))
         done()
-      })
+      }, 10)
     })
 
     it('sends an event with an event type and a payload object', function (done) {
@@ -1084,7 +1088,185 @@ describe('client', function () {
         }
         expect(transportSpy).toHaveBeenCalledWith(expect.anything(), NdJson.stringify([expectedRequestPayload]))
         done()
+      }, 10)
+    })
+
+    it('drops the event when eventsEnabled is false', function (done) {
+      client.configure({ eventsEnabled: false })
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      client.event('expected event', { message: 'should be dropped' })
+
+      setTimeout(() => {
+        expect(logSpy).not.toHaveBeenCalled()
+        done()
+      }, 10)
+    })
+  })
+
+  describe('beforeEvent', function () {
+    beforeEach(function () {
+      client.configure({ eventsEnabled: true })
+    })
+
+    it('mutates the event payload', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.beforeEvent((event) => {
+        event.tag = 'expected tag'
       })
+      client.event('an_event', { message: 'hi' })
+
+      setTimeout(() => {
+        expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
+          event_type: 'an_event',
+          message: 'hi',
+          tag: 'expected tag',
+        }))
+        done()
+      }, 10)
+    })
+
+    it('drops the event when a sync handler returns false', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.beforeEvent(() => false)
+      client.event('an_event', { message: 'hi' })
+
+      setTimeout(() => {
+        expect(logSpy).not.toHaveBeenCalled()
+        done()
+      }, 10)
+    })
+
+    it('drops the event when an async handler resolves false', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.beforeEvent(async () => false)
+      client.event('an_event', { message: 'hi' })
+
+      setTimeout(() => {
+        expect(logSpy).not.toHaveBeenCalled()
+        done()
+      }, 20)
+    })
+
+    it('awaits an async handler before pushing to the queue', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.beforeEvent(async (event) => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+        event.tag = 'after await'
+      })
+      client.event('an_event', { message: 'hi' })
+
+      setTimeout(() => {
+        expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
+          event_type: 'an_event',
+          message: 'hi',
+          tag: 'after await',
+        }))
+        done()
+      }, 30)
+    })
+
+    it('runs handlers sequentially and stops dispatching to the queue on first false', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const calls: string[] = []
+
+      client.beforeEvent(() => { calls.push('first') })
+      client.beforeEvent(() => { calls.push('second'); return false })
+      client.beforeEvent(() => { calls.push('third') })
+
+      client.event('an_event', { message: 'hi' })
+
+      setTimeout(() => {
+        expect(calls).toEqual(['first', 'second'])
+        expect(logSpy).not.toHaveBeenCalled()
+        done()
+      }, 10)
+    })
+
+    it('is chainable', function () {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      expect(client.beforeEvent(() => {})).toBe(client)
+    })
+  })
+
+  describe('eventContext', function () {
+    beforeEach(function () {
+      client.configure({ eventsEnabled: true })
+    })
+
+    it('merges eventContext into outgoing event payloads', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.setEventContext({ requestId: 'r-1', correlationId: 'c-1' })
+      client.event('an_event', { message: 'hi' })
+
+      setTimeout(() => {
+        expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
+          event_type: 'an_event',
+          message: 'hi',
+          requestId: 'r-1',
+          correlationId: 'c-1',
+        }))
+        done()
+      }, 10)
+    })
+
+    it('lets explicit data keys win over eventContext on collision', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.setEventContext({ requestId: 'r-1', shared: 'from-context' })
+      client.event('an_event', { shared: 'from-data' })
+
+      setTimeout(() => {
+        expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
+          requestId: 'r-1',
+          shared: 'from-data',
+        }))
+        done()
+      }, 10)
+    })
+
+    it('clearEventContext empties the event context', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.setEventContext({ requestId: 'r-1' })
+      client.clearEventContext()
+      client.event('an_event', { message: 'hi' })
+
+      setTimeout(() => {
+        const call = logSpy.mock.calls[0][0]
+        expect(call.requestId).toBeUndefined()
+        done()
+      }, 10)
+    })
+
+    it('client.clear() also clears eventContext', function (done) {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.setEventContext({ requestId: 'r-1' })
+      client.clear()
+      client.event('an_event', { message: 'hi' })
+
+      setTimeout(() => {
+        const call = logSpy.mock.calls[0][0]
+        expect(call.requestId).toBeUndefined()
+        done()
+      }, 10)
+    })
+
+    it('setEventContext ignores non-object inputs', function () {
+      client.setEventContext({ requestId: 'r-1' })
+      client.setEventContext(<never>'bad')
+      // chainable still
+      expect(client.setEventContext({})).toBe(client)
+    })
+
+    it('is chainable', function () {
+      expect(client.setEventContext({ a: 1 })).toBe(client)
+      expect(client.clearEventContext()).toBe(client)
     })
   })
 

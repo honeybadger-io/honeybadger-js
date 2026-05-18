@@ -12,6 +12,7 @@ export const CONFIG = {
   breadcrumbsEnabled: true,
   // we could decide the value of eventsEnabled based on `env` and `developmentEnvironments`
   eventsEnabled: false,
+  insights: { enabled: false, console: false, http: false },
   maxBreadcrumbs: 40,
   maxObjectDepth: 8,
   logger: console,
