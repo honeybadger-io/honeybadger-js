@@ -2,7 +2,7 @@ import * as stackTraceParser from 'stacktrace-parser'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 import { Notice } from '../src/types'
 import { makeBacktrace, DEFAULT_BACKTRACE_SHIFT } from '../src/util'
-import { ThrottledEventsLogger } from '../src/throttled_events_logger';
+import { ThrottledEventsWorker } from '../src/throttled_events_worker';
 import { NdJson } from 'json-nd';
 
 class MyError extends Error {
@@ -62,9 +62,9 @@ describe('client', function () {
       })
 
       // @ts-ignore
-      expect(client.__eventsLogger).toBeInstanceOf(ThrottledEventsLogger)
+      expect(client.__eventsWorker).toBeInstanceOf(ThrottledEventsWorker)
       // @ts-ignore
-      expect(client.__eventsLogger.config.apiKey).toEqual(client.config.apiKey)
+      expect(client.__eventsWorker.config.apiKey).toEqual(client.config.apiKey)
     })
   })
 
@@ -1093,7 +1093,7 @@ describe('client', function () {
 
     it('drops the event when eventsEnabled is false', function (done) {
       client.configure({ eventsEnabled: false })
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
       client.event('expected event', { message: 'should be dropped' })
 
       setTimeout(() => {
@@ -1109,7 +1109,7 @@ describe('client', function () {
     })
 
     it('mutates the event payload', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.beforeEvent((event) => {
         event.tag = 'expected tag'
@@ -1127,7 +1127,7 @@ describe('client', function () {
     })
 
     it('drops the event when a sync handler returns false', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.beforeEvent(() => false)
       client.event('an_event', { message: 'hi' })
@@ -1139,7 +1139,7 @@ describe('client', function () {
     })
 
     it('drops the event when an async handler resolves false', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.beforeEvent(async () => false)
       client.event('an_event', { message: 'hi' })
@@ -1151,7 +1151,7 @@ describe('client', function () {
     })
 
     it('awaits an async handler before pushing to the queue', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.beforeEvent(async (event) => {
         await new Promise((resolve) => setTimeout(resolve, 10))
@@ -1170,7 +1170,7 @@ describe('client', function () {
     })
 
     it('runs handlers sequentially and stops dispatching to the queue on first false', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
       const calls: string[] = []
 
       client.beforeEvent(() => { calls.push('first') })
@@ -1187,7 +1187,7 @@ describe('client', function () {
     })
 
     it('does not drop the event when a sync handler throws', async function () {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.beforeEvent(() => { throw new Error('boom') })
       client.event('an_event', { message: 'hi' })
@@ -1200,7 +1200,7 @@ describe('client', function () {
     })
 
     it('does not drop the event when an async handler rejects', async function () {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.beforeEvent(async () => { throw new Error('boom') })
       client.event('an_event', { message: 'hi' })
@@ -1213,7 +1213,7 @@ describe('client', function () {
     })
 
     it('keeps running subsequent handlers when an earlier one throws', async function () {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
       const calls: string[] = []
 
       client.beforeEvent(() => { calls.push('first'); throw new Error('boom') })
@@ -1239,8 +1239,8 @@ describe('client', function () {
     })
 
     it('awaits pending async beforeEvent handlers before flushing the queue', async function () {
-      const eventsLoggerSpy = jest.spyOn(client.eventsLogger(), 'log')
-      const flushSpy = jest.spyOn(client.eventsLogger(), 'flushAsync')
+      const eventsLoggerSpy = jest.spyOn(client.eventsWorker(), 'log')
+      const flushSpy = jest.spyOn(client.eventsWorker(), 'flushAsync')
 
       let handlerOrder = 0
       let queueOrderAtHandler = -1
@@ -1269,7 +1269,7 @@ describe('client', function () {
     })
 
     it('still flushes when there are no pending events', async function () {
-      const flushSpy = jest.spyOn(client.eventsLogger(), 'flushAsync')
+      const flushSpy = jest.spyOn(client.eventsWorker(), 'flushAsync')
       await client.flushAsync()
       expect(flushSpy).toHaveBeenCalledTimes(1)
     })
@@ -1281,7 +1281,7 @@ describe('client', function () {
     })
 
     it('merges eventContext into outgoing event payloads', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.setEventContext({ requestId: 'r-1', correlationId: 'c-1' })
       client.event('an_event', { message: 'hi' })
@@ -1298,7 +1298,7 @@ describe('client', function () {
     })
 
     it('lets explicit data keys win over eventContext on collision', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.setEventContext({ requestId: 'r-1', shared: 'from-context' })
       client.event('an_event', { shared: 'from-data' })
@@ -1313,7 +1313,7 @@ describe('client', function () {
     })
 
     it('clearEventContext empties the event context', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.setEventContext({ requestId: 'r-1' })
       client.clearEventContext()
@@ -1327,7 +1327,7 @@ describe('client', function () {
     })
 
     it('client.clear() also clears eventContext', function (done) {
-      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
       client.setEventContext({ requestId: 'r-1' })
       client.clear()

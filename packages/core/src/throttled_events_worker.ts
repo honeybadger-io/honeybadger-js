@@ -1,9 +1,9 @@
-import { Transport, Config, EventsLogger, Logger, EventPayload } from './types'
+import { Transport, Config, EventsWorker, Logger, EventPayload } from './types'
 import { NdJson } from 'json-nd'
 import { endpoint } from './util'
 import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
-export class ThrottledEventsLogger implements EventsLogger {
+export class ThrottledEventsWorker implements EventsWorker {
   private queue: EventPayload[] = []
   private isProcessing = false
   private logger: Logger
@@ -96,7 +96,7 @@ export class ThrottledEventsLogger implements EventsLogger {
   /**
    * todo: improve this
    *
-   * The EventsLogger overrides the console methods to enable automatic instrumentation
+   * The events plugin overrides the console methods to enable automatic instrumentation
    * of console logs to the Honeybadger API.
    * So if we want to log something in here we need to use the original methods.
    */

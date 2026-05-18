@@ -2,7 +2,7 @@
 
 ## Context
 
-`Client.event()` (`packages/core/src/client.ts:314`) is wired to `ThrottledEventsLogger` (`packages/core/src/throttled_events_logger.ts`) which batches events to `/v1/events`. Today the only auto-emitter is the console plugin (`packages/core/src/plugins/events.ts`); HTTP request instrumentation is entirely manual.
+`Client.event()` (`packages/core/src/client.ts:314`) is wired to `ThrottledEventsWorker` (`packages/core/src/throttled_events_worker.ts`) which batches events to `/v1/events`. Today the only auto-emitter is the console plugin (`packages/core/src/plugins/events.ts`); HTTP request instrumentation is entirely manual.
 
 The Honeybadger client spec requires framework integrations to emit per-request events with durations, attach a stable correlation id to every event in a request, and allow users to filter or augment events via a `beforeEvent` hook.
 
@@ -66,7 +66,7 @@ flowchart LR
   USR[user code: client.event] --> EV
   CON[console plugin<br/>insights.enabled and insights.console] --> EV
 
-  EV[Client.event<br/>1. drop if eventsEnabled false<br/>2. merge eventContext<br/>3. await beforeEvent handlers<br/>4. drop on false] --> Q[ThrottledEventsLogger]
+  EV[Client.event<br/>1. drop if eventsEnabled false<br/>2. merge eventContext<br/>3. await beforeEvent handlers<br/>4. drop on false] --> Q[ThrottledEventsWorker]
   Q -->|/v1/events| HB[(Honeybadger)]
 ```
 
@@ -175,7 +175,7 @@ Handlers run sequentially (matches `beforeNotify` semantics — earlier handlers
         this.logger.debug('skipping event: beforeEvent handler returned false')
         return
       }
-      this.__eventsLogger.log(payload)
+      this.__eventsWorker.log(payload)
     }).catch((err) => {
       this.logger.error('beforeEvent handler threw; dropping event', err)
     })
@@ -569,7 +569,7 @@ Reconstructs the full URL from an `options` object as `${protocol}//${hostname}:
 
 **Emission timing:** events fire on the `'response'` event (status code available), not on body completion. This is consistent across the four transports and avoids dangling listeners when callers drop the response stream. `duration` therefore reflects time-to-first-response, not time-to-last-byte. Documented in code comment.
 
-**Self-traffic filtering:** `isHoneybadgerEndpoint` parses each destination URL once and compares its `host` against the parsed hosts of `client.config.endpoint` (`api.honeybadger.io` by default) and `client.config.appEndpoint` (`app.honeybadger.io`). A match short-circuits before `client.event(...)` is called — preventing the recursive emission that would otherwise happen when `ThrottledEventsLogger` POSTs to `/v1/events`.
+**Self-traffic filtering:** `isHoneybadgerEndpoint` parses each destination URL once and compares its `host` against the parsed hosts of `client.config.endpoint` (`api.honeybadger.io` by default) and `client.config.appEndpoint` (`app.honeybadger.io`). A match short-circuits before `client.event(...)` is called — preventing the recursive emission that would otherwise happen when `ThrottledEventsWorker` POSTs to `/v1/events`.
 
 **ALS propagation:** because the patched function executes synchronously (creates the `ClientRequest` and returns immediately), and the `'response'` callback runs on Node's event loop within the same async context, both the request-scoped `requestId` and `correlationId` set by Express/Fastify/Next.js/Lambda are merged onto the outbound event payload via `eventContext`. No extra wiring needed.
 
@@ -608,7 +608,7 @@ Reconstructs the full URL from an `options` object as `${protocol}//${hostname}:
 Three independent guards prevent self-feedback loops:
 
 1. `isHoneybadgerEndpoint` short-circuits emission for any URL whose host matches the configured `endpoint` or `appEndpoint`.
-2. The outbound plugin emits via `client.event(...)`; events go through `ThrottledEventsLogger`, which uses `client.__transport` (the existing `ServerTransport` in `packages/js/src/server/transport.ts` — built on raw `http`/`https`). Even if guard (1) fails, the transport's outbound call would itself be patched and skipped, but our short-circuit ensures we never enter `event()` for self-traffic in the first place.
+2. The outbound plugin emits via `client.event(...)`; events go through `ThrottledEventsWorker`, which uses `client.__transport` (the existing `ServerTransport` in `packages/js/src/server/transport.ts` — built on raw `http`/`https`). Even if guard (1) fails, the transport's outbound call would itself be patched and skipped, but our short-circuit ensures we never enter `event()` for self-traffic in the first place.
 3. The patches are one-shot via `instrument()`'s `__hb_original` chain — re-loading the plugin is a no-op.
 
 ---
@@ -670,7 +670,7 @@ Three independent guards prevent self-feedback loops:
 - `setContext` / `__store.setContext` pattern — `packages/core/src/client.ts:133`, `packages/core/src/store.ts:26`. Pattern model for `setEventContext`.
 - `instrument()` — `packages/core/src/util.ts:350`. Used for all outbound monkey-patching of `http`, `https`, and `globalThis.fetch`. The `__hb_original` chain makes the patches idempotent (re-loading the plugin is a no-op).
 - `filterUrl()` — `packages/core/src/util.ts:507`. Scrubs query-string keys matching `config.filters` from outbound URLs before emission.
-- `ThrottledEventsLogger.log()` — `packages/core/src/throttled_events_logger.ts:25`.
+- `ThrottledEventsWorker.log()` — `packages/core/src/throttled_events_worker.ts:25`.
 - `EventPayload` — `packages/core/src/types.ts:17`.
 
 ## Verification
@@ -685,7 +685,7 @@ Three independent guards prevent self-feedback loops:
 5. **Header passthrough — amzn trace:** send `curl -H "x-amzn-trace-id: Root=1-..." http://localhost:3000/`; confirm the trace id resolves to `correlationId` and a fresh `requestId` is generated.
 6. **Generated ids:** without any of the above headers, confirm both fields are non-empty UUID-ish strings and that they are equal.
 7. **Outbound from Express:** add a route that calls `fetch('https://httpbin.org/get')` then `https.get('https://httpbin.org/status/500')`. Confirm two `request.outbound` events fire with correct `client`, `status`, `duration`, and that both share the **inbound request's** `requestId` and `correlationId`.
-8. **Self-traffic suppression:** confirm that the actual POST to `api.honeybadger.io/v1/events` (driven by `ThrottledEventsLogger`) produces **no** `request.outbound` event in Insights.
+8. **Self-traffic suppression:** confirm that the actual POST to `api.honeybadger.io/v1/events` (driven by `ThrottledEventsWorker`) produces **no** `request.outbound` event in Insights.
 9. **Fastify live check:** same as Express. Additionally verify the plugin registers via `fastify.register(fastifyPlugin(Honeybadger))` and that `Honeybadger.fastifyPlugin` is **undefined** on the singleton.
 10. **Lambda live check:** `serverless invoke local -f helloWrapped --data '{"requestContext":{"http":{"method":"GET","path":"/x"}}}'`. Confirm `request.lambda` event with `requestId` and `correlationId`.
 11. **Next.js live check:** run an app-router example, hit a route, confirm `request.nextjs` event and that programmatic events inside the handler share the same `requestId`/`correlationId`.

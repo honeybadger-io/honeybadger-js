@@ -8,7 +8,7 @@ export interface Logger {
   error(...args: unknown[]): unknown
 }
 
-export interface EventsLogger {
+export interface EventsWorker {
   configure: (opts: Partial<Config>) => void
   log(data: EventPayload): void
   flushAsync(): Promise<void>

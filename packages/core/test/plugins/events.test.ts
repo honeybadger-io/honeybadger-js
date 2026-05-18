@@ -57,14 +57,14 @@ describe('window.console integration for events logging', function () {
   })
 
   it('should send events to Honeybadger', async function () {
-    const eventsLoggerSpy = jest.spyOn(client.eventsLogger(), 'log')
+    const workerLogSpy = jest.spyOn(client.eventsWorker(), 'log')
     enableConsoleInsights()
     const window = { console: mockConsole }
     eventsLogger(<never>window).load(client)
     mockConsole.log('testing')
     // client.event() runs beforeEvent handlers async, so flush microtasks before asserting.
     await new Promise((resolve) => setTimeout(resolve, 0))
-    expect(eventsLoggerSpy).toHaveBeenCalledWith({
+    expect(workerLogSpy).toHaveBeenCalledWith({
       event_type: 'log',
       ts: expect.any(String),
       severity: 'log',

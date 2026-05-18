@@ -32,10 +32,10 @@ import {
   NoticeTransportPayload,
   EventPayload,
   UserFeedbackFormOptions,
-  Notifier, EventsLogger,
+  Notifier, EventsWorker,
 } from './types'
 import { GlobalStore } from './store';
-import { ThrottledEventsLogger } from './throttled_events_logger';
+import { ThrottledEventsWorker } from './throttled_events_worker';
 import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
 // Split at commas and spaces
@@ -55,7 +55,7 @@ export abstract class Client {
   protected __getSourceFileHandler: (path: string) => Promise<string>
 
   protected readonly __transport: Transport;
-  protected readonly __eventsLogger: EventsLogger;
+  protected readonly __eventsWorker: EventsWorker;
 
   protected __notifier: Notifier = {
     name: '@honeybadger-io/core',
@@ -74,7 +74,7 @@ export abstract class Client {
 
     this.__initStore();
     this.__transport = transport
-    this.__eventsLogger = new ThrottledEventsLogger(this.config, this.__transport)
+    this.__eventsWorker = new ThrottledEventsWorker(this.config, this.__transport)
     this.logger = logger(this)
   }
 
@@ -107,7 +107,7 @@ export abstract class Client {
     for (const k in opts) {
       this.config[k] = opts[k]
     }
-    this.__eventsLogger.configure(this.config)
+    this.__eventsWorker.configure(this.config)
     this.loadPlugins()
 
     return this
@@ -363,7 +363,7 @@ export abstract class Client {
           this.logger.debug('skipping event: beforeEvent handler returned false')
           return
         }
-        this.__eventsLogger.log(payload)
+        this.__eventsWorker.log(payload)
       })
       .catch((err) => {
         // should not happen, because each handler is wrapped with a try/catch
@@ -385,7 +385,7 @@ export abstract class Client {
     if (this.__pendingEvents.size > 0) {
       await Promise.allSettled(Array.from(this.__pendingEvents))
     }
-    return this.__eventsLogger.flushAsync();
+    return this.__eventsWorker.flushAsync();
   }
 
   __getBreadcrumbs() {
