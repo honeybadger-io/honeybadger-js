@@ -1186,9 +1186,92 @@ describe('client', function () {
       }, 10)
     })
 
+    it('does not drop the event when a sync handler throws', async function () {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.beforeEvent(() => { throw new Error('boom') })
+      client.event('an_event', { message: 'hi' })
+
+      await client.flushAsync()
+      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
+        event_type: 'an_event',
+        message: 'hi',
+      }))
+    })
+
+    it('does not drop the event when an async handler rejects', async function () {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+
+      client.beforeEvent(async () => { throw new Error('boom') })
+      client.event('an_event', { message: 'hi' })
+
+      await client.flushAsync()
+      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
+        event_type: 'an_event',
+        message: 'hi',
+      }))
+    })
+
+    it('keeps running subsequent handlers when an earlier one throws', async function () {
+      const logSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const calls: string[] = []
+
+      client.beforeEvent(() => { calls.push('first'); throw new Error('boom') })
+      client.beforeEvent((event) => { calls.push('second'); event.tag = 'after-throw' })
+      client.event('an_event', { message: 'hi' })
+
+      await client.flushAsync()
+      expect(calls).toEqual(['first', 'second'])
+      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
+        tag: 'after-throw',
+      }))
+    })
+
     it('is chainable', function () {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       expect(client.beforeEvent(() => {})).toBe(client)
+    })
+  })
+
+  describe('flushAsync', function () {
+    beforeEach(function () {
+      client.configure({ eventsEnabled: true })
+    })
+
+    it('awaits pending async beforeEvent handlers before flushing the queue', async function () {
+      const eventsLoggerSpy = jest.spyOn(client.eventsLogger(), 'log')
+      const flushSpy = jest.spyOn(client.eventsLogger(), 'flushAsync')
+
+      let handlerOrder = 0
+      let queueOrderAtHandler = -1
+      let queueOrderAtFlush = -1
+
+      client.beforeEvent(async (event) => {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+        event.tag = 'awaited'
+        queueOrderAtHandler = ++handlerOrder
+      })
+
+      eventsLoggerSpy.mockImplementation(() => {
+        queueOrderAtFlush = ++handlerOrder
+      })
+
+      client.event('an_event', { message: 'hi' })
+      await client.flushAsync()
+
+      expect(eventsLoggerSpy).toHaveBeenCalledWith(expect.objectContaining({
+        tag: 'awaited',
+      }))
+      // beforeEvent handler must run, push the payload, then flush runs.
+      expect(queueOrderAtHandler).toBeGreaterThan(0)
+      expect(queueOrderAtFlush).toBeGreaterThan(queueOrderAtHandler)
+      expect(flushSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('still flushes when there are no pending events', async function () {
+      const flushSpy = jest.spyOn(client.eventsLogger(), 'flushAsync')
+      await client.flushAsync()
+      expect(flushSpy).toHaveBeenCalledTimes(1)
     })
   })
 

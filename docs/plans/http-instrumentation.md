@@ -17,7 +17,7 @@ This plan adds:
    - `insights.enabled` (new, default `false`) — master gate for **automatic instrumentation only**. When `false`, the per-source flags don't matter; when `true`, the per-source flags decide which sources fire.
    - `insights.console` (new, default `false`) — gates the console-instrumentation plugin. Only effective when `insights.enabled` is true.
    - `insights.http` (new, default `false`) — gates HTTP auto-events (inbound + outbound).
-   Shorthand booleans accepted: `insights: true` ≡ `{ enabled: true }` and `insights: false` ≡ `{ enabled: false }`. Sub-flags fall back to their listed defaults — so `insights: true` alone does **not** turn on any sources; users must enable them explicitly.
+   `insights` must be an object. Boolean shorthands are intentionally **not** accepted; users opt in by setting `insights.enabled: true` together with the per-source flags they want.
 4. **Inbound** automatic request events for **Express**, **AWS Lambda** (HTTP-shaped invocations), **Fastify**, and **Next.js App Router**.
 5. **Outbound** automatic request events for Node `http` / `https` / `fetch` (server-side only — browser deferred).
 
@@ -26,7 +26,7 @@ Configuration recipes:
 | Goal | Settings |
 |---|---|
 | Everything off (default) | `eventsEnabled: false` |
-| Programmatic `event()` only, no auto-instrumentation | `eventsEnabled: true` |
+| Programmatic `event()` only, no auto-instrumentation | `eventsEnabled: true, insights: { enabled: false }` |
 | Console events only | `eventsEnabled: true, insights: { enabled: true, console: true }` |
 | HTTP auto-events only | `eventsEnabled: true, insights: { enabled: true, http: true }` |
 | Console + HTTP auto-events | `eventsEnabled: true, insights: { enabled: true, console: true, http: true }` |

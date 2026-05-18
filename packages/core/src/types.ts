@@ -40,7 +40,7 @@ export interface Config {
   reportData: boolean
   breadcrumbsEnabled: boolean | { dom?: boolean, network?: boolean, navigation?: boolean, console?: boolean}
   eventsEnabled: boolean
-  insights: boolean | InsightsConfig
+  insights: InsightsConfig
   maxBreadcrumbs: number
   maxObjectDepth: number
   logger: Logger

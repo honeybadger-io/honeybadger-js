@@ -51,6 +51,7 @@ export abstract class Client {
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
   protected __beforeEventHandlers: BeforeEventHandler[] = []
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
+  protected __pendingEvents: Set<Promise<void>> = new Set()
   protected __getSourceFileHandler: (path: string) => Promise<string>
 
   protected readonly __transport: Transport;
@@ -353,7 +354,10 @@ export abstract class Client {
       ...data,
     }
 
-    runBeforeEventHandlers(payload, this.__beforeEventHandlers)
+    // Track in-flight handler chains so flushAsync() can await them before
+    // delegating to the events logger; otherwise a caller that awaits flushAsync()
+    // immediately after event() may flush before the payload enters the queue.
+    const inFlight = runBeforeEventHandlers(payload, this.__beforeEventHandlers, this.logger)
       .then((shouldSend) => {
         if (!shouldSend) {
           this.logger.debug('skipping event: beforeEvent handler returned false')
@@ -362,15 +366,25 @@ export abstract class Client {
         this.__eventsLogger.log(payload)
       })
       .catch((err) => {
-        this.logger.error('beforeEvent handler threw; dropping event', err)
+        // should not happen, because each handler is wrapped with a try/catch
+        this.logger.error('beforeEvent handler chain failed; dropping event', err)
       })
+      .finally(() => {
+        this.__pendingEvents.delete(inFlight)
+      })
+    this.__pendingEvents.add(inFlight)
   }
 
   /**
    * This method currently flushes the event (Insights) queue.
    * In the future, it should also flush the error queue (assuming an error throttler is implemented).
    */
-  flushAsync(): Promise<void> {
+  async flushAsync(): Promise<void> {
+    // Wait for any pending beforeEvent chains so their payloads land in the queue
+    // before we ask the events logger to drain.
+    if (this.__pendingEvents.size > 0) {
+      await Promise.allSettled(Array.from(this.__pendingEvents))
+    }
     return this.__eventsLogger.flushAsync();
   }
 

@@ -196,21 +196,43 @@ describe('utils', function () {
       expect(payload.first).toEqual('one')
       expect(payload.second).toEqual('one-two')
     })
+
+    it('treats a thrown sync handler as a no-op (does not drop the event)', async function () {
+      const calls: string[] = []
+      const handlers = [
+        () => { calls.push('a'); throw new Error('boom') },
+        (e) => { calls.push('b'); e.tag = 'after-throw' },
+      ]
+      const payload = makePayload()
+      expect(await runBeforeEventHandlers(payload, handlers)).toEqual(true)
+      expect(calls).toEqual(['a', 'b'])
+      expect(payload.tag).toEqual('after-throw')
+    })
+
+    it('treats a rejected async handler as a no-op (does not drop the event)', async function () {
+      const calls: string[] = []
+      const handlers = [
+        async () => { calls.push('a'); throw new Error('boom') },
+        (e) => { calls.push('b'); e.tag = 'after-throw' },
+      ]
+      const payload = makePayload()
+      expect(await runBeforeEventHandlers(payload, handlers)).toEqual(true)
+      expect(calls).toEqual(['a', 'b'])
+      expect(payload.tag).toEqual('after-throw')
+    })
+
+    it('logs via the supplied logger when a handler throws', async function () {
+      const errorSpy = jest.fn()
+      const logger = { ...nullLogger(), error: errorSpy }
+      const handlers = [() => { throw new Error('boom') }]
+      await runBeforeEventHandlers(makePayload(), handlers, logger)
+      expect(errorSpy).toHaveBeenCalled()
+    })
   })
 
   describe('resolveInsights', function () {
     it('returns everything off when eventsEnabled is false', function () {
       expect(resolveInsights({ eventsEnabled: false, insights: { enabled: true, console: true, http: true } }))
-        .toEqual({ console: false, http: false })
-    })
-
-    it('returns everything off when insights is false', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: false }))
-        .toEqual({ console: false, http: false })
-    })
-
-    it('returns everything off when insights is true shorthand (no sources opted in)', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: true }))
         .toEqual({ console: false, http: false })
     })
 

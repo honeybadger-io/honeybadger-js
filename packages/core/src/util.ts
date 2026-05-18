@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import * as stackTraceParser from 'stacktrace-parser'
 import {
-  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, BeforeEventHandler, AfterNotifyHandler, Config, BrowserConfig, EventPayload, InsightsConfig
+  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, BeforeEventHandler, AfterNotifyHandler, Config, BrowserConfig, EventPayload
 } from './types'
 
 export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
@@ -180,10 +180,18 @@ export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeN
 
 export async function runBeforeEventHandlers(
   payload: EventPayload,
-  handlers: BeforeEventHandler[]
+  handlers: BeforeEventHandler[],
+  logger?: Logger
 ): Promise<boolean> {
   for (let i = 0, len = handlers.length; i < len; i++) {
-    const result = await handlers[i](payload)
+    let result: ReturnType<BeforeEventHandler>
+    try {
+      result = await handlers[i](payload)
+    } catch (err) {
+      // A buggy handler should not suppress unrelated events. Log and treat as no-op.
+      logger?.error('beforeEvent handler threw; continuing', err)
+      continue
+    }
     if (result === false) {
       return false
     }
@@ -202,17 +210,13 @@ export function resolveInsights(config: Pick<Config, 'eventsEnabled' | 'insights
   }
 
   const insights = config.insights
-  if (insights === true) {
-    return { console: false, http: false }
-  }
-  if (!insights || (insights as InsightsConfig).enabled !== true) {
+  if (!insights || insights.enabled !== true) {
     return { console: false, http: false }
   }
 
-  const obj = insights as InsightsConfig
   return {
-    console: obj.console ?? false,
-    http: obj.http ?? false,
+    console: insights.console ?? false,
+    http: insights.http ?? false,
   }
 }
 
