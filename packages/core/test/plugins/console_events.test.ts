@@ -1,5 +1,5 @@
 import { nullLogger, TestClient, TestTransport } from '../helpers'
-import eventsLogger from '../../src/plugins/events'
+import eventsLogger from '../../src/plugins/console_events'
 
 const consoleMocked = () => {
   return {

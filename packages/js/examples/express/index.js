@@ -9,6 +9,7 @@ Honeybadger.configure({
   apiKey: process.env.HONEYBADGER_API_KEY,
   reportData: true,
   eventsEnabled: true,
+  insights: { enabled: true, http: true },
   debug: true,
 })
 

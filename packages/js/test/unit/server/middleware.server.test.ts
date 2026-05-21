@@ -149,4 +149,288 @@ describe('Express Middleware', function () {
         })
     }));
   })
+
+  describe('inbound HTTP events', function () {
+    // The store is `protected` on Client; in tests we read it via `as any`.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const readEventContext = (): Record<string, unknown> => (client as any).__store.getContents('eventContext')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const eventsWorker = () => (client as any).__eventsWorker
+
+    function buildApp(handler?: (req, res) => void) {
+      const app = express()
+      app.use(client.requestHandler)
+      app.get('/ok', (req, res) => {
+        if (handler) handler(req, res)
+        else res.status(200).json({ ok: true })
+      })
+      app.get('/custom', (_req, res) => {
+        client.event('custom', { msg: 'hi' })
+        res.status(200).json({ ok: true })
+      })
+      app.get('/fail', (_req, _res) => {
+        throw new Error('boom')
+      })
+      app.use(client.errorHandler)
+      app.use(function (_err, _req, res, _next) {
+        res.status(500).json({ failed: true })
+      })
+      return app
+    }
+
+    describe('with eventsEnabled: true, insights: { enabled: true, http: true }', function () {
+      beforeEach(function () {
+        client.configure({
+          eventsEnabled: true,
+          insights: { enabled: true, http: true },
+        })
+      })
+
+      it('emits a request.handled event with method, path, status, and duration', function () {
+        const evSpy = jest.spyOn(client, 'event')
+
+        return request(buildApp())
+          .get('/ok')
+          .expect(200)
+          .then(() => {
+            const calls = evSpy.mock.calls.filter(c => c[0] === 'request.handled')
+            expect(calls).toHaveLength(1)
+            const payload = calls[0][1] as Record<string, unknown>
+            expect(payload).toMatchObject({
+              method: 'GET',
+              path: '/ok',
+              status: 200,
+            })
+            expect(typeof payload.duration).toBe('number')
+            expect(payload.duration).toBeGreaterThanOrEqual(0)
+          })
+      })
+
+      it('uses x-request-id header for requestId and falls back to it for correlationId', function () {
+        let captured: Record<string, unknown>
+
+        return request(buildApp((_req, res) => {
+          captured = readEventContext()
+          res.status(200).json({ ok: true })
+        }))
+          .get('/ok')
+          .set('x-request-id', 'abc-123')
+          .expect(200)
+          .then(() => {
+            expect(captured.requestId).toBe('abc-123')
+            expect(captured.correlationId).toBe('abc-123')
+          })
+      })
+
+      it('uses request-id header when x-request-id is absent', function () {
+        let captured: Record<string, unknown>
+
+        return request(buildApp((_req, res) => {
+          captured = readEventContext()
+          res.status(200).json({ ok: true })
+        }))
+          .get('/ok')
+          .set('request-id', 'plain-456')
+          .expect(200)
+          .then(() => {
+            expect(captured.requestId).toBe('plain-456')
+            expect(captured.correlationId).toBe('plain-456')
+          })
+      })
+
+      it('uses x-correlation-id header for correlationId (distinct from requestId)', function () {
+        let captured: Record<string, unknown>
+
+        return request(buildApp((_req, res) => {
+          captured = readEventContext()
+          res.status(200).json({ ok: true })
+        }))
+          .get('/ok')
+          .set('x-request-id', 'req-1')
+          .set('x-correlation-id', 'trace-9')
+          .expect(200)
+          .then(() => {
+            expect(captured.requestId).toBe('req-1')
+            expect(captured.correlationId).toBe('trace-9')
+          })
+      })
+
+      it('falls back to x-amzn-trace-id for correlationId when x-correlation-id is absent', function () {
+        let captured: Record<string, unknown>
+
+        return request(buildApp((_req, res) => {
+          captured = readEventContext()
+          res.status(200).json({ ok: true })
+        }))
+          .get('/ok')
+          .set('x-amzn-trace-id', 'Root=1-abc-def')
+          .expect(200)
+          .then(() => {
+            expect(typeof captured.requestId).toBe('string')
+            expect((captured.requestId as string).length).toBeGreaterThan(0)
+            expect(captured.correlationId).toBe('Root=1-abc-def')
+            expect(captured.correlationId).not.toBe(captured.requestId)
+          })
+      })
+
+      it('generates non-empty requestId equal to correlationId when no headers are present', function () {
+        let captured: Record<string, unknown>
+
+        return request(buildApp((_req, res) => {
+          captured = readEventContext()
+          res.status(200).json({ ok: true })
+        }))
+          .get('/ok')
+          .expect(200)
+          .then(() => {
+            expect(typeof captured.requestId).toBe('string')
+            expect((captured.requestId as string).length).toBeGreaterThan(0)
+            expect(captured.correlationId).toBe(captured.requestId)
+          })
+      })
+
+      it('only emits a single request.handled event when both finish and close fire', function () {
+        const evSpy = jest.spyOn(client, 'event')
+
+        return request(buildApp((_req, res) => {
+          res.once('finish', () => {
+            // Simulate both terminal events firing on the same response.
+            res.emit('close')
+          })
+          res.status(200).json({ ok: true })
+        }))
+          .get('/ok')
+          .expect(200)
+          .then(() => {
+            const calls = evSpy.mock.calls.filter(c => c[0] === 'request.handled')
+            expect(calls).toHaveLength(1)
+          })
+      })
+
+      it('emits with status 500 on errors', function () {
+        const evSpy = jest.spyOn(client, 'event')
+
+        return request(buildApp())
+          .get('/fail')
+          .expect(500)
+          .then(() => {
+            const call = evSpy.mock.calls.find(c => c[0] === 'request.handled')
+            expect(call).toBeDefined()
+            const payload = call[1] as Record<string, unknown>
+            expect(payload.status).toBe(500)
+          })
+      })
+    })
+
+    describe('gating', function () {
+      it('with insights.http: false (default), does not emit request.handled but still seeds event context', function () {
+        client.configure({
+          eventsEnabled: true,
+          insights: { enabled: true, http: false },
+        })
+
+        const evSpy = jest.spyOn(client, 'event')
+        let captured: Record<string, unknown>
+
+        return request(buildApp((_req, res) => {
+          captured = readEventContext()
+          res.status(200).json({ ok: true })
+        }))
+          .get('/ok')
+          .set('x-request-id', 'rid-1')
+          .expect(200)
+          .then(() => {
+            expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+            expect(captured.requestId).toBe('rid-1')
+            expect(captured.correlationId).toBe('rid-1')
+          })
+      })
+
+      it('with insights.enabled: false, does not emit request.handled but still seeds event context', function () {
+        client.configure({
+          eventsEnabled: true,
+          insights: { enabled: false, http: true },
+        })
+
+        const evSpy = jest.spyOn(client, 'event')
+        let captured: Record<string, unknown>
+
+        return request(buildApp((_req, res) => {
+          captured = readEventContext()
+          res.status(200).json({ ok: true })
+        }))
+          .get('/ok')
+          .set('x-request-id', 'rid-2')
+          .expect(200)
+          .then(() => {
+            expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+            expect(captured.requestId).toBe('rid-2')
+          })
+      })
+
+      it('with insights.http: true but insights.enabled missing (footgun), does not emit request.handled', function () {
+        client.configure({
+          eventsEnabled: true,
+          // intentionally omitting `enabled` — verifies the footgun is gated off
+          insights: { http: true },
+        })
+
+        const evSpy = jest.spyOn(client, 'event')
+
+        return request(buildApp())
+          .get('/ok')
+          .expect(200)
+          .then(() => {
+            expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+          })
+      })
+
+      it('with eventsEnabled: false, neither request.handled nor programmatic events fire', function () {
+        client.configure({
+          eventsEnabled: false,
+          insights: { enabled: true, http: true },
+        })
+
+        const workerSpy = jest.spyOn(eventsWorker(), 'log')
+
+        return request(buildApp())
+          .get('/custom') // handler calls client.event('custom', ...)
+          .expect(200)
+          .then(() => new Promise((resolve) => setTimeout(resolve, 50)))
+          .then(() => {
+            expect(workerSpy).not.toHaveBeenCalled()
+          })
+      })
+
+      it('with eventsEnabled: true and insights off, programmatic events still fire and carry requestId/correlationId', function () {
+        client.configure({
+          eventsEnabled: true,
+          insights: { enabled: false },
+        })
+
+        const workerSpy = jest.spyOn(eventsWorker(), 'log')
+
+        return request(buildApp())
+          .get('/custom')
+          .set('x-request-id', 'rid-prog')
+          .expect(200)
+          .then(() => new Promise((resolve) => setTimeout(resolve, 50)))
+          .then(() => {
+            const customCall = workerSpy.mock.calls.find(
+              (c) => (c[0] as Record<string, unknown>).event_type === 'custom'
+            )
+            expect(customCall).toBeDefined()
+            const payload = customCall[0] as Record<string, unknown>
+            expect(payload.requestId).toBe('rid-prog')
+            expect(payload.correlationId).toBe('rid-prog')
+
+            const requestExpressCall = workerSpy.mock.calls.find(
+              (c) => (c[0] as Record<string, unknown>).event_type === 'request.handled'
+            )
+            expect(requestExpressCall).toBeUndefined()
+          })
+      })
+    })
+  })
 })
