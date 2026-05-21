@@ -136,5 +136,13 @@ describe('http_event helpers', function () {
       expect(payload.method).toBe('GET')
       expect(payload.custom).toBe('value')
     })
+
+    it('does not drop extras that share names with Object prototype keys', function () {
+      const payload = buildRequestEventPayload({
+        extra: { toString: 'custom-to-string', constructor: 'custom-ctor' },
+      })
+      expect(payload.toString).toBe('custom-to-string')
+      expect(payload.constructor).toBe('custom-ctor')
+    })
   })
 })

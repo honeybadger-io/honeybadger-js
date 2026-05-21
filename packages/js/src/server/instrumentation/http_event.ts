@@ -5,6 +5,8 @@
  * outbound (`http`, `https`, `fetch`) integrations.
  */
 
+import { randomUUID as nodeRandomUUID } from 'crypto'
+
 export type HeaderValue = string | string[] | undefined
 export type HeadersInput = Record<string, HeaderValue> | null | undefined
 
@@ -35,15 +37,14 @@ function readHeader(headers: HeadersInput, name: string): string | undefined {
 }
 
 /**
- * Generates a UUID-like identifier. Prefers `crypto.randomUUID()` when
- * available (Node 14.17+); falls back to a Math.random-based v4-shaped string.
+ * Generates a UUID-like identifier. Prefers Node's `crypto.randomUUID()` when
+ * available (Node 14.17+); falls back to a Math.random-based v4-shaped string
+ * for older Node versions.
  */
 function generateId(): string {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const c: any = (globalThis as any).crypto
-  if (c && typeof c.randomUUID === 'function') {
+  if (typeof nodeRandomUUID === 'function') {
     try {
-      return c.randomUUID()
+      return nodeRandomUUID()
     } catch (_e) {
       // fall through to manual generation
     }
@@ -137,7 +138,9 @@ export function buildRequestEventPayload(input: RequestEventInput): Record<strin
 
   if (input.extra) {
     for (const k of Object.keys(input.extra)) {
-      if (!(k in payload)) payload[k] = input.extra[k]
+      if (!Object.prototype.hasOwnProperty.call(payload, k)) {
+        payload[k] = input.extra[k]
+      }
     }
   }
 
