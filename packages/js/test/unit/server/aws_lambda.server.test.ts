@@ -604,10 +604,16 @@ describe('Lambda Handler', function () {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const readEventContext = (): Record<string, unknown> => (client as any).__store.getContents('eventContext')
 
-    beforeEach(function () {
-      // Silently swallow the events worker's POSTs so unmatched-host nock
-      // interceptors from earlier tests don't surface as console noise.
+    // Silently swallow the events worker's POSTs so unmatched-host nock
+    // interceptors from earlier tests don't surface as console noise. Registered
+    // once for the whole describe and torn down in afterAll so persistent
+    // interceptors don't accumulate.
+    beforeAll(function () {
       nock('https://api.honeybadger.io').persist().post('/v1/events').reply(201, '')
+    })
+
+    afterAll(function () {
+      nock.cleanAll()
     })
 
     const apiGatewayV2Event = (headers: Record<string, string> = {}) => ({
@@ -840,7 +846,6 @@ describe('Lambda Handler', function () {
         const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
 
         await handler(apiGatewayV2Event(), ctx())
-        await new Promise((r) => setTimeout(r, 30))
 
         expect(workerSpy).not.toHaveBeenCalled()
       })

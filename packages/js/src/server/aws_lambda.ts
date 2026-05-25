@@ -33,9 +33,10 @@ function reportToHoneybadger(hb: typeof Honeybadger, err: Error | string | null,
   })
 }
 
-// Detects API Gateway (v1 REST + v2 HTTP) and ALB events. v1/ALB carry
-// `httpMethod` at the top level; v2 nests method under `requestContext.http`.
-function isApiGatewayEvent(event: unknown): boolean {
+// Detects inbound HTTP Lambda events (API Gateway v1 REST, API Gateway v2 HTTP, and ALB).
+// API Gateway v1 and ALB carry `httpMethod` at the top level; API Gateway v2 nests
+// method under `requestContext.http`.
+function isHttpLambdaEvent(event: unknown): boolean {
   if (!event || typeof event !== 'object') {
     return false
   }
@@ -109,7 +110,7 @@ function getLambdaHeaders(event: unknown): Record<string, string | string[] | un
 }
 
 function seedLambdaEventContext(hb: typeof Honeybadger, event: unknown, context: Context): void {
-  if (isApiGatewayEvent(event)) {
+  if (isHttpLambdaEvent(event)) {
     hb.setEventContext(seedRequestEventContext(getLambdaHeaders(event)))
     return
   }
@@ -122,7 +123,7 @@ function seedLambdaEventContext(hb: typeof Honeybadger, event: unknown, context:
 }
 
 function createLambdaRequestEmitter(hb: typeof Honeybadger, event: unknown): ((status: number) => void) | null {
-  if (!isApiGatewayEvent(event)) return null
+  if (!isHttpLambdaEvent(event)) return null
   if (!Util.resolveInsights(hb.config).http) return null
 
   const start = startTimer()
