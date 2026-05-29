@@ -61,11 +61,42 @@ app.get('/checkin/:id', (req, res) => {
 })
 
 app.get('/event', (req, res) => {
-  // should send an event to Honeybadger, with type 'test-event'
+  // should send an event to Honeybadger, with type 'button_click'
   Honeybadger.event('button_click', {
     action: 'buy_now',
     user_id: 123,
     product_id: 456
+  })
+
+  // should send an event to Honeybadger, with type 'log'
+  console.log('Event sent!', { source: 'console.log' , path: req.url })
+
+  res.send('Done. Check your Honeybadger Insights page!')
+})
+
+app.get('/event-flood', async (req, res) => {
+  const count = parseInt(req.query.count, 10) || 100000
+  const batchSize = 1000
+  for (let i = 0; i < count; i++) {
+    Honeybadger.event('quota_test', {
+      index: i,
+      timestamp: Date.now(),
+      payload: 'x'.repeat(200),
+    })
+    if (i > 0 && i % batchSize === 0) {
+      await new Promise((resolve) => setImmediate(resolve))
+    }
+  }
+  res.send(`Fired ${count} events. Watch the logs for throttling/quota messages.`)
+})
+
+app.get('/event/:name', (req, res) => {
+  // should send an event to Honeybadger, with type 'button_click'
+  Honeybadger.event('button_click', {
+    action: 'buy_now',
+    user_id: 123,
+    product_id: 456,
+    name: req.params.name
   })
 
   // should send an event to Honeybadger, with type 'log'
