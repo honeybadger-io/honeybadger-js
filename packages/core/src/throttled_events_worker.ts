@@ -87,7 +87,7 @@ export class ThrottledEventsWorker implements EventsWorker {
         if ([200, 201].includes(resp.statusCode)) {
           this.logger.debug('[Honeybadger] Events sent successfully')
         } else {
-          this.logger.debug('[Honeybadger] Events failed with status code: ' + resp.statusCode)
+          this.logger.debug(`[Honeybadger] Events failed[${resp.statusCode}]: ${resp.body}`)
         }
       })
       .catch(err => {
