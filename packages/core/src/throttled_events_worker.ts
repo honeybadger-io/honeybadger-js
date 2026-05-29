@@ -83,9 +83,11 @@ export class ThrottledEventsWorker implements EventsWorker {
         maxObjectDepth: this.config.maxObjectDepth,
         logger: this.logger,
       }, data)
-      .then(() => {
-        if (this.config.debug) {
+      .then((resp: { statusCode: number, body: string }) => {
+        if ([200, 201].includes(resp.statusCode)) {
           this.logger.debug('[Honeybadger] Events sent successfully')
+        } else {
+          this.logger.debug('[Honeybadger] Events failed with status code: ' + resp.statusCode)
         }
       })
       .catch(err => {
@@ -106,8 +108,14 @@ export class ThrottledEventsWorker implements EventsWorker {
       log: (<any>console.log).__hb_original ?? console.log,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       info: (<any>console.info).__hb_original ?? console.info,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      debug: (<any>console.debug).__hb_original ?? console.debug,
+      debug: (...args: unknown[]) => {
+        if (!this.config.debug) {
+          return
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const func = (<any>console.debug).__hb_original ?? console.debug
+        return func(...args)
+      },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       warn: (<any>console.warn).__hb_original ?? console.warn,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
