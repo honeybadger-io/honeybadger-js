@@ -6,6 +6,7 @@ import {
   makeBacktrace,
   runBeforeNotifyHandlers,
   runBeforeEventHandlers,
+  shouldSampleEvent,
   shallowClone,
   logger,
   logDeprecatedMethod,
@@ -363,6 +364,12 @@ export abstract class Client {
           this.logger.debug('skipping event: beforeEvent handler returned false')
           return
         }
+        const sampleRate = this.config.insights?.sampleRatePercentage ?? 100
+        if (!shouldSampleEvent(payload, sampleRate)) {
+          this.logger.debug('skipping event: dropped by sampleRatePercentage')
+          return
+        }
+        delete (payload as Record<string, unknown>)._hb
         this.__eventsWorker.log(payload)
       })
       .catch((err) => {

@@ -23,6 +23,9 @@ export interface InsightsConfig {
   enabled?: boolean
   console?: boolean
   http?: boolean
+  dispatchIntervalSeconds?: number
+  bulkThreshold?: number
+  sampleRatePercentage?: number
 }
 
 export interface Config {

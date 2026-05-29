@@ -220,6 +220,35 @@ export function resolveInsights(config: Pick<Config, 'eventsEnabled' | 'insights
   }
 }
 
+function fnv1a(str: string): number {
+  let h = 0x811c9dc5
+  for (let i = 0, len = str.length; i < len; i++) {
+    h ^= str.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
+  }
+  return h >>> 0
+}
+
+function clampSampleRate(rate: number): number {
+  if (rate < 0) return 0
+  if (rate > 100) return 100
+  return rate
+}
+
+export function shouldSampleEvent(event: EventPayload, configRate: number): boolean {
+  const meta = (event as Record<string, unknown>)._hb as { sampleRate?: unknown } | undefined
+  const override = meta && typeof meta.sampleRate === 'number' ? meta.sampleRate : undefined
+  const rate = clampSampleRate(typeof override === 'number' ? override : configRate)
+  if (rate <= 0) return false
+  if (rate >= 100) return true
+
+  const requestId = (event as Record<string, unknown>).requestId
+  if (typeof requestId === 'string' && requestId.length > 0) {
+    return fnv1a(requestId) % 100 < rate
+  }
+  return Math.random() * 100 < rate
+}
+
 export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNotifyHandler[], error?: Error): boolean {
   if (notice && notice.afterNotify) {
     notice.afterNotify(error, notice)

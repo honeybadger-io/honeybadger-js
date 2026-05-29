@@ -1101,6 +1101,70 @@ describe('client', function () {
         done()
       }, 10)
     })
+
+    describe('sampling', function () {
+      it('drops events when insights.sampleRatePercentage is 0', function (done) {
+        client.configure({ insights: { enabled: true, sampleRatePercentage: 0 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.event('e', { requestId: 'abc' })
+        setTimeout(() => {
+          expect(logSpy).not.toHaveBeenCalled()
+          done()
+        }, 10)
+      })
+
+      it('always sends events at rate 100', function (done) {
+        client.configure({ insights: { enabled: true, sampleRatePercentage: 100 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.event('e', { message: 'm' })
+        setTimeout(() => {
+          expect(logSpy).toHaveBeenCalledTimes(1)
+          done()
+        }, 10)
+      })
+
+      it('strips _hb metadata before enqueueing', function (done) {
+        client.configure({ insights: { enabled: true, sampleRatePercentage: 100 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.event('e', { _hb: { sampleRate: 100 } })
+        setTimeout(() => {
+          expect(logSpy).toHaveBeenCalledTimes(1)
+          const arg = logSpy.mock.calls[0][0] as Record<string, unknown>
+          expect(arg._hb).toBeUndefined()
+          done()
+        }, 10)
+      })
+
+      it('respects per-event _hb.sampleRate override', function (done) {
+        client.configure({ insights: { enabled: true, sampleRatePercentage: 100 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.event('e', { requestId: 'abc', _hb: { sampleRate: 0 } })
+        setTimeout(() => {
+          expect(logSpy).not.toHaveBeenCalled()
+          done()
+        }, 10)
+      })
+
+      it('applies sampling after beforeEvent handlers run', function (done) {
+        client.configure({ insights: { enabled: true, sampleRatePercentage: 50 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.beforeEvent((evt) => {
+          (evt as Record<string, unknown>).requestId = 'stable-request-id'
+        })
+        const first: boolean[] = []
+        for (let i = 0; i < 5; i++) {
+          client.event('e', { index: i })
+        }
+        setTimeout(() => {
+          // All five events share the same requestId after the handler runs,
+          // so they all get the same sampling decision.
+          const callCount = logSpy.mock.calls.length
+          expect(callCount === 0 || callCount === 5).toBe(true)
+          first.push(callCount > 0)
+          done()
+        }, 20)
+      })
+    })
   })
 
   describe('beforeEvent', function () {

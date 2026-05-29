@@ -94,9 +94,12 @@ export interface HoneybadgerStore {
 }
 
 export interface InsightsConfig {
-  enabled?: boolean         // master gate for AUTOMATIC instrumentation (default false)
-  console?: boolean         // console-instrumentation plugin (default false; only effective when enabled is true)
-  http?: boolean            // HTTP auto-events, inbound + outbound (default false)
+  enabled?: boolean                  // master gate for AUTOMATIC instrumentation (default false)
+  console?: boolean                  // console-instrumentation plugin (default false; only effective when enabled is true)
+  http?: boolean                     // HTTP auto-events, inbound + outbound (default false)
+  dispatchIntervalSeconds?: number   // worker cooldown between sends (default 10)
+  bulkThreshold?: number             // early-dispatch + per-send cap (default 500)
+  sampleRatePercentage?: number      // probabilistic sampling 0..100 (default 100, no sampling)
 }
 
 // Config (existing fields retained):
@@ -106,12 +109,27 @@ export interface InsightsConfig {
 
 `eventsEnabled` is the existing top-level field; it stays.
 
+**Worker tunables** (`dispatchIntervalSeconds`, `bulkThreshold`) control how `ThrottledEventsWorker` paces and bounds outgoing batches:
+- `dispatchIntervalSeconds` — the cooldown the worker waits after each successful send before draining again. Lower values reduce delivery latency at the cost of more HTTP calls; higher values batch more aggressively.
+- `bulkThreshold` — both an early-dispatch trigger (preempts the cooldown when the queue grows past this size) and a per-send cap (each HTTP body carries at most this many events). Prevents `413 Payload Too Large` under bursty load.
+
+A `flushAfterResponse` config flag (per-response `flushAsync()` for Express/Fastify/Lambda/Next.js) was considered but **not** shipped — the two worker tunables above cover the original motivation (avoiding 413s and bounding latency under load). May be revisited as a follow-up if real use cases emerge.
+
+**Sampling** (`sampleRatePercentage`) drops events at the `Client.event()` boundary, before they enter the worker queue. `100` (default) sends every event; `0` drops everything. When a payload carries `requestId` (auto-added by inbound HTTP instrumentation), the decision is derived from a stable hash of the id so all events from one request are kept or dropped together; otherwise sampling falls back to `Math.random()`. A per-event escape hatch is available via `payload._hb.sampleRate` (the `_hb` key is stripped before enqueueing).
+
 ### 1b. Defaults — `packages/core/src/defaults.ts`
 
 Keep `eventsEnabled: false`. Add:
 
 ```ts
-insights: { enabled: false, console: false, http: false }
+insights: {
+  enabled: false,
+  console: false,
+  http: false,
+  dispatchIntervalSeconds: 10,
+  bulkThreshold: 500,
+  sampleRatePercentage: 100,
+}
 ```
 
 Everything is off by default. To get any auto-instrumentation, the user must set both `eventsEnabled: true` AND `insights.enabled: true` AND the per-source flag they want.

@@ -7,6 +7,7 @@ import {
   runBeforeNotifyHandlers,
   runBeforeEventHandlers,
   resolveInsights,
+  shouldSampleEvent,
   runAfterNotifyHandlers,
   shallowClone,
   sanitize,
@@ -269,6 +270,70 @@ describe('utils', function () {
     it('footgun: insights.console without insights.enabled is off', function () {
       expect(resolveInsights({ eventsEnabled: true, insights: { console: true } }))
         .toEqual({ console: false, http: false })
+    })
+  })
+
+  describe('shouldSampleEvent', function () {
+    function makeEvent(extra: Record<string, unknown> = {}): EventPayload {
+      return { event_type: 'event', ts: new Date().toISOString(), ...extra }
+    }
+
+    it('returns true at rate 100', function () {
+      expect(shouldSampleEvent(makeEvent(), 100)).toBe(true)
+    })
+
+    it('returns false at rate 0', function () {
+      expect(shouldSampleEvent(makeEvent({ requestId: 'abc' }), 0)).toBe(false)
+    })
+
+    it('clamps rates above 100 to always-send', function () {
+      expect(shouldSampleEvent(makeEvent({ requestId: 'abc' }), 200)).toBe(true)
+    })
+
+    it('clamps rates below 0 to never-send', function () {
+      expect(shouldSampleEvent(makeEvent({ requestId: 'abc' }), -10)).toBe(false)
+    })
+
+    it('is deterministic for the same requestId', function () {
+      const event = makeEvent({ requestId: 'request-xyz' })
+      const first = shouldSampleEvent(event, 50)
+      for (let i = 0; i < 10; i++) {
+        expect(shouldSampleEvent(event, 50)).toBe(first)
+      }
+    })
+
+    it('produces both buckets across different requestIds at rate 50', function () {
+      let kept = 0
+      let dropped = 0
+      for (let i = 0; i < 200; i++) {
+        if (shouldSampleEvent(makeEvent({ requestId: `req-${i}` }), 50)) kept++
+        else dropped++
+      }
+      expect(kept).toBeGreaterThan(0)
+      expect(dropped).toBeGreaterThan(0)
+    })
+
+    it('uses Math.random when no requestId is present', function () {
+      const spy = jest.spyOn(Math, 'random').mockReturnValue(0.1)
+      try {
+        expect(shouldSampleEvent(makeEvent(), 50)).toBe(true)
+        spy.mockReturnValue(0.9)
+        expect(shouldSampleEvent(makeEvent(), 50)).toBe(false)
+      } finally {
+        spy.mockRestore()
+      }
+    })
+
+    it('respects per-event _hb.sampleRate override', function () {
+      const event = makeEvent({ requestId: 'r', _hb: { sampleRate: 0 } })
+      expect(shouldSampleEvent(event, 100)).toBe(false)
+      const event2 = makeEvent({ requestId: 'r', _hb: { sampleRate: 100 } })
+      expect(shouldSampleEvent(event2, 0)).toBe(true)
+    })
+
+    it('ignores non-numeric _hb.sampleRate', function () {
+      const event = makeEvent({ _hb: { sampleRate: 'fifty' } })
+      expect(shouldSampleEvent(event, 100)).toBe(true)
     })
   })
 
