@@ -115,7 +115,7 @@ export interface InsightsConfig {
 
 A `flushAfterResponse` config flag (per-response `flushAsync()` for Express/Fastify/Lambda/Next.js) was considered but **not** shipped — the two worker tunables above cover the original motivation (avoiding 413s and bounding latency under load). May be revisited as a follow-up if real use cases emerge.
 
-**Sampling** (`sampleRatePercentage`) drops events at the `Client.event()` boundary, before they enter the worker queue. `100` (default) sends every event; `0` drops everything. When a payload carries `requestId` (auto-added by inbound HTTP instrumentation), the decision is derived from a stable hash of the id so all events from one request are kept or dropped together; otherwise sampling falls back to `Math.random()`. A per-event escape hatch is available via `payload._hb.sampleRate` (the `_hb` key is stripped before enqueueing).
+**Sampling** (`sampleRatePercentage`) drops events at the `Client.event()` boundary, before they enter the worker queue. `100` (default) sends every event; `0` drops everything. When a payload carries `request_id` (auto-added by inbound HTTP instrumentation), the decision is derived from a stable hash of the id so all events from one request are kept or dropped together; otherwise sampling falls back to `Math.random()`. A per-event escape hatch is available via `payload._hb.sampleRate` (the `_hb` key is stripped before enqueueing).
 
 ### 1b. Defaults — `packages/core/src/defaults.ts`
 
