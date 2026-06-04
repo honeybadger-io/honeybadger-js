@@ -177,6 +177,41 @@ describe('ThrottledEventsWorker', () => {
       expect(eventsWorker.queue.length).toBe(0)
     })
 
+    it('does not start an overlapping send when log() races an in-flight flush', async () => {
+      const transport = new TestTransport()
+      let releaseFirst: (v: { statusCode: number; body: string }) => void = () => undefined
+      const firstSend = new Promise<{ statusCode: number; body: string }>((resolve) => {
+        releaseFirst = resolve
+      })
+      const sendSpy = jest.spyOn(transport, 'send').mockImplementationOnce(() => firstSend)
+
+      const eventsWorker = new ThrottledEventsWorker(fastWorkerConfig({ dispatchIntervalSeconds: 0.05 }), transport)
+      eventsWorker.log(makeEvent('first'))
+      await wait(20)
+      expect(sendSpy).toHaveBeenCalledTimes(1)
+
+      // Begin a flush while the first send is still in flight, then race more logs in.
+      const flushPromise = eventsWorker.flushAsync()
+      eventsWorker.log(makeEvent('second'))
+      eventsWorker.log(makeEvent('third'))
+
+      await wait(30)
+      // No overlapping send: still just the one in-flight request, and the flush
+      // keeps inFlight occupied so log()'s processQueue can't drain concurrently.
+      expect(sendSpy).toHaveBeenCalledTimes(1)
+      // @ts-ignore
+      expect(eventsWorker.inFlight).not.toBeNull()
+
+      releaseFirst({ statusCode: 200, body: '' })
+      await flushPromise
+      // Second/third were drained by the flush in exactly one extra send.
+      expect(sendSpy).toHaveBeenCalledTimes(2)
+      // @ts-ignore
+      expect(eventsWorker.queue.length).toBe(0)
+      // @ts-ignore
+      expect(eventsWorker.inFlight).toBeNull()
+    })
+
     it('is a no-op when the queue is empty and nothing is in flight', async () => {
       const transport = new TestTransport()
       const sendSpy = jest.spyOn(transport, 'send')

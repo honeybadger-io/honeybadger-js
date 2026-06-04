@@ -237,8 +237,11 @@ function clampSampleRate(rate: number): number {
 
 export function shouldSampleEvent(event: EventPayload, configRate: number): boolean {
   const meta = (event as Record<string, unknown>)._hb as { sampleRate?: unknown } | undefined
-  const override = meta && typeof meta.sampleRate === 'number' ? meta.sampleRate : undefined
-  const rate = clampSampleRate(typeof override === 'number' ? override : configRate)
+  const override = meta && Number.isFinite(meta.sampleRate) ? (meta.sampleRate as number) : undefined
+  const rawRate = override !== undefined ? override : configRate
+  // Guard against non-finite rates (e.g. NaN from Number(invalidConfig)); an
+  // unusable rate must not silently drop every event, so fall back to send-all.
+  const rate = clampSampleRate(Number.isFinite(rawRate) ? rawRate : 100)
   if (rate <= 0) return false
   if (rate >= 100) return true
 

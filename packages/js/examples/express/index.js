@@ -91,16 +91,15 @@ app.get('/event-flood', async (req, res) => {
 })
 
 app.get('/event/:name', (req, res) => {
-  // should send an event to Honeybadger, with type 'button_click'
-  Honeybadger.event('button_click', {
+  // should send an event to Honeybadger, with the type taken from the :name param
+  Honeybadger.event(req.params.name, {
     action: 'buy_now',
     user_id: 123,
     product_id: 456,
-    name: req.params.name
   })
 
   // should send an event to Honeybadger, with type 'log'
-  console.log('Event sent!', { source: 'console.log' , path: req.url })
+  console.log('Event sent!', { source: 'console.log', path: req.url })
 
   res.send('Done. Check your Honeybadger Insights page!')
 })

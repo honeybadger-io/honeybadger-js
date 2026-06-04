@@ -335,6 +335,17 @@ describe('utils', function () {
       const event = makeEvent({ _hb: { sampleRate: 'fifty' } })
       expect(shouldSampleEvent(event, 100)).toBe(true)
     })
+
+    it('ignores a NaN _hb.sampleRate override and falls back to configRate', function () {
+      const event = makeEvent({ request_id: 'abc', _hb: { sampleRate: NaN } })
+      expect(shouldSampleEvent(event, 0)).toBe(false)
+      expect(shouldSampleEvent(event, 100)).toBe(true)
+    })
+
+    it('treats a NaN configRate as send-all instead of dropping every event', function () {
+      expect(shouldSampleEvent(makeEvent({ request_id: 'abc' }), NaN)).toBe(true)
+      expect(shouldSampleEvent(makeEvent(), NaN)).toBe(true)
+    })
   })
 
   describe('runAfterNotifyHandlers', function () {

@@ -49,7 +49,17 @@ export class ThrottledEventsWorker implements EventsWorker {
       this.cooldownTimer = null
     }
     const previous = this.inFlight ?? Promise.resolve()
-    return previous.then(() => this.drainAll())
+    const flush = previous.then(() => this.drainAll())
+    // Mark the flush as in-flight so a concurrent log() doesn't start an
+    // overlapping processQueue() drain while we're draining here.
+    this.inFlight = flush
+    const clear = () => {
+      if (this.inFlight === flush) {
+        this.inFlight = null
+      }
+    }
+    flush.then(clear, clear)
+    return flush
   }
 
   private async drainAll(): Promise<void> {
@@ -63,14 +73,19 @@ export class ThrottledEventsWorker implements EventsWorker {
       return
     }
 
-    this.inFlight = this.send()
+    const inFlight = this.send()
       .catch((error) => {
         this.logger.error('[Honeybadger] Error making HTTP request:', error)
       })
       .then(() => {
-        this.inFlight = null
-        this.scheduleNextDispatch()
+        // Only reset if we're still the current operation; a flushAsync() may
+        // have taken ownership of inFlight while this send was resolving.
+        if (this.inFlight === inFlight) {
+          this.inFlight = null
+          this.scheduleNextDispatch()
+        }
       })
+    this.inFlight = inFlight
   }
 
   private scheduleNextDispatch() {
