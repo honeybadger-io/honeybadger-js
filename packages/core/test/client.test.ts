@@ -1106,7 +1106,7 @@ describe('client', function () {
       it('drops events when insights.sampleRatePercentage is 0', function (done) {
         client.configure({ insights: { enabled: true, sampleRatePercentage: 0 } })
         const logSpy = jest.spyOn(client.eventsWorker(), 'log')
-        client.event('e', { requestId: 'abc' })
+        client.event('e', { request_id: 'abc' })
         setTimeout(() => {
           expect(logSpy).not.toHaveBeenCalled()
           done()
@@ -1138,7 +1138,7 @@ describe('client', function () {
       it('respects per-event _hb.sampleRate override', function (done) {
         client.configure({ insights: { enabled: true, sampleRatePercentage: 100 } })
         const logSpy = jest.spyOn(client.eventsWorker(), 'log')
-        client.event('e', { requestId: 'abc', _hb: { sampleRate: 0 } })
+        client.event('e', { request_id: 'abc', _hb: { sampleRate: 0 } })
         setTimeout(() => {
           expect(logSpy).not.toHaveBeenCalled()
           done()
@@ -1149,14 +1149,14 @@ describe('client', function () {
         client.configure({ insights: { enabled: true, sampleRatePercentage: 50 } })
         const logSpy = jest.spyOn(client.eventsWorker(), 'log')
         client.beforeEvent((evt) => {
-          (evt as Record<string, unknown>).requestId = 'stable-request-id'
+          (evt as Record<string, unknown>).request_id = 'stable-request-id'
         })
         const first: boolean[] = []
         for (let i = 0; i < 5; i++) {
           client.event('e', { index: i })
         }
         setTimeout(() => {
-          // All five events share the same requestId after the handler runs,
+          // All five events share the same request_id after the handler runs,
           // so they all get the same sampling decision.
           const callCount = logSpy.mock.calls.length
           expect(callCount === 0 || callCount === 5).toBe(true)
@@ -1347,15 +1347,15 @@ describe('client', function () {
     it('merges eventContext into outgoing event payloads', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
-      client.setEventContext({ requestId: 'r-1', correlationId: 'c-1' })
+      client.setEventContext({ request_id: 'r-1', correlation_id: 'c-1' })
       client.event('an_event', { message: 'hi' })
 
       setTimeout(() => {
         expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
           event_type: 'an_event',
           message: 'hi',
-          requestId: 'r-1',
-          correlationId: 'c-1',
+          request_id: 'r-1',
+          correlation_id: 'c-1',
         }))
         done()
       }, 10)
@@ -1364,12 +1364,12 @@ describe('client', function () {
     it('lets explicit data keys win over eventContext on collision', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
-      client.setEventContext({ requestId: 'r-1', shared: 'from-context' })
+      client.setEventContext({ request_id: 'r-1', shared: 'from-context' })
       client.event('an_event', { shared: 'from-data' })
 
       setTimeout(() => {
         expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
-          requestId: 'r-1',
+          request_id: 'r-1',
           shared: 'from-data',
         }))
         done()
@@ -1379,13 +1379,13 @@ describe('client', function () {
     it('clearEventContext empties the event context', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
-      client.setEventContext({ requestId: 'r-1' })
+      client.setEventContext({ request_id: 'r-1' })
       client.clearEventContext()
       client.event('an_event', { message: 'hi' })
 
       setTimeout(() => {
         const call = logSpy.mock.calls[0][0]
-        expect(call.requestId).toBeUndefined()
+        expect(call.request_id).toBeUndefined()
         done()
       }, 10)
     })
@@ -1393,19 +1393,19 @@ describe('client', function () {
     it('client.clear() also clears eventContext', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
-      client.setEventContext({ requestId: 'r-1' })
+      client.setEventContext({ request_id: 'r-1' })
       client.clear()
       client.event('an_event', { message: 'hi' })
 
       setTimeout(() => {
         const call = logSpy.mock.calls[0][0]
-        expect(call.requestId).toBeUndefined()
+        expect(call.request_id).toBeUndefined()
         done()
       }, 10)
     })
 
     it('setEventContext ignores non-object inputs', function () {
-      client.setEventContext({ requestId: 'r-1' })
+      client.setEventContext({ request_id: 'r-1' })
       client.setEventContext(<never>'bad')
       // chainable still
       expect(client.setEventContext({})).toBe(client)

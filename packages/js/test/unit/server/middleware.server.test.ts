@@ -207,7 +207,7 @@ describe('Express Middleware', function () {
           })
       })
 
-      it('uses x-request-id header for requestId and falls back to it for correlationId', function () {
+      it('uses x-request-id header for request_id and falls back to it for correlation_id', function () {
         let captured: Record<string, unknown>
 
         return request(buildApp((_req, res) => {
@@ -218,8 +218,8 @@ describe('Express Middleware', function () {
           .set('x-request-id', 'abc-123')
           .expect(200)
           .then(() => {
-            expect(captured.requestId).toBe('abc-123')
-            expect(captured.correlationId).toBe('abc-123')
+            expect(captured.request_id).toBe('abc-123')
+            expect(captured.correlation_id).toBe('abc-123')
           })
       })
 
@@ -234,12 +234,12 @@ describe('Express Middleware', function () {
           .set('request-id', 'plain-456')
           .expect(200)
           .then(() => {
-            expect(captured.requestId).toBe('plain-456')
-            expect(captured.correlationId).toBe('plain-456')
+            expect(captured.request_id).toBe('plain-456')
+            expect(captured.correlation_id).toBe('plain-456')
           })
       })
 
-      it('uses x-correlation-id header for correlationId (distinct from requestId)', function () {
+      it('uses x-correlation-id header for correlation_id (distinct from request_id)', function () {
         let captured: Record<string, unknown>
 
         return request(buildApp((_req, res) => {
@@ -251,12 +251,12 @@ describe('Express Middleware', function () {
           .set('x-correlation-id', 'trace-9')
           .expect(200)
           .then(() => {
-            expect(captured.requestId).toBe('req-1')
-            expect(captured.correlationId).toBe('trace-9')
+            expect(captured.request_id).toBe('req-1')
+            expect(captured.correlation_id).toBe('trace-9')
           })
       })
 
-      it('falls back to x-amzn-trace-id for correlationId when x-correlation-id is absent', function () {
+      it('falls back to x-amzn-trace-id for correlation_id when x-correlation-id is absent', function () {
         let captured: Record<string, unknown>
 
         return request(buildApp((_req, res) => {
@@ -267,14 +267,14 @@ describe('Express Middleware', function () {
           .set('x-amzn-trace-id', 'Root=1-abc-def')
           .expect(200)
           .then(() => {
-            expect(typeof captured.requestId).toBe('string')
-            expect((captured.requestId as string).length).toBeGreaterThan(0)
-            expect(captured.correlationId).toBe('Root=1-abc-def')
-            expect(captured.correlationId).not.toBe(captured.requestId)
+            expect(typeof captured.request_id).toBe('string')
+            expect((captured.request_id as string).length).toBeGreaterThan(0)
+            expect(captured.correlation_id).toBe('Root=1-abc-def')
+            expect(captured.correlation_id).not.toBe(captured.request_id)
           })
       })
 
-      it('generates non-empty requestId equal to correlationId when no headers are present', function () {
+      it('generates non-empty request_id equal to correlation_id when no headers are present', function () {
         let captured: Record<string, unknown>
 
         return request(buildApp((_req, res) => {
@@ -284,9 +284,9 @@ describe('Express Middleware', function () {
           .get('/ok')
           .expect(200)
           .then(() => {
-            expect(typeof captured.requestId).toBe('string')
-            expect((captured.requestId as string).length).toBeGreaterThan(0)
-            expect(captured.correlationId).toBe(captured.requestId)
+            expect(typeof captured.request_id).toBe('string')
+            expect((captured.request_id as string).length).toBeGreaterThan(0)
+            expect(captured.correlation_id).toBe(captured.request_id)
           })
       })
 
@@ -342,8 +342,8 @@ describe('Express Middleware', function () {
           .expect(200)
           .then(() => {
             expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
-            expect(captured.requestId).toBe('rid-1')
-            expect(captured.correlationId).toBe('rid-1')
+            expect(captured.request_id).toBe('rid-1')
+            expect(captured.correlation_id).toBe('rid-1')
           })
       })
 
@@ -365,7 +365,7 @@ describe('Express Middleware', function () {
           .expect(200)
           .then(() => {
             expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
-            expect(captured.requestId).toBe('rid-2')
+            expect(captured.request_id).toBe('rid-2')
           })
       })
 
@@ -403,7 +403,7 @@ describe('Express Middleware', function () {
           })
       })
 
-      it('with eventsEnabled: true and insights off, programmatic events still fire and carry requestId/correlationId', function () {
+      it('with eventsEnabled: true and insights off, programmatic events still fire and carry request_id/correlation_id', function () {
         client.configure({
           eventsEnabled: true,
           insights: { enabled: false },
@@ -422,8 +422,8 @@ describe('Express Middleware', function () {
             )
             expect(customCall).toBeDefined()
             const payload = customCall[0] as Record<string, unknown>
-            expect(payload.requestId).toBe('rid-prog')
-            expect(payload.correlationId).toBe('rid-prog')
+            expect(payload.request_id).toBe('rid-prog')
+            expect(payload.correlation_id).toBe('rid-prog')
 
             const requestExpressCall = workerSpy.mock.calls.find(
               (c) => (c[0] as Record<string, unknown>).event_type === 'request.handled'

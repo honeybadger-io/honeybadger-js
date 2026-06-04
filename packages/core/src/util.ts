@@ -242,7 +242,7 @@ export function shouldSampleEvent(event: EventPayload, configRate: number): bool
   if (rate <= 0) return false
   if (rate >= 100) return true
 
-  const requestId = (event as Record<string, unknown>).requestId
+  const requestId = (event as Record<string, unknown>).request_id
   if (typeof requestId === 'string' && requestId.length > 0) {
     return fnv1a(requestId) % 100 < rate
   }
