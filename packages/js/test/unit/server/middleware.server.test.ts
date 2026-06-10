@@ -307,6 +307,29 @@ describe('Express Middleware', function () {
           })
       })
 
+      it('skips the request event without crashing when the response is not an EventEmitter (e.g. fastify preHandler misuse)', function () {
+        const evSpy = jest.spyOn(client, 'event')
+        let captured: Record<string, unknown>
+        // next runs inside withRequest, so it sees the request-scoped store
+        const next = jest.fn(() => { captured = readEventContext() })
+        // FastifyReply-like object: carries a statusCode but has no .once
+        const replyLike = { statusCode: 200 }
+        const reqLike = { headers: { 'x-request-id': 'rid-not-express' }, method: 'GET', url: '/x' }
+
+        expect(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          client.requestHandler(reqLike as any, replyLike as any, next)
+        }).not.toThrow()
+
+        expect(next).toHaveBeenCalledTimes(1)
+        expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+        // context isolation still happened: event context was seeded from headers
+        expect(captured).toMatchObject({
+          request_id: 'rid-not-express',
+          correlation_id: 'rid-not-express',
+        })
+      })
+
       it('emits with status 500 on errors', function () {
         const evSpy = jest.spyOn(client, 'event')
 
