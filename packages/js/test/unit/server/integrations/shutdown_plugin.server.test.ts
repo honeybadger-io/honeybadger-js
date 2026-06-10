@@ -10,7 +10,7 @@ describe('Shutdown Plugin', () => {
   beforeEach(() => {
     // We just need a really basic client, so ignoring type issues here
     client = new TestClient(
-      { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger(), eventsEnabled: true },
+      { apiKey: 'testKey', afterUncaught: jest.fn(), logger: nullLogger() },
       new TestTransport()
     ) as unknown as typeof Singleton
     // Have to mock fatallyLogAndExitGracefully or we will crash the test
@@ -36,45 +36,40 @@ describe('Shutdown Plugin', () => {
   describe('load', () => {
     const load = plugin().load
 
-    it('attaches a listener for SIGTERM if eventsEnabled is true', () => {
+    it('attaches a listener for SIGTERM', () => {
       load(client)
       const listeners = process.listeners('SIGTERM')
       expect(listeners).toHaveLength(1)
       expect(listeners[0].name).toBe('honeybadgerShutdownListener')
-      process.emit('SIGTERM')
+      process.emit('SIGTERM', 'SIGTERM')
       expect(flushSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('attaches a listener for SIGINT if eventsEnabled is true', () => {
+    it('attaches a listener for SIGINT', () => {
       load(client)
       const listeners = process.listeners('SIGINT')
       expect(listeners).toHaveLength(1)
       expect(listeners[0].name).toBe('honeybadgerShutdownListener')
-      process.emit('SIGINT')
+      process.emit('SIGINT', 'SIGINT')
       expect(flushSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('does not add a listener if enableUnhandledRejection is false', () => {
+    it('attaches the listener even when eventsEnabled is false (programmatic events are never gated)', () => {
       client.configure({ eventsEnabled: false })
       load(client)
-      expect(process.listeners('SIGINT')).toHaveLength(0)
-      expect(process.listeners('SIGTERM')).toHaveLength(0)
+      expect(process.listeners('SIGINT')).toHaveLength(1)
+      expect(process.listeners('SIGTERM')).toHaveLength(1)
     })
 
-    it('adds or removes listener if needed when reloaded', () => {
+    it('does not add duplicate listeners when reloaded', () => {
       load(client)
       expect(process.listeners('SIGINT')).toHaveLength(1)
       expect(process.listeners('SIGTERM')).toHaveLength(1)
 
-      client.configure({ eventsEnabled: false })
+      client.configure({})
       load(client)
-      expect(process.listeners('SIGINT')).toHaveLength(0)
-      expect(process.listeners('SIGTERM')).toHaveLength(0)
-
-      client.configure({ eventsEnabled: true })
-      load(client)
-      expect(process.listeners('SIGINT').length).toBe(1)
-      expect(process.listeners('SIGTERM').length).toBe(1)
+      expect(process.listeners('SIGINT')).toHaveLength(1)
+      expect(process.listeners('SIGTERM')).toHaveLength(1)
     })
   })
 })

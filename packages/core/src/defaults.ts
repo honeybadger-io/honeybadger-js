@@ -10,12 +10,14 @@ export const CONFIG = {
   revision: null,
   reportData: null,
   breadcrumbsEnabled: true,
-  // we could decide the value of eventsEnabled based on `env` and `developmentEnvironments`
+  // deprecated: `eventsEnabled: true` auto-enables insights.enabled + insights.console
   eventsEnabled: false,
   insights: {
     enabled: false,
     console: false,
     http: false,
+  },
+  events: {
     dispatchIntervalSeconds: 10,
     bulkThreshold: 500,
     sampleRatePercentage: 100,

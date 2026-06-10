@@ -111,13 +111,13 @@ export class ThrottledEventsWorker implements EventsWorker {
   }
 
   private bulkThreshold(): number {
-    const v = this.config.insights?.bulkThreshold
-    return typeof v === 'number' && v > 0 ? v : DEFAULT_CONFIG.insights.bulkThreshold
+    const v = this.config.events?.bulkThreshold
+    return typeof v === 'number' && v > 0 ? v : DEFAULT_CONFIG.events.bulkThreshold
   }
 
   private dispatchIntervalMs(): number {
-    const v = this.config.insights?.dispatchIntervalSeconds
-    const seconds = typeof v === 'number' && v >= 0 ? v : DEFAULT_CONFIG.insights.dispatchIntervalSeconds
+    const v = this.config.events?.dispatchIntervalSeconds
+    const seconds = typeof v === 'number' && v >= 0 ? v : DEFAULT_CONFIG.events.dispatchIntervalSeconds
     return seconds * 1000
   }
 

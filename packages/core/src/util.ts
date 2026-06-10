@@ -204,11 +204,7 @@ export interface ResolvedInsights {
   http: boolean
 }
 
-export function resolveInsights(config: Pick<Config, 'eventsEnabled' | 'insights'>): ResolvedInsights {
-  if (!config.eventsEnabled) {
-    return { console: false, http: false }
-  }
-
+export function resolveInsights(config: Pick<Config, 'insights'>): ResolvedInsights {
   const insights = config.insights
   if (!insights || insights.enabled !== true) {
     return { console: false, http: false }
