@@ -126,7 +126,7 @@ export abstract class Client {
       return
     }
     this.logger.warn('Deprecation warning: `eventsEnabled` has been deprecated; please use `insights.enabled` and `insights.console` instead.')
-    this.config.insights = { enabled: true, console: true, ...opts.insights }
+    this.config.insights = { ...(this.config.insights ?? {}), enabled: true, console: true, ...opts.insights }
   }
 
   loadPlugins() {
