@@ -309,10 +309,9 @@ describe('Express Middleware', function () {
 
       it('skips the request event without crashing when the response is not an EventEmitter (e.g. fastify preHandler misuse)', function () {
         const evSpy = jest.spyOn(client, 'event')
-        let captured: Record<string, unknown>
+        let captured: Record<string, unknown> = {}
         // next runs inside withRequest, so it sees the request-scoped store
         const next = jest.fn(() => { captured = readEventContext() })
-        // FastifyReply-like object: carries a statusCode but has no .once
         const replyLike = { statusCode: 200 }
         const reqLike = { headers: { 'x-request-id': 'rid-not-express' }, method: 'GET', url: '/x' }
 

@@ -40,7 +40,10 @@ function requireFastifyPlugin(): FastifyPluginWrapper {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const fp = require('fastify-plugin')
     return fp.default ?? fp
-  } catch (_e) {
+  } catch (e: any) {
+    if (e?.code !== 'MODULE_NOT_FOUND') {
+      throw e
+    }
     throw new Error(
       '@honeybadger-io/js: fastifyPlugin requires the `fastify-plugin` package. ' +
       'Install it in your application: npm install fastify-plugin'
