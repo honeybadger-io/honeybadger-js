@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.45](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.44...@honeybadger-io/gatsby-plugin-honeybadger@6.0.45) (2026-06-18)
+
+
+### Bug Fixes
+
+* **deps:** bump form-data to ^4.0.6 (GHSA-hmw2-7cc7-3qxx) ([#1505](https://github.com/honeybadger-io/honeybadger-js/issues/1505)) ([5412c93](https://github.com/honeybadger-io/honeybadger-js/commit/5412c93f8fa3d5d43b572a3c3eee13d7025329b0))
+
+
+
+
+
 ## [6.0.44](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.43...@honeybadger-io/gatsby-plugin-honeybadger@6.0.44) (2026-05-06)
 
 **Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
