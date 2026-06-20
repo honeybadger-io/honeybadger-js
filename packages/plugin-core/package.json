@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/plugin-core",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Shared functionality used by Honeybadger's javascript build plugins",
   "files": [
     "dist/**"
@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "fetch-retry": "^5.0.3",
-    "form-data": "^4.0.0",
+    "form-data": "^4.0.6",
     "node-fetch": "^2.6.9"
   },
   "main": "dist/index.js",

@@ -209,10 +209,15 @@ if $USE_HERMES; then
 	# react native <= 0.68
 	HERMES_PATH_2="$NODE_MODULES/hermes-engine/$OS_BIN/hermesc"
 
+ 	# react native >= 0.82
+ 	HERMES_PATH_3="$NODE_MODULES/hermes-compiler/hermesc/$OS_BIN/hermesc"
+
 	if [ -f "$HERMES_PATH_1" ]; then
 		HERMES_EXECUTABLE="$HERMES_PATH_1"
 	elif [ -f "$HERMES_PATH_2" ]; then
 		HERMES_EXECUTABLE="$HERMES_PATH_2"
+	elif [ -f "$HERMES_PATH_3" ]; then
+		HERMES_EXECUTABLE="$HERMES_PATH_3"
 	else
 		echo "Error: The Hermes compiler executable for Android was not found in the expected locations."
 		exit 1

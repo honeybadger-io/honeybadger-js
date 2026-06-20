@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.10.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.10.1...@honeybadger-io/rollup-plugin@5.10.2) (2026-06-18)
+
+
+### Bug Fixes
+
+* **deps:** bump form-data to ^4.0.6 (GHSA-hmw2-7cc7-3qxx) ([#1505](https://github.com/honeybadger-io/honeybadger-js/issues/1505)) ([5412c93](https://github.com/honeybadger-io/honeybadger-js/commit/5412c93f8fa3d5d43b572a3c3eee13d7025329b0))
+
+
+
+
+
 ## [5.10.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.10.0...@honeybadger-io/rollup-plugin@5.10.1) (2024-11-25)
 
 **Note:** Version bump only for package @honeybadger-io/rollup-plugin
