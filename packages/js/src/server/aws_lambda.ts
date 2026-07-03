@@ -115,11 +115,11 @@ function seedLambdaEventContext(hb: typeof Honeybadger, event: unknown, context:
     return
   }
   // Non-HTTP triggers (SQS, S3, EventBridge, scheduled) have no inbound headers.
-  // Use the AWS request id as the requestId, and X-Ray's trace id (if set) as
-  // the correlationId, otherwise mirror requestId.
+  // Use the AWS request id as the request_id, and X-Ray's trace id (if set) as
+  // the correlation_id, otherwise mirror request_id.
   const requestId = context.awsRequestId
   const correlationId = process.env._X_AMZN_TRACE_ID || requestId
-  hb.setEventContext({ requestId, correlationId })
+  hb.setEventContext({ request_id: requestId, correlation_id: correlationId })
 }
 
 function createLambdaRequestEmitter(hb: typeof Honeybadger, event: unknown): ((status: number) => void) | null {

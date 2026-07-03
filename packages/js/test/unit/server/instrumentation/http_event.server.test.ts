@@ -73,10 +73,10 @@ describe('http_event helpers', function () {
   })
 
   describe('seedRequestEventContext', function () {
-    it('returns both ids; correlationId equals requestId when no correlation header', function () {
+    it('returns both ids; correlation_id equals request_id when no correlation header', function () {
       const out = seedRequestEventContext({ 'x-request-id': 'r-1' })
-      expect(out.requestId).toBe('r-1')
-      expect(out.correlationId).toBe('r-1')
+      expect(out.request_id).toBe('r-1')
+      expect(out.correlation_id).toBe('r-1')
     })
 
     it('returns distinct ids when both headers are present', function () {
@@ -84,14 +84,14 @@ describe('http_event helpers', function () {
         'x-request-id': 'r-2',
         'x-correlation-id': 'c-2',
       })
-      expect(out.requestId).toBe('r-2')
-      expect(out.correlationId).toBe('c-2')
+      expect(out.request_id).toBe('r-2')
+      expect(out.correlation_id).toBe('c-2')
     })
 
     it('generates ids when no headers are present', function () {
       const out = seedRequestEventContext({})
-      expect(out.requestId.length).toBeGreaterThan(0)
-      expect(out.correlationId).toBe(out.requestId)
+      expect(out.request_id.length).toBeGreaterThan(0)
+      expect(out.correlation_id).toBe(out.request_id)
     })
   })
 

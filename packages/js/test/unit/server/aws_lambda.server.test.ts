@@ -635,11 +635,10 @@ describe('Lambda Handler', function () {
 
     const ctx = (awsRequestId = 'aws-req-1') => mockAwsContext({ awsRequestId })
 
-    describe('with eventsEnabled: true, insights: { enabled: true, http: true }', function () {
+    describe('with insights: { enabled: true, http: true }', function () {
       beforeEach(function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: true,
           insights: { enabled: true, http: true },
         })
       })
@@ -712,7 +711,7 @@ describe('Lambda Handler', function () {
         })
       })
 
-      it('uses x-request-id header for requestId and falls back to it for correlationId', async function () {
+      it('uses x-request-id header for request_id and falls back to it for correlation_id', async function () {
         let captured: Record<string, unknown>
         const handler = client.lambdaHandler(async () => {
           captured = readEventContext()
@@ -721,8 +720,8 @@ describe('Lambda Handler', function () {
 
         await handler(apiGatewayV2Event({ 'x-request-id': 'hdr-1' }), ctx())
 
-        expect(captured.requestId).toBe('hdr-1')
-        expect(captured.correlationId).toBe('hdr-1')
+        expect(captured.request_id).toBe('hdr-1')
+        expect(captured.correlation_id).toBe('hdr-1')
       })
 
       it('uses x-correlation-id when distinct from x-request-id', async function () {
@@ -737,8 +736,8 @@ describe('Lambda Handler', function () {
           'x-correlation-id': 'trace-9',
         }), ctx())
 
-        expect(captured.requestId).toBe('req-1')
-        expect(captured.correlationId).toBe('trace-9')
+        expect(captured.request_id).toBe('req-1')
+        expect(captured.correlation_id).toBe('trace-9')
       })
 
       it('emits once even if both success and finalize paths could fire', async function () {
@@ -756,7 +755,6 @@ describe('Lambda Handler', function () {
       beforeEach(function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: true,
           insights: { enabled: true, http: true },
         })
       })
@@ -772,11 +770,11 @@ describe('Lambda Handler', function () {
         await handler(sqsEvent(), ctx('lambda-invocation-42'))
 
         expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
-        expect(captured.requestId).toBe('lambda-invocation-42')
-        expect(captured.correlationId).toBe('lambda-invocation-42')
+        expect(captured.request_id).toBe('lambda-invocation-42')
+        expect(captured.correlation_id).toBe('lambda-invocation-42')
       })
 
-      it('uses _X_AMZN_TRACE_ID env var as correlationId when present', async function () {
+      it('uses _X_AMZN_TRACE_ID env var as correlation_id when present', async function () {
         const prev = process.env._X_AMZN_TRACE_ID
         process.env._X_AMZN_TRACE_ID = 'Root=1-trace-xyz'
         try {
@@ -788,8 +786,8 @@ describe('Lambda Handler', function () {
 
           await handler(sqsEvent(), ctx('aws-id-7'))
 
-          expect(captured.requestId).toBe('aws-id-7')
-          expect(captured.correlationId).toBe('Root=1-trace-xyz')
+          expect(captured.request_id).toBe('aws-id-7')
+          expect(captured.correlation_id).toBe('Root=1-trace-xyz')
         } finally {
           if (prev === undefined) delete process.env._X_AMZN_TRACE_ID
           else process.env._X_AMZN_TRACE_ID = prev
@@ -801,7 +799,6 @@ describe('Lambda Handler', function () {
       it('with insights.http: false, does not emit but still seeds eventContext from headers', async function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: true,
           insights: { enabled: true, http: false },
         })
 
@@ -815,14 +812,13 @@ describe('Lambda Handler', function () {
         await handler(apiGatewayV2Event({ 'x-request-id': 'rid-1' }), ctx())
 
         expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
-        expect(captured.requestId).toBe('rid-1')
-        expect(captured.correlationId).toBe('rid-1')
+        expect(captured.request_id).toBe('rid-1')
+        expect(captured.correlation_id).toBe('rid-1')
       })
 
       it('with insights.enabled: false, does not emit even if http: true', async function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: true,
           insights: { enabled: false, http: true },
         })
 
@@ -834,20 +830,20 @@ describe('Lambda Handler', function () {
         expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
       })
 
-      it('with eventsEnabled: false, drops everything including request.handled', async function () {
+      it('with deprecated eventsEnabled: true alone, does not emit request.handled (shim enables console, not http)', async function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: false,
-          insights: { enabled: true, http: true },
+          eventsEnabled: true,
         })
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const workerSpy = jest.spyOn((client as any).__eventsWorker, 'log')
+        const evSpy = jest.spyOn(client, 'event')
         const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
 
         await handler(apiGatewayV2Event(), ctx())
 
-        expect(workerSpy).not.toHaveBeenCalled()
+        expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+        expect(client.config.insights.enabled).toBe(true)
+        expect(client.config.insights.console).toBe(true)
       })
     })
   })

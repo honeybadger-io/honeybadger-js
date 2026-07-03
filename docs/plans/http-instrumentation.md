@@ -12,8 +12,8 @@ This plan adds:
 2. A new `eventContext` slot on the request store. Every `client.event()` call merges `eventContext` into the outgoing payload, and integrations seed it with two distinct fields:
    - `requestId` — unique per request. Read from `x-request-id` / `request-id` headers, or generated when absent.
    - `correlationId` — may span multiple requests in a logical trace. Read from `x-correlation-id` / `x-amzn-trace-id` headers, falling back to the request's `requestId` when absent (so events always carry both fields, and a single-request flow naturally has `requestId === correlationId`).
-3. A two-tier configuration model for Insights events. **All flags default to `false`.** This is a **breaking change** for existing `eventsEnabled: true` users (who today get console events automatically) and will ship behind a **major version bump**. No compatibility shim is planned; the changelog and upgrade guide call out the new explicit opt-in.
-   - `eventsEnabled` (existing, default `false`) — **global kill switch** for everything that ships to `/v1/events`: programmatic `client.event()`, the console plugin, and HTTP auto-events. When `false`, nothing fires (semantic change for programmatic `event()`, which previously bypassed all gates).
+3. A configuration model for Insights events that is **fully backwards compatible** with the existing setup. Programmatic `client.event()` is **never gated by configuration** — manual calls always ship, exactly as they do today.
+   - `eventsEnabled` (existing, default `false`) — **deprecated**. Kept for backwards compatibility: setting `eventsEnabled: true` automatically sets `insights.enabled: true` and `insights.console: true` (unless the user sets those explicitly), so existing users keep their console events with no code change. A deprecation warning points users at `insights`.
    - `insights.enabled` (new, default `false`) — master gate for **automatic instrumentation only**. When `false`, the per-source flags don't matter; when `true`, the per-source flags decide which sources fire.
    - `insights.console` (new, default `false`) — gates the console-instrumentation plugin. Only effective when `insights.enabled` is true.
    - `insights.http` (new, default `false`) — gates HTTP auto-events (inbound + outbound).
@@ -25,12 +25,11 @@ Configuration recipes:
 
 | Goal | Settings |
 |---|---|
-| Everything off (default) | `eventsEnabled: false` |
-| Programmatic `event()` only, no auto-instrumentation | `eventsEnabled: true, insights: { enabled: false }` |
-| Console events only | `eventsEnabled: true, insights: { enabled: true, console: true }` |
-| HTTP auto-events only | `eventsEnabled: true, insights: { enabled: true, http: true }` |
-| Console + HTTP auto-events | `eventsEnabled: true, insights: { enabled: true, console: true, http: true }` |
-| Master kill switch (programmatic + auto) | `eventsEnabled: false` |
+| Auto-instrumentation off (default) | no config needed — programmatic `event()` always works |
+| Console events only | `insights: { enabled: true, console: true }` |
+| HTTP auto-events only | `insights: { enabled: true, http: true }` |
+| Console + HTTP auto-events | `insights: { enabled: true, console: true, http: true }` |
+| Legacy (deprecated) | `eventsEnabled: true` → behaves as `insights: { enabled: true, console: true }` |
 
 ```mermaid
 flowchart LR
@@ -40,7 +39,7 @@ flowchart LR
     BC[breadcrumbs]
   end
 
-  subgraph Inbound[Inbound - eventsEnabled AND insights.enabled AND insights.http]
+  subgraph Inbound[Inbound - insights.enabled AND insights.http]
     EX[Express middleware]
     LM[AWS Lambda wrapper]
     FA[Fastify plugin NEW]
@@ -66,7 +65,7 @@ flowchart LR
   USR[user code: client.event] --> EV
   CON[console plugin<br/>insights.enabled and insights.console] --> EV
 
-  EV[Client.event<br/>1. drop if eventsEnabled false<br/>2. merge eventContext<br/>3. await beforeEvent handlers<br/>4. drop on false] --> Q[ThrottledEventsWorker]
+  EV[Client.event<br/>1. merge eventContext<br/>2. await beforeEvent handlers<br/>3. drop on false] --> Q[ThrottledEventsWorker]
   Q -->|/v1/events| HB[(Honeybadger)]
 ```
 
@@ -94,29 +93,55 @@ export interface HoneybadgerStore {
 }
 
 export interface InsightsConfig {
-  enabled?: boolean         // master gate for AUTOMATIC instrumentation (default false)
-  console?: boolean         // console-instrumentation plugin (default false; only effective when enabled is true)
-  http?: boolean            // HTTP auto-events, inbound + outbound (default false)
+  enabled?: boolean                  // master gate for AUTOMATIC instrumentation (default false)
+  console?: boolean                  // console-instrumentation plugin (default false; only effective when enabled is true)
+  http?: boolean                     // HTTP auto-events, inbound + outbound (default false)
+}
+
+export interface EventsConfig {
+  dispatchIntervalSeconds?: number   // worker cooldown between sends (default 10)
+  bulkThreshold?: number             // early-dispatch + per-send cap (default 500)
+  sampleRatePercentage?: number      // probabilistic sampling 0..100 (default 100, no sampling)
 }
 
 // Config (existing fields retained):
-//   eventsEnabled?: boolean   // global kill switch for /v1/events
-//   insights?: InsightsConfig
+//   eventsEnabled?: boolean   // DEPRECATED — `true` auto-enables insights.enabled + insights.console
+//   insights?: InsightsConfig  // gates for AUTOMATIC instrumentation only
+//   events?: EventsConfig      // delivery/sampling tunables for ALL events (manual + automatic)
 ```
 
-`eventsEnabled` is the existing top-level field; it stays.
+`eventsEnabled` is the existing top-level field; it stays for backwards compatibility but is **deprecated** (see §1g for the compatibility shim). Mark it `@deprecated` in the type docs.
+
+`insights` holds only the **gates for automatic instrumentation**; `events` holds the **delivery/sampling tunables that apply to every event** shipped to `/v1/events`, manual or automatic. The split mirrors the runtime behavior: manual `event()` calls are never gated by `insights`, but they do flow through the worker and sampler configured by `events`.
+
+**Worker tunables** (`events.dispatchIntervalSeconds`, `events.bulkThreshold`) control how `ThrottledEventsWorker` paces and bounds outgoing batches:
+- `dispatchIntervalSeconds` — the cooldown the worker waits after each successful send before draining again. Lower values reduce delivery latency at the cost of more HTTP calls; higher values batch more aggressively.
+- `bulkThreshold` — both an early-dispatch trigger (preempts the cooldown when the queue grows past this size) and a per-send cap (each HTTP body carries at most this many events). Prevents `413 Payload Too Large` under bursty load.
+
+A `flushAfterResponse` config flag (per-response `flushAsync()` for Express/Fastify/Lambda/Next.js) was considered but **not** shipped — the two worker tunables above cover the original motivation (avoiding 413s and bounding latency under load). May be revisited as a follow-up if real use cases emerge.
+
+**Sampling** (`events.sampleRatePercentage`) drops events at the `Client.event()` boundary, before they enter the worker queue. `100` (default) sends every event; `0` drops everything. When a payload carries `request_id` (auto-added by inbound HTTP instrumentation), the decision is derived from a stable hash of the id so all events from one request are kept or dropped together; otherwise sampling falls back to `Math.random()`. A per-event escape hatch is available via `payload._hb.sampleRate` (the `_hb` key is stripped before enqueueing).
 
 ### 1b. Defaults — `packages/core/src/defaults.ts`
 
 Keep `eventsEnabled: false`. Add:
 
 ```ts
-insights: { enabled: false, console: false, http: false }
+insights: {
+  enabled: false,
+  console: false,
+  http: false,
+},
+events: {
+  dispatchIntervalSeconds: 10,
+  bulkThreshold: 500,
+  sampleRatePercentage: 100,
+}
 ```
 
-Everything is off by default. To get any auto-instrumentation, the user must set both `eventsEnabled: true` AND `insights.enabled: true` AND the per-source flag they want.
+Auto-instrumentation is off by default. To opt in, users set `insights.enabled: true` plus the per-source flags they want. Programmatic `event()` is unaffected by all of these flags.
 
-> **Breaking change:** existing users on `eventsEnabled: true` (today's default opt-in for console events) will lose console events when this ships. Shipped behind a major version bump; no compat shim.
+> **Backwards compatibility:** `eventsEnabled: true` is deprecated but keeps working — at configure time it auto-sets `insights.enabled: true` and `insights.console: true` (see §1g), so existing users keep console events with no code change. No major version bump required.
 
 ### 1c. Stores
 
@@ -156,13 +181,8 @@ Handlers run sequentially (matches `beforeNotify` semantics — earlier handlers
   event(type, data?) {
     if (typeof type === 'object') { data = type; type = type['event_type'] as string ?? undefined }
 
-    // Global kill switch: eventsEnabled === false drops everything,
-    // including programmatic events. (Semantic change from today.)
-    if (!this.config.eventsEnabled) {
-      this.logger.debug('skipping event: eventsEnabled is false')
-      return
-    }
-
+    // Programmatic events are never gated by configuration — manual calls
+    // always ship, exactly as today.
     const eventContext = this.__store.getContents('eventContext')
     const payload: EventPayload = {
       event_type: type,
@@ -185,11 +205,11 @@ Handlers run sequentially (matches `beforeNotify` semantics — earlier handlers
 
 ### 1f. Shutdown plugin — `packages/js/src/server/integrations/shutdown_plugin.ts`
 
-Currently gated only on `eventsEnabled` (line 13). Keep gating on `eventsEnabled` — that's the global kill switch and it correctly suppresses the flush listener when no events can ever be queued.
+Currently gated only on `eventsEnabled` (line 13). Since programmatic `client.event()` is no longer gated by configuration, events can be queued at any time — **drop the `eventsEnabled` check and register the flush listener unconditionally**.
 
 ### 1g. Config resolver — `packages/core/src/util.ts`
 
-Add a single normaliser used everywhere automatic-instrumentation flags are read. It applies the **two-tier** rule: `eventsEnabled` AND `insights.enabled` AND the per-source flag must all be on.
+Add a single normaliser used everywhere automatic-instrumentation flags are read. It applies the **two-tier** rule: `insights.enabled` AND the per-source flag must both be on.
 
 ```ts
 export interface ResolvedInsights {
@@ -198,13 +218,10 @@ export interface ResolvedInsights {
 }
 
 export function resolveInsights(config: Config): ResolvedInsights {
-  // Tier 1: global kill switch.
-  if (!config.eventsEnabled) return { console: false, http: false }
-
-  // Tier 2: automatic-instrumentation master.
+  // Tier 1: automatic-instrumentation master.
   if (!config.insights.enabled) return { console: false, http: false }
 
-  // Tier 3: per-source. Both default false; users opt in explicitly.
+  // Tier 2: per-source. Both default false; users opt in explicitly.
   return {
     console: config.insights.console ?? false,
     http:    config.insights.http    ?? false,
@@ -212,11 +229,24 @@ export function resolveInsights(config: Config): ResolvedInsights {
 }
 ```
 
-Programmatic `client.event()` does **not** go through `resolveInsights` — it gates only on `config.eventsEnabled` (see §1e). `resolveInsights` is for automatic instrumentation only.
+Programmatic `client.event()` does **not** go through `resolveInsights` — it is not gated by configuration at all (see §1e). `resolveInsights` is for automatic instrumentation only.
+
+**Deprecation shim for `eventsEnabled`** — applied once at config-normalisation time (in `configure()`, before defaults merge the `insights` object), **not** inside `resolveInsights`, so the resolver stays pure:
+
+```ts
+if (opts.eventsEnabled === true) {
+  logger.warn('eventsEnabled is deprecated; use insights.enabled and insights.console instead')
+  opts.insights = {
+    enabled: true,
+    console: true,
+    ...opts.insights,   // explicit user values win over the shim
+  }
+}
+```
+
+This preserves today's behavior for existing `eventsEnabled: true` users (console events keep flowing) while letting them override any piece explicitly, e.g. `eventsEnabled: true, insights: { console: false }` keeps the master on but silences console events.
 
 **Footgun watch:** writing `insights: { http: true }` alone is **not enough** — `enabled` defaults to `false`, which short-circuits everything. Users must write `insights: { enabled: true, http: true }`. The recipes table in the intro documents this. We deliberately don't auto-promote sub-flags into `enabled: true`; explicit is clearer than implicit, and the resolver stays trivially predictable.
-
-**Breaking change:** existing users with `eventsEnabled: true` will lose console events when they upgrade. This ships as a **major version bump**; no compatibility shim is planned. The changelog and upgrade guide spell out the new explicit opt-in (`insights: { enabled: true, console: true }`) so users can restore prior behavior in one line.
 
 ---
 
@@ -316,7 +346,7 @@ export function requestHandler(req, res, next) {
 }
 ```
 
-`setEventContext` runs even when `insights.http` is off — so user `client.event(...)` calls in the request still get `requestId` and `correlationId` (subject to `eventsEnabled`). Listeners are registered **inside** the `withRequest` callback so the ALS context is captured at registration. `errorHandler` is unchanged: Express's default error handler writes the 500, then `finish`/`close` fires.
+`setEventContext` runs even when `insights.http` is off — so user `client.event(...)` calls in the request still get `requestId` and `correlationId`. Listeners are registered **inside** the `withRequest` callback so the ALS context is captured at registration. `errorHandler` is unchanged: Express's default error handler writes the 500, then `finish`/`close` fires.
 
 ---
 
@@ -438,7 +468,7 @@ The shared helper lives in `@honeybadger-io/js` and is imported via the existing
 
 ## 7. Outbound HTTP and `fetch` instrumentation (server only)
 
-Patches outbound HTTP clients so any call from a **server runtime** emits a `request.outbound` event when `resolveInsights(client.config).http` is true (i.e. `eventsEnabled && insights.enabled !== false && insights.http === true`). Browser-side outbound is deferred (see "Out of scope").
+Patches outbound HTTP clients so any call from a **server runtime** emits a `request.outbound` event when `resolveInsights(client.config).http` is true (i.e. `insights.enabled === true && insights.http === true`). Browser-side outbound is deferred (see "Out of scope").
 
 Together these cover the vast majority of Node HTTP traffic: `http.request` is the substrate for axios, got, node-fetch, superagent, request, and direct `http`/`https` callers. Node 18+ `fetch` is implemented on undici and bypasses `http.request`, so it must be patched separately.
 
@@ -617,36 +647,37 @@ Three independent guards prevent self-feedback loops:
 
 | File | Coverage |
 |---|---|
-| `packages/core/test/client.test.ts` | New `describe('beforeEvent', ...)`: sync handler mutates payload (assert via transport spy), `false` drops the event, async handler resolving `false` drops, async handler that mutates is awaited before queue push. New `describe('eventContext', ...)`: `setEventContext` merges into next `event()` payload; `clearEventContext` empties it; `client.clear()` also empties `eventContext`; explicit `data` key wins over `eventContext` on collision. |
-| `packages/core/test/util.test.ts` | `runBeforeEventHandlers` runs sequentially, awaits async, returns `false` on first false, mutates in place. `resolveInsights` honours every tier: `eventsEnabled: false` zeroes everything; `insights: false` zeroes; `insights: true` returns `{ console: false, http: false }` (master on, but no sources opted in); `insights: { enabled: false }` zeroes; `insights: { enabled: true }` (no sub-flags) returns `{ console: false, http: false }`; `insights: { enabled: true, console: true }` returns `{ console: true, http: false }`; `insights: { enabled: true, http: true }` returns `{ console: false, http: true }`. Footgun: `insights: { http: true }` (no `enabled`) returns `{ console: false, http: false }`. |
-| `packages/js/test/unit/server/middleware.server.test.ts` | With `eventsEnabled: true, insights: { enabled: true, http: true }`: `client.event` called with correct payload (method/path/route/status/duration). Header parsing: `x-request-id` → `requestId`; `x-correlation-id` (when present) → `correlationId`; absent both → `correlationId === requestId`; `x-amzn-trace-id` accepted as correlation fallback. With `insights.http: false` (or default): no `request.express` event, but `requestId` and `correlationId` still on event context (assert via `client.event('custom', {})` payload). With `eventsEnabled: false`: nothing fires, including programmatic events. With `insights.enabled: false` and `eventsEnabled: true`: programmatic events fire, but no `request.express`. With `insights: { http: true }` only (no `enabled`): no `request.express` (footgun verification). Single emit even when both `finish` and `close` fire. Generated `requestId` is non-empty when no header is set. |
+| `packages/core/test/client.test.ts` | New `describe('beforeEvent', ...)`: sync handler mutates payload (assert via transport spy), `false` drops the event, async handler resolving `false` drops, async handler that mutates is awaited before queue push. New `describe('eventContext', ...)`: `setEventContext` merges into next `event()` payload; `clearEventContext` empties it; `client.clear()` also empties `eventContext`; explicit `data` key wins over `eventContext` on collision. Programmatic `event()` ships regardless of config flags (default config, `insights.enabled: false`, `eventsEnabled: false` — all still send). Deprecation shim: `configure({ eventsEnabled: true })` results in `insights.enabled === true` and `insights.console === true`, logs a deprecation warning; explicit `insights` values win over the shim. |
+| `packages/core/test/util.test.ts` | `runBeforeEventHandlers` runs sequentially, awaits async, returns `false` on first false, mutates in place. `resolveInsights` honours both tiers: `insights: { enabled: false }` zeroes; `insights: { enabled: true }` (no sub-flags) returns `{ console: false, http: false }`; `insights: { enabled: true, console: true }` returns `{ console: true, http: false }`; `insights: { enabled: true, http: true }` returns `{ console: false, http: true }`. Footgun: `insights: { http: true }` (no `enabled`) returns `{ console: false, http: false }`. |
+| `packages/js/test/unit/server/middleware.server.test.ts` | With `insights: { enabled: true, http: true }`: `client.event` called with correct payload (method/path/route/status/duration). Header parsing: `x-request-id` → `requestId`; `x-correlation-id` (when present) → `correlationId`; absent both → `correlationId === requestId`; `x-amzn-trace-id` accepted as correlation fallback. With `insights.http: false` (or default): no `request.express` event, but `requestId` and `correlationId` still on event context (assert via `client.event('custom', {})` payload). With `insights.enabled: false`: programmatic events fire, but no `request.express`. With `insights: { http: true }` only (no `enabled`): no `request.express` (footgun verification). Deprecated `eventsEnabled: true` alone: no `request.express` (shim enables console, not http), programmatic events fire. Single emit even when both `finish` and `close` fire. Generated `requestId` is non-empty when no header is set. |
 | `packages/js/test/unit/server/aws_lambda.server.test.ts` | API-Gateway event → `request.lambda` fires; SQS event → no request event but `requestId === awsRequestId` on subsequent `event()`; status 500 on rejection. |
 | `packages/js/test/unit/server/fastify.server.test.ts` (new) | Add `fastify` to `devDependencies`. `fastify.inject({...})` to drive requests; spy on `client.event`. Cover: gated-off, gated-on, error path. **Plugin shape:** assert `fastifyPlugin(client)` is a function and is registered via `fastify.register(fastifyPlugin(client))`; assert no `fastifyPlugin` property is added to the singleton. **Cross-hook context:** assert that `setEventContext` issued in `onRequest` is observable in `onResponse` (event payload carries the same `requestId`/`correlationId`) — proves the `withRequest` re-entry shares store contents via the request-keyed Symbol. |
-| `packages/js/test/unit/server/outbound_http.server.test.ts` (new) | Use `nock` (already in `packages/js` devDependencies — used by transport tests) to mock destinations. Cases: (a) `http.request` resolves 200 → event with `client: 'http'`, method, url, status, duration; (b) `https.request` 500 → event status 500; (c) `http.get` resolves; (d) network error → event status 0, error_class/error_message; (e) destination = `client.config.endpoint` → no event; (f) destination = `client.config.appEndpoint` → no event; (g) `insights.http: false` → no event; (h) `insights.enabled: false` → no event even with `insights.http: true`; (i) `eventsEnabled: false` → no event regardless of `insights.*`; (j) Node 18+ `fetch` 200 → event with `client: 'fetch'`; (k) `requestId` and `correlationId` from a wrapping Express/Lambda request land on the outbound event payload. **Helper coverage:** also unit-test `wrapHttpRequest`, `wrapFetch`, `wireClientRequestEmit`, and `isSelfTraffic` in isolation (no plugin) so each helper has direct coverage. |
+| `packages/js/test/unit/server/outbound_http.server.test.ts` (new) | Use `nock` (already in `packages/js` devDependencies — used by transport tests) to mock destinations. Cases: (a) `http.request` resolves 200 → event with `client: 'http'`, method, url, status, duration; (b) `https.request` 500 → event status 500; (c) `http.get` resolves; (d) network error → event status 0, error_class/error_message; (e) destination = `client.config.endpoint` → no event; (f) destination = `client.config.appEndpoint` → no event; (g) `insights.http: false` → no event; (h) `insights.enabled: false` → no event even with `insights.http: true`; (i) deprecated `eventsEnabled: true` alone → no outbound event (shim maps to console, not http); (j) Node 18+ `fetch` 200 → event with `client: 'fetch'`; (k) `requestId` and `correlationId` from a wrapping Express/Lambda request land on the outbound event payload. **Helper coverage:** also unit-test `wrapHttpRequest`, `wrapFetch`, `wireClientRequestEmit`, and `isSelfTraffic` in isolation (no plugin) so each helper has direct coverage. |
 | `packages/nextjs/src/with-honeybadger.test.ts` (new) | Mock `Request`/`Response`; assert event on success and error; assert `requestId` and `correlationId` land on a programmatic `Honeybadger.event()` call inside the handler. |
 
 ---
 
 ## 9. Examples
 
-- `packages/js/examples/express/index.js:13` — already has `eventsEnabled: true`; add `insights: { enabled: true, http: true }`.
+- `packages/js/examples/express/index.js:13` — replace the deprecated `eventsEnabled: true` with `insights: { enabled: true, http: true }`.
 - `packages/js/examples/fastify/index.js` — replace lines 5–10 with:
   ```js
   const Honeybadger = require('@honeybadger-io/js')
   const { fastifyPlugin } = require('@honeybadger-io/js')
-  Honeybadger.configure({ eventsEnabled: true, insights: { enabled: true, http: true } })
+  Honeybadger.configure({ insights: { enabled: true, http: true } })
   fastify.register(fastifyPlugin(Honeybadger))
   ```
-- `packages/js/examples/aws-lambda/honeybadger.js` — add `insights: { enabled: true, http: true }` (assuming `eventsEnabled: true` is already set).
+- `packages/js/examples/aws-lambda/honeybadger.js` — replace any `eventsEnabled: true` with `insights: { enabled: true, http: true }`.
 - The existing `/outbound` route in the Express example (or add one) should `fetch('https://httpbin.org/get')` to demonstrate that the outbound event automatically appears alongside the inbound one with the same `requestId` and `correlationId`.
 
 ---
 
 ## Critical files
 
-- `packages/core/src/types.ts` — `BeforeEventHandler`, `InsightsConfig`, `Config.insights`, `StoreContents.eventContext`, store interface methods
-- `packages/core/src/defaults.ts` — keep `eventsEnabled: false`; add `insights: { enabled: true, console: true, http: false }`
+- `packages/core/src/types.ts` — `BeforeEventHandler`, `InsightsConfig`, `EventsConfig`, `Config.insights`, `Config.events`, `StoreContents.eventContext`, store interface methods; mark `eventsEnabled` as `@deprecated`
+- `packages/core/src/defaults.ts` — keep `eventsEnabled: false` (deprecated); add `insights: { enabled: false, console: false, http: false }` and `events: { dispatchIntervalSeconds: 10, bulkThreshold: 500, sampleRatePercentage: 100 }`
 - `packages/core/src/util.ts` — add `resolveInsights(config)` (also: `runBeforeEventHandlers`, see §1d)
+- `packages/core/src/client.ts` — `configure()` applies the `eventsEnabled` deprecation shim (auto-sets `insights.enabled` + `insights.console`, logs deprecation warning)
 - `packages/core/src/plugins/events.ts` — swap `eventsEnabled` check for `resolveInsights(client.config).console`
 - `packages/core/src/store.ts` — `eventContext` in `GlobalStore`
 - `packages/core/src/util.ts` — `runBeforeEventHandlers` (async)
@@ -659,7 +690,7 @@ Three independent guards prevent self-feedback loops:
 - `packages/js/src/server/fastify.ts` — **new** Fastify plugin (factory: `fastifyPlugin(client)` returns the plugin function; not bound on the singleton)
 - `packages/js/src/server/integrations/outbound_http_plugin.ts` — **new** Node `http`/`https`/`fetch` outbound patch (server only); thin entry point that composes helpers from `outbound_http.ts`
 - `packages/js/src/server.ts` — register outbound plugin in DEFAULT_PLUGINS; **re-export** `fastifyPlugin` from the package entry (no singleton binding)
-- `packages/js/src/server/integrations/shutdown_plugin.ts` — no change (continues to gate on `eventsEnabled`)
+- `packages/js/src/server/integrations/shutdown_plugin.ts` — drop the `eventsEnabled` gate; register the flush listener unconditionally
 - `packages/nextjs/src/with-honeybadger.ts` — App Router auto-event + Honeybadger.run wrapper
 
 ## Reused utilities (do not duplicate)
@@ -679,7 +710,7 @@ Three independent guards prevent self-feedback loops:
    - `cd packages/core && npm test`
    - `cd packages/js && npm run test:server`
    - `cd packages/nextjs && npm test`
-2. **Express live check:** build `js` package, run the express example with `eventsEnabled: true, insights: { http: true }`, hit `/` (200) and `/fail` (500). Confirm two `request.express` events carrying `requestId` + `correlationId` and that a manual `client.event('test', {})` from the same request carries the **same** pair.
+2. **Express live check:** build `js` package, run the express example with `insights: { enabled: true, http: true }`, hit `/` (200) and `/fail` (500). Confirm two `request.express` events carrying `requestId` + `correlationId` and that a manual `client.event('test', {})` from the same request carries the **same** pair.
 3. **Header passthrough — requestId:** send `curl -H "x-request-id: abc-123" http://localhost:3000/`; confirm `requestId === 'abc-123'` and `correlationId === 'abc-123'` (correlation falls back to requestId).
 4. **Header passthrough — correlationId:** send `curl -H "x-request-id: req-1" -H "x-correlation-id: trace-9" http://localhost:3000/`; confirm `requestId === 'req-1'` and `correlationId === 'trace-9'` (distinct values).
 5. **Header passthrough — amzn trace:** send `curl -H "x-amzn-trace-id: Root=1-..." http://localhost:3000/`; confirm the trace id resolves to `correlationId` and a fresh `requestId` is generated.
@@ -690,20 +721,21 @@ Three independent guards prevent self-feedback loops:
 10. **Lambda live check:** `serverless invoke local -f helloWrapped --data '{"requestContext":{"http":{"method":"GET","path":"/x"}}}'`. Confirm `request.lambda` event with `requestId` and `correlationId`.
 11. **Next.js live check:** run an app-router example, hit a route, confirm `request.nextjs` event and that programmatic events inside the handler share the same `requestId`/`correlationId`.
 12. **`beforeEvent` async:** register `client.beforeEvent(async (e) => { e.tag = 'x' })`; assert `tag` lands. Register a second one returning `Promise.resolve(false)`; assert event is dropped.
-13. **Three-tier gating matrix:** verify each row produces the expected behaviour.
+13. **Gating matrix:** verify each row produces the expected behaviour. Programmatic `event()` is **on in every row** — it is never gated by configuration.
 
     | Settings | console | http | programmatic event() |
     |---|---|---|---|
-    | `eventsEnabled: false` | off | off | off |
-    | `eventsEnabled: true` (no `insights`) | off | off | on |
-    | `eventsEnabled: true, insights: { enabled: true }` | off | off | on |
-    | `eventsEnabled: true, insights: { enabled: true, console: true }` | on | off | on |
-    | `eventsEnabled: true, insights: { enabled: true, http: true }` | off | on | on |
-    | `eventsEnabled: true, insights: { enabled: true, console: true, http: true }` | on | on | on |
-    | `eventsEnabled: true, insights: { http: true }` (footgun: enabled not set) | off | off | on |
-    | `eventsEnabled: true, insights: { enabled: false }` | off | off | on |
+    | (default, no config) | off | off | on |
+    | `insights: { enabled: true }` | off | off | on |
+    | `insights: { enabled: true, console: true }` | on | off | on |
+    | `insights: { enabled: true, http: true }` | off | on | on |
+    | `insights: { enabled: true, console: true, http: true }` | on | on | on |
+    | `insights: { http: true }` (footgun: enabled not set) | off | off | on |
+    | `eventsEnabled: true` (deprecated; shim → enabled + console) | on | off | on |
+    | `eventsEnabled: true, insights: { console: false }` (explicit value beats shim) | off | off | on |
+    | `eventsEnabled: false` (deprecated; no effect) | off | off | on |
 
-    In every "auto-instrumentation off" case where `eventsEnabled: true`, `requestId` and `correlationId` still flow onto programmatic `event()` calls.
+    In every "auto-instrumentation off" case, `requestId` and `correlationId` still flow onto programmatic `event()` calls. The `eventsEnabled: true` rows must also log a deprecation warning exactly once.
 
 ## Out of scope (deferred)
 
@@ -736,21 +768,22 @@ flowchart LR
 **Goal:** land the plumbing every framework integration depends on, with no framework code touched.
 
 **Scope (from §1):**
-- `BeforeEventHandler` type, `InsightsConfig` type, `Config.insights`, `StoreContents.eventContext`, `HoneybadgerStore.setEventContext` / `clearEventContext` — `packages/core/src/types.ts`.
-- Defaults: `eventsEnabled: false`, `insights: { enabled: false, console: false, http: false }` — `packages/core/src/defaults.ts`.
+- `BeforeEventHandler` type, `InsightsConfig` type, `EventsConfig` type, `Config.insights`, `Config.events`, `StoreContents.eventContext`, `HoneybadgerStore.setEventContext` / `clearEventContext` — `packages/core/src/types.ts`; mark `eventsEnabled` as `@deprecated`.
+- Defaults: `eventsEnabled: false` (deprecated), `insights: { enabled: false, console: false, http: false }`, `events: { dispatchIntervalSeconds: 10, bulkThreshold: 500, sampleRatePercentage: 100 }` — `packages/core/src/defaults.ts`.
+- `eventsEnabled` deprecation shim in `configure()`: `true` auto-sets `insights.enabled: true` and `insights.console: true` (explicit user values win), logs a deprecation warning — `packages/core/src/client.ts`.
 - `eventContext` propagation in all three stores (`store.ts`, `async_store.ts`, `stacked_store.ts`); `clear()` extended to also reset `eventContext`.
 - `runBeforeEventHandlers` (async) and `resolveInsights(config)` — `packages/core/src/util.ts`.
-- `Client.beforeEvent`, `Client.setEventContext`, `Client.clearEventContext`; `Client.event()` rewritten with kill-switch / merge / handler chain — `packages/core/src/client.ts`.
+- `Client.beforeEvent`, `Client.setEventContext`, `Client.clearEventContext`; `Client.event()` rewritten with merge + handler chain (no config gate — programmatic events always ship) — `packages/core/src/client.ts`.
 - Console plugin migrated to gate on `resolveInsights(client.config).console` — `packages/core/src/plugins/events.ts`.
-- Shutdown plugin: keep gating on `eventsEnabled` (no code change, but verify by test).
+- Shutdown plugin: drop the `eventsEnabled` gate; register the flush listener unconditionally.
 
-**Tests:** `packages/core/test/client.test.ts` (`describe('beforeEvent', ...)`, `describe('eventContext', ...)`); `packages/core/test/util.test.ts` (`runBeforeEventHandlers`, `resolveInsights` matrix including the footgun row).
+**Tests:** `packages/core/test/client.test.ts` (`describe('beforeEvent', ...)`, `describe('eventContext', ...)`, ungated programmatic `event()`, deprecation shim); `packages/core/test/util.test.ts` (`runBeforeEventHandlers`, `resolveInsights` matrix including the footgun row).
 
 **Out of this PR:** any HTTP instrumentation, any framework integration, any outbound patching. No new files under `packages/js/src/server/`.
 
-**Breaking change lands here:** existing users with `eventsEnabled: true` lose console events on upgrade. Ships as a major version bump; no compat shim. Call this out prominently in the changelog and upgrade guide.
+**Backwards compatibility:** existing users with `eventsEnabled: true` keep console events via the deprecation shim — no breaking change, no major version bump. The changelog announces the deprecation and the new `insights` config.
 
-**Risk:** the `event()` rewrite changes a public method. Verify existing programmatic `event()` callers still work via the existing test suite, and confirm the new `eventsEnabled === false` short-circuit semantics in the changelog.
+**Risk:** the `event()` rewrite changes a public method. Verify existing programmatic `event()` callers still work via the existing test suite. The shim must run before `resolveInsights` is ever consulted (i.e. at configure time), and must not clobber explicit `insights` values.
 
 ---
 
@@ -853,4 +886,4 @@ flowchart LR
 
 - The `beforeEvent` hook, `eventContext`, and `resolveInsights` ship together in PR 1. They are co-designed and any one of them in isolation would be confusing in the public API.
 - Helpers in `http_event.ts` ship with their first consumer (PR 2) rather than as a standalone PR — orphan utility code is hard to review and tends to drift from real use.
-- There is **no backwards-compat shim** for existing `eventsEnabled: true` console-events users. The console-event loss is a deliberate breaking change shipped under a major version bump; documented in the changelog and upgrade guide.
+- The `eventsEnabled` deprecation shim ships inside PR 1 (it is part of the config normalisation that `resolveInsights` depends on), not as a separate PR. Removal of `eventsEnabled` itself is deferred to a future major version.

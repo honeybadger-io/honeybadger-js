@@ -5,7 +5,8 @@ import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
 export class ThrottledEventsWorker implements EventsWorker {
   private queue: EventPayload[] = []
-  private isProcessing = false
+  private cooldownTimer: ReturnType<typeof setTimeout> | null = null
+  private inFlight: Promise<void> | null = null
   private logger: Logger
 
   constructor(private readonly config: Partial<Config>, private transport: Transport) {
@@ -25,38 +26,77 @@ export class ThrottledEventsWorker implements EventsWorker {
   log(payload: EventPayload) {
     this.queue.push(payload)
 
-    if (!this.isProcessing) {
-      this.processQueue()
+    if (this.inFlight) {
+      return
     }
+
+    if (this.cooldownTimer) {
+      if (this.queue.length >= this.bulkThreshold()) {
+        clearTimeout(this.cooldownTimer)
+        this.cooldownTimer = null
+        this.processQueue()
+      }
+      return
+    }
+
+    this.processQueue()
   }
 
   flushAsync(): Promise<void> {
     this.logger.debug('[Honeybadger] Flushing events')
-    return this.send();
+    if (this.cooldownTimer) {
+      clearTimeout(this.cooldownTimer)
+      this.cooldownTimer = null
+    }
+    const previous = this.inFlight ?? Promise.resolve()
+    const flush = previous.then(() => this.drainAll())
+    // Mark the flush as in-flight so a concurrent log() doesn't start an
+    // overlapping processQueue() drain while we're draining here.
+    this.inFlight = flush
+    const clear = () => {
+      if (this.inFlight === flush) {
+        this.inFlight = null
+      }
+    }
+    flush.then(clear, clear)
+    return flush
+  }
+
+  private async drainAll(): Promise<void> {
+    while (this.queue.length > 0) {
+      await this.send()
+    }
   }
 
   private processQueue() {
-    if (this.queue.length === 0 || this.isProcessing) {
+    if (this.queue.length === 0 || this.inFlight) {
       return
     }
 
-    this.isProcessing = true
-
-    this.send()
-      .then(() => {
-        setTimeout(() => {
-          this.isProcessing = false
-          this.processQueue()
-        }, 50)
-      })
+    const inFlight = this.send()
       .catch((error) => {
         this.logger.error('[Honeybadger] Error making HTTP request:', error)
-        // Continue processing the queue even if there's an error
-        setTimeout(() => {
-          this.isProcessing = false
-          this.processQueue()
-        }, 50)
       })
+      .then(() => {
+        // Only reset if we're still the current operation; a flushAsync() may
+        // have taken ownership of inFlight while this send was resolving.
+        if (this.inFlight === inFlight) {
+          this.inFlight = null
+          this.scheduleNextDispatch()
+        }
+      })
+    this.inFlight = inFlight
+  }
+
+  private scheduleNextDispatch() {
+    if (this.queue.length >= this.bulkThreshold()) {
+      this.processQueue()
+      return
+    }
+    this.cooldownTimer = setTimeout(() => {
+      this.cooldownTimer = null
+      this.processQueue()
+    }, this.dispatchIntervalMs())
   }
 
   private async send(): Promise<void> {
@@ -64,11 +104,21 @@ export class ThrottledEventsWorker implements EventsWorker {
       return;
     }
 
-    const eventsData = this.queue.slice()
-    this.queue = []
+    const eventsData = this.queue.splice(0, this.bulkThreshold())
 
     const data = NdJson.stringify(eventsData)
     return this.makeHttpRequest(data)
+  }
+
+  private bulkThreshold(): number {
+    const v = this.config.events?.bulkThreshold
+    return typeof v === 'number' && v > 0 ? v : DEFAULT_CONFIG.events.bulkThreshold
+  }
+
+  private dispatchIntervalMs(): number {
+    const v = this.config.events?.dispatchIntervalSeconds
+    const seconds = typeof v === 'number' && v >= 0 ? v : DEFAULT_CONFIG.events.dispatchIntervalSeconds
+    return seconds * 1000
   }
 
   private async makeHttpRequest(data: string): Promise<void> {
