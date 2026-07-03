@@ -54,6 +54,12 @@ function configure() {
  * These are not real failures — the framework catches them upstream to produce
  * the redirect/404/etc. — so we must let them propagate without reporting them,
  * otherwise every redirect shows up as an error in Honeybadger.
+ *
+ * We match on the `NEXT_` prefix rather than an exhaustive list so that any
+ * present or future framework control-flow digest is covered. This is safe:
+ * genuine errors that React tags with a `digest` use an opaque hash, and other
+ * Next.js bailout signals (e.g. `BAILOUT_TO_CLIENT_SIDE_RENDERING`,
+ * `DYNAMIC_SERVER_USAGE`) are not `NEXT_`-prefixed, so neither is skipped.
  */
 function isNextControlFlowError(error: unknown): boolean {
   const digest = (error as { digest?: unknown } | null | undefined)?.digest
