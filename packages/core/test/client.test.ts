@@ -56,6 +56,37 @@ describe('client', function () {
       expect(client.configure({})).toEqual(client)
     })
 
+    describe('eventsEnabled deprecation shim', function () {
+      it('auto-enables insights.enabled and insights.console and logs a deprecation warning', function () {
+        const warnSpy = jest.spyOn(client.config.logger, 'warn')
+        client.configure({ eventsEnabled: true })
+        expect(client.config.insights.enabled).toEqual(true)
+        expect(client.config.insights.console).toEqual(true)
+        expect(warnSpy).toHaveBeenCalledWith('[Honeybadger]', expect.stringContaining('`eventsEnabled` has been deprecated'))
+      })
+
+      it('lets explicit insights values win over the shim', function () {
+        client.configure({ eventsEnabled: true, insights: { console: false } })
+        expect(client.config.insights.enabled).toEqual(true)
+        expect(client.config.insights.console).toEqual(false)
+      })
+
+      it('does nothing when eventsEnabled is false', function () {
+        client.configure({ eventsEnabled: false })
+        expect(client.config.insights.enabled).toEqual(false)
+        expect(client.config.insights.console).toEqual(false)
+      })
+
+      it('applies at construction time too', function () {
+        const constructed = new TestClient({
+          logger: nullLogger(),
+          eventsEnabled: true,
+        }, new TestTransport())
+        expect(constructed.config.insights.enabled).toEqual(true)
+        expect(constructed.config.insights.console).toEqual(true)
+      })
+    })
+
     it('configures event logger from base config', function () {
       client.configure({
         apiKey: 'testing',
@@ -1051,10 +1082,6 @@ describe('client', function () {
   })
 
   describe('event', function () {
-    beforeEach(function () {
-      client.configure({ eventsEnabled: true })
-    })
-
     it('sends an event with only a payload object', function (done) {
       const transport = client.transport();
       const transportSpy = jest.spyOn(transport, 'send')
@@ -1091,23 +1118,86 @@ describe('client', function () {
       }, 10)
     })
 
-    it('drops the event when eventsEnabled is false', function (done) {
-      client.configure({ eventsEnabled: false })
+    it('sends the event even when eventsEnabled is false (programmatic events are never gated)', function (done) {
+      client.configure({ eventsEnabled: false, insights: { enabled: false } })
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
-      client.event('expected event', { message: 'should be dropped' })
+      client.event('expected event', { message: 'should be sent' })
 
       setTimeout(() => {
-        expect(logSpy).not.toHaveBeenCalled()
+        expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
+          event_type: 'expected event',
+          message: 'should be sent',
+        }))
         done()
       }, 10)
+    })
+
+    describe('sampling', function () {
+      it('drops events when events.sampleRatePercentage is 0', function (done) {
+        client.configure({ events: { sampleRatePercentage: 0 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.event('e', { request_id: 'abc' })
+        setTimeout(() => {
+          expect(logSpy).not.toHaveBeenCalled()
+          done()
+        }, 10)
+      })
+
+      it('always sends events at rate 100', function (done) {
+        client.configure({ events: { sampleRatePercentage: 100 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.event('e', { message: 'm' })
+        setTimeout(() => {
+          expect(logSpy).toHaveBeenCalledTimes(1)
+          done()
+        }, 10)
+      })
+
+      it('strips _hb metadata before enqueueing', function (done) {
+        client.configure({ events: { sampleRatePercentage: 100 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.event('e', { _hb: { sampleRate: 100 } })
+        setTimeout(() => {
+          expect(logSpy).toHaveBeenCalledTimes(1)
+          const arg = logSpy.mock.calls[0][0] as Record<string, unknown>
+          expect(arg._hb).toBeUndefined()
+          done()
+        }, 10)
+      })
+
+      it('respects per-event _hb.sampleRate override', function (done) {
+        client.configure({ events: { sampleRatePercentage: 100 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.event('e', { request_id: 'abc', _hb: { sampleRate: 0 } })
+        setTimeout(() => {
+          expect(logSpy).not.toHaveBeenCalled()
+          done()
+        }, 10)
+      })
+
+      it('applies sampling after beforeEvent handlers run', function (done) {
+        client.configure({ events: { sampleRatePercentage: 50 } })
+        const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+        client.beforeEvent((evt) => {
+          (evt as Record<string, unknown>).request_id = 'stable-request-id'
+        })
+        const first: boolean[] = []
+        for (let i = 0; i < 5; i++) {
+          client.event('e', { index: i })
+        }
+        setTimeout(() => {
+          // All five events share the same request_id after the handler runs,
+          // so they all get the same sampling decision.
+          const callCount = logSpy.mock.calls.length
+          expect(callCount === 0 || callCount === 5).toBe(true)
+          first.push(callCount > 0)
+          done()
+        }, 20)
+      })
     })
   })
 
   describe('beforeEvent', function () {
-    beforeEach(function () {
-      client.configure({ eventsEnabled: true })
-    })
-
     it('mutates the event payload', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
@@ -1234,10 +1324,6 @@ describe('client', function () {
   })
 
   describe('flushAsync', function () {
-    beforeEach(function () {
-      client.configure({ eventsEnabled: true })
-    })
-
     it('awaits pending async beforeEvent handlers before flushing the queue', async function () {
       const eventsLoggerSpy = jest.spyOn(client.eventsWorker(), 'log')
       const flushSpy = jest.spyOn(client.eventsWorker(), 'flushAsync')
@@ -1276,22 +1362,18 @@ describe('client', function () {
   })
 
   describe('eventContext', function () {
-    beforeEach(function () {
-      client.configure({ eventsEnabled: true })
-    })
-
     it('merges eventContext into outgoing event payloads', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
-      client.setEventContext({ requestId: 'r-1', correlationId: 'c-1' })
+      client.setEventContext({ request_id: 'r-1', correlation_id: 'c-1' })
       client.event('an_event', { message: 'hi' })
 
       setTimeout(() => {
         expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
           event_type: 'an_event',
           message: 'hi',
-          requestId: 'r-1',
-          correlationId: 'c-1',
+          request_id: 'r-1',
+          correlation_id: 'c-1',
         }))
         done()
       }, 10)
@@ -1300,12 +1382,12 @@ describe('client', function () {
     it('lets explicit data keys win over eventContext on collision', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
-      client.setEventContext({ requestId: 'r-1', shared: 'from-context' })
+      client.setEventContext({ request_id: 'r-1', shared: 'from-context' })
       client.event('an_event', { shared: 'from-data' })
 
       setTimeout(() => {
         expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({
-          requestId: 'r-1',
+          request_id: 'r-1',
           shared: 'from-data',
         }))
         done()
@@ -1315,13 +1397,13 @@ describe('client', function () {
     it('clearEventContext empties the event context', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
-      client.setEventContext({ requestId: 'r-1' })
+      client.setEventContext({ request_id: 'r-1' })
       client.clearEventContext()
       client.event('an_event', { message: 'hi' })
 
       setTimeout(() => {
         const call = logSpy.mock.calls[0][0]
-        expect(call.requestId).toBeUndefined()
+        expect(call.request_id).toBeUndefined()
         done()
       }, 10)
     })
@@ -1329,19 +1411,19 @@ describe('client', function () {
     it('client.clear() also clears eventContext', function (done) {
       const logSpy = jest.spyOn(client.eventsWorker(), 'log')
 
-      client.setEventContext({ requestId: 'r-1' })
+      client.setEventContext({ request_id: 'r-1' })
       client.clear()
       client.event('an_event', { message: 'hi' })
 
       setTimeout(() => {
         const call = logSpy.mock.calls[0][0]
-        expect(call.requestId).toBeUndefined()
+        expect(call.request_id).toBeUndefined()
         done()
       }, 10)
     })
 
     it('setEventContext ignores non-object inputs', function () {
-      client.setEventContext({ requestId: 'r-1' })
+      client.setEventContext({ request_id: 'r-1' })
       client.setEventContext(<never>'bad')
       // chainable still
       expect(client.setEventContext({})).toBe(client)
