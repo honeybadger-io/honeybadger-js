@@ -232,43 +232,38 @@ describe('utils', function () {
   })
 
   describe('resolveInsights', function () {
-    it('returns everything off when eventsEnabled is false', function () {
-      expect(resolveInsights({ eventsEnabled: false, insights: { enabled: true, console: true, http: true } }))
-        .toEqual({ console: false, http: false })
-    })
-
     it('returns everything off when insights.enabled is false', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: false } }))
+      expect(resolveInsights({ insights: { enabled: false } }))
         .toEqual({ console: false, http: false })
     })
 
     it('returns everything off when insights.enabled is true but no sub-flags', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: true } }))
+      expect(resolveInsights({ insights: { enabled: true } }))
         .toEqual({ console: false, http: false })
     })
 
     it('returns console on when fully opted in', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: true, console: true } }))
+      expect(resolveInsights({ insights: { enabled: true, console: true } }))
         .toEqual({ console: true, http: false })
     })
 
     it('returns http on when fully opted in', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: true, http: true } }))
+      expect(resolveInsights({ insights: { enabled: true, http: true } }))
         .toEqual({ console: false, http: true })
     })
 
     it('returns both on when fully opted in', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: { enabled: true, console: true, http: true } }))
+      expect(resolveInsights({ insights: { enabled: true, console: true, http: true } }))
         .toEqual({ console: true, http: true })
     })
 
     it('footgun: insights.http without insights.enabled is off', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: { http: true } }))
+      expect(resolveInsights({ insights: { http: true } }))
         .toEqual({ console: false, http: false })
     })
 
     it('footgun: insights.console without insights.enabled is off', function () {
-      expect(resolveInsights({ eventsEnabled: true, insights: { console: true } }))
+      expect(resolveInsights({ insights: { console: true } }))
         .toEqual({ console: false, http: false })
     })
   })

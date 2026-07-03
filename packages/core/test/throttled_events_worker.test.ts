@@ -13,8 +13,7 @@ function makeEvent(name = 'foo') {
 function fastWorkerConfig(extra: Record<string, unknown> = {}) {
   return {
     debug: true,
-    insights: {
-      enabled: true,
+    events: {
       dispatchIntervalSeconds: 0.05,
       bulkThreshold: 500,
       sampleRatePercentage: 100,
@@ -95,7 +94,7 @@ describe('ThrottledEventsWorker', () => {
       expect(transportSpy).toHaveBeenCalledTimes(1)
       // Lower the interval after the first send while the cooldown is pending.
       // We can't shorten the in-flight cooldown, but the *next* one should use the new value.
-      eventsWorker.configure({ insights: { enabled: true, dispatchIntervalSeconds: 0.05, bulkThreshold: 500 } as never })
+      eventsWorker.configure({ events: { dispatchIntervalSeconds: 0.05, bulkThreshold: 500 } as never })
       eventsWorker.log(makeEvent('b'))
       eventsWorker.log(makeEvent('c'))
       // Threshold isn't crossed; the long cooldown set up earlier is still running.

@@ -179,10 +179,9 @@ describe('Express Middleware', function () {
       return app
     }
 
-    describe('with eventsEnabled: true, insights: { enabled: true, http: true }', function () {
+    describe('with insights: { enabled: true, http: true }', function () {
       beforeEach(function () {
         client.configure({
-          eventsEnabled: true,
           insights: { enabled: true, http: true },
         })
       })
@@ -308,6 +307,28 @@ describe('Express Middleware', function () {
           })
       })
 
+      it('skips the request event without crashing when the response is not an EventEmitter (e.g. fastify preHandler misuse)', function () {
+        const evSpy = jest.spyOn(client, 'event')
+        let captured: Record<string, unknown> = {}
+        // next runs inside withRequest, so it sees the request-scoped store
+        const next = jest.fn(() => { captured = readEventContext() })
+        const replyLike = { statusCode: 200 }
+        const reqLike = { headers: { 'x-request-id': 'rid-not-express' }, method: 'GET', url: '/x' }
+
+        expect(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          client.requestHandler(reqLike as any, replyLike as any, next)
+        }).not.toThrow()
+
+        expect(next).toHaveBeenCalledTimes(1)
+        expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+        // context isolation still happened: event context was seeded from headers
+        expect(captured).toMatchObject({
+          request_id: 'rid-not-express',
+          correlation_id: 'rid-not-express',
+        })
+      })
+
       it('emits with status 500 on errors', function () {
         const evSpy = jest.spyOn(client, 'event')
 
@@ -326,7 +347,6 @@ describe('Express Middleware', function () {
     describe('gating', function () {
       it('with insights.http: false (default), does not emit request.handled but still seeds event context', function () {
         client.configure({
-          eventsEnabled: true,
           insights: { enabled: true, http: false },
         })
 
@@ -349,7 +369,6 @@ describe('Express Middleware', function () {
 
       it('with insights.enabled: false, does not emit request.handled but still seeds event context', function () {
         client.configure({
-          eventsEnabled: true,
           insights: { enabled: false, http: true },
         })
 
@@ -371,7 +390,6 @@ describe('Express Middleware', function () {
 
       it('with insights.http: true but insights.enabled missing (footgun), does not emit request.handled', function () {
         client.configure({
-          eventsEnabled: true,
           // intentionally omitting `enabled` — verifies the footgun is gated off
           insights: { http: true },
         })
@@ -386,10 +404,9 @@ describe('Express Middleware', function () {
           })
       })
 
-      it('with eventsEnabled: false, neither request.handled nor programmatic events fire', function () {
+      it('with deprecated eventsEnabled: true alone, does not emit request.handled (shim enables console, not http) but programmatic events fire', function () {
         client.configure({
-          eventsEnabled: false,
-          insights: { enabled: true, http: true },
+          eventsEnabled: true,
         })
 
         const workerSpy = jest.spyOn(eventsWorker(), 'log')
@@ -399,13 +416,19 @@ describe('Express Middleware', function () {
           .expect(200)
           .then(() => new Promise((resolve) => setTimeout(resolve, 50)))
           .then(() => {
-            expect(workerSpy).not.toHaveBeenCalled()
+            const customCall = workerSpy.mock.calls.find(
+              (c) => (c[0] as Record<string, unknown>).event_type === 'custom'
+            )
+            expect(customCall).toBeDefined()
+            const requestHandledCall = workerSpy.mock.calls.find(
+              (c) => (c[0] as Record<string, unknown>).event_type === 'request.handled'
+            )
+            expect(requestHandledCall).toBeUndefined()
           })
       })
 
-      it('with eventsEnabled: true and insights off, programmatic events still fire and carry request_id/correlation_id', function () {
+      it('with insights off, programmatic events still fire and carry request_id/correlation_id', function () {
         client.configure({
-          eventsEnabled: true,
           insights: { enabled: false },
         })
 

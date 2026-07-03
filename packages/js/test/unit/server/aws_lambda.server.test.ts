@@ -635,11 +635,10 @@ describe('Lambda Handler', function () {
 
     const ctx = (awsRequestId = 'aws-req-1') => mockAwsContext({ awsRequestId })
 
-    describe('with eventsEnabled: true, insights: { enabled: true, http: true }', function () {
+    describe('with insights: { enabled: true, http: true }', function () {
       beforeEach(function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: true,
           insights: { enabled: true, http: true },
         })
       })
@@ -756,7 +755,6 @@ describe('Lambda Handler', function () {
       beforeEach(function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: true,
           insights: { enabled: true, http: true },
         })
       })
@@ -801,7 +799,6 @@ describe('Lambda Handler', function () {
       it('with insights.http: false, does not emit but still seeds eventContext from headers', async function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: true,
           insights: { enabled: true, http: false },
         })
 
@@ -822,7 +819,6 @@ describe('Lambda Handler', function () {
       it('with insights.enabled: false, does not emit even if http: true', async function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: true,
           insights: { enabled: false, http: true },
         })
 
@@ -834,20 +830,20 @@ describe('Lambda Handler', function () {
         expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
       })
 
-      it('with eventsEnabled: false, drops everything including request.handled', async function () {
+      it('with deprecated eventsEnabled: true alone, does not emit request.handled (shim enables console, not http)', async function () {
         client.configure({
           apiKey: 'testing',
-          eventsEnabled: false,
-          insights: { enabled: true, http: true },
+          eventsEnabled: true,
         })
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const workerSpy = jest.spyOn((client as any).__eventsWorker, 'log')
+        const evSpy = jest.spyOn(client, 'event')
         const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
 
         await handler(apiGatewayV2Event(), ctx())
 
-        expect(workerSpy).not.toHaveBeenCalled()
+        expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+        expect(client.config.insights.enabled).toBe(true)
+        expect(client.config.insights.console).toBe(true)
       })
     })
   })

@@ -77,6 +77,7 @@ export abstract class Client {
     this.__transport = transport
     this.__eventsWorker = new ThrottledEventsWorker(this.config, this.__transport)
     this.logger = logger(this)
+    this.__applyEventsEnabledShim(opts)
   }
 
   protected abstract factory(opts: Partial<Config>): this
@@ -108,10 +109,24 @@ export abstract class Client {
     for (const k in opts) {
       this.config[k] = opts[k]
     }
+    this.__applyEventsEnabledShim(opts)
     this.__eventsWorker.configure(this.config)
     this.loadPlugins()
 
     return this
+  }
+
+  /**
+   * Backwards compatibility: `eventsEnabled: true` used to opt into console events.
+   * The deprecated flag auto-enables `insights.enabled` and `insights.console`;
+   * explicit user-provided insights values win over the shim.
+   */
+  protected __applyEventsEnabledShim(opts: Partial<Config>): void {
+    if (opts.eventsEnabled !== true) {
+      return
+    }
+    this.logger.warn('Deprecation warning: `eventsEnabled` has been deprecated; please use `insights.enabled` and `insights.console` instead.')
+    this.config.insights = { ...(this.config.insights ?? {}), enabled: true, console: true, ...opts.insights }
   }
 
   loadPlugins() {
@@ -342,11 +357,6 @@ export abstract class Client {
       type = type['event_type'] as string ?? undefined
     }
 
-    if (!this.config.eventsEnabled) {
-      this.logger.debug('skipping event: eventsEnabled is false')
-      return
-    }
-
     const eventContext = this.__store.getContents('eventContext') || {}
     const payload: EventPayload = {
       event_type: type as string,
@@ -364,7 +374,7 @@ export abstract class Client {
           this.logger.debug('skipping event: beforeEvent handler returned false')
           return
         }
-        const sampleRate = this.config.insights?.sampleRatePercentage ?? 100
+        const sampleRate = this.config.events?.sampleRatePercentage ?? 100
         if (!shouldSampleEvent(payload, sampleRate)) {
           this.logger.debug('skipping event: dropped by sampleRatePercentage')
           return

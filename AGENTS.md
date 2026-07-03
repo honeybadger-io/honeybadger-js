@@ -146,8 +146,13 @@ From the root: `npm run build` runs `lerna run build --stream` and respects TS p
 
 ## Install & local dev
 
-- **Install only from the repo root**: `npm install`. The root `package.json` has `"install": "lerna bootstrap"`, so a root install also wires symlinks between packages. Running `npm install` inside a single package will likely break the link graph.
-- Add a dependency to a single package: `lerna add <pkg> --scope="@honeybadger-io/<name>"` (or edit the package's `package.json` and re-run root install).
+- **Install only from the repo root**: `npm install`. The root `package.json` has `"install": "lerna bootstrap"`, so a root install also wires symlinks between packages. **Never run `npm install` inside a single package** — it replaces the in-repo `@honeybadger-io/*` symlinks (e.g. `packages/js/node_modules/@honeybadger-io/core`) with registry copies and breaks the link graph. If this happens, delete the affected `node_modules/@honeybadger-io/*` entries and re-run a root install (or `npx lerna bootstrap`) to restore the symlinks.
+- **Add a dependency to a single package** (runtime or dev) with `lerna add` from the repo root — never with `npm install` inside the package:
+  ```sh
+  npx lerna add <pkg>[@<version>] --scope="@honeybadger-io/<name>"          # runtime dep
+  npx lerna add <pkg>[@<version>] --dev --scope="@honeybadger-io/<name>"    # devDependency
+  ```
+  This updates the package's `package.json` and re-bootstraps, keeping inter-package symlinks intact. (Alternatively, edit the package's `package.json` by hand and re-run the root install.)
 - To run an arbitrary script across packages: `lerna run <script>` (with optional `--scope`). Missing scripts are silently skipped.
 - Each package keeps its own `package-lock.json` in addition to the root one.
 
@@ -193,6 +198,7 @@ NPM Trusted Publishing is configured per-package; only one workflow can be the t
 ## Working in this repo as an agent
 
 - **Always start from the repo root.** Run `npm install` there, run `npm run build` there, run `npm run lint` there. Use `lerna run <script> --scope=...` (or `cd packages/<x>`) for per-package tasks.
+- **Never `npm install` inside a package.** To add a dependency, use `npx lerna add <pkg> [--dev] --scope="@honeybadger-io/<name>"` from the root (see "Install & local dev"). A package-local `npm install` breaks the Lerna symlink graph.
 - **Mind project references.** A change in `core` requires a rebuild before downstream packages typecheck cleanly. Run `npm run build` (or at minimum `lerna run build --scope @honeybadger-io/core` and any downstream).
 - **Match the package's existing tooling.** Don't introduce Jest into a Mocha package, or vice-versa, without strong reason. Don't add new build tools to a package that already has one — extend the existing config.
 - **Honor the lint rules.** Run `npm run lint` before completing a change. Note the custom `local-rules/no-test-imports` — keep all jest helpers behind `test/`.
