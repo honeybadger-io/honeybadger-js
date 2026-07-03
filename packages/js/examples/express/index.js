@@ -8,8 +8,16 @@ const Honeybadger = require('../../dist/server/honeybadger')
 Honeybadger.configure({
   apiKey: process.env.HONEYBADGER_API_KEY,
   reportData: true,
-  eventsEnabled: true,
-  insights: { enabled: true, http: true },
+  insights: {
+    enabled: true,
+    http: true,
+    console: true,
+  },
+  events: {
+    dispatchIntervalSeconds: 1,
+    bulkThreshold: 500,
+    sampleRatePercentage: 100,
+  },
   debug: true,
 })
 
@@ -54,7 +62,7 @@ app.get('/checkin/:id', (req, res) => {
 })
 
 app.get('/event', (req, res) => {
-  // should send an event to Honeybadger, with type 'test-event'
+  // should send an event to Honeybadger, with type 'button_click'
   Honeybadger.event('button_click', {
     action: 'buy_now',
     user_id: 123,
@@ -63,6 +71,36 @@ app.get('/event', (req, res) => {
 
   // should send an event to Honeybadger, with type 'log'
   console.log('Event sent!', { source: 'console.log' , path: req.url })
+
+  res.send('Done. Check your Honeybadger Insights page!')
+})
+
+app.get('/event-flood', async (req, res) => {
+  const count = parseInt(req.query.count, 10) || 100000
+  const batchSize = 1000
+  for (let i = 0; i < count; i++) {
+    Honeybadger.event('quota_test', {
+      index: i,
+      timestamp: Date.now(),
+      payload: 'x'.repeat(200),
+    })
+    if (i > 0 && i % batchSize === 0) {
+      await new Promise((resolve) => setImmediate(resolve))
+    }
+  }
+  res.send(`Fired ${count} events. Watch the logs for throttling/quota messages.`)
+})
+
+app.get('/event/:name', (req, res) => {
+  // should send an event to Honeybadger, with the type taken from the :name param
+  Honeybadger.event(req.params.name, {
+    action: 'buy_now',
+    user_id: 123,
+    product_id: 456,
+  })
+
+  // should send an event to Honeybadger, with type 'log'
+  console.log('Event sent!', { source: 'console.log', path: req.url })
 
   res.send('Done. Check your Honeybadger Insights page!')
 })

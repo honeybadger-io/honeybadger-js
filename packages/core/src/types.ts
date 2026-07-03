@@ -25,6 +25,12 @@ export interface InsightsConfig {
   http?: boolean
 }
 
+export interface EventsConfig {
+  dispatchIntervalSeconds?: number
+  bulkThreshold?: number
+  sampleRatePercentage?: number
+}
+
 export interface Config {
   apiKey?: string,
   endpoint: string,
@@ -39,8 +45,10 @@ export interface Config {
   debug: boolean
   reportData: boolean
   breadcrumbsEnabled: boolean | { dom?: boolean, network?: boolean, navigation?: boolean, console?: boolean}
+  /** @deprecated Use `insights.enabled` and `insights.console` instead. Setting `eventsEnabled: true` auto-enables both. */
   eventsEnabled: boolean
   insights: InsightsConfig
+  events: EventsConfig
   maxBreadcrumbs: number
   maxObjectDepth: number
   logger: Logger

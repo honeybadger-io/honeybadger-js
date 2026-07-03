@@ -25,6 +25,18 @@ function fullUrl(req: Request): string {
 }
 
 function instrumentInboundRequest(client: Client, req: Request, res: Response): void {
+  // Completion is observed via response events, which requires a Node
+  // ServerResponse. A non-EventEmitter response (e.g. a FastifyReply when this
+  // middleware is mistakenly registered as a fastify preHandler) would break
+  // every request — degrade to "no request event" instead. Fastify users
+  // should register fastifyPlugin() from server/fastify.
+  if (typeof res.once !== 'function') {
+    client.logger.debug(
+      'skipping insights instrumentation for http requests: response object is not an EventEmitter and does not have a .once() hook'
+    )
+    return
+  }
+
   const start = startTimer()
   let emitted = false
   const emit = () => {

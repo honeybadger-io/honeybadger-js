@@ -75,10 +75,39 @@ export default [
       'util',
       'domain',
       'async_hooks',
+      'fastify-plugin',
     ],
     output: {
       file: pkg.main,
       format: 'cjs',
+      sourcemap: true
+    },
+    plugins: sharedPlugins
+  },
+
+  // Fastify plugin (server-only subpath).
+  // The main server bundle unwraps to the singleton (`module.exports = singleton`),
+  // which drops named exports at runtime — so the plugin gets its own CJS entry:
+  // require('@honeybadger-io/js/dist/server/fastify')
+  {
+    input: 'build/src/server/fastify.js',
+    external: [
+      'http',
+      'https',
+      'url',
+      'os',
+      'fs',
+      'util',
+      'domain',
+      'async_hooks',
+      'crypto',
+      'fastify',
+      'fastify-plugin',
+    ],
+    output: {
+      file: 'dist/server/fastify.js',
+      format: 'cjs',
+      exports: 'named',
       sourcemap: true
     },
     plugins: sharedPlugins

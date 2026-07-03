@@ -90,10 +90,10 @@ export function getOrCreateCorrelationId(headers: HeadersInput, requestId: strin
  */
 export function seedRequestEventContext(
   headers: HeadersInput
-): { requestId: string; correlationId: string } {
+): { request_id: string; correlation_id: string } {
   const requestId = getOrCreateRequestId(headers)
   const correlationId = getOrCreateCorrelationId(headers, requestId)
-  return { requestId, correlationId }
+  return { request_id: requestId, correlation_id: correlationId }
 }
 
 /**
@@ -123,9 +123,9 @@ export interface RequestEventInput {
 }
 
 /**
- * Builds the per-request event payload. `requestId` and `correlationId` are NOT
- * added here — they live on `eventContext` and are merged onto every event by
- * the client.
+ * Builds the per-request event payload. `request_id` and `correlation_id` are
+ * NOT added here — they live on `eventContext` and are merged onto every event
+ * by the client.
  */
 export function buildRequestEventPayload(input: RequestEventInput): Record<string, unknown> {
   const payload: Record<string, unknown> = {}

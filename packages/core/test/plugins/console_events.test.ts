@@ -23,26 +23,24 @@ describe('window.console integration for events logging', function () {
   })
 
   function enableConsoleInsights() {
-    client.config.eventsEnabled = true
     client.config.insights = { enabled: true, console: true }
   }
 
   it('should skip install by default', function () {
     const window = { console: mockConsole }
     eventsLogger(<never>window).load(client)
-    expect(client.config.eventsEnabled).toEqual(false)
+    expect(client.config.insights.enabled).toEqual(false)
     expect(window.console.log).toEqual(mockConsole.log)
   })
 
-  it('should skip install when eventsEnabled is true but insights.console is false', function () {
-    client.config.eventsEnabled = true
+  it('should skip install when insights.enabled is true but insights.console is false', function () {
+    client.config.insights = { enabled: true, console: false }
     const window = { console: mockConsole }
     eventsLogger(<never>window).load(client)
     expect(window.console.log).toEqual(mockConsole.log)
   })
 
   it('should skip install when insights.enabled is false even if insights.console is true', function () {
-    client.config.eventsEnabled = true
     client.config.insights = { enabled: false, console: true }
     const window = { console: mockConsole }
     eventsLogger(<never>window).load(client)
