@@ -41,7 +41,9 @@ function requireFastifyPlugin(): FastifyPluginWrapper {
     const fp = require('fastify-plugin')
     return fp.default ?? fp
   } catch (e: any) {
-    if (e?.code !== 'MODULE_NOT_FOUND') {
+    const message = typeof e?.message === 'string' ? e.message : ''
+    const isMissing = e?.code === 'MODULE_NOT_FOUND' || (message.includes('Cannot find module') && message.includes('fastify-plugin'))
+    if (!isMissing) {
       throw e
     }
     throw new Error(
