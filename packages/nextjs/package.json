@@ -17,6 +17,20 @@
   "main": "dist/honeybadger-nextjs.cjs.js",
   "module": "dist/honeybadger-nextjs.esm.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "edge-light": {
+        "types": "./dist/edge.d.ts",
+        "import": "./dist/honeybadger-nextjs-edge.esm.js",
+        "require": "./dist/honeybadger-nextjs-edge.cjs.js"
+      },
+      "types": "./dist/index.d.ts",
+      "import": "./dist/honeybadger-nextjs.esm.js",
+      "require": "./dist/honeybadger-nextjs.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "src",

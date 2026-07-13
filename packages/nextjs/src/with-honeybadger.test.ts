@@ -198,6 +198,33 @@ describe('withHoneybadger', () => {
     })
   })
 
+  describe('withHoneybadger(handler, config)', () => {
+    it('applies the config when Honeybadger has not been configured yet', async () => {
+      // Simulate a fresh client: no apiKey set yet, so the wrapper's internal
+      // `configure()` has not early-returned.
+      Honeybadger.configure({ apiKey: '' })
+
+      const wrapped = withHoneybadger(okHandler, { insights: { enabled: true, http: true } })
+      await wrapped(new Request('http://localhost:3000/api/items'))
+      await waitForEvents()
+
+      expect(Honeybadger.config.insights.http).toBe(true)
+      expect(requestHandledCalls()).toHaveLength(1)
+    })
+
+    it('does not override a client that is already configured (apiKey set)', async () => {
+      // The outer beforeEach already configured Honeybadger with an apiKey
+      // and insights.http: false; this mirrors the existing early-return
+      // semantics of the parameterless `configure()`.
+      const wrapped = withHoneybadger(okHandler, { insights: { enabled: true, http: true } })
+      await wrapped(new Request('http://localhost:3000/api/items'))
+      await waitForEvents()
+
+      expect(Honeybadger.config.insights.http).toBe(false)
+      expect(requestHandledCalls()).toHaveLength(0)
+    })
+  })
+
   describe('edge runtime fallback (no Honeybadger.run)', () => {
     let originalRun: unknown
 

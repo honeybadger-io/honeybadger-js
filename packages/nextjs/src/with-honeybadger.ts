@@ -11,7 +11,7 @@ import {
 } from './insights-instrumentation';
 import type { NodeRequestLike } from './insights-instrumentation';
 
-function configure() {
+function configure(overrides?: Parameters<typeof Honeybadger.configure>[0]) {
   if (Honeybadger.config.apiKey?.length > 0) {
     return;
   }
@@ -31,7 +31,8 @@ function configure() {
       apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
       environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || process.env.NODE_ENV,
       revision: process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
-      projectRoot: 'webpack://_N_E/./'
+      projectRoot: 'webpack://_N_E/./',
+      ...overrides,
     })
     .beforeNotify((notice) => {
       if (!projectRoot) {
@@ -174,11 +175,16 @@ async function handleUninstrumented(call: () => unknown): Promise<unknown> {
  * runtime (browser build, single global store) seeding the shared event
  * context would leak ids between concurrent requests, so programmatic events
  * there don't inherit them.
+ *
+ * The webpack config-file auto-injection (`honeybadger.*.config.js`) doesn't
+ * reach API routes or edge middleware, so pass `config` to configure
+ * Honeybadger explicitly there. It's ignored if Honeybadger is already
+ * configured (e.g. by the auto-injected file).
  */
-export function withHoneybadger(handler: AppRouterHandler): AppRouterHandler
-export function withHoneybadger(handler: PagesApiHandler): PagesApiHandler
-export function withHoneybadger(handler: AppRouterHandler | PagesApiHandler) {
-  configure();
+export function withHoneybadger(handler: AppRouterHandler, config?: Parameters<typeof Honeybadger.configure>[0]): AppRouterHandler
+export function withHoneybadger(handler: PagesApiHandler, config?: Parameters<typeof Honeybadger.configure>[0]): PagesApiHandler
+export function withHoneybadger(handler: AppRouterHandler | PagesApiHandler, config?: Parameters<typeof Honeybadger.configure>[0]) {
+  configure(config);
   return new Proxy(handler, {
     apply: (target, thisArg, args) => {
       const canIsolate = typeof Honeybadger.run === 'function'
