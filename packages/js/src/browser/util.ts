@@ -62,11 +62,16 @@ export function stringNameOfElement (element: HTMLElement, attributes: string[] 
   return name
 }
 
-export function stringSelectorOfElement(element) {
-  const name = stringNameOfElement(element)
+export function stringSelectorOfElement(element, attributes: string[] = DEFAULT_SELECTOR_ATTRIBUTES) {
+  const name = stringNameOfElement(element, attributes)
+
+  // A named element anchors the selector: stop walking up.
+  if (name && cleanNameOfElement(element, attributes)) {
+    return name
+  }
 
   if (element.parentNode && element.parentNode.tagName) {
-    const parentName = stringSelectorOfElement(element.parentNode)
+    const parentName = stringSelectorOfElement(element.parentNode, attributes)
     if (parentName.length > 0) {
       return `${parentName} > ${name}`
     }

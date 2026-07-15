@@ -170,6 +170,64 @@ describe('utils/browser', function () {
         'body > div > button'
       )
     })
+
+    it('anchors the chain at the nearest named ancestor', function () {
+      const html = document.createElement('html')
+      const body = document.createElement('body')
+      const card = document.createElement('div')
+      card.setAttribute('data-hb-name', 'deal-card')
+      const inner = document.createElement('div')
+      const element = document.createElement('h3')
+      element.setAttribute('class', 'text-left font-semibold')
+
+      html.appendChild(body)
+      body.appendChild(card)
+      card.appendChild(inner)
+      inner.appendChild(element)
+
+      expect(stringSelectorOfElement(element)).toEqual(
+        'deal-card > div > h3.text-left.font-semibold'
+      )
+    })
+
+    it('returns only the clean name when the leaf itself is named', function () {
+      const html = document.createElement('html')
+      const body = document.createElement('body')
+      const element = document.createElement('button')
+      element.setAttribute('data-hb-name', 'foo-button')
+
+      html.appendChild(body)
+      body.appendChild(element)
+
+      expect(stringSelectorOfElement(element)).toEqual('foo-button')
+    })
+
+    it('uses the nearest named ancestor when multiple ancestors are named', function () {
+      const html = document.createElement('html')
+      const outer = document.createElement('div')
+      outer.setAttribute('data-hb-name', 'outer')
+      const inner = document.createElement('div')
+      inner.setAttribute('data-hb-name', 'inner')
+      const element = document.createElement('button')
+
+      html.appendChild(outer)
+      outer.appendChild(inner)
+      inner.appendChild(element)
+
+      expect(stringSelectorOfElement(element)).toEqual('inner > button')
+    })
+
+    it('honors a custom attribute list in the chain', function () {
+      const html = document.createElement('html')
+      const card = document.createElement('div')
+      card.setAttribute('data-testid', 'deal-card')
+      const element = document.createElement('button')
+
+      html.appendChild(card)
+      card.appendChild(element)
+
+      expect(stringSelectorOfElement(element, ['data-testid'])).toEqual('deal-card > button')
+    })
   })
 
   describe('stringTextOfElement', function () {
