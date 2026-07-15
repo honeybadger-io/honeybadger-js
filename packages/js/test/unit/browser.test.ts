@@ -26,6 +26,11 @@ describe('browser client', function () {
       Singleton.configure()
       expect(Singleton.config.breadcrumbsEnabled).toEqual(true)
     })
+
+    it('defaults breadcrumbsSelectorAttributes to [data-hb-name]', function () {
+      Singleton.configure()
+      expect(Singleton.config.breadcrumbsSelectorAttributes).toEqual(['data-hb-name'])
+    })
   })
 
   describe('afterNotify', function () {

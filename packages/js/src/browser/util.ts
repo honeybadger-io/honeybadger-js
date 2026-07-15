@@ -2,6 +2,8 @@ import { Util } from '@honeybadger-io/core';
 
 const { globalThisOrWindow } = Util;
 
+export const DEFAULT_SELECTOR_ATTRIBUTES = ['data-hb-name']
+
 /**
  * Converts an HTMLElement into a human-readable string.
  * @param {!HTMLElement} element

@@ -97,6 +97,7 @@ export interface BrowserConfig extends Config {
   async: boolean
   maxErrors: number | null,
   ignoreBrowserExtensionErrors: boolean
+  breadcrumbsSelectorAttributes: string[]
 }
 
 export type Noticeable = string | Error | Partial<Notice>
