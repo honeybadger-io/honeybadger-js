@@ -11,6 +11,34 @@ Universal JavaScript library for integrating apps with the :zap: [Honeybadger Er
 
 For comprehensive documentation and support, [check out our documentation site](http://docs.honeybadger.io/lib/javascript/index.html).
 
+## Configuration
+
+The full list of configuration options lives on the [documentation
+site](http://docs.honeybadger.io/lib/javascript/index.html). A few browser
+options are documented here.
+
+#### `breadcrumbsSelectorAttributes`
+
+An array of element attributes to prefer when building the CSS selector for
+`ui.click` breadcrumbs. Defaults to `['data-hb-name']`. When a clicked element —
+or one of its ancestors — has one of these attributes with a non-empty value,
+that value replaces the element's tag/class selector segment, and the named
+ancestor anchors the selector (the chain stops there). This keeps click
+breadcrumbs legible in utility-CSS apps (e.g. Tailwind) where elements carry
+many classes.
+
+```js
+Honeybadger.configure({
+  apiKey: 'project api key',
+  // Reuse an attribute you already have, or add data-hb-name to key elements:
+  breadcrumbsSelectorAttributes: ['data-hb-name', 'data-testid'],
+})
+```
+
+Given `<div data-hb-name="deal-card"><h3 class="...">…</h3></div>`, clicking the
+heading records the selector `deal-card > h3.…` instead of the full
+`body > div#root > … ` chain. Set to `[]` to disable this behavior entirely.
+
 ## Development
 
 ### Bundling and types
