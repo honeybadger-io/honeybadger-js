@@ -2,7 +2,8 @@
 
 **Date:** 2026-07-15
 **Package:** `@honeybadger-io/js` (browser)
-**Status:** Design approved, pending spec review
+**Issue:** [honeybadger-io/honeybadger-js#1509](https://github.com/honeybadger-io/honeybadger-js/issues/1509)
+**Status:** Design approved
 
 ## Problem
 
