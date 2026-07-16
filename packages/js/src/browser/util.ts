@@ -1,19 +1,39 @@
-import { Util } from '@honeybadger-io/core';
+import { Util, Defaults } from '@honeybadger-io/core';
 
 const { globalThisOrWindow } = Util;
+const { BREADCRUMBS_SELECTOR_ATTRIBUTES } = Defaults;
 
 /**
  * Converts an HTMLElement into a human-readable string.
  * @param {!HTMLElement} element
  * @return {string}
  */
-export function stringNameOfElement (element: HTMLElement): string {
+function cleanNameOfElement(element, attributes: string[]): string | undefined {
+  if (!Array.isArray(attributes)) { return undefined }
+  if (!element || typeof element.getAttribute !== 'function') { return undefined }
+
+  for (const attr of attributes) {
+    if (typeof attr !== 'string' || attr.length === 0) { continue }
+    const value = element.getAttribute(attr)
+    if (value && value.trim()) {
+      const normalized = value.trim().replace(/\s+/g, ' ')
+      return truncate(normalized, 100)
+    }
+  }
+
+  return undefined
+}
+
+export function stringNameOfElement (element: HTMLElement, attributes: string[] = BREADCRUMBS_SELECTOR_ATTRIBUTES): string {
   if (!element || !element.tagName) { return '' }
 
   let name = element.tagName.toLowerCase()
 
   // Ignore the root <html> element in selectors and events.
   if (name === 'html') { return '' }
+
+  const cleanName = cleanNameOfElement(element, attributes)
+  if (cleanName) { return cleanName }
 
   if (element.id) {
     name += `#${element.id}`
@@ -41,11 +61,16 @@ export function stringNameOfElement (element: HTMLElement): string {
   return name
 }
 
-export function stringSelectorOfElement(element) {
-  const name = stringNameOfElement(element)
+export function stringSelectorOfElement(element, attributes: string[] = BREADCRUMBS_SELECTOR_ATTRIBUTES) {
+  const name = stringNameOfElement(element, attributes)
+
+  // A named element anchors the selector: stop walking up.
+  if (name && cleanNameOfElement(element, attributes)) {
+    return name
+  }
 
   if (element.parentNode && element.parentNode.tagName) {
-    const parentName = stringSelectorOfElement(element.parentNode)
+    const parentName = stringSelectorOfElement(element.parentNode, attributes)
     if (parentName.length > 0) {
       return `${parentName} > ${name}`
     }
