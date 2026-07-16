@@ -1,8 +1,7 @@
-import { Util } from '@honeybadger-io/core';
+import { Util, Defaults } from '@honeybadger-io/core';
 
 const { globalThisOrWindow } = Util;
-
-export const DEFAULT_SELECTOR_ATTRIBUTES = ['data-hb-name']
+const { BREADCRUMBS_SELECTOR_ATTRIBUTES } = Defaults;
 
 /**
  * Converts an HTMLElement into a human-readable string.
@@ -25,7 +24,7 @@ function cleanNameOfElement(element, attributes: string[]): string | undefined {
   return undefined
 }
 
-export function stringNameOfElement (element: HTMLElement, attributes: string[] = DEFAULT_SELECTOR_ATTRIBUTES): string {
+export function stringNameOfElement (element: HTMLElement, attributes: string[] = BREADCRUMBS_SELECTOR_ATTRIBUTES): string {
   if (!element || !element.tagName) { return '' }
 
   let name = element.tagName.toLowerCase()
@@ -62,7 +61,7 @@ export function stringNameOfElement (element: HTMLElement, attributes: string[] 
   return name
 }
 
-export function stringSelectorOfElement(element, attributes: string[] = DEFAULT_SELECTOR_ATTRIBUTES) {
+export function stringSelectorOfElement(element, attributes: string[] = BREADCRUMBS_SELECTOR_ATTRIBUTES) {
   const name = stringNameOfElement(element, attributes)
 
   // A named element anchors the selector: stop walking up.
