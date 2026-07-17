@@ -7,7 +7,7 @@ Reference for AI agents working in the `honeybadger-js` repository. Covers monor
 - Public Honeybadger JavaScript SDKs and build/CI plugins.
 - Monorepo managed by npm workspaces + [Lerna](https://lerna.js.org/) (v9) in **independent** versioning mode (`lerna.json`).
 - All packages live under `packages/*` and publish to npm under the `@honeybadger-io/*` scope.
-- Node `>= 14` for most packages (`>= 18` for `esbuild-plugin`). CI runs unit tests, lint, and integration on Node 20; repo tooling (lerna 9) requires Node `^20.19.0 || ^22.12.0 || >=24`.
+- Node `>= 14` for most packages (`>= 18` for `esbuild-plugin`). CI runs unit tests on Node 22 and lint/integration on Node 20; repo tooling (lerna 9) requires Node `^20.19.0 || ^22.12.0 || >=24`.
 - Conventional Commits are enforced in CI via the `commitlint.yml` workflow on PR titles; release tooling derives versions and changelogs from commit messages.
 
 ## Top-level layout
