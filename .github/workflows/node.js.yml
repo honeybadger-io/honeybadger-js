@@ -19,7 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x] # getting CI failures with 20.x, will revisit later
+        # lerna 9 requires Node ^20.19.0 || ^22.12.0 || >=24. 22.x specifically:
+        # the js shutdown_plugin test crashes jest workers on Node 20 (process.listeners
+        # bug when the async SIGTERM listener outlives the test), and 22 matches the
+        # publish workflow.
+        node-version: [22.x]
     env:
       CI: true
     steps:
@@ -31,17 +35,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: |
-          package-lock.json
-          packages/core/package-lock.json
-          packages/gatsby-plugin/package-lock.json
-          packages/js/package-lock.json
-          packages/nextjs/package-lock.json
-          packages/react/package-lock.json
-          packages/react-native/package-lock.json
-          packages/rollup-plugin/package-lock.json
-          packages/vue/package-lock.json
-          packages/webpack/package-lock.json
+        cache-dependency-path: package-lock.json
 
     - name: Build
       run: npm ci
@@ -79,9 +73,7 @@ jobs:
       with:
         node-version: '20.x'
         cache: 'npm'
-        cache-dependency-path: |
-          package-lock.json
-          packages/js/package-lock.json
+        cache-dependency-path: package-lock.json
 
     - name: Build
       run: npm ci

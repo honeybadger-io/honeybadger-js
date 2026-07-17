@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { extractSourcemapDataFromBundle, isDevEnv } from '../src/rollupUtils';
 import bundle from './fixtures/bundle'
 import path from 'node:path'
-import { NormalizedOutputOptions } from 'rollup';
+import type { NormalizedOutputOptions } from 'rollup';
 import * as td from 'testdouble'
 
 describe('extractSourcemapDataFromBundle', () => {

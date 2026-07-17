@@ -43,6 +43,9 @@ describe('react native client', () => {
 
   afterEach(() => {
     jest.resetAllMocks()
+    // resetAllMocks leaves spies in place as no-op mocks (jest >= 29.6 no
+    // longer reinstates the original implementation), so restore them too
+    jest.restoreAllMocks()
     fetch.resetMocks()
   })
 
