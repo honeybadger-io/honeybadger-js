@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.15.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.14.0...@honeybadger-io/js@6.15.0) (2026-07-17)
+
+
+### Features
+
+* **js:** legible ui.click breadcrumb selectors via breadcrumbsSelectorAttributes ([#1510](https://github.com/honeybadger-io/honeybadger-js/issues/1510)) ([45ae020](https://github.com/honeybadger-io/honeybadger-js/commit/45ae020b85804442c454517d7e9fe0025f304792)), closes [#1509](https://github.com/honeybadger-io/honeybadger-js/issues/1509)
+
+
+
+
+
 # [6.14.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.13.0...@honeybadger-io/js@6.14.0) (2026-05-06)
 
 
