@@ -122,6 +122,19 @@ Therefore, a manual release is required:
 - `npm login`
 - `lerna publish from-package --yes --loglevel silly`
 
+> [!NOTE]
+> A manual release can also be used any time NPM Trusted Publishing does not work.
+
+> [!IMPORTANT]
+> If the `@honeybadger-io/js` package is among those being released, its `postpublish` script (`packages/js/scripts/release-cdn.sh`) runs as part of the publish. That script relies on secret variables that are normally injected by CI, so you must export them in your shell **before** running the publish command:
+> ```
+> export HONEYBADGER_JS_S3_BUCKET=honeybadger-js
+> export HONEYBADGER_DISTRIBUTION_ID=cloudfront-id
+> export BUNNY_API_KEY=bunny-api-key
+> export AWS_ACCESS_KEY_ID=aws-access-key-id
+> export AWS_SECRET_ACCESS_KEY=aws-secret-access-key
+> ```
+
 ## License
 
 This Honeybadger repository and published packages are MIT licensed. See the [MIT-LICENSE](https://raw.github.com/honeybadger-io/honeybadger-js/master/MIT-LICENSE) file in this repository for details.
