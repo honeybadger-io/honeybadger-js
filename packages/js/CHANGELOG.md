@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.15.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.15.0...@honeybadger-io/js@6.15.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **js:** handle unstringifiable unhandled-rejection reasons ([#1516](https://github.com/honeybadger-io/honeybadger-js/issues/1516)) ([2118ac8](https://github.com/honeybadger-io/honeybadger-js/commit/2118ac84e7ca6c7ce3ebf8b46d9bb08a7665c41b))
+
+
+
+
+
 # [6.15.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.14.0...@honeybadger-io/js@6.15.0) (2026-07-17)
 
 
