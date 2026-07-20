@@ -202,6 +202,17 @@ NPM Trusted Publishing is configured per-package; only one workflow can be the t
 - **Examples are non-build artifacts.** `packages/*/examples/` directories are documentation; they are not built by the package build, are mostly excluded from lint, and shouldn't import from the package's `dist/` — they should consume the published API.
 - **Browser vs Node code in `packages/js`.** The split is enforced by file naming (`*.browser.test.ts` / `*.server.test.ts`) and entry points (`src/browser.ts` / `src/server.ts`). When adding browser-only or server-only code, place it under `src/browser/` or `src/server/` respectively.
 
+### Agent skills
+
+Project-level skills live in [`.agents/skills/`](.agents/skills/). Cursor and Claude Code both discover skills in this directory. Read the relevant `SKILL.md` before following a workflow it covers.
+
+| Skill | When to use |
+| ----- | ----------- |
+| [`create-pull-request`](.agents/skills/create-pull-request/SKILL.md) | Before opening or submitting a pull request — remove planning artifacts, request an AI review (Codex CLI or Claude), and format the PR title. |
+| [`writing-documentation`](.agents/skills/writing-documentation/SKILL.md) | When a change needs user-facing documentation — recommend a docs-repo issue (create only after human approval); do not document features in READMEs here. |
+
+**Keep skills up to date.** When new conventions are deduced during work, or when existing rules or conventions change as the code evolves, update the corresponding `SKILL.md` and add a row to the table above in the same PR.
+
 ## Quick reference: root scripts
 
 | Command             | What it does                                                       |
