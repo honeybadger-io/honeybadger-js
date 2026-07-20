@@ -6,10 +6,10 @@ module.exports = {
       { configFile: './babel.config.js' },
     ],
   },
-  // pnpm nests packages under node_modules/.pnpm/.../node_modules/<pkg>, so the
-  // react-native preset's default transformIgnorePatterns (which only unwraps a
-  // top-level node_modules/<pkg>) leaves @react-native/polyfills untransformed.
+  // pnpm nests packages under node_modules/.pnpm/<name>@ver/node_modules/<name>
+  // (scoped packages use "+" in the store folder, e.g. @react-native+polyfills@…).
+  // Transform any path that still resolves into react-native / @react-native.
   transformIgnorePatterns: [
-    'node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|@react-native/))',
+    'node_modules/(?!.*(?:(?:jest-)?react-native|@react-native(?:-community)?)/)',
   ],
 };
