@@ -36,7 +36,18 @@ export default function (_window: any = globalThisOrWindow()): Types.Plugin {
             return
           }
 
-          const message = typeof reason === 'string' ? reason : (JSON.stringify(reason) ?? 'Unspecified reason')
+          let message: string
+          if (typeof reason === 'string') {
+            message = reason
+          } else {
+            try {
+              message = JSON.stringify(reason) ?? 'Unspecified reason'
+            } catch (_err) {
+              // Circular structures (e.g. DOM nodes with React fiber expandos) can't be stringified
+              const name = reason != null && reason.constructor ? reason.constructor.name : null
+              message = name ? `[${name}]` : Object.prototype.toString.call(reason)
+            }
+          }
           client.notify({
             name: 'window.onunhandledrejection',
             message: `UnhandledPromiseRejectionWarning: ${message}`

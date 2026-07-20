@@ -80,4 +80,41 @@ describe('window.onunhandledrejection integration', function () {
     expect((notifiedError.originalError as CustomError).skipReporting).toBe(true)
     expect((notifiedError.originalError as CustomError).errorType).toBe('CUSTOM')
   })
+
+  it('reports constructor name when reason has circular references', function () {
+    const window = { onunhandledrejection: undefined }
+    onUnhandledRejection(window).load(client)
+
+    class CircularThing {
+      self: CircularThing
+      constructor() {
+        this.self = this
+      }
+    }
+    const reason = new CircularThing()
+
+    expect(() => window.onunhandledrejection({ reason })).not.toThrow()
+    expect(mockNotify.mock.calls.length).toBe(1)
+    expect(mockNotify.mock.calls[0][0]).toEqual(expect.objectContaining({
+      name: 'window.onunhandledrejection',
+      message: 'UnhandledPromiseRejectionWarning: [CircularThing]'
+    }))
+  })
+
+  it('reports DOM node constructor name when reason has a circular expando', function () {
+    const window = { onunhandledrejection: undefined }
+    onUnhandledRejection(window).load(client)
+
+    const reason = document.createElement('a')
+    // Simulate React fiber-style circular expandos that break JSON.stringify
+    const fiber = { stateNode: reason }
+    reason['__reactFiber$test'] = fiber
+
+    expect(() => window.onunhandledrejection({ reason })).not.toThrow()
+    expect(mockNotify.mock.calls.length).toBe(1)
+    expect(mockNotify.mock.calls[0][0]).toEqual(expect.objectContaining({
+      name: 'window.onunhandledrejection',
+      message: 'UnhandledPromiseRejectionWarning: [HTMLAnchorElement]'
+    }))
+  })
 })
