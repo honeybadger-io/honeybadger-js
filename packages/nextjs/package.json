@@ -32,7 +32,7 @@
   },
   "scripts": {
     "build": "tsc --build tsconfig.json && rollup -c && rollup -c rollup.scripts.config.js && tsc --build tsconfig.types.json",
-    "test": "./node_modules/jest/bin/jest.js --config jest.config.js"
+    "test": "jest --config jest.config.js"
   },
   "bugs": {
     "url": "https://github.com/honeybadger-io/honeybadger-js/issues"

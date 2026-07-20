@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import 'mocha'
-import { NormalizedOutputOptions } from 'rollup'
+import type { NormalizedOutputOptions } from 'rollup'
 import * as td from 'testdouble'
 
 describe('Index', () => {

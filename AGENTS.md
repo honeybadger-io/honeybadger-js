@@ -5,9 +5,9 @@ Reference for AI agents working in the `honeybadger-js` repository. Covers monor
 ## Repository overview
 
 - Public Honeybadger JavaScript SDKs and build/CI plugins.
-- Monorepo managed by [Lerna](https://lerna.js.org/) (v6) in **independent** versioning mode (`lerna.json`).
+- Monorepo managed by npm workspaces + [Lerna](https://lerna.js.org/) (v9) in **independent** versioning mode (`lerna.json`).
 - All packages live under `packages/*` and publish to npm under the `@honeybadger-io/*` scope.
-- Node `>= 14` for most packages (`>= 18` for `esbuild-plugin`). CI runs unit tests on Node 18 and lint/integration on Node 20.
+- Node `>= 14` for most packages (`>= 18` for `esbuild-plugin`). CI runs unit tests on Node 22 and lint/integration on Node 20; repo tooling (lerna 9) requires Node `^20.19.0 || ^22.12.0 || >=24`.
 - Conventional Commits are enforced in CI via the `commitlint.yml` workflow on PR titles; release tooling derives versions and changelogs from commit messages.
 
 ## Top-level layout
@@ -28,7 +28,7 @@ Reference for AI agents working in the `honeybadger-js` repository. Covers monor
 
 ## Packages
 
-Each package is independently versioned, has its own `package.json`, and publishes its own changelog. Inter-package deps are linked via Lerna at install time but published as real npm version ranges.
+Each package is independently versioned, has its own `package.json`, and publishes its own changelog. Inter-package deps are linked via npm workspaces at install time but published as real npm version ranges.
 
 | Package                                    | Path                          | Purpose                                                | Notable deps          |
 | ------------------------------------------ | ----------------------------- | ------------------------------------------------------ | --------------------- |
@@ -146,10 +146,10 @@ From the root: `npm run build` runs `lerna run build --stream` and respects TS p
 
 ## Install & local dev
 
-- **Install only from the repo root**: `npm install`. The root `package.json` has `"install": "lerna bootstrap"`, so a root install also wires symlinks between packages. Running `npm install` inside a single package will likely break the link graph.
-- Add a dependency to a single package: `lerna add <pkg> --scope="@honeybadger-io/<name>"` (or edit the package's `package.json` and re-run root install).
+- **Install only from the repo root**: `npm install`. Packages are npm workspaces (`"workspaces": ["packages/*"]`), so a root install wires symlinks between packages. Running `npm install` inside a single package will likely break the link graph.
+- Add a dependency to a single package: `npm install <pkg> --workspace=packages/<name>` (or edit the package's `package.json` and re-run root install).
 - To run an arbitrary script across packages: `lerna run <script>` (with optional `--scope`). Missing scripts are silently skipped.
-- Each package keeps its own `package-lock.json` in addition to the root one.
+- There is a single root `package-lock.json`; packages do not keep their own lockfiles.
 
 ## Commit messages and PR titles
 
@@ -217,7 +217,7 @@ Project-level skills live in [`.agents/skills/`](.agents/skills/). Cursor and Cl
 
 | Command             | What it does                                                       |
 | ------------------- | ------------------------------------------------------------------ |
-| `npm install`       | Installs root deps + bootstraps every package via Lerna.           |
+| `npm install`       | Installs all workspace deps and links packages together.           |
 | `npm run build`     | `lerna run build --stream` across all packages.                    |
 | `npm test`          | `lerna run test --stream` across all packages.                     |
 | `npm run lint`      | `eslint .` from the repo root.                                     |

@@ -1,1 +1,4 @@
 require: '@babel/register'
+# integration tests run real webpack builds, which can exceed the 2s default
+# when other packages' suites run in parallel via `lerna run test`
+timeout: 10000

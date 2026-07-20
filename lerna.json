@@ -2,7 +2,6 @@
   "packages": [
     "packages/*"
   ],
-  "useNx": false,
   "version": "independent",
   "command": {
     "version": {
