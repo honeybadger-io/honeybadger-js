@@ -45,17 +45,17 @@ jobs:
           fetch-depth: 0
           ref: master
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
-          cache: 'npm'
-
-      - name: Install latest NPM version (needed for trusted publishing)
-        run: npm install -g npm@latest
+          cache: 'pnpm'
 
       - name: Install Deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Git Config
         run: |
@@ -63,7 +63,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
 
       - name: Publish Release
-        run: npm run release
+        run: pnpm run release
         env:
           # for lerna
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
