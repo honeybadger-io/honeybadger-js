@@ -129,7 +129,7 @@ describe('utils', function () {
       const handlers = [
         (notice) => { notice.call() }
       ]
-      runBeforeNotifyHandlers(notice, handlers)
+      runBeforeNotifyHandlers(<never>notice, handlers)
       expect(notice.called).toEqual(true)
     })
 
@@ -349,7 +349,7 @@ describe('utils', function () {
       const handlers = [
         (_error, notice) => { notice.call() }
       ]
-      runAfterNotifyHandlers(notice, handlers)
+      runAfterNotifyHandlers(<never>notice, handlers)
       expect(notice.called).toEqual(true)
     })
 
@@ -358,7 +358,7 @@ describe('utils', function () {
       const handlers = [
         (error, _notice) => { error.call() }
       ]
-      runAfterNotifyHandlers(<never>{}, handlers, error)
+      runAfterNotifyHandlers(<never>{}, handlers, <never>error)
       expect(error.called).toEqual(true)
     })
   })

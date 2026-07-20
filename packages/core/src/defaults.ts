@@ -34,3 +34,6 @@ export const CONFIG = {
   filters: ['creditcard', 'password'],
   __plugins: [],
 }
+
+// Browser-only, so it lives outside CONFIG (which is shared with Node).
+export const BREADCRUMBS_SELECTOR_ATTRIBUTES = ['data-hb-name']

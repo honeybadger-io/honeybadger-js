@@ -1,4 +1,4 @@
-import { Types, Util, Client, Plugins as CorePlugins } from '@honeybadger-io/core'
+import { Types, Util, Client, Plugins as CorePlugins, Defaults } from '@honeybadger-io/core'
 import { encodeCookie, decodeCookie, preferCatch } from './browser/util'
 import { onError, ignoreNextOnError } from './browser/integrations/onerror'
 import onUnhandledRejection from './browser/integrations/onunhandledrejection'
@@ -87,6 +87,7 @@ class Honeybadger extends Client {
       async: true,
       maxErrors: null,
       ignoreBrowserExtensionErrors: false,
+      breadcrumbsSelectorAttributes: Defaults.BREADCRUMBS_SELECTOR_ATTRIBUTES,
       projectRoot: getProjectRoot(),
       ...opts
     }, new BrowserTransport({

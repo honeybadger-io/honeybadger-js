@@ -59,8 +59,9 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
         _window.addEventListener('click', (event) => {
           let message, selector, text
           try {
-            message = stringNameOfElement(event.target as HTMLElement)
-            selector = stringSelectorOfElement(event.target)
+            const attributes = client.config.breadcrumbsSelectorAttributes
+            message = stringNameOfElement(event.target as HTMLElement, attributes)
+            selector = stringSelectorOfElement(event.target, attributes)
             text = stringTextOfElement(event.target)
           } catch (e) {
             message = 'UI Click'

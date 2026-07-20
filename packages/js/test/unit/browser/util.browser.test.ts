@@ -82,6 +82,75 @@ describe('utils/browser', function () {
         stringNameOfElement(element)
       ).toEqual('button.foo.bar.baz')
     })
+
+    it('returns the clean name from the default data-hb-name attribute', function () {
+      const element = document.createElement('button')
+      element.setAttribute('class', 'foo bar baz')
+      element.setAttribute('data-hb-name', 'foo-button')
+
+      expect(stringNameOfElement(element)).toEqual('foo-button')
+    })
+
+    it('honors a custom attribute list and ignores data-hb-name when not listed', function () {
+      const element = document.createElement('button')
+      element.setAttribute('data-hb-name', 'ignored')
+      element.setAttribute('data-testid', 'foo-button')
+
+      expect(stringNameOfElement(element, ['data-testid'])).toEqual('foo-button')
+    })
+
+    it('uses the first matching attribute in the list', function () {
+      const element = document.createElement('button')
+      element.setAttribute('data-hb-name', 'primary')
+      element.setAttribute('data-testid', 'secondary')
+
+      expect(stringNameOfElement(element, ['data-hb-name', 'data-testid'])).toEqual('primary')
+    })
+
+    it('falls back to tag/class output when the attribute value is blank', function () {
+      const element = document.createElement('button')
+      element.setAttribute('class', 'foo')
+      element.setAttribute('data-hb-name', '   ')
+
+      expect(stringNameOfElement(element)).toEqual('button.foo')
+    })
+
+    it('collapses internal whitespace and newlines in the clean name', function () {
+      const element = document.createElement('button')
+      element.setAttribute('data-hb-name', 'foo   bar\nbaz')
+
+      expect(stringNameOfElement(element)).toEqual('foo bar baz')
+    })
+
+    it('truncates long clean names to 100 chars plus ellipsis', function () {
+      const element = document.createElement('button')
+      element.setAttribute('data-hb-name', 'x'.repeat(150))
+
+      expect(stringNameOfElement(element)).toEqual('x'.repeat(100) + '...')
+    })
+
+    it('ignores data-hb-name on the html element', function () {
+      const element = document.createElement('html')
+      element.setAttribute('data-hb-name', 'nope')
+
+      expect(stringNameOfElement(element)).toEqual('')
+    })
+
+    it('does not throw on malformed attributes config', function () {
+      const element = document.createElement('button')
+      element.setAttribute('class', 'foo')
+
+      expect(stringNameOfElement(element, null)).toEqual('button.foo')
+      // @ts-expect-error intentionally malformed input
+      expect(stringNameOfElement(element, [123, ''])).toEqual('button.foo')
+    })
+
+    it('disables naming when given an empty attribute list', function () {
+      const element = document.createElement('button')
+      element.setAttribute('data-hb-name', 'foo-button')
+
+      expect(stringNameOfElement(element, [])).toEqual('button')
+    })
   })
 
   describe('stringSelectorOfElement', function () {
@@ -100,6 +169,64 @@ describe('utils/browser', function () {
       ).toEqual(
         'body > div > button'
       )
+    })
+
+    it('anchors the chain at the nearest named ancestor', function () {
+      const html = document.createElement('html')
+      const body = document.createElement('body')
+      const card = document.createElement('div')
+      card.setAttribute('data-hb-name', 'deal-card')
+      const inner = document.createElement('div')
+      const element = document.createElement('h3')
+      element.setAttribute('class', 'text-left font-semibold')
+
+      html.appendChild(body)
+      body.appendChild(card)
+      card.appendChild(inner)
+      inner.appendChild(element)
+
+      expect(stringSelectorOfElement(element)).toEqual(
+        'deal-card > div > h3.text-left.font-semibold'
+      )
+    })
+
+    it('returns only the clean name when the leaf itself is named', function () {
+      const html = document.createElement('html')
+      const body = document.createElement('body')
+      const element = document.createElement('button')
+      element.setAttribute('data-hb-name', 'foo-button')
+
+      html.appendChild(body)
+      body.appendChild(element)
+
+      expect(stringSelectorOfElement(element)).toEqual('foo-button')
+    })
+
+    it('uses the nearest named ancestor when multiple ancestors are named', function () {
+      const html = document.createElement('html')
+      const outer = document.createElement('div')
+      outer.setAttribute('data-hb-name', 'outer')
+      const inner = document.createElement('div')
+      inner.setAttribute('data-hb-name', 'inner')
+      const element = document.createElement('button')
+
+      html.appendChild(outer)
+      outer.appendChild(inner)
+      inner.appendChild(element)
+
+      expect(stringSelectorOfElement(element)).toEqual('inner > button')
+    })
+
+    it('honors a custom attribute list in the chain', function () {
+      const html = document.createElement('html')
+      const card = document.createElement('div')
+      card.setAttribute('data-testid', 'deal-card')
+      const element = document.createElement('button')
+
+      html.appendChild(card)
+      card.appendChild(element)
+
+      expect(stringSelectorOfElement(element, ['data-testid'])).toEqual('deal-card > button')
     })
   })
 
