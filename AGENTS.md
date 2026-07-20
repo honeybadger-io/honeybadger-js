@@ -5,9 +5,9 @@ Reference for AI agents working in the `honeybadger-js` repository. Covers monor
 ## Repository overview
 
 - Public Honeybadger JavaScript SDKs and build/CI plugins.
-- Monorepo managed by npm workspaces + [Lerna](https://lerna.js.org/) (v9) in **independent** versioning mode (`lerna.json`).
+- Monorepo managed by [pnpm workspaces](https://pnpm.io/workspaces) + [Lerna](https://lerna.js.org/) (v9) in **independent** versioning mode (`lerna.json` with `"npmClient": "pnpm"`).
 - All packages live under `packages/*` and publish to npm under the `@honeybadger-io/*` scope.
-- Node `>= 14` for most packages (`>= 18` for `esbuild-plugin`). CI runs unit tests on Node 22 and lint/integration on Node 20; repo tooling (lerna 9) requires Node `^20.19.0 || ^22.12.0 || >=24`.
+- Node `>= 14` for most packages (`>= 18` for `esbuild-plugin`). CI runs unit tests on Node 22 and lint/integration on Node 20; repo tooling (lerna 9) requires Node `^20.19.0 || ^22.12.0 || >=24`. Use the `packageManager` field in the root `package.json` (via Corepack) for the pinned pnpm version.
 - Conventional Commits are enforced in CI via the `commitlint.yml` workflow on PR titles; release tooling derives versions and changelogs from commit messages.
 
 ## Top-level layout
@@ -15,10 +15,12 @@ Reference for AI agents working in the `honeybadger-js` repository. Covers monor
 ```
 .
 ├── .github/workflows/   # CI: tests, lint, commitlint, release, CDN/NPM publish
-├── packages/            # All publishable packages (Lerna workspaces)
+├── packages/            # All publishable packages (pnpm + Lerna workspaces)
 ├── scripts/             # Repo-wide helpers (e.g. clean-repo.sh)
-├── lerna.json           # Independent versioning, release commit message
-├── package.json         # Root scripts (build, test, lint, release, clean)
+├── pnpm-workspace.yaml  # Single source of truth for workspace package globs
+├── pnpm-lock.yaml       # Lockfile (do not hand-edit)
+├── lerna.json           # Independent versioning, npmClient: pnpm, release commit message
+├── package.json         # Root scripts (build, test, lint, release, clean) + packageManager
 ├── tsconfig.base.json   # Shared TS compiler defaults (extended by packages)
 ├── .eslintrc            # Repo-wide ESLint config (TS + import + local rules)
 ├── eslint-local-rules.js# Custom rule: local-rules/no-test-imports
@@ -28,7 +30,7 @@ Reference for AI agents working in the `honeybadger-js` repository. Covers monor
 
 ## Packages
 
-Each package is independently versioned, has its own `package.json`, and publishes its own changelog. Inter-package deps are linked via npm workspaces at install time but published as real npm version ranges.
+Each package is independently versioned, has its own `package.json`, and publishes its own changelog. Inter-package deps use the `workspace:^` protocol in `dependencies`/`devDependencies` (Lerna rewrites them to real semver ranges on publish). `peerDependencies` stay as plain semver ranges.
 
 | Package                                    | Path                          | Purpose                                                | Notable deps          |
 | ------------------------------------------ | ----------------------------- | ------------------------------------------------------ | --------------------- |
@@ -78,12 +80,12 @@ Source organization conventions inside `src/`:
 - All TS packages extend `tsconfig.base.json`:
   - `target: es5`, `esModuleInterop: true`, `declaration: true`, `declarationMap: true`, `sourceMap: true`, `skipLibCheck: true`.
   - Note: `strict: false`, `noImplicitAny: false` at the base — individual packages may tighten.
-- TS packages use **Project References** (`composite: true`, `references: [...]`). `npm run build` at the root must succeed before downstream packages typecheck — if you see "cannot find module" errors in TS files, build first.
+- TS packages use **Project References** (`composite: true`, `references: [...]`). `pnpm run build` at the root must succeed before downstream packages typecheck — if you see "cannot find module" errors in TS files, build first.
 - Build output dirs vary: `core` uses `build/`, most others use `dist/`. Both are gitignored and cleaned by `scripts/clean-repo.sh`.
 
 ## ESLint
 
-- The root `.eslintrc` is the primary shared config for the repo; run repo-wide linting from the root with `npm run lint`. Some subdirectories, especially under `examples/`, also include local `.eslintrc.json` overrides.
+- The root `.eslintrc` is the primary shared config for the repo; run repo-wide linting from the root with `pnpm run lint`. Some subdirectories, especially under `examples/`, also include local `.eslintrc.json` overrides.
 - Extends `eslint:recommended`, `@typescript-eslint/recommended`, `import/errors`, `import/warnings`, `import/typescript`.
 - Style rules to respect:
   - **Single quotes** (escape-aware).
@@ -101,7 +103,7 @@ Most packages use **Jest with `ts-jest`**. The exceptions are intentional and li
 | Package           | Runner   | Notes                                                                |
 | ----------------- | -------- | -------------------------------------------------------------------- |
 | `core`            | Jest     | Node env.                                                            |
-| `js`              | Jest + Playwright | `npm test` runs browser (jsdom) + server (node) + `tsd` type tests. `npm run test:integration` runs Playwright E2E (uses BrowserStack in CI). |
+| `js`              | Jest + Playwright | `pnpm test` runs browser (jsdom) + server (node) + `tsd` type tests. `pnpm run test:integration` runs Playwright E2E (uses BrowserStack in CI). |
 | `react`           | Jest     | jsdom + `@testing-library/react`.                                    |
 | `vue`             | Jest     | jsdom + `@vue/test-utils`. Also runs `tsd`.                          |
 | `nextjs`          | Jest     |                                                                       |
@@ -121,7 +123,7 @@ Conventions:
 - `tsd` is used in `js` and `vue` to validate the public type surface (`*.test-d.ts`).
 - The `local-rules/no-test-imports` lint rule means production code under `src/` cannot import jest helpers — keep test fixtures inside `test/`.
 
-To run a single package's tests: `cd packages/<name> && npm test`, or from the root with `lerna run test --scope @honeybadger-io/<name>`.
+To run a single package's tests: `cd packages/<name> && pnpm test`, or from the root with `pnpm --filter @honeybadger-io/<name> test` / `lerna run test --scope @honeybadger-io/<name>`.
 
 ## Builds and bundling
 
@@ -140,16 +142,17 @@ To run a single package's tests: `cd packages/<name> && npm test`, or from the r
 | `plugin-core`    | Rollup                                 | `dist/`                                               |
 | `gatsby-plugin`  | _none_                                 | Source files published as-is.                         |
 
-From the root: `npm run build` runs `lerna run build --stream` and respects TS project-reference order. Always build from root before debugging cross-package TS errors.
+From the root: `pnpm run build` runs `lerna run build --stream` and respects TS project-reference order. Always build from root before debugging cross-package TS errors.
 
 `scripts/clean-repo.sh` removes every `dist/`, `build/`, `node_modules/`, and `tsconfig.tsbuildinfo` in the tree. Use it before reinstalling on a stale checkout.
 
 ## Install & local dev
 
-- **Install only from the repo root**: `npm install`. Packages are npm workspaces (`"workspaces": ["packages/*"]`), so a root install wires symlinks between packages. Running `npm install` inside a single package will likely break the link graph.
-- Add a dependency to a single package: `npm install <pkg> --workspace=packages/<name>` (or edit the package's `package.json` and re-run root install).
-- To run an arbitrary script across packages: `lerna run <script>` (with optional `--scope`). Missing scripts are silently skipped.
-- There is a single root `package-lock.json`; packages do not keep their own lockfiles.
+- **Install only from the repo root**: `pnpm install`. Workspace packages are declared in `pnpm-workspace.yaml` (`packages/*`); a root install links them via the `workspace:` protocol. Running `pnpm install` / `npm install` inside a single package will break the link graph.
+- Add a dependency to a single package: `pnpm add <pkg> --filter @honeybadger-io/<name>` (or edit the package's `package.json` and re-run root `pnpm install`). Use `pnpm add -D` for devDependencies. In-repo deps must use `workspace:^`.
+- To run an arbitrary script across packages: `lerna run <script>` (with optional `--scope`) or `pnpm --filter <pkg> <script>`. Missing scripts are silently skipped by lerna.
+- There is a single root `pnpm-lock.yaml`; packages do not keep their own lockfiles (example apps under `packages/*/examples/` may still use npm lockfiles — they are standalone).
+- pnpm's strict `node_modules` means phantom (undeclared) dependencies fail at install/test time. Declare what you import; do not rely on hoisting.
 
 ## Commit messages and PR titles
 
@@ -162,14 +165,16 @@ From the root: `npm run build` runs `lerna run build --stream` and respects TS p
 ## CI workflows (`.github/workflows/`)
 
 - **`node.js.yml`** (Node CI) — runs on PRs to `master` and is `workflow_call`-able. Jobs:
-  - `unit` — `npm ci` then `npm test` on Node 18.
+  - `unit` — `pnpm install --frozen-lockfile` then `pnpm test` on Node 22.
   - `changes` — uses `dorny/paths-filter` to detect edits in `packages/core/**` or `packages/js/**`.
   - `integration` — only when `core` filter matches; installs Playwright browsers and runs `packages/js` E2E against BrowserStack. Uploads `playwright-report/` on failure.
-  - `lint` — `npm run lint` on Node 20.
+  - `lint` — `pnpm run lint` on Node 20.
 - **`commitlint.yml`** — validates the PR title against commitlint and posts an upgrade-guide reminder for breaking-change PRs.
-- **`lerna-publish.yml`** (Publish New Release) — push to `master` or manual dispatch. Calls `node.js.yml` first, then runs `npm run release` (`lerna publish --conventional-commits`). Uses a GitHub App token, NPM Trusted Publishing (OIDC, hence `id-token: write`), and AWS/Bunny credentials for the CDN.
+- **`lerna-publish.yml`** (Publish New Release) — push to `master` or manual dispatch. Calls `node.js.yml` first, then runs `pnpm run release` (`lerna publish --conventional-commits`). Uses a GitHub App token, NPM Trusted Publishing (OIDC, hence `id-token: write`), and AWS/Bunny credentials for the CDN.
 - **`npm-publish.yml`** — manual fallback that runs `lerna publish from-package` against whatever versions are already in `master`. Use when the main release workflow partially fails.
 - **`cdn-publish.yml`** — manual fallback that re-runs `packages/js` `postpublish` (S3/CloudFront upload + Bunny purge).
+
+All workflows use `pnpm/action-setup` (version from `packageManager`) and `actions/setup-node` with `cache: 'pnpm'`.
 
 NPM Trusted Publishing is configured per-package; only one workflow can be the trusted publisher at a time. Default = `lerna-publish.yml`. If you switch it temporarily for a fallback run, switch it back afterwards (called out in the README too).
 
@@ -178,7 +183,7 @@ NPM Trusted Publishing is configured per-package; only one workflow can be the t
 - Independent versioning: each package's version bump is computed from the conventional commits that touched its files since its last release tag.
 - Release flow:
   1. Merge PRs to `master` with conventional commits.
-  2. `lerna-publish.yml` runs CI, then `npm run release`, which:
+  2. `lerna-publish.yml` runs CI, then `pnpm run release`, which:
      - Bumps versions via `lerna version`.
      - Generates each package's `CHANGELOG.md` (`conventional-changelog-angular` preset).
      - Commits `chore(release): publish [skip ci]` and tags.
@@ -192,15 +197,17 @@ NPM Trusted Publishing is configured per-package; only one workflow can be the t
 
 ## Working in this repo as an agent
 
-- **Always start from the repo root.** Run `npm install` there, run `npm run build` there, run `npm run lint` there. Use `lerna run <script> --scope=...` (or `cd packages/<x>`) for per-package tasks.
-- **Mind project references.** A change in `core` requires a rebuild before downstream packages typecheck cleanly. Run `npm run build` (or at minimum `lerna run build --scope @honeybadger-io/core` and any downstream).
+- **Always start from the repo root.** Run `pnpm install` there, run `pnpm run build` there, run `pnpm run lint` there. Use `lerna run <script> --scope=...` or `pnpm --filter @honeybadger-io/<name> <script>` for per-package tasks.
+- **Never install inside a package.** To add a dependency, use `pnpm add <pkg> [--filter @honeybadger-io/<name>]` from the root (see "Install & local dev"). A package-local install breaks the workspace link graph.
+- **Mind project references.** A change in `core` requires a rebuild before downstream packages typecheck cleanly. Run `pnpm run build` (or at minimum `lerna run build --scope @honeybadger-io/core` and any downstream).
 - **Match the package's existing tooling.** Don't introduce Jest into a Mocha package, or vice-versa, without strong reason. Don't add new build tools to a package that already has one — extend the existing config.
-- **Honor the lint rules.** Run `npm run lint` before completing a change. Note the custom `local-rules/no-test-imports` — keep all jest helpers behind `test/`.
+- **Honor the lint rules.** Run `pnpm run lint` before completing a change. Note the custom `local-rules/no-test-imports` — keep all jest helpers behind `test/`.
 - **Conventional commits + scopes.** Lerna decides which packages to version from the files each commit touches — keep a commit confined to one package whenever practical, and scope it accordingly (`feat(js): ...`) so the generated changelog is readable. Cross-package refactors usually warrant separate commits per package for the same reason.
 - **Don't hand-edit `CHANGELOG.md` or version fields.** Both are owned by `lerna publish`.
 - **Don't run releases manually.** Releases are GitHub-Actions-driven. Local `lerna publish` is reserved for the new-package bootstrap case.
 - **Examples are non-build artifacts.** `packages/*/examples/` directories are documentation; they are not built by the package build, are mostly excluded from lint, and shouldn't import from the package's `dist/` — they should consume the published API.
 - **Browser vs Node code in `packages/js`.** The split is enforced by file naming (`*.browser.test.ts` / `*.server.test.ts`) and entry points (`src/browser.ts` / `src/server.ts`). When adding browser-only or server-only code, place it under `src/browser/` or `src/server/` respectively.
+- **Declare what you import.** pnpm does not hoist arbitrary transitive deps into a package's `node_modules`. If a phantom dependency surfaces at build/test time, add it explicitly.
 
 ### Agent skills
 
@@ -217,9 +224,9 @@ Project-level skills live in [`.agents/skills/`](.agents/skills/). Cursor and Cl
 
 | Command             | What it does                                                       |
 | ------------------- | ------------------------------------------------------------------ |
-| `npm install`       | Installs all workspace deps and links packages together.           |
-| `npm run build`     | `lerna run build --stream` across all packages.                    |
-| `npm test`          | `lerna run test --stream` across all packages.                     |
-| `npm run lint`      | `eslint .` from the repo root.                                     |
-| `npm run clean`     | `scripts/clean-repo.sh` — wipes all `dist`, `build`, `node_modules`, tsbuildinfo files. |
-| `npm run release`   | CI-only. Runs `lerna publish` with conventional-commits config.    |
+| `pnpm install`      | Installs all workspace deps and links packages together.           |
+| `pnpm run build`    | `lerna run build --stream` across all packages.                    |
+| `pnpm test`         | `lerna run test --stream` across all packages.                     |
+| `pnpm run lint`     | `eslint .` from the repo root.                                     |
+| `pnpm run clean`    | `scripts/clean-repo.sh` — wipes all `dist`, `build`, `node_modules`, tsbuildinfo files. |
+| `pnpm run release`  | CI-only. Runs `lerna publish` with conventional-commits config.    |

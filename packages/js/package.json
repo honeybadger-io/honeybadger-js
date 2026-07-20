@@ -52,7 +52,7 @@
     "postpublish": "./scripts/release-cdn.sh"
   },
   "dependencies": {
-    "@honeybadger-io/core": "^6.10.1",
+    "@honeybadger-io/core": "workspace:^",
     "@types/aws-lambda": "^8.10.89",
     "@types/express": "^5.0.3"
   },
@@ -66,6 +66,8 @@
     "browserstack-local": "^1.5.5",
     "express": "^5.1.0",
     "jest": "^27.4.4",
+    "jest-environment-jsdom": "^27.5.1",
+    "jest-environment-node": "^27.5.1",
     "jest-fetch-mock": "^3.0.3",
     "nock": "^13.2.1",
     "rollup": "^2.77.0",

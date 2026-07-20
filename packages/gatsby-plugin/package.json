@@ -15,8 +15,8 @@
   "license": "MIT",
   "main": "index.js",
   "dependencies": {
-    "@honeybadger-io/js": "^6.15.2",
-    "@honeybadger-io/webpack": "^6.3.3"
+    "@honeybadger-io/js": "workspace:^",
+    "@honeybadger-io/webpack": "workspace:^"
   },
   "engines": {
     "node": ">=14"

@@ -17,20 +17,20 @@ jobs:
           fetch-depth: 0
           ref: master
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
-          cache: 'npm'
-
-      - name: Install latest NPM version (needed for trusted publishing)
-        run: npm install -g npm@latest
+          cache: 'pnpm'
 
       - name: Install Deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Publish to NPM
-        run: lerna publish from-package --yes --loglevel silly
+        run: pnpm exec lerna publish from-package --yes --loglevel silly
         env:
           # the following are needed for the post-publish script of @honeybadger-io/js which pushes new version to CDN
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -49,4 +49,3 @@ jobs:
         if: failure()
         run: |
           echo ":warning: Publish failed. Did you set this workflow as Trusted Publisher in NPM?" >> $GITHUB_STEP_SUMMARY
-          

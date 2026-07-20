@@ -4,7 +4,16 @@ import path from 'path'
 import { copyConfigFiles } from './copy-config-files';
 describe('copy-config-files', () => {
 
+  // mock-fs replaces the real filesystem; Jest's BufferedConsole lazily reads
+  // jest-util from disk when logging. Under pnpm that path lives deep in
+  // node_modules/.pnpm and isn't present in the mock, so console.log throws.
+  // The production log isn't under test — stub it while the fs is mocked.
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined)
+  })
+
   afterEach(() => {
+    jest.restoreAllMocks()
     mock.restore()
   })
 
