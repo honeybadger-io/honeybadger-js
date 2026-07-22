@@ -5,6 +5,9 @@ import {
   objectIsEmpty,
   makeNotice,
   runBeforeNotifyHandlers,
+  runBeforeEventHandlers,
+  resolveInsights,
+  shouldSampleEvent,
   runAfterNotifyHandlers,
   shallowClone,
   sanitize,
@@ -14,6 +17,7 @@ import {
   logDeprecatedMethod,
   getSourceForBacktrace
 } from '../src/util'
+import { EventPayload } from '../src/types'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 
 describe('utils', function () {
@@ -138,6 +142,204 @@ describe('utils', function () {
       runBeforeNotifyHandlers(<never>notice, handlers)
       expect(notice.first).toEqual('first expected')
       expect(notice.second).toEqual('second expected')
+    })
+  })
+
+  describe('runBeforeEventHandlers', function () {
+    const makePayload = (): EventPayload => ({ event_type: 'test', ts: '2020-01-01T00:00:00.000Z' })
+
+    it('returns true when no handlers are present', async function () {
+      expect(await runBeforeEventHandlers(makePayload(), [])).toEqual(true)
+    })
+
+    it('returns true when all handlers pass', async function () {
+      const handlers = [
+        () => true,
+        () => undefined,
+        async () => true,
+      ]
+      expect(await runBeforeEventHandlers(makePayload(), handlers)).toEqual(true)
+    })
+
+    it('returns false when a sync handler returns false', async function () {
+      const handlers = [
+        () => true,
+        () => false,
+      ]
+      expect(await runBeforeEventHandlers(makePayload(), handlers)).toEqual(false)
+    })
+
+    it('returns false when an async handler resolves false', async function () {
+      const handlers = [
+        async () => false,
+      ]
+      expect(await runBeforeEventHandlers(makePayload(), handlers)).toEqual(false)
+    })
+
+    it('stops invoking handlers after the first false', async function () {
+      const calls: string[] = []
+      const handlers = [
+        () => { calls.push('a') },
+        () => { calls.push('b'); return false },
+        () => { calls.push('c') },
+      ]
+      await runBeforeEventHandlers(makePayload(), handlers)
+      expect(calls).toEqual(['a', 'b'])
+    })
+
+    it('runs handlers sequentially and observes mutations in order', async function () {
+      const payload = makePayload()
+      const handlers = [
+        (e) => { e.first = 'one' },
+        async (e) => { e.second = e.first + '-two' },
+      ]
+      await runBeforeEventHandlers(payload, handlers)
+      expect(payload.first).toEqual('one')
+      expect(payload.second).toEqual('one-two')
+    })
+
+    it('treats a thrown sync handler as a no-op (does not drop the event)', async function () {
+      const calls: string[] = []
+      const handlers = [
+        () => { calls.push('a'); throw new Error('boom') },
+        (e) => { calls.push('b'); e.tag = 'after-throw' },
+      ]
+      const payload = makePayload()
+      expect(await runBeforeEventHandlers(payload, handlers)).toEqual(true)
+      expect(calls).toEqual(['a', 'b'])
+      expect(payload.tag).toEqual('after-throw')
+    })
+
+    it('treats a rejected async handler as a no-op (does not drop the event)', async function () {
+      const calls: string[] = []
+      const handlers = [
+        async () => { calls.push('a'); throw new Error('boom') },
+        (e) => { calls.push('b'); e.tag = 'after-throw' },
+      ]
+      const payload = makePayload()
+      expect(await runBeforeEventHandlers(payload, handlers)).toEqual(true)
+      expect(calls).toEqual(['a', 'b'])
+      expect(payload.tag).toEqual('after-throw')
+    })
+
+    it('logs via the supplied logger when a handler throws', async function () {
+      const errorSpy = jest.fn()
+      const logger = { ...nullLogger(), error: errorSpy }
+      const handlers = [() => { throw new Error('boom') }]
+      await runBeforeEventHandlers(makePayload(), handlers, logger)
+      expect(errorSpy).toHaveBeenCalled()
+    })
+  })
+
+  describe('resolveInsights', function () {
+    it('returns everything off when insights.enabled is false', function () {
+      expect(resolveInsights({ insights: { enabled: false } }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('returns everything off when insights.enabled is true but no sub-flags', function () {
+      expect(resolveInsights({ insights: { enabled: true } }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('returns console on when fully opted in', function () {
+      expect(resolveInsights({ insights: { enabled: true, console: true } }))
+        .toEqual({ console: true, http: false })
+    })
+
+    it('returns http on when fully opted in', function () {
+      expect(resolveInsights({ insights: { enabled: true, http: true } }))
+        .toEqual({ console: false, http: true })
+    })
+
+    it('returns both on when fully opted in', function () {
+      expect(resolveInsights({ insights: { enabled: true, console: true, http: true } }))
+        .toEqual({ console: true, http: true })
+    })
+
+    it('footgun: insights.http without insights.enabled is off', function () {
+      expect(resolveInsights({ insights: { http: true } }))
+        .toEqual({ console: false, http: false })
+    })
+
+    it('footgun: insights.console without insights.enabled is off', function () {
+      expect(resolveInsights({ insights: { console: true } }))
+        .toEqual({ console: false, http: false })
+    })
+  })
+
+  describe('shouldSampleEvent', function () {
+    function makeEvent(extra: Record<string, unknown> = {}): EventPayload {
+      return { event_type: 'event', ts: new Date().toISOString(), ...extra }
+    }
+
+    it('returns true at rate 100', function () {
+      expect(shouldSampleEvent(makeEvent(), 100)).toBe(true)
+    })
+
+    it('returns false at rate 0', function () {
+      expect(shouldSampleEvent(makeEvent({ request_id: 'abc' }), 0)).toBe(false)
+    })
+
+    it('clamps rates above 100 to always-send', function () {
+      expect(shouldSampleEvent(makeEvent({ request_id: 'abc' }), 200)).toBe(true)
+    })
+
+    it('clamps rates below 0 to never-send', function () {
+      expect(shouldSampleEvent(makeEvent({ request_id: 'abc' }), -10)).toBe(false)
+    })
+
+    it('is deterministic for the same request_id', function () {
+      const event = makeEvent({ request_id: 'request-xyz' })
+      const first = shouldSampleEvent(event, 50)
+      for (let i = 0; i < 10; i++) {
+        expect(shouldSampleEvent(event, 50)).toBe(first)
+      }
+    })
+
+    it('produces both buckets across different request_ids at rate 50', function () {
+      let kept = 0
+      let dropped = 0
+      for (let i = 0; i < 200; i++) {
+        if (shouldSampleEvent(makeEvent({ request_id: `req-${i}` }), 50)) kept++
+        else dropped++
+      }
+      expect(kept).toBeGreaterThan(0)
+      expect(dropped).toBeGreaterThan(0)
+    })
+
+    it('uses Math.random when no request_id is present', function () {
+      const spy = jest.spyOn(Math, 'random').mockReturnValue(0.1)
+      try {
+        expect(shouldSampleEvent(makeEvent(), 50)).toBe(true)
+        spy.mockReturnValue(0.9)
+        expect(shouldSampleEvent(makeEvent(), 50)).toBe(false)
+      } finally {
+        spy.mockRestore()
+      }
+    })
+
+    it('respects per-event _hb.sampleRate override', function () {
+      const event = makeEvent({ request_id: 'r', _hb: { sampleRate: 0 } })
+      expect(shouldSampleEvent(event, 100)).toBe(false)
+      const event2 = makeEvent({ request_id: 'r', _hb: { sampleRate: 100 } })
+      expect(shouldSampleEvent(event2, 0)).toBe(true)
+    })
+
+    it('ignores non-numeric _hb.sampleRate', function () {
+      const event = makeEvent({ _hb: { sampleRate: 'fifty' } })
+      expect(shouldSampleEvent(event, 100)).toBe(true)
+    })
+
+    it('ignores a NaN _hb.sampleRate override and falls back to configRate', function () {
+      const event = makeEvent({ request_id: 'abc', _hb: { sampleRate: NaN } })
+      expect(shouldSampleEvent(event, 0)).toBe(false)
+      expect(shouldSampleEvent(event, 100)).toBe(true)
+    })
+
+    it('treats a NaN configRate as send-all instead of dropping every event', function () {
+      expect(shouldSampleEvent(makeEvent({ request_id: 'abc' }), NaN)).toBe(true)
+      expect(shouldSampleEvent(makeEvent(), NaN)).toBe(true)
     })
   })
 

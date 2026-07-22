@@ -30,6 +30,8 @@ describe('ShutdownMonitor', () => {
     jest.clearAllMocks()
     process.removeAllListeners('SIGTERM')
     process.removeAllListeners('SIGINT')
+    // Remove only our beforeExit listener; the test runner may register its own.
+    process.removeListener('beforeExit', shutdownMonitor.__beforeExitListener)
     shutdownMonitor.__isReporting = false
     shutdownMonitor.__handlerAlreadyCalled = false
   })
@@ -42,23 +44,33 @@ describe('ShutdownMonitor', () => {
       expect(newMonitor.__isReporting).toBe(false)
       expect(newMonitor.__listener).toStrictEqual(expect.any(Function))
       expect(newMonitor.__listener.name).toBe('honeybadgerShutdownListener')
+      expect(newMonitor.__beforeExitListener).toStrictEqual(expect.any(Function))
+      expect(newMonitor.__beforeExitListener.name).toBe('honeybadgerBeforeExitListener')
     })
   })
+
+  // Other listeners (e.g. the test runner's) may already be registered on
+  // beforeExit, so assert on the presence of *our* listener rather than a count.
+  const ourBeforeExitCount = () =>
+    process.listeners('beforeExit').filter(l => l === shutdownMonitor.__beforeExitListener).length
 
   describe('maybeAddListener', () => {
     it('adds our listener a maximum of one time', () => {
       expect(process.listeners('SIGINT')).toHaveLength(0)
       expect(process.listeners('SIGTERM')).toHaveLength(0)
+      expect(ourBeforeExitCount()).toBe(0)
 
       // Adds our listener
       shutdownMonitor.maybeAddListener()
       expect(process.listeners('SIGINT')).toHaveLength(1)
       expect(process.listeners('SIGTERM')).toHaveLength(1)
+      expect(ourBeforeExitCount()).toBe(1)
 
       // Doesn't add a duplicate
       shutdownMonitor.maybeAddListener()
       expect(process.listeners('SIGINT')).toHaveLength(1)
       expect(process.listeners('SIGTERM')).toHaveLength(1)
+      expect(ourBeforeExitCount()).toBe(1)
     })
   })
 
@@ -69,10 +81,12 @@ describe('ShutdownMonitor', () => {
       process.on('SIGTERM', (signal) => { console.log(signal) })
       expect(process.listeners('SIGINT')).toHaveLength(2)
       expect(process.listeners('SIGTERM')).toHaveLength(2)
+      expect(ourBeforeExitCount()).toBe(1)
 
       shutdownMonitor.maybeRemoveListener()
       expect(process.listeners('SIGINT')).toHaveLength(1)
       expect(process.listeners('SIGTERM')).toHaveLength(1)
+      expect(ourBeforeExitCount()).toBe(0)
     })
 
     it('does nothing if our listener is not present', () => {
@@ -102,6 +116,22 @@ describe('ShutdownMonitor', () => {
       shutdownMonitor.__listener('SIGINT')
       expect(flushSpy).not.toHaveBeenCalled()
       expect(fatallyLogAndExitGracefullySpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('__beforeExitListener', () => {
+    it('flushes queued events without forcing the process to exit', async () => {
+      await shutdownMonitor.__beforeExitListener()
+      expect(flushSpy).toHaveBeenCalledTimes(1)
+      // Natural exit: we must not force-exit the way the signal handler does.
+      expect(fatallyLogAndExitGracefullySpy).not.toHaveBeenCalled()
+      expect(shutdownMonitor.__isReporting).toBe(false)
+    })
+
+    it('returns if it is already reporting (so the flush I/O does not re-trigger it)', async () => {
+      shutdownMonitor.__isReporting = true
+      await shutdownMonitor.__beforeExitListener()
+      expect(flushSpy).not.toHaveBeenCalled()
     })
   })
 

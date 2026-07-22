@@ -5,6 +5,8 @@ import {
   makeNotice,
   makeBacktrace,
   runBeforeNotifyHandlers,
+  runBeforeEventHandlers,
+  shouldSampleEvent,
   shallowClone,
   logger,
   logDeprecatedMethod,
@@ -21,6 +23,7 @@ import {
   Config,
   Logger,
   BeforeNotifyHandler,
+  BeforeEventHandler,
   AfterNotifyHandler,
   Notice,
   Noticeable,
@@ -28,11 +31,12 @@ import {
   BacktraceFrame,
   Transport,
   NoticeTransportPayload,
+  EventPayload,
   UserFeedbackFormOptions,
-  Notifier, EventsLogger,
+  Notifier, EventsWorker,
 } from './types'
 import { GlobalStore } from './store';
-import { ThrottledEventsLogger } from './throttled_events_logger';
+import { ThrottledEventsWorker } from './throttled_events_worker';
 import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
 // Split at commas and spaces
@@ -46,11 +50,13 @@ export abstract class Client {
 
   protected __store: HoneybadgerStore = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
+  protected __beforeEventHandlers: BeforeEventHandler[] = []
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
+  protected __pendingEvents: Set<Promise<void>> = new Set()
   protected __getSourceFileHandler: (path: string) => Promise<string>
 
   protected readonly __transport: Transport;
-  protected readonly __eventsLogger: EventsLogger;
+  protected readonly __eventsWorker: EventsWorker;
 
   protected __notifier: Notifier = {
     name: '@honeybadger-io/core',
@@ -69,8 +75,9 @@ export abstract class Client {
 
     this.__initStore();
     this.__transport = transport
-    this.__eventsLogger = new ThrottledEventsLogger(this.config, this.__transport)
+    this.__eventsWorker = new ThrottledEventsWorker(this.config, this.__transport)
     this.logger = logger(this)
+    this.__applyEventsEnabledShim(opts)
   }
 
   protected abstract factory(opts: Partial<Config>): this
@@ -102,10 +109,24 @@ export abstract class Client {
     for (const k in opts) {
       this.config[k] = opts[k]
     }
-    this.__eventsLogger.configure(this.config)
+    this.__applyEventsEnabledShim(opts)
+    this.__eventsWorker.configure(this.config)
     this.loadPlugins()
 
     return this
+  }
+
+  /**
+   * Backwards compatibility: `eventsEnabled: true` used to opt into console events.
+   * The deprecated flag auto-enables `insights.enabled` and `insights.console`;
+   * explicit user-provided insights values win over the shim.
+   */
+  protected __applyEventsEnabledShim(opts: Partial<Config>): void {
+    if (opts.eventsEnabled !== true) {
+      return
+    }
+    this.logger.warn('Deprecation warning: `eventsEnabled` has been deprecated; please use `insights.enabled` and `insights.console` instead.')
+    this.config.insights = { ...(this.config.insights ?? {}), enabled: true, console: true, ...opts.insights }
   }
 
   loadPlugins() {
@@ -117,11 +138,16 @@ export abstract class Client {
   }
 
   protected __initStore() {
-    this.__store = new GlobalStore({ context: {}, breadcrumbs: [] }, this.config.maxBreadcrumbs);
+    this.__store = new GlobalStore({ context: {}, eventContext: {}, breadcrumbs: [] }, this.config.maxBreadcrumbs);
   }
 
   beforeNotify(handler: BeforeNotifyHandler): Client {
     this.__beforeNotifyHandlers.push(handler)
+    return this
+  }
+
+  beforeEvent(handler: BeforeEventHandler): Client {
+    this.__beforeEventHandlers.push(handler)
     return this
   }
 
@@ -134,6 +160,18 @@ export abstract class Client {
     if (typeof context === 'object' && context != null) {
       this.__store.setContext(context)
     }
+    return this
+  }
+
+  setEventContext(eventContext: Record<string, unknown>): Client {
+    if (typeof eventContext === 'object' && eventContext != null) {
+      this.__store.setEventContext(eventContext)
+    }
+    return this
+  }
+
+  clearEventContext(): Client {
+    this.__store.clearEventContext()
     return this
   }
 
@@ -318,19 +356,53 @@ export abstract class Client {
       data = type
       type = type['event_type'] as string ?? undefined
     }
-    this.__eventsLogger.log({
-      event_type: type,
+
+    const eventContext = this.__store.getContents('eventContext') || {}
+    const payload: EventPayload = {
+      event_type: type as string,
       ts: new Date().toISOString(),
-      ...data
-    })
+      ...eventContext,
+      ...data,
+    }
+
+    // Track in-flight handler chains so flushAsync() can await them before
+    // delegating to the events logger; otherwise a caller that awaits flushAsync()
+    // immediately after event() may flush before the payload enters the queue.
+    const inFlight = runBeforeEventHandlers(payload, this.__beforeEventHandlers, this.logger)
+      .then((shouldSend) => {
+        if (!shouldSend) {
+          this.logger.debug('skipping event: beforeEvent handler returned false')
+          return
+        }
+        const sampleRate = this.config.events?.sampleRatePercentage ?? 100
+        if (!shouldSampleEvent(payload, sampleRate)) {
+          this.logger.debug('skipping event: dropped by sampleRatePercentage')
+          return
+        }
+        delete (payload as Record<string, unknown>)._hb
+        this.__eventsWorker.log(payload)
+      })
+      .catch((err) => {
+        // should not happen, because each handler is wrapped with a try/catch
+        this.logger.error('beforeEvent handler chain failed; dropping event', err)
+      })
+      .finally(() => {
+        this.__pendingEvents.delete(inFlight)
+      })
+    this.__pendingEvents.add(inFlight)
   }
 
   /**
    * This method currently flushes the event (Insights) queue.
    * In the future, it should also flush the error queue (assuming an error throttler is implemented).
    */
-  flushAsync(): Promise<void> {
-    return this.__eventsLogger.flushAsync();
+  async flushAsync(): Promise<void> {
+    // Wait for any pending beforeEvent chains so their payloads land in the queue
+    // before we ask the events logger to drain.
+    if (this.__pendingEvents.size > 0) {
+      await Promise.allSettled(Array.from(this.__pendingEvents))
+    }
+    return this.__eventsWorker.flushAsync();
   }
 
   __getBreadcrumbs() {

@@ -52,6 +52,14 @@ export class AsyncStore implements Types.HoneybadgerStore {
     Object.assign(this.__currentContents().context, context || {});
   }
 
+  setEventContext(eventContext: Record<string, unknown>): void {
+    Object.assign(this.__currentContents().eventContext, eventContext || {});
+  }
+
+  clearEventContext(): void {
+    this.__currentContents().eventContext = {}
+  }
+
   addBreadcrumb(breadcrumb) {
     if (this.__currentContents().breadcrumbs.length == this.breadcrumbsLimit) {
       this.__currentContents().breadcrumbs.shift()
@@ -61,6 +69,7 @@ export class AsyncStore implements Types.HoneybadgerStore {
 
   clear() {
     this.__currentContents().context = {}
+    this.__currentContents().eventContext = {}
     this.__currentContents().breadcrumbs = []
   }
 

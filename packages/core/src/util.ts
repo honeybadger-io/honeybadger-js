@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import * as stackTraceParser from 'stacktrace-parser'
 import {
-  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, AfterNotifyHandler, Config, BrowserConfig
+  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, BeforeEventHandler, AfterNotifyHandler, Config, BrowserConfig, EventPayload
 } from './types'
 
 export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
@@ -176,6 +176,76 @@ export function runBeforeNotifyHandlers(notice: Notice | null, handlers: BeforeN
     results,
     result
   }
+}
+
+export async function runBeforeEventHandlers(
+  payload: EventPayload,
+  handlers: BeforeEventHandler[],
+  logger?: Logger
+): Promise<boolean> {
+  for (let i = 0, len = handlers.length; i < len; i++) {
+    let result: ReturnType<BeforeEventHandler>
+    try {
+      result = await handlers[i](payload)
+    } catch (err) {
+      // A buggy handler should not suppress unrelated events. Log and treat as no-op.
+      logger?.error('beforeEvent handler threw; continuing', err)
+      continue
+    }
+    if (result === false) {
+      return false
+    }
+  }
+  return true
+}
+
+export interface ResolvedInsights {
+  console: boolean
+  http: boolean
+}
+
+export function resolveInsights(config: Pick<Config, 'insights'>): ResolvedInsights {
+  const insights = config.insights
+  if (!insights || insights.enabled !== true) {
+    return { console: false, http: false }
+  }
+
+  return {
+    console: insights.console ?? false,
+    http: insights.http ?? false,
+  }
+}
+
+function fnv1a(str: string): number {
+  let h = 0x811c9dc5
+  for (let i = 0, len = str.length; i < len; i++) {
+    h ^= str.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
+  }
+  return h >>> 0
+}
+
+function clampSampleRate(rate: number): number {
+  if (rate < 0) return 0
+  if (rate > 100) return 100
+  return rate
+}
+
+export function shouldSampleEvent(event: EventPayload, configRate: number): boolean {
+  const meta = (event as Record<string, unknown>)._hb as { sampleRate?: unknown } | undefined
+  const override = meta && Number.isFinite(meta.sampleRate) ? (meta.sampleRate as number) : undefined
+  const rawRate = override !== undefined ? override : configRate
+  // Guard against non-finite rates (e.g. NaN from Number(invalidConfig)); an
+  // unusable rate must not silently drop every event, so fall back to send-all.
+  const rate = clampSampleRate(Number.isFinite(rawRate) ? rawRate : 100)
+  if (rate <= 0) return false
+  if (rate >= 100) return true
+
+  const requestId = (event as Record<string, unknown>).request_id
+  if (typeof requestId === 'string' && requestId.length > 0) {
+    return fnv1a(requestId) % 100 < rate
+  }
+  return Math.random() * 100 < rate
 }
 
 export function runAfterNotifyHandlers(notice: Notice | null, handlers: AfterNotifyHandler[], error?: Error): boolean {

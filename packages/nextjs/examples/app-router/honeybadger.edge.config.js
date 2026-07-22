@@ -1,12 +1,14 @@
-import { Honeybadger } from '@honeybadger-io/react'
+import Honeybadger from '@honeybadger-io/js'
 
-Honeybadger.configure({
-
+export const config = {
   apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || process.env.NODE_ENV,
   revision: process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
   projectRoot: 'webpack://_N_E/./',
   debug: true,
   // reportData: true,
-})
+  insights: { enabled: true, http: true },
+}
+
+Honeybadger.configure(config)
 Honeybadger.logger.debug('Honeybadger configured for edge')

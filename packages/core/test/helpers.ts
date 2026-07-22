@@ -35,8 +35,8 @@ export class TestClient extends BaseClient {
     throw new Error('Method not implemented.');
   }
 
-  public eventsLogger() {
-    return this.__eventsLogger;
+  public eventsWorker() {
+    return this.__eventsWorker;
   }
 
   public transport() {
