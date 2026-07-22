@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/plugin-core@1.4.3...@honeybadger-io/plugin-core@1.4.4) (2026-07-20)
+
+**Note:** Version bump only for package @honeybadger-io/plugin-core
+
+
+
+
+
 ## [1.4.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/plugin-core@1.4.2...@honeybadger-io/plugin-core@1.4.3) (2026-07-20)
 
 **Note:** Version bump only for package @honeybadger-io/plugin-core
