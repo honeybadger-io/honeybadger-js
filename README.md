@@ -47,7 +47,7 @@ For comprehensive documentation and support, see our docs: https://docs.honeybad
 
 ## Changelog
 
-- Each package's `CHANGELOG.md` is updated when a new version is released (`npm run release`).
+- Each package's `CHANGELOG.md` is updated when a new version is released (`pnpm run release`).
 
 - [Conventional Commits](https://www.conventionalcommits.org/) are enforced with a Git hook (via [husky](https://typicode.github.io/husky) + [commitlint](https://commitlint.js.org/)) in order to automate changelog generation.
 
@@ -61,39 +61,41 @@ For comprehensive documentation and support, see our docs: https://docs.honeybad
 
 ## Development
 
-We use [Lerna](https://lerna.js.org/) to manage the monorepo. It helps us:
-- link between packages,
+We use [pnpm workspaces](https://pnpm.io/workspaces) and [Lerna](https://lerna.js.org/) to manage the monorepo. Lerna helps us:
 - generate changelogs and bump versions (based on conventional commits) and
 - publish to NPM
 
-1. Run `npm install` from the monorepo root.
-2. Run `npm test` from the monorepo root to run unit tests for all packages.
+pnpm owns install/linking (including the `workspace:` protocol for in-repo deps).
+
+1. Enable Corepack (ships with Node) so the pinned pnpm version from `packageManager` is used: `corepack enable`
+2. Run `pnpm install` from the monorepo root.
+3. Run `pnpm test` from the monorepo root to run unit tests for all packages.
 
 
-### Lerna Tips
+### Lerna / pnpm Tips
 
-- Always install from the root, i.e. `npm install` only from the root folder, otherwise you may get unexpected issues with the linked packages.
-- Use `lerna add my-pkg --scope="@honeybadger-io/js"` to add `my-pkg` in the `@honeybadger-io/js` project. Or you can manually add to the target project's `package.json` file. You still need to run `npm install` from the root.
-- Use `lerna run` to execute commands for all projects. If the command is not found it will not be executed. You can filter the packages using `--scope`. For example, `lerna run test` will execute `npm run test` to all packages that have this script available.
+- Always install from the root, i.e. `pnpm install` only from the root folder, otherwise you may get unexpected issues with the linked packages.
+- Use `pnpm add my-pkg --filter @honeybadger-io/js` to add `my-pkg` to the `@honeybadger-io/js` project. Or you can manually add to the target project's `package.json` file (use `workspace:^` for in-repo deps). You still need to run `pnpm install` from the root.
+- Use `lerna run` or `pnpm --filter` to execute commands for projects. If the command is not found it will not be executed. You can filter the packages using `--scope` / `--filter`. For example, `lerna run test` will execute `test` in all packages that have this script available.
 
 > [!TIP]
-> For more info, you can read the [docs](https://lerna.js.org/docs/introduction).
+> For more info, you can read the [Lerna docs](https://lerna.js.org/docs/introduction) and [pnpm workspace docs](https://pnpm.io/workspaces).
 
 
 ### Troubleshooting TypeScript
 
 - Not seeing changes when working in `.ts` files? Make sure that you rebuild every time you make a change. Or enable "compile on save" with your IDE — [WebStorm (JetBrains)](https://www.jetbrains.com/help/webstorm/compiling-typescript-to-javascript.html#ts_compiler_compile_code_automatically) / [VS Code](https://code.visualstudio.com/docs/typescript/typescript-compiling#_step-2-run-the-typescript-build).
-- If you are getting errors with TypeScript, make sure that you run `npm run build`.
+- If you are getting errors with TypeScript, make sure that you run `pnpm run build`.
   It's a prerequisite for [TypeScript Project References](https://www.typescriptlang.org/docs/handbook/project-references.html#caveats-for-project-references).
 
 ## Releasing
 
 Packages in the monorepo are released in [independent mode](https://lerna.js.org/docs/features/version-and-publish#independent-mode), meaning that Lerna will decide which packages to release and what version bump to apply based on the commits since the last release.
 
-Releases are performed via [GitHub Actions](https://github.com/honeybadger-io/honeybadger-js/actions), which run `npm run release`. That command calls `lerna publish`, which:
+Releases are performed via [GitHub Actions](https://github.com/honeybadger-io/honeybadger-js/actions), which run `pnpm run release`. That command calls `lerna publish`, which:
 - generates the changelog based on commit messages (see [Changelog](#changelog) above)
-- runs `npm version`
-- runs `npm publish`
+- bumps package versions
+- publishes to NPM
 
 > [!NOTE] 
 > Some packages may have a `postpublish` script, for example `@honeybadger-io/js` (found in `packages/js`) has a script to also publish to our *js.honeybadger.io* CDN (hosted on AWS via S3/CloudFront).
@@ -110,7 +112,7 @@ The repository automatically releases new packages when a PR is merged on master
 
 #### Available Commands
 
-- `npm run release` - Calculates the next version, commits and publishes to NPM (and to our CDN). This command is executed from the [Publish New Release](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/lerna-publish.yml) workflow.
+- `pnpm run release` - Calculates the next version, commits and publishes to NPM (and to our CDN). This command is executed from the [Publish New Release](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/lerna-publish.yml) workflow.
 
 ### Releasing Package For The First Time
 

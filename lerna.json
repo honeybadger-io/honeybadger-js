@@ -1,7 +1,5 @@
 {
-  "packages": [
-    "packages/*"
-  ],
+  "npmClient": "pnpm",
   "version": "independent",
   "command": {
     "version": {

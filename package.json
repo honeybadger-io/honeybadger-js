@@ -1,9 +1,7 @@
 {
   "name": "root",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "packageManager": "pnpm@10.18.3",
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
@@ -16,11 +14,19 @@
     "lerna": "^9.0.7"
   },
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "pnpm run build",
     "build": "lerna run build --stream",
     "test": "lerna run test --stream",
-    "lint": "npx eslint .",
+    "lint": "pnpm exec eslint .",
     "release": "lerna publish --conventional-commits --changelog-preset conventional-changelog-angular --yes --create-release github --loglevel silly",
     "clean": "./scripts/clean-repo.sh"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "react-native>react": "18",
+        "vue-jest>babel-jest": "29"
+      }
+    }
   }
 }
