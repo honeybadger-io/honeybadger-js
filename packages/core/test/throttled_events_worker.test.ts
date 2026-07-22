@@ -46,6 +46,37 @@ describe('ThrottledEventsWorker', () => {
     expect(consoleLogSpy).toHaveBeenCalledWith('[Honeybadger] Events sent successfully')
   })
 
+  it('does not hold a pending cooldown timer once the queue drains', async () => {
+    const transport = new TestTransport()
+    const eventsWorker = new ThrottledEventsWorker(fastWorkerConfig({ dispatchIntervalSeconds: 10 }), transport)
+    eventsWorker.log(makeEvent())
+    await wait(50)
+    // Queue is drained and no timer is left armed, so an idle worker never keeps
+    // the Node process alive for the full dispatch interval.
+    // @ts-ignore
+    expect(eventsWorker.queue.length).toBe(0)
+    // @ts-ignore
+    expect(eventsWorker.cooldownTimer).toBeNull()
+  })
+
+  it('still honors the remaining cooldown window for an event that arrives after the queue drained', async () => {
+    const transport = new TestTransport()
+    const transportSpy = jest.spyOn(transport, 'send')
+    const eventsWorker = new ThrottledEventsWorker(fastWorkerConfig({ dispatchIntervalSeconds: 0.3 }), transport)
+    eventsWorker.log(makeEvent('a'))
+    await wait(50)
+    // First send fired immediately and drained the queue (no timer armed).
+    expect(transportSpy).toHaveBeenCalledTimes(1)
+    // @ts-ignore
+    expect(eventsWorker.cooldownTimer).toBeNull()
+    // A later event must wait out the remaining window rather than sending at once.
+    eventsWorker.log(makeEvent('b'))
+    await wait(100)
+    expect(transportSpy).toHaveBeenCalledTimes(1)
+    await wait(300)
+    expect(transportSpy).toHaveBeenCalledTimes(2)
+  })
+
   it('should batch events that arrive during an in-flight send', async () => {
     const consoleLogSpy = jest.spyOn(console, 'debug')
     const transport = new TestTransport()

@@ -6,6 +6,12 @@ import { CONFIG as DEFAULT_CONFIG } from './defaults';
 export class ThrottledEventsWorker implements EventsWorker {
   private queue: EventPayload[] = []
   private cooldownTimer: ReturnType<typeof setTimeout> | null = null
+  // Timestamp (ms) until which the post-send cooldown window is active. A timer
+  // is only armed while there are queued events waiting for this window; when the
+  // queue drains empty we keep the timestamp but drop the timer, so an idle worker
+  // never holds a pending timer (which would otherwise keep a Node process alive
+  // for the full interval.
+  private cooldownUntil = 0
   private inFlight: Promise<void> | null = null
   private logger: Logger
 
@@ -30,12 +36,25 @@ export class ThrottledEventsWorker implements EventsWorker {
       return
     }
 
+    // Crossing the bulk threshold preempts any pending cooldown and dispatches now.
+    if (this.queue.length >= this.bulkThreshold()) {
+      this.clearCooldownTimer()
+      this.processQueue()
+      return
+    }
+
+    // A timer is already counting down the cooldown window; the queued event
+    // will be picked up when it fires.
     if (this.cooldownTimer) {
-      if (this.queue.length >= this.bulkThreshold()) {
-        clearTimeout(this.cooldownTimer)
-        this.cooldownTimer = null
-        this.processQueue()
-      }
+      return
+    }
+
+    // We're inside a cooldown window but no timer is armed (the queue had drained
+    // empty after the previous send). Arm one for the remaining time so this event
+    // still respects the interval.
+    const remaining = this.cooldownRemainingMs()
+    if (remaining > 0) {
+      this.scheduleCooldownTimer(remaining)
       return
     }
 
@@ -44,10 +63,7 @@ export class ThrottledEventsWorker implements EventsWorker {
 
   flushAsync(): Promise<void> {
     this.logger.debug('[Honeybadger] Flushing events')
-    if (this.cooldownTimer) {
-      clearTimeout(this.cooldownTimer)
-      this.cooldownTimer = null
-    }
+    this.clearCooldownTimer()
     const previous = this.inFlight ?? Promise.resolve()
     const flush = previous.then(() => this.drainAll())
     // Mark the flush as in-flight so a concurrent log() doesn't start an
@@ -89,14 +105,52 @@ export class ThrottledEventsWorker implements EventsWorker {
   }
 
   private scheduleNextDispatch() {
+    const intervalMs = this.dispatchIntervalMs()
+    // Capture the cooldown deadline at dispatch time so a later config change to
+    // the interval doesn't retroactively shorten a window already in progress.
+    this.cooldownUntil = Date.now() + intervalMs
+
     if (this.queue.length >= this.bulkThreshold()) {
       this.processQueue()
       return
     }
+
+    // Only arm a timer when there's queued work waiting for it. If the queue is
+    // empty, `cooldownUntil` alone enforces the window: the next log() will arm a
+    // timer for whatever time remains, and an idle worker holds no timer at all.
+    if (this.queue.length > 0) {
+      this.scheduleCooldownTimer(intervalMs)
+    }
+  }
+
+  private cooldownRemainingMs(): number {
+    if (!this.cooldownUntil) {
+      return 0
+    }
+    return Math.max(0, this.cooldownUntil - Date.now())
+  }
+
+  private scheduleCooldownTimer(ms: number) {
     this.cooldownTimer = setTimeout(() => {
       this.cooldownTimer = null
       this.processQueue()
-    }, this.dispatchIntervalMs())
+    }, ms)
+    // In Node, don't let a pending cooldown timer keep the process alive for the
+    // whole batching interval. `unref` lets the event loop go idle so the process
+    // can exit (or a shutdown / `beforeExit` handler can run) promptly instead of
+    // blocking for `dispatchIntervalSeconds`. Queued events aren't lost: a
+    // `flushAsync()` on the way out still drains them before exit. (`unref` is
+    // Node-only; the browser's numeric setTimeout handle has no such method.)
+    if (typeof this.cooldownTimer === 'object' && this.cooldownTimer !== null && typeof this.cooldownTimer.unref === 'function') {
+      this.cooldownTimer.unref()
+    }
+  }
+
+  private clearCooldownTimer() {
+    if (this.cooldownTimer) {
+      clearTimeout(this.cooldownTimer)
+      this.cooldownTimer = null
+    }
   }
 
   private async send(): Promise<void> {

@@ -122,14 +122,20 @@ function seedLambdaEventContext(hb: typeof Honeybadger, event: unknown, context:
   hb.setEventContext({ request_id: requestId, correlation_id: correlationId })
 }
 
-function createLambdaRequestEmitter(hb: typeof Honeybadger, event: unknown): ((status: number) => void) | null {
+// Returns an emitter for the `request.handled` event, or null when HTTP
+// instrumentation is off (nothing to emit). The emitter also owns delivery:
+// Lambda may freeze the execution environment the moment the handler completes,
+// so after recording the event it flushes the queue and returns that promise.
+// Callers must await it before resolving/invoking the callback. Delivery failures
+// are logged by the events worker and must not break the handler.
+function createLambdaRequestEmitter(hb: typeof Honeybadger, event: unknown): ((status: number) => Promise<void>) | null {
   if (!isHttpLambdaEvent(event)) return null
   if (!Util.resolveInsights(hb.config).http) return null
 
   const start = startTimer()
   let emitted = false
-  return function emit(status: number) {
-    if (emitted) return
+  return function emit(status: number): Promise<void> {
+    if (emitted) return Promise.resolve()
     emitted = true
     hb.event('request.handled', buildRequestEventPayload({
       method: getLambdaMethod(event),
@@ -137,6 +143,7 @@ function createLambdaRequestEmitter(hb: typeof Honeybadger, event: unknown): ((s
       status,
       duration: durationMs(start),
     }))
+    return hb.flushAsync().catch(() => { /* swallow: errors are logged by the events worker */ })
   }
 }
 
@@ -152,25 +159,17 @@ function asyncHandler<TEvent = any, TResult = any>(handler: AsyncHandler<TEvent,
           // check if handler returns a promise
           if (result && result.then) {
             result
-              .then((value) => {
-                emit?.(lambdaStatus(value))
-                resolve(value)
-              })
-              .catch(err => {
-                emit?.(500)
-                reportToHoneybadger(hb, err, reject)
-              })
+              .then((value) => Promise.resolve(emit?.(lambdaStatus(value))).then(() => resolve(value)))
+              .catch(err => Promise.resolve(emit?.(500)).then(() => reportToHoneybadger(hb, err, reject)))
               .finally(() => clearTimeout(timeoutHandler))
           }
           else {
             clearTimeout(timeoutHandler)
-            emit?.(lambdaStatus(result))
-            resolve(result)
+            Promise.resolve(emit?.(lambdaStatus(result))).then(() => resolve(result))
           }
         } catch (err) {
           clearTimeout(timeoutHandler)
-          emit?.(500)
-          reportToHoneybadger(hb, err, reject)
+          Promise.resolve(emit?.(500)).then(() => reportToHoneybadger(hb, err, reject))
         }
       })
     })
@@ -187,17 +186,15 @@ function syncHandler<TEvent = any, TResult = any>(handler: SyncHandler<TEvent, T
         handler(event, context, (error, result) => {
           clearTimeout(timeoutHandler)
           if (error) {
-            emit?.(500)
-            return reportToHoneybadger(hb, error, cb)
+            Promise.resolve(emit?.(500)).then(() => reportToHoneybadger(hb, error, cb))
+            return
           }
 
-          emit?.(lambdaStatus(result))
-          cb(null, result)
+          Promise.resolve(emit?.(lambdaStatus(result))).then(() => cb(null, result))
         });
       } catch (err) {
         clearTimeout(timeoutHandler)
-        emit?.(500)
-        reportToHoneybadger(hb, err, cb)
+        Promise.resolve(emit?.(500)).then(() => reportToHoneybadger(hb, err, cb))
       }
     })
   }

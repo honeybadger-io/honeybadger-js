@@ -749,6 +749,49 @@ describe('Lambda Handler', function () {
         const calls = evSpy.mock.calls.filter(c => c[0] === 'request.handled')
         expect(calls).toHaveLength(1)
       })
+
+      it('awaits flushAsync before an async handler resolves so events ship before the runtime freezes', async function () {
+        let releaseFlush: () => void = () => undefined
+        const flushSpy = jest.spyOn(client, 'flushAsync').mockImplementation(
+          () => new Promise<void>((resolve) => { releaseFlush = resolve })
+        )
+        const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
+
+        let resolved = false
+        const pending = handler(apiGatewayV2Event(), ctx()).then(() => { resolved = true })
+
+        // Let the handler run and emit; the flush is now pending and must gate resolution.
+        await new Promise((r) => setImmediate(r))
+        expect(flushSpy).toHaveBeenCalledTimes(1)
+        expect(resolved).toBe(false)
+
+        releaseFlush()
+        await pending
+        expect(resolved).toBe(true)
+      })
+
+      it('awaits flushAsync before a sync handler invokes its callback', function () {
+        let releaseFlush: () => void = () => undefined
+        const flushSpy = jest.spyOn(client, 'flushAsync').mockImplementation(
+          () => new Promise<void>((resolve) => { releaseFlush = resolve })
+        )
+        const handler = client.lambdaHandler(function (_event, _context, callback) {
+          callback(null, { statusCode: 200 })
+        }) as SyncHandler
+
+        return new Promise<void>((done) => {
+          let called = false
+          handler(apiGatewayV1Event(), ctx(), () => {
+            called = true
+            done()
+          })
+          setImmediate(() => {
+            expect(flushSpy).toHaveBeenCalledTimes(1)
+            expect(called).toBe(false)
+            releaseFlush()
+          })
+        })
+      })
     })
 
     describe('non-HTTP triggers', function () {
