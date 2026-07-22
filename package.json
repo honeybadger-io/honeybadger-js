@@ -27,6 +27,10 @@
         "react-native>react": "18",
         "vue-jest>babel-jest": "29"
       }
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "nx"
+    ]
   }
 }
