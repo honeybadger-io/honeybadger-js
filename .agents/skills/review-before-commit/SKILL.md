@@ -14,7 +14,7 @@ Run this checklist before every commit. Do not commit until it is complete.
 
 Get a code review of the working-tree / staged changes about to be committed:
 
-1. **Codex CLI** (preferred): run `codex` to review the changes. If `codex` is not installed, skip to step 2.
+1. **Codex CLI** (preferred): run `codex` to review the changes. If `codex` is not installed, skip to item 2.
 2. **Claude** (fallback): perform a thorough code review using Claude.
 
 Address any findings.
