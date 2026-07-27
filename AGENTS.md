@@ -215,7 +215,8 @@ Project-level skills live in [`.agents/skills/`](.agents/skills/). Cursor and Cl
 
 | Skill | When to use |
 | ----- | ----------- |
-| [`create-pull-request`](.agents/skills/create-pull-request/SKILL.md) | Before opening or submitting a pull request — remove planning artifacts, request an AI review (Codex CLI or Claude), and format the PR title. |
+| [`review-before-commit`](.agents/skills/review-before-commit/SKILL.md) | Before every commit — request an AI review (Codex CLI or Claude), address findings, and get human approval. |
+| [`create-pull-request`](.agents/skills/create-pull-request/SKILL.md) | Before opening or submitting a pull request — remove planning artifacts and format the PR title. |
 | [`writing-documentation`](.agents/skills/writing-documentation/SKILL.md) | When a change needs user-facing documentation — recommend a docs-repo issue (create only after human approval); do not document features in READMEs here. |
 
 **Keep skills up to date.** When new conventions are deduced during work, or when existing rules or conventions change as the code evolves, update the corresponding `SKILL.md` and add a row to the table above in the same PR.
