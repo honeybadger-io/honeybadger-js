@@ -1,5 +1,6 @@
 import Honeybadger from '@honeybadger-io/js';
 import { NextRequest, NextResponse } from 'next/server';
+import * as nextServer from 'next/server';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   emitNodeRequestEvent,
@@ -10,6 +11,74 @@ import {
   seedRequestEventContext,
 } from './insights-instrumentation';
 import type { NodeRequestLike } from './insights-instrumentation';
+
+type WaitUntil = (promise: Promise<unknown>) => void
+
+/**
+ * The `waitUntil` primitive the hosting platform injects per request. Next.js
+ * resolves `after()` through this same accessor, and it is the only channel
+ * available in Pages Router API routes, which are invoked as `(req, res)` with
+ * no context argument to read it from.
+ */
+function requestContextWaitUntil(): WaitUntil | undefined {
+  const context = (globalThis as Record<symbol, unknown>)[Symbol.for('@next/request-context')] as
+    | { get?: () => { waitUntil?: WaitUntil } | undefined }
+    | undefined
+  const waitUntil = context?.get?.()?.waitUntil
+  return typeof waitUntil === 'function' ? waitUntil : undefined
+}
+
+/**
+ * Middleware receives a `NextFetchEvent` as its second argument. Duck-typed
+ * rather than `instanceof` so the edge bundle needs no runtime import, and
+ * bound because `waitUntil` is a class method that collects into the event.
+ */
+function eventWaitUntil(event: unknown): WaitUntil | undefined {
+  const waitUntil = (event as { waitUntil?: WaitUntil } | undefined)?.waitUntil
+  return typeof waitUntil === 'function' ? waitUntil.bind(event) : undefined
+}
+
+/**
+ * Ensure Insights events are delivered before the serverless/edge runtime
+ * freezes, without delaying the response where the runtime lets us avoid it.
+ *
+ * In order of preference: Next.js `after()` (stable in 15.1, App Router only —
+ * it needs App Router request context, so Pages Router must not call it), then
+ * a `waitUntil` from the middleware event or the platform request context,
+ * then a blocking `flushAsync()` when the runtime offers neither. Blocking is
+ * correct in that last case: no `waitUntil` means nothing is going to freeze
+ * the invocation out from under us.
+ *
+ * Delivery failures are logged by the events worker and must not break the handler.
+ */
+function scheduleFlush(options: { useAfter?: boolean; waitUntil?: WaitUntil } = {}): Promise<void> | void {
+  const flush = () => Honeybadger.flushAsync().catch(() => { /* logged by the events worker */ })
+
+  if (options.useAfter) {
+    const after = (nextServer as { after?: (cb: () => unknown) => void }).after
+    if (typeof after === 'function') {
+      // Exported but still refusable: `after()` throws outside a supported
+      // context. Fall through to the remaining strategies rather than failing
+      // the request.
+      try {
+        after(flush)
+        return
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      catch (error) {
+        // try waitUntil / blocking flush below
+      }
+    }
+  }
+
+  const waitUntil = options.waitUntil ?? requestContextWaitUntil()
+  if (waitUntil) {
+    waitUntil(flush())
+    return
+  }
+
+  return flush()
+}
 
 function configure(overrides?: Parameters<typeof Honeybadger.configure>[0]) {
   if (Honeybadger.config.apiKey?.length > 0) {
@@ -88,8 +157,11 @@ function isPagesApiInvocation(args: unknown[]): args is [NodeRequestLike, NextAp
 /**
  * App Router route handlers and middleware: a web `Request`/`NextRequest` in, a
  * `Response`/`NextResponse` out. The status comes from the returned response.
+ *
+ * `waitUntil` is present for middleware (from its `NextFetchEvent`); route
+ * handlers get `{ params }` as their second argument and rely on `after()`.
  */
-async function handleAppRouterRequest(call: () => unknown, req: Request, canIsolate: boolean): Promise<unknown> {
+async function handleAppRouterRequest(call: () => unknown, req: Request, canIsolate: boolean, waitUntil?: WaitUntil): Promise<unknown> {
   const ids = seedRequestEventContext(req.headers)
   if (canIsolate) {
     Honeybadger.setEventContext(ids)
@@ -99,6 +171,7 @@ async function handleAppRouterRequest(call: () => unknown, req: Request, canIsol
     const response = await call()
     if (start !== null) {
       emitRequestEvent(req, (response as Response | undefined)?.status, start, ids)
+      await scheduleFlush({ useAfter: true, waitUntil })
     }
     return response
   } catch (error) {
@@ -107,6 +180,7 @@ async function handleAppRouterRequest(call: () => unknown, req: Request, canIsol
     }
     if (start !== null) {
       emitRequestEvent(req, 500, start, ids)
+      await scheduleFlush({ useAfter: true, waitUntil })
     }
     await Honeybadger.notifyAsync(error as Error)
     throw error
@@ -128,6 +202,9 @@ async function handlePagesApiRequest(call: () => unknown, req: NodeRequestLike, 
     const result = await call()
     if (start !== null) {
       emitNodeRequestEvent(req, res.statusCode, start, ids)
+      // No after() here: Pages Router lacks the App Router request context it
+      // needs. scheduleFlush falls through to the platform waitUntil instead.
+      await scheduleFlush({ useAfter: false })
     }
     return result
   } catch (error) {
@@ -136,6 +213,7 @@ async function handlePagesApiRequest(call: () => unknown, req: NodeRequestLike, 
     }
     if (start !== null) {
       emitNodeRequestEvent(req, 500, start, ids)
+      await scheduleFlush({ useAfter: false })
     }
     await Honeybadger.notifyAsync(error as Error)
     throw error
@@ -193,7 +271,7 @@ export function withHoneybadger(handler: AppRouterHandler | PagesApiHandler, con
       const invoke = (): unknown => {
         // App Router / middleware first: a web Request as the first argument.
         if (typeof Request !== 'undefined' && args[0] instanceof Request) {
-          return handleAppRouterRequest(call, args[0], canIsolate)
+          return handleAppRouterRequest(call, args[0], canIsolate, eventWaitUntil(args[1]))
         }
         // Pages Router API route: a Node req/res pair.
         if (isPagesApiInvocation(args)) {

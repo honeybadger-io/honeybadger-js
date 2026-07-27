@@ -29,7 +29,17 @@
       "import": "./dist/honeybadger-nextjs.esm.js",
       "require": "./dist/honeybadger-nextjs.cjs.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./dist/*.js": "./dist/*.js",
+    "./dist/*.d.ts": "./dist/*.d.ts",
+    "./dist/*.js.map": "./dist/*.js.map",
+    "./dist/*": "./dist/*.js",
+    "./src/*.ts": "./src/*.ts",
+    "./src/*.tsx": "./src/*.tsx",
+    "./src/*.js": "./src/*.js",
+    "./src/*": "./src/*.ts",
+    "./scripts/*": "./scripts/*",
+    "./templates/*": "./templates/*"
   },
   "files": [
     "dist",

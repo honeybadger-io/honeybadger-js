@@ -3,9 +3,23 @@ import Honeybadger from '@honeybadger-io/js'
 import type { NextResponse } from 'next/server'
 import { withHoneybadger } from './with-honeybadger'
 
+// Mutable so individual tests can install/remove `after` without reloading the
+// module. scheduleFlush reads nextServer.after at call time via the namespace.
+const nextServerMocks: { after?: (cb: () => unknown) => void } = {}
+jest.mock('next/server', () => {
+  const actual = jest.requireActual('next/server') as Record<string, unknown>
+  return {
+    ...actual,
+    get after() {
+      return nextServerMocks.after
+    },
+  }
+})
+
 describe('withHoneybadger', () => {
   let workerLogSpy: jest.SpyInstance
   let notifyAsyncSpy: jest.SpyInstance
+  let flushAsyncSpy: jest.SpyInstance
 
   // The events worker is `protected` on Client; in tests we read it via `as any`.
   const eventsWorker = () => (Honeybadger as any).__eventsWorker
@@ -29,7 +43,16 @@ describe('withHoneybadger', () => {
 
   const okHandler = jest.fn(async () => new Response('ok', { status: 200 }) as NextResponse)
 
+  // The platform-injected waitUntil accessor that Next.js reads to extend a
+  // serverless invocation past the response.
+  const requestContextSymbol = Symbol.for('@next/request-context')
+  const installRequestContext = (waitUntil: (p: Promise<unknown>) => void) => {
+    (globalThis as any)[requestContextSymbol] = { get: () => ({ waitUntil }) }
+  }
+
   beforeEach(() => {
+    delete (globalThis as any)[requestContextSymbol]
+    delete nextServerMocks.after
     // Configure explicitly so the wrapper's auto-configure (env-based) is
     // skipped, and reset the insights gates mutated by previous tests.
     Honeybadger.configure({
@@ -44,10 +67,15 @@ describe('withHoneybadger', () => {
     // dispatch cooldown timer keeps the jest process alive after the run.
     workerLogSpy = jest.spyOn(eventsWorker(), 'log').mockImplementation(() => undefined)
     notifyAsyncSpy = jest.spyOn(Honeybadger, 'notifyAsync').mockResolvedValue(undefined as any)
+    // next/server has no after() in our pinned Next 13, so scheduleFlush falls
+    // back to a blocking flushAsync — spy it to assert delivery is scheduled
+    // per instrumented request.
+    flushAsyncSpy = jest.spyOn(Honeybadger, 'flushAsync').mockResolvedValue(undefined as any)
     okHandler.mockClear()
   })
 
   afterEach(() => {
+    delete (globalThis as any)[requestContextSymbol]
     jest.restoreAllMocks()
   })
 
@@ -73,6 +101,77 @@ describe('withHoneybadger', () => {
       })
       expect(typeof payload.duration).toBe('number')
       expect(payload.duration as number).toBeGreaterThanOrEqual(0)
+      expect(flushAsyncSpy).toHaveBeenCalled()
+    })
+
+    it('registers flush with after() when available (App Router)', async () => {
+      const afterMock = jest.fn((cb: () => unknown) => { void cb() })
+      nextServerMocks.after = afterMock
+
+      const wrapped = withHoneybadger(okHandler)
+      await wrapped(new Request('http://localhost:3000/api/items'))
+      await waitForEvents()
+
+      expect(afterMock).toHaveBeenCalledTimes(1)
+      expect(flushAsyncSpy).toHaveBeenCalled()
+    })
+
+    it('falls back to waitUntil when after() throws', async () => {
+      nextServerMocks.after = jest.fn(() => {
+        throw new Error('after() called outside a request scope')
+      })
+      const waitUntil = jest.fn((_p: Promise<unknown>) => undefined)
+      installRequestContext(waitUntil)
+
+      const wrapped = withHoneybadger(okHandler)
+      const res = await wrapped(new Request('http://localhost:3000/api/items'))
+
+      expect(res.status).toBe(200)
+      await waitForEvents()
+
+      expect(nextServerMocks.after).toHaveBeenCalledTimes(1)
+      expect(waitUntil).toHaveBeenCalledTimes(1)
+      expect(flushAsyncSpy).toHaveBeenCalled()
+    })
+
+    it('falls back to a blocking flush when after() throws and no waitUntil exists', async () => {
+      nextServerMocks.after = jest.fn(() => {
+        throw new Error('after() called outside a request scope')
+      })
+
+      const wrapped = withHoneybadger(okHandler)
+      const res = await wrapped(new Request('http://localhost:3000/api/items'))
+
+      expect(res.status).toBe(200)
+      await waitForEvents()
+
+      expect(flushAsyncSpy).toHaveBeenCalled()
+    })
+
+    it('uses the middleware event waitUntil when after() is unavailable', async () => {
+      const waitUntil = jest.fn((_p: Promise<unknown>) => undefined)
+      // Middleware is called as (request, event); the event owns waitUntil.
+      const event = { waitUntil }
+
+      const wrapped = withHoneybadger(okHandler)
+      await (wrapped as any)(new Request('http://localhost:3000/api/items'), event)
+      await waitForEvents()
+
+      expect(waitUntil).toHaveBeenCalledTimes(1)
+      expect(flushAsyncSpy).toHaveBeenCalled()
+    })
+
+    it('falls back to the platform request-context waitUntil (App Router route handler)', async () => {
+      const waitUntil = jest.fn((_p: Promise<unknown>) => undefined)
+      installRequestContext(waitUntil)
+
+      const wrapped = withHoneybadger(okHandler)
+      // Route handlers get { params } as the second argument — no waitUntil.
+      await (wrapped as any)(new Request('http://localhost:3000/api/items'), { params: {} })
+      await waitForEvents()
+
+      expect(waitUntil).toHaveBeenCalledTimes(1)
+      expect(flushAsyncSpy).toHaveBeenCalled()
     })
 
     it('carries request_id/correlation_id from the request headers', async () => {
@@ -125,6 +224,7 @@ describe('withHoneybadger', () => {
       expect(payload.status).toBe(500)
       expect(payload.path).toBe('/api/fail')
       expect(notifyAsyncSpy).toHaveBeenCalledWith(error)
+      expect(flushAsyncSpy).toHaveBeenCalled()
     })
 
     it('does not emit request.handled when the first argument is not a Request', async () => {
@@ -135,6 +235,7 @@ describe('withHoneybadger', () => {
       await waitForEvents()
 
       expect(requestHandledCalls()).toHaveLength(0)
+      expect(flushAsyncSpy).not.toHaveBeenCalled()
     })
 
     it('does not leak event context between concurrent requests', async () => {
@@ -339,6 +440,33 @@ describe('withHoneybadger', () => {
           correlation_id: 'pg-1',
         })
         expect(typeof payload.duration).toBe('number')
+        expect(flushAsyncSpy).toHaveBeenCalled()
+      })
+
+      it('does not call after() even when it is exported (Pages Router has no request context)', async () => {
+        const afterMock = jest.fn((cb: () => unknown) => { void cb() })
+        nextServerMocks.after = afterMock
+
+        const handler = jest.fn(async (_req: any, _res: any) => undefined)
+        const wrapped = withHoneybadger(handler)
+        await wrapped(makeReq('/api/items'), makeRes())
+        await waitForEvents()
+
+        expect(afterMock).not.toHaveBeenCalled()
+        expect(flushAsyncSpy).toHaveBeenCalled()
+      })
+
+      it('delivers via the platform request-context waitUntil instead of blocking', async () => {
+        const waitUntil = jest.fn((_p: Promise<unknown>) => undefined)
+        installRequestContext(waitUntil)
+
+        const handler = jest.fn(async (_req: any, _res: any) => undefined)
+        const wrapped = withHoneybadger(handler)
+        await wrapped(makeReq('/api/items'), makeRes())
+        await waitForEvents()
+
+        expect(waitUntil).toHaveBeenCalledTimes(1)
+        expect(flushAsyncSpy).toHaveBeenCalled()
       })
 
       it('reads ids from Node headers (array values, case-insensitive)', async () => {
