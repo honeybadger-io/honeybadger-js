@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.11.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.10.2...@honeybadger-io/core@6.11.0) (2026-07-28)
+
+
+### Features
+
+* **core:** insights instrumentation ([#1497](https://github.com/honeybadger-io/honeybadger-js/issues/1497)) ([f6627b9](https://github.com/honeybadger-io/honeybadger-js/commit/f6627b96b5e76d63aabfe6b95a7087feb2187393))
+
+
+
+
+
 ## [6.10.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.10.1...@honeybadger-io/core@6.10.2) (2026-07-20)
 
 **Note:** Version bump only for package @honeybadger-io/core
