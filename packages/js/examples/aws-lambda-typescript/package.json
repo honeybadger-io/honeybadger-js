@@ -21,7 +21,7 @@
     "@types/aws-lambda": "^8.10.51",
     "@types/dotenv-safe": "^8.1.0",
     "cross-env": "^7.0.2",
-    "serverless-offline": "^12.0.3",
+    "serverless-offline": "^14.7.4",
     "serverless-plugin-typescript": "^2.1.4",
     "ts-node": "^8.9.1",
     "typescript": "^3.8.3"
