@@ -14,3 +14,5 @@ browserstack.err
 .envrc
 
 .rollup.cache
+
+.vscode/settings.json

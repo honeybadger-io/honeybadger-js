@@ -16,14 +16,9 @@ Delete any agent-generated spec, plan, or implementation-notes markdown files fr
 
 Move the essential spec content into the PR description instead — reviewers should not need to hunt for planning files in the diff.
 
-## 2. Request an AI review
+## 2. AI review
 
-Before submitting, get a code review of the branch diff:
-
-1. **Codex CLI** (preferred): run `codex` to review the changes. If `codex` is not installed, skip to step 2.
-2. **Claude** (fallback): perform a thorough code review using Claude.
-
-Address any findings before opening the PR.
+Commits on the PR branch must already have gone through the [`review-before-commit`](../review-before-commit/SKILL.md) skill. If any uncommitted changes remain, follow that skill before committing.
 
 ## 3. PR title
 
