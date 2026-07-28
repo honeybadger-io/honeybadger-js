@@ -1,4 +1,4 @@
-import { Honeybadger } from '@honeybadger-io/react'
+import Honeybadger from '@honeybadger-io/js'
 
 Honeybadger.configure({
   apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,

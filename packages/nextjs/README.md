@@ -43,6 +43,14 @@ The following limitations are known to exist and will be tackled in future relea
   since Next.js will send a [generic error message](https://nextjs.org/docs/app/building-your-application/routing/error-handling#handling-server-errors) to this component for better security.
 - [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1056): Source maps for the [Edge runtime](https://vercel.com/docs/concepts/functions/edge-functions/edge-runtime) are not supported yet.
 
+## API routes and edge runtime
+
+API routes (`pages/api/*`, `app/api/*`) and edge middleware are not reached by the
+webpack config-file auto-injection. Pass an explicit config as the second argument
+to `withHoneybadger` there — see the
+[Next.js integration guide](https://docs.honeybadger.io/lib/javascript/integration/nextjs)
+for details.
+
 ## Example app
 
 A separate repository, [nextjs-with-honeybadger](https://github.com/honeybadger-io/nextjs-with-honeybadger) exists with an example app using this package.

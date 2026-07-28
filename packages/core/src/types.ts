@@ -8,7 +8,7 @@ export interface Logger {
   error(...args: unknown[]): unknown
 }
 
-export interface EventsLogger {
+export interface EventsWorker {
   configure: (opts: Partial<Config>) => void
   log(data: EventPayload): void
   flushAsync(): Promise<void>
@@ -18,6 +18,18 @@ export type EventPayload = {
   event_type: string;
   ts: string; // ISO Date string
 } & Record<string, unknown>
+
+export interface InsightsConfig {
+  enabled?: boolean
+  console?: boolean
+  http?: boolean
+}
+
+export interface EventsConfig {
+  dispatchIntervalSeconds?: number
+  bulkThreshold?: number
+  sampleRatePercentage?: number
+}
 
 export interface Config {
   apiKey?: string,
@@ -33,7 +45,10 @@ export interface Config {
   debug: boolean
   reportData: boolean
   breadcrumbsEnabled: boolean | { dom?: boolean, network?: boolean, navigation?: boolean, console?: boolean}
+  /** @deprecated Use `insights.enabled` and `insights.console` instead. Setting `eventsEnabled: true` auto-enables both. */
   eventsEnabled: boolean
+  insights: InsightsConfig
+  events: EventsConfig
   maxBreadcrumbs: number
   maxObjectDepth: number
   logger: Logger
@@ -52,6 +67,10 @@ export interface ServerlessConfig extends Config {
 
 export interface BeforeNotifyHandler {
   (notice?: Notice): boolean | void | Promise<boolean | void>
+}
+
+export interface BeforeEventHandler {
+  (event: EventPayload): boolean | void | Promise<boolean | void>
 }
 
 export interface AfterNotifyHandler {
@@ -197,6 +216,10 @@ export interface HoneybadgerStore {
 
   setContext(context: Record<string, unknown>): void
 
+  setEventContext(eventContext: Record<string, unknown>): void
+
+  clearEventContext(): void
+
   addBreadcrumb(breadcrumb: BreadcrumbRecord): void
 
   clear(): void
@@ -206,6 +229,7 @@ export interface HoneybadgerStore {
 
 export type StoreContents = {
   context: Record<string, unknown>,
+  eventContext: Record<string, unknown>,
   breadcrumbs: BreadcrumbRecord[]
 }
 

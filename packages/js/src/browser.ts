@@ -240,7 +240,7 @@ const singleton = new Honeybadger({
     timers(),
     eventListeners(),
     breadcrumbs(),
-    CorePlugins.events(),
+    CorePlugins.consoleEvents(),
   ]
 })
 

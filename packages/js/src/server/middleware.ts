@@ -1,6 +1,12 @@
 import url from 'url'
 import { NextFunction, Request, Response } from 'express'
-import { Types } from '@honeybadger-io/core'
+import { Client, Types, Util } from '@honeybadger-io/core'
+import {
+  buildRequestEventPayload,
+  durationMs,
+  seedRequestEventContext,
+  startTimer,
+} from './instrumentation/http_event'
 
 function fullUrl(req: Request): string {
   const connection = req.connection
@@ -18,8 +24,46 @@ function fullUrl(req: Request): string {
   })
 }
 
+function instrumentInboundRequest(client: Client, req: Request, res: Response): void {
+  // Completion is observed via response events, which requires a Node
+  // ServerResponse. A non-EventEmitter response (e.g. a FastifyReply when this
+  // middleware is mistakenly registered as a fastify preHandler) would break
+  // every request — degrade to "no request event" instead. Fastify users
+  // should register fastifyPlugin() from server/fastify.
+  if (typeof res.once !== 'function') {
+    client.logger.debug(
+      'skipping insights instrumentation for http requests: response object is not an EventEmitter and does not have a .once() hook'
+    )
+    return
+  }
+
+  const start = startTimer()
+  let emitted = false
+  const emit = () => {
+    if (emitted) return
+    emitted = true
+    client.event('request.handled', buildRequestEventPayload({
+      method: req.method,
+      path: req.path,
+      route: req.route?.path,
+      status: res.statusCode,
+      duration: durationMs(start),
+    }))
+  }
+  res.once('finish', emit)
+  res.once('close', emit)
+}
+
 export function requestHandler(req: Request, res: Response, next: NextFunction): void {
-  this.withRequest(req, next, next)
+  this.withRequest(req, () => {
+    this.setEventContext(seedRequestEventContext(req.headers as Record<string, string | string[] | undefined>))
+
+    if (Util.resolveInsights(this.config).http) {
+      instrumentInboundRequest(this, req, res)
+    }
+
+    next()
+  }, next)
 }
 
 export function errorHandler(err: Types.Noticeable, req: Request, _res: Response, next: NextFunction): unknown {

@@ -8,13 +8,9 @@ export default function (): Types.Plugin {
   return {
     load: (client: typeof Client) => {
       shutdownMonitor.setClient(client)
-      // at the moment, the shutdown monitor only sends events from the queue
-      // if we implement a queue for throttling errors, we won't have to check for `config.eventsEnabled`
-      if (client.config.eventsEnabled) {
-        shutdownMonitor.maybeAddListener()
-      } else {
-        shutdownMonitor.maybeRemoveListener()
-      }
+      // programmatic events can be queued at any time, so the flush listener
+      // is always registered
+      shutdownMonitor.maybeAddListener()
     },
     shouldReloadOnConfigure: true,
   }

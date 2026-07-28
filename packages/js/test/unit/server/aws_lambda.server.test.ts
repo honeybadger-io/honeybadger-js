@@ -599,4 +599,295 @@ describe('Lambda Handler', function () {
       })
     })
   })
+
+  describe('inbound HTTP events', function () {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const readEventContext = (): Record<string, unknown> => (client as any).__store.getContents('eventContext')
+
+    // Silently swallow the events worker's POSTs so unmatched-host nock
+    // interceptors from earlier tests don't surface as console noise. Registered
+    // once for the whole describe and torn down in afterAll so persistent
+    // interceptors don't accumulate.
+    beforeAll(function () {
+      nock('https://api.honeybadger.io').persist().post('/v1/events').reply(201, '')
+    })
+
+    afterAll(function () {
+      nock.cleanAll()
+    })
+
+    const apiGatewayV2Event = (headers: Record<string, string> = {}) => ({
+      headers,
+      requestContext: { http: { method: 'GET', path: '/users' } },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+
+    const apiGatewayV1Event = (headers: Record<string, string> = {}) => ({
+      headers,
+      httpMethod: 'POST',
+      path: '/items',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+
+    // SQS-like trigger has no method/path/headers.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sqsEvent = () => ({ Records: [{ messageId: 'm-1', body: 'hello' }] } as any)
+
+    const ctx = (awsRequestId = 'aws-req-1') => mockAwsContext({ awsRequestId })
+
+    describe('with insights: { enabled: true, http: true }', function () {
+      beforeEach(function () {
+        client.configure({
+          apiKey: 'testing',
+          insights: { enabled: true, http: true },
+        })
+      })
+
+      it('emits request.handled for API Gateway v2 with method, path, status, duration', async function () {
+        const evSpy = jest.spyOn(client, 'event')
+        const handler = client.lambdaHandler(async () => ({ statusCode: 201, body: 'ok' })) as AsyncHandler
+
+        await handler(apiGatewayV2Event(), ctx())
+
+        const call = evSpy.mock.calls.find(c => c[0] === 'request.handled')
+        expect(call).toBeDefined()
+        const payload = call[1] as Record<string, unknown>
+        expect(payload).toMatchObject({ method: 'GET', path: '/users', status: 201 })
+        expect(typeof payload.duration).toBe('number')
+        expect(payload.duration).toBeGreaterThanOrEqual(0)
+      })
+
+      it('emits request.handled for API Gateway v1 with httpMethod and path', async function () {
+        const evSpy = jest.spyOn(client, 'event')
+        const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
+
+        await handler(apiGatewayV1Event(), ctx())
+
+        const call = evSpy.mock.calls.find(c => c[0] === 'request.handled')
+        expect(call).toBeDefined()
+        const payload = call[1] as Record<string, unknown>
+        expect(payload).toMatchObject({ method: 'POST', path: '/items', status: 200 })
+      })
+
+      it('defaults status to 200 when the handler result omits statusCode', async function () {
+        const evSpy = jest.spyOn(client, 'event')
+        const handler = client.lambdaHandler(async () => ({ body: 'no status' })) as AsyncHandler
+
+        await handler(apiGatewayV2Event(), ctx())
+
+        const call = evSpy.mock.calls.find(c => c[0] === 'request.handled')
+        expect((call[1] as Record<string, unknown>).status).toBe(200)
+      })
+
+      it('emits request.handled with status 500 when an async handler rejects', async function () {
+        client.configure({ apiKey: null }) // skip the actual notify network call
+        const evSpy = jest.spyOn(client, 'event')
+        // @ts-expect-error handler that always throws is inferred as Promise<never>
+        const handler = client.lambdaHandler(async () => {
+          throw new Error('boom')
+        }) as AsyncHandler
+
+        await expect(handler(apiGatewayV2Event(), ctx())).rejects.toEqual(new Error('boom'))
+
+        const call = evSpy.mock.calls.find(c => c[0] === 'request.handled')
+        expect(call).toBeDefined()
+        expect((call[1] as Record<string, unknown>).status).toBe(500)
+      })
+
+      it('emits request.handled with status 500 when a sync handler errors via callback', function () {
+        client.configure({ apiKey: null })
+        const evSpy = jest.spyOn(client, 'event')
+        const handler = client.lambdaHandler(function (_event, _context, callback) {
+          callback(new Error('sync-boom'))
+        }) as SyncHandler
+
+        return new Promise<void>((done) => {
+          handler(apiGatewayV1Event(), ctx(), () => {
+            const call = evSpy.mock.calls.find(c => c[0] === 'request.handled')
+            expect(call).toBeDefined()
+            expect((call[1] as Record<string, unknown>).status).toBe(500)
+            done()
+          })
+        })
+      })
+
+      it('uses x-request-id header for request_id and falls back to it for correlation_id', async function () {
+        let captured: Record<string, unknown>
+        const handler = client.lambdaHandler(async () => {
+          captured = readEventContext()
+          return { statusCode: 200 }
+        }) as AsyncHandler
+
+        await handler(apiGatewayV2Event({ 'x-request-id': 'hdr-1' }), ctx())
+
+        expect(captured.request_id).toBe('hdr-1')
+        expect(captured.correlation_id).toBe('hdr-1')
+      })
+
+      it('uses x-correlation-id when distinct from x-request-id', async function () {
+        let captured: Record<string, unknown>
+        const handler = client.lambdaHandler(async () => {
+          captured = readEventContext()
+          return { statusCode: 200 }
+        }) as AsyncHandler
+
+        await handler(apiGatewayV2Event({
+          'x-request-id': 'req-1',
+          'x-correlation-id': 'trace-9',
+        }), ctx())
+
+        expect(captured.request_id).toBe('req-1')
+        expect(captured.correlation_id).toBe('trace-9')
+      })
+
+      it('emits once even if both success and finalize paths could fire', async function () {
+        const evSpy = jest.spyOn(client, 'event')
+        const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
+
+        await handler(apiGatewayV2Event(), ctx())
+
+        const calls = evSpy.mock.calls.filter(c => c[0] === 'request.handled')
+        expect(calls).toHaveLength(1)
+      })
+
+      it('awaits flushAsync before an async handler resolves so events ship before the runtime freezes', async function () {
+        let releaseFlush: () => void = () => undefined
+        const flushSpy = jest.spyOn(client, 'flushAsync').mockImplementation(
+          () => new Promise<void>((resolve) => { releaseFlush = resolve })
+        )
+        const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
+
+        let resolved = false
+        const pending = handler(apiGatewayV2Event(), ctx()).then(() => { resolved = true })
+
+        // Let the handler run and emit; the flush is now pending and must gate resolution.
+        await new Promise((r) => setImmediate(r))
+        expect(flushSpy).toHaveBeenCalledTimes(1)
+        expect(resolved).toBe(false)
+
+        releaseFlush()
+        await pending
+        expect(resolved).toBe(true)
+      })
+
+      it('awaits flushAsync before a sync handler invokes its callback', function () {
+        let releaseFlush: () => void = () => undefined
+        const flushSpy = jest.spyOn(client, 'flushAsync').mockImplementation(
+          () => new Promise<void>((resolve) => { releaseFlush = resolve })
+        )
+        const handler = client.lambdaHandler(function (_event, _context, callback) {
+          callback(null, { statusCode: 200 })
+        }) as SyncHandler
+
+        return new Promise<void>((done) => {
+          let called = false
+          handler(apiGatewayV1Event(), ctx(), () => {
+            called = true
+            done()
+          })
+          setImmediate(() => {
+            expect(flushSpy).toHaveBeenCalledTimes(1)
+            expect(called).toBe(false)
+            releaseFlush()
+          })
+        })
+      })
+    })
+
+    describe('non-HTTP triggers', function () {
+      beforeEach(function () {
+        client.configure({
+          apiKey: 'testing',
+          insights: { enabled: true, http: true },
+        })
+      })
+
+      it('does not emit request.handled but seeds eventContext from awsRequestId', async function () {
+        const evSpy = jest.spyOn(client, 'event')
+        let captured: Record<string, unknown>
+        const handler = client.lambdaHandler(async () => {
+          captured = readEventContext()
+          return { ok: true }
+        }) as AsyncHandler
+
+        await handler(sqsEvent(), ctx('lambda-invocation-42'))
+
+        expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+        expect(captured.request_id).toBe('lambda-invocation-42')
+        expect(captured.correlation_id).toBe('lambda-invocation-42')
+      })
+
+      it('uses _X_AMZN_TRACE_ID env var as correlation_id when present', async function () {
+        const prev = process.env._X_AMZN_TRACE_ID
+        process.env._X_AMZN_TRACE_ID = 'Root=1-trace-xyz'
+        try {
+          let captured: Record<string, unknown>
+          const handler = client.lambdaHandler(async () => {
+            captured = readEventContext()
+            return { ok: true }
+          }) as AsyncHandler
+
+          await handler(sqsEvent(), ctx('aws-id-7'))
+
+          expect(captured.request_id).toBe('aws-id-7')
+          expect(captured.correlation_id).toBe('Root=1-trace-xyz')
+        } finally {
+          if (prev === undefined) delete process.env._X_AMZN_TRACE_ID
+          else process.env._X_AMZN_TRACE_ID = prev
+        }
+      })
+    })
+
+    describe('gating', function () {
+      it('with insights.http: false, does not emit but still seeds eventContext from headers', async function () {
+        client.configure({
+          apiKey: 'testing',
+          insights: { enabled: true, http: false },
+        })
+
+        const evSpy = jest.spyOn(client, 'event')
+        let captured: Record<string, unknown>
+        const handler = client.lambdaHandler(async () => {
+          captured = readEventContext()
+          return { statusCode: 200 }
+        }) as AsyncHandler
+
+        await handler(apiGatewayV2Event({ 'x-request-id': 'rid-1' }), ctx())
+
+        expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+        expect(captured.request_id).toBe('rid-1')
+        expect(captured.correlation_id).toBe('rid-1')
+      })
+
+      it('with insights.enabled: false, does not emit even if http: true', async function () {
+        client.configure({
+          apiKey: 'testing',
+          insights: { enabled: false, http: true },
+        })
+
+        const evSpy = jest.spyOn(client, 'event')
+        const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
+
+        await handler(apiGatewayV2Event(), ctx())
+
+        expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+      })
+
+      it('with deprecated eventsEnabled: true alone, does not emit request.handled (shim enables console, not http)', async function () {
+        client.configure({
+          apiKey: 'testing',
+          eventsEnabled: true,
+        })
+
+        const evSpy = jest.spyOn(client, 'event')
+        const handler = client.lambdaHandler(async () => ({ statusCode: 200 })) as AsyncHandler
+
+        await handler(apiGatewayV2Event(), ctx())
+
+        expect(evSpy.mock.calls.find(c => c[0] === 'request.handled')).toBeUndefined()
+        expect(client.config.insights.enabled).toBe(true)
+        expect(client.config.insights.console).toBe(true)
+      })
+    })
+  })
 })

@@ -27,6 +27,14 @@ export class GlobalStore implements HoneybadgerStore {
     this.contents.context = merge(this.contents.context, context || {});
   }
 
+  setEventContext(eventContext) {
+    this.contents.eventContext = merge(this.contents.eventContext, eventContext || {});
+  }
+
+  clearEventContext() {
+    this.contents.eventContext = {}
+  }
+
   addBreadcrumb(breadcrumb) {
     if (this.contents.breadcrumbs.length == this.breadcrumbsLimit) {
       this.contents.breadcrumbs.shift()
@@ -36,6 +44,7 @@ export class GlobalStore implements HoneybadgerStore {
 
   clear() {
     this.contents.context = {}
+    this.contents.eventContext = {}
     this.contents.breadcrumbs = []
   }
 

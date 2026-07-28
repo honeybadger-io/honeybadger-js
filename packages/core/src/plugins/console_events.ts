@@ -1,6 +1,6 @@
 /* eslint-disable prefer-rest-params */
 import { Client } from '../client'
-import { globalThisOrWindow, instrumentConsole } from '../util';
+import { globalThisOrWindow, instrumentConsole, resolveInsights } from '../util';
 import { Plugin } from '../types'
 
 export default function (_window = globalThisOrWindow()): Plugin {
@@ -8,7 +8,7 @@ export default function (_window = globalThisOrWindow()): Plugin {
     shouldReloadOnConfigure: false,
     load: (client: Client) => {
       function sendEventsToInsights() {
-        return client.config.eventsEnabled
+        return resolveInsights(client.config).console
       }
 
       if (!sendEventsToInsights()) {

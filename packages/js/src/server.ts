@@ -17,7 +17,7 @@ const DEFAULT_PLUGINS = [
   uncaughtException(),
   unhandledRejection(),
   shutdown(),
-  CorePlugins.events(),
+  CorePlugins.consoleEvents(),
 ]
 
 type HoneybadgerServerConfig = (Types.Config | Types.ServerlessConfig) & CheckInsConfig
