@@ -74,7 +74,7 @@ function requireFastifyPlugin(): FastifyPluginWrapper {
  * `request.handled` event per request with method, path, route, status and
  * duration.
  *
- * Supports Fastify 3+.
+ * Supports Fastify 4+.
  */
 export function fastifyPlugin(client: ServerClient): FastifyPluginCallback {
   const fp = requireFastifyPlugin()

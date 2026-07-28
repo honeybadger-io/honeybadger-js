@@ -4,7 +4,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "fastify": "^3.29.4",
-    "fastify-plugin": "^3.0.1"
+    "fastify": "^4.23.2",
+    "fastify-plugin": "^4.5.1"
   }
 }
