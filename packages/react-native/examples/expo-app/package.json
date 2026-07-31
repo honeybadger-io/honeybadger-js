@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@honeybadger-io/react-native": "latest",
-    "expo": "~49.0.2",
+    "expo": "~57.0.9",
     "expo-status-bar": "~1.6.0",
     "react": "18.2.0",
-    "react-native": "^0.72.0",
-    "expo-splash-screen": "~0.20.4",
+    "react-native": "^0.86.2",
+    "expo-splash-screen": "~57.0.5",
     "@types/react": "~18.2.14"
   },
   "devDependencies": {
