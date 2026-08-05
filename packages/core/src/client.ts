@@ -222,7 +222,14 @@ export abstract class Client {
             return false
           }
           return this.__send(notice, sourceCodeData)
-        }).catch((_err) => { /* error is already caught and logged */ })
+        }).catch((err) => {
+          // __send installs its own catch, which logs and runs the afterNotify
+          // handlers. Anything arriving here failed before that chain existed,
+          // so it is still unreported -- and notify() has already returned
+          // true, leaving notifyAsync() waiting on those handlers.
+          this.__logReportingFailure(err)
+          runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err instanceof Error ? err : new Error(String(err)))
+        })
 
         return true
       }
@@ -233,13 +240,18 @@ export abstract class Client {
     } catch (err) {
       // Reporting an error must never break the host application, so a failure
       // in the reporting path is logged rather than thrown back at the caller.
-      // The logger is host-supplied, so even it gets a guard.
-      try {
-        this.logger.error('Error report failed: an internal error occurred while reporting', err)
-      } catch (_loggerErr) { /* nothing left to report it with */ }
+      // notifyAsync() settles on the false return below.
+      this.__logReportingFailure(err)
 
       return false
     }
+  }
+
+  /** The logger is host-supplied, so even reporting a failure gets a guard. */
+  private __logReportingFailure(err: unknown): void {
+    try {
+      this.logger.error('Error report failed: an internal error occurred while reporting', err)
+    } catch (_loggerErr) { /* nothing left to report it with */ }
   }
 
   /**

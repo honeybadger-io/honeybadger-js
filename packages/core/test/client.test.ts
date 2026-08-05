@@ -616,6 +616,25 @@ describe('client', function () {
       expect(called).toBeTruthy()
     })
 
+    it('rejects rather than hanging when reporting fails behind an async beforeNotify handler', async () => {
+      // An async beforeNotify handler routes notify() through its Promise
+      // branch, where a synchronous failure in __send lands in a catch of its
+      // own rather than the one __send installs.
+      client.beforeNotify(() => Promise.resolve(true))
+      const store = client['__store']
+      const original = store.getContents.bind(store)
+      jest.spyOn(store, 'getContents').mockImplementation((key?) => {
+        // Only the read __send performs; makeNotice reads 'context' earlier,
+        // which would fail before the Promise branch is ever reached.
+        if (key === 'breadcrumbs') {
+          throw new TypeError('Converting circular structure to JSON')
+        }
+        return original(key)
+      })
+
+      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow()
+    })
+
     it('settles rather than hanging when an afterNotify handler throws', async () => {
       await expect(client.notifyAsync('test', {
         afterNotify: () => { throw new Error('handler is broken') }
