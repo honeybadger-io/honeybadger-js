@@ -155,6 +155,27 @@ describe('client', function () {
       expect(client.__getContext()).toEqual({})
     })
 
+    it('keeps dates readable', function () {
+      client.setContext({ signedUpAt: new Date('2026-01-02T03:04:05Z') })
+
+      expect(client.__getContext().signedUpAt).toEqual('2026-01-02T03:04:05.000Z')
+    })
+
+    it('keeps a shared reference on both keys', function () {
+      const account = { id: 42 }
+      client.setContext({ primary: account, billing: account })
+
+      expect(client.__getContext()).toEqual({ primary: { id: 42 }, billing: { id: 42 } })
+    })
+
+    it('reads back context holding a circular reference', function () {
+      const node = { tag: 'button' } as Record<string, unknown>
+      node.self = node
+      client.setContext({ node })
+
+      expect(client.__getContext().node).toEqual({ tag: 'button', self: '[RECURSION]' })
+    })
+
     it('keeps previous context when called with non-object', function () {
       client.setContext({
         foo: 'bar'
@@ -232,6 +253,48 @@ describe('client', function () {
 
     it('doesn\'t send the notice when not configured', function () {
       expect(client.notify(new Error('test'))).toEqual(false)
+    })
+
+    it('does not throw into the caller when a breadcrumb holds a circular reference', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      const event = { type: 'click' } as Record<string, unknown>
+      event.nativeEvent = event
+      client.addBreadcrumb('UI Click', { category: 'ui.click', metadata: { event } })
+
+      // `true` pins that the report went out on the happy path -- a `false`
+      // here would mean notify()'s catch swallowed a still-broken store.
+      expect(client.notify(new Error('network error'))).toEqual(true)
+    })
+
+    it('does not throw into the caller when the logger itself throws', function () {
+      client.configure({
+        apiKey: 'testing',
+        logger: {
+          ...nullLogger(),
+          error: () => { throw new Error('logger is broken') }
+        }
+      })
+
+      jest.spyOn(client['__store'], 'getContents').mockImplementation(() => {
+        throw new TypeError('Converting circular structure to JSON')
+      })
+
+      expect(() => client.notify(new Error('network error'))).not.toThrow()
+    })
+
+    it('does not throw into the caller when the store cannot be serialized', function () {
+      client.configure({
+        apiKey: 'testing'
+      })
+
+      jest.spyOn(client['__store'], 'getContents').mockImplementation(() => {
+        throw new TypeError('Converting circular structure to JSON')
+      })
+
+      expect(client.notify(new Error('network error'))).toEqual(false)
     })
 
     it('doesn\'t send the notice when in a development environment', function () {
@@ -551,6 +614,20 @@ describe('client', function () {
         called = true
       })
       expect(called).toBeTruthy()
+    })
+
+    it('settles rather than hanging when an afterNotify handler throws', async () => {
+      await expect(client.notifyAsync('test', {
+        afterNotify: () => { throw new Error('handler is broken') }
+      })).resolves.toBeUndefined()
+    })
+
+    it('rejects rather than hanging when a beforeNotify handler throws', async () => {
+      client.beforeNotify(() => {
+        throw new Error('handler is broken')
+      })
+
+      await expect(client.notifyAsync(new Error('test'))).rejects.toThrow()
     })
 
     it('calls afterNotify from client.afterNotify', async () => {
@@ -1078,6 +1155,21 @@ describe('client', function () {
 
       expect(payload.breadcrumbs.enabled).toEqual(false)
       expect(payload.breadcrumbs.trail).toEqual([])
+    })
+
+    it('reads back breadcrumbs whose metadata contains a circular reference', function () {
+      // Frameworks (e.g. preact/compat) attach a `nativeEvent` own property to
+      // the native event that points back at the event itself.
+      const event = { type: 'click' } as Record<string, unknown>
+      event.nativeEvent = event
+
+      client.addBreadcrumb('UI Click', { category: 'ui.click', metadata: { event } })
+
+      expect(() => client.__getBreadcrumbs()).not.toThrow()
+      expect(client.__getBreadcrumbs()[0].metadata.event).toEqual({
+        type: 'click',
+        nativeEvent: '[RECURSION]'
+      })
     })
   })
 
