@@ -77,7 +77,11 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
             metadata: {
               selector,
               text,
-              event
+              // Frameworks decorate the native event with their own properties
+              // (preact/compat adds a `nativeEvent` back-reference), so the raw
+              // event may be circular. Sanitize it here rather than storing a
+              // value we cannot serialize later.
+              event: sanitize(event, 3)
             }
           })
         }, _window.location ? true : false) // In CloudFlare workers useCapture must be false. window.location is a hacky way to detect it.

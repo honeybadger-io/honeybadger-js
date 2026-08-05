@@ -60,4 +60,69 @@ describe('breadcrumbs click integration', function () {
     const metadata = mockAddBreadcrumb.mock.calls[0][1].metadata
     expect(metadata.selector).toEqual('deal-card > button')
   })
+
+  it('records a JSON-serializable event when the event is circular', function () {
+    // preact/compat attaches a `nativeEvent` own property to the native event
+    // that points back at the event itself.
+    breadcrumbs(fakeWindow).load(client)
+
+    const button = document.createElement('button')
+    button.setAttribute('data-hb-name', 'send')
+    const event = { target: button, isTrusted: true, type: 'click' } as Record<string, unknown>
+    event.nativeEvent = event
+
+    handlers['click'](event)
+
+    const metadata = mockAddBreadcrumb.mock.calls[0][1].metadata
+    expect(() => JSON.stringify(metadata)).not.toThrow()
+    expect(metadata.event.nativeEvent).toEqual('[RECURSION]')
+  })
+
+})
+
+describe('breadcrumbs click integration, end to end', function () {
+  // The click breadcrumb goes through the real client and store here, which is
+  // where "Converting circular structure to JSON" used to escape notify().
+  let client, handlers, fakeWindow
+
+  beforeEach(function () {
+    client = new TestClient(
+      { logger: nullLogger(), apiKey: 'testing', breadcrumbsEnabled: { dom: true } },
+      new TestTransport()
+    )
+    handlers = {}
+    fakeWindow = {
+      addEventListener: (type, handler) => { handlers[type] = handler },
+      location: { href: 'https://example.com' },
+      history: {}
+    }
+    breadcrumbs(fakeWindow).load(client)
+  })
+
+  function clickCircularEvent() {
+    const button = document.createElement('button')
+    button.setAttribute('data-hb-name', 'send-message')
+    const event = { target: button, isTrusted: true, type: 'click' } as Record<string, unknown>
+    event.nativeEvent = event
+
+    handlers['click'](event)
+  }
+
+  it('reports the error instead of throwing out of notify', function () {
+    clickCircularEvent()
+
+    // `true` pins that the report went out on the happy path -- a `false` here
+    // would mean notify()'s catch swallowed a still-broken store.
+    expect(client.notify(new Error('network error'))).toEqual(true)
+  })
+
+  it('sends the click breadcrumb with the circular reference replaced', function () {
+    clickCircularEvent()
+
+    const trail = client.getPayload(new Error('network error')).breadcrumbs.trail
+    const click = trail.find(crumb => crumb.category === 'ui.click')
+
+    expect(click.metadata.selector).toEqual('send-message')
+    expect(click.metadata.event.nativeEvent).toEqual('[RECURSION]')
+  })
 })

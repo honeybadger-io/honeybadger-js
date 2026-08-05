@@ -32,6 +32,23 @@ describe('AsyncStore', function () {
     })
   })
 
+  describe('getContents', function () {
+    it('reads back context holding a circular reference', function () {
+      const node = { tag: 'button' } as Record<string, unknown>
+      node.self = node
+      client.setContext({ node })
+
+      expect(() => client.__getContext()).not.toThrow()
+      expect(client.__getContext().node).toEqual({ tag: 'button', self: '[RECURSION]' })
+    })
+
+    it('keeps dates readable', function () {
+      client.setContext({ signedUpAt: new Date('2026-01-02T03:04:05Z') })
+
+      expect(client.__getContext().signedUpAt).toEqual('2026-01-02T03:04:05.000Z')
+    })
+  })
+
   describe('async handlers', function () {
     /**
          * In this section, we are trying to simulate
