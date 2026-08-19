@@ -10,6 +10,7 @@ import {
   shouldSampleEvent,
   runAfterNotifyHandlers,
   shallowClone,
+  clone,
   sanitize,
   logger,
   filter,
@@ -368,6 +369,55 @@ describe('utils', function () {
       const obj = { expected: 'value' }
       expect(shallowClone(obj)).toEqual(obj)
       expect(shallowClone(obj)).not.toBe(obj)
+    })
+  })
+
+  describe('clone', function () {
+    it('deep copies the value', function () {
+      const original = { nested: { key: 'value' } }
+      const copy = clone(original)
+
+      expect(copy).toEqual(original)
+      expect(copy.nested).not.toBe(original.nested)
+    })
+
+    it('converts dates to ISO strings, like JSON.stringify', function () {
+      expect(clone({ when: new Date('2026-01-02T03:04:05Z') }))
+        .toEqual({ when: '2026-01-02T03:04:05.000Z' })
+    })
+
+    it('duplicates a shared reference instead of treating it as recursion', function () {
+      const shared = { id: 42 }
+
+      expect(clone({ a: shared, b: shared })).toEqual({ a: { id: 42 }, b: { id: 42 } })
+    })
+
+    it('does not truncate deeply nested values', function () {
+      const deep = { l1: { l2: { l3: { l4: { l5: { l6: { l7: { l8: { l9: 'bottom' } } } } } } } } }
+
+      expect(clone(deep)).toEqual(deep)
+    })
+
+    it('replaces a circular reference rather than throwing', function () {
+      const event = { type: 'click' } as Record<string, unknown>
+      event.nativeEvent = event
+
+      expect(clone(event)).toEqual({ type: 'click', nativeEvent: '[RECURSION]' })
+    })
+
+    it('replaces a circular reference nested in an array', function () {
+      const parent = { children: [] } as Record<string, unknown>;
+      (parent.children as unknown[]).push(parent)
+
+      expect(clone(parent)).toEqual({ children: ['[RECURSION]'] })
+    })
+
+    it('propagates failures a plain JSON round trip would also throw on', function () {
+      // Only circular references are handled; anything else keeps round trip
+      // behavior so a malformed value cannot masquerade as valid contents.
+      const exploding = { get boom() { throw new Error('getter exploded') } }
+
+      expect(() => clone(exploding)).toThrow('getter exploded')
     })
   })
 

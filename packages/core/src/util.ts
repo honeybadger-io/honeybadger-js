@@ -609,8 +609,36 @@ export function formatCGIData(vars: Record<string, unknown>, prefix = ''): Recor
   return formattedVars
 }
 
+/**
+ * Deep-copies a value exactly the way a JSON round trip does -- `toJSON` is
+ * honored, so dates become ISO strings -- except that circular references are
+ * replaced with '[RECURSION]' instead of throwing.
+ *
+ * Only true cycles are replaced: a value referenced twice in sibling branches
+ * is copied twice, as a JSON round trip would.
+ *
+ * Anything else a round trip rejects (a BigInt, a getter that throws) still
+ * throws here. Callers that must not fail are expected to handle it: silently
+ * substituting a placeholder would let a malformed value -- a string where an
+ * object is expected, say -- travel on as though it were valid.
+ */
 export function clone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj))
+  const ancestors: unknown[] = []
+
+  return JSON.parse(JSON.stringify(obj, function (_key: string, value: unknown) {
+    if (typeof value !== 'object' || value === null) { return value }
+
+    // `this` is the object `value` sits in, so anything stacked above it has
+    // been fully visited and is no longer an ancestor of `value`.
+    while (ancestors.length > 0 && ancestors[ancestors.length - 1] !== this) {
+      ancestors.pop()
+    }
+
+    if (ancestors.indexOf(value) !== -1) { return '[RECURSION]' }
+    ancestors.push(value)
+
+    return value
+  }))
 }
 
 const THRESHOLD_COLUMN_NUMBER = 10000

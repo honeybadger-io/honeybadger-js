@@ -1,5 +1,7 @@
-import { Types } from '@honeybadger-io/core';
+import { Types, Util } from '@honeybadger-io/core';
 import type { AsyncLocalStorage } from 'async_hooks';
+
+const { clone } = Util;
 
 const kHoneybadgerStore = Symbol.for('kHoneybadgerStore');
 
@@ -41,7 +43,10 @@ export class AsyncStore implements Types.HoneybadgerStore {
 
   getContents(key?: keyof Types.StoreContents) {
     const value = key ? this.__currentContents()[key] : this.__currentContents();
-    return JSON.parse(JSON.stringify(value));
+    // Deep copy like a JSON round trip, but tolerate circular references in
+    // host-supplied context and breadcrumb metadata. See GlobalStore.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return clone(value) as any;
   }
 
   available() {

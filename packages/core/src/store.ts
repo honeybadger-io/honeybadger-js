@@ -1,5 +1,5 @@
 import { HoneybadgerStore, StoreContents } from './types';
-import { merge } from './util';
+import { merge, clone } from './util';
 
 export class GlobalStore implements HoneybadgerStore {
   private readonly contents: StoreContents;
@@ -20,7 +20,11 @@ export class GlobalStore implements HoneybadgerStore {
 
   getContents(key?: keyof StoreContents) {
     const value = key ? this.contents[key] : this.contents;
-    return JSON.parse(JSON.stringify(value));
+    // `clone` keeps JSON round trip semantics but tolerates values a bare
+    // round trip throws on -- notably circular references, which arrive via
+    // context or breadcrumb metadata the host application controls.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return clone(value) as any;
   }
 
   setContext(context) {

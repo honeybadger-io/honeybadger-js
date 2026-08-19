@@ -191,35 +191,67 @@ export abstract class Client {
     return this
   }
 
+  /**
+   * Reporting an error must never break the host application, so any failure
+   * inside the reporting path is logged and swallowed rather than thrown back
+   * into the caller.
+   */
   notify(noticeable: Noticeable, name: string | Partial<Notice> = undefined, extra: Partial<Notice> = undefined): boolean {
-    const notice = this.makeNotice(noticeable, name, extra)
+    // The body is inlined in this try/catch rather than delegated to a private
+    // method: generated backtraces are trimmed by a fixed frame count
+    // (DEFAULT_BACKTRACE_SHIFT), so an extra call frame here would shift every
+    // generated backtrace into Honeybadger's own source.
+    try {
+      const notice = this.makeNotice(noticeable, name, extra)
 
-    // we need to have the source file data before the beforeNotifyHandlers,
-    // in case they modify them
-    const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
-    const preConditionsResult = this.__runPreconditions(notice)
-    if (preConditionsResult instanceof Error) {
-      runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, preConditionsResult)
+      // we need to have the source file data before the beforeNotifyHandlers,
+      // in case they modify them
+      const sourceCodeData = notice && notice.backtrace ? notice.backtrace.map(trace => shallowClone(trace) as BacktraceFrame) : null
+      const preConditionsResult = this.__runPreconditions(notice)
+      if (preConditionsResult instanceof Error) {
+        runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, preConditionsResult)
+
+        return false
+      }
+
+      if (preConditionsResult instanceof Promise) {
+        preConditionsResult.then((result) => {
+          if (result instanceof Error) {
+            runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, result)
+
+            return false
+          }
+          return this.__send(notice, sourceCodeData)
+        }).catch((err) => {
+          // __send installs its own catch, which logs and runs the afterNotify
+          // handlers. Anything arriving here failed before that chain existed,
+          // so it is still unreported -- and notify() has already returned
+          // true, leaving notifyAsync() waiting on those handlers.
+          this.__logReportingFailure(err)
+          runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, err instanceof Error ? err : new Error(String(err)))
+        })
+
+        return true
+      }
+
+      this.__send(notice, sourceCodeData).catch((_err) => { /* error is already caught and logged */ })
+
+      return true
+    } catch (err) {
+      // Reporting an error must never break the host application, so a failure
+      // in the reporting path is logged rather than thrown back at the caller.
+      // notifyAsync() settles on the false return below.
+      this.__logReportingFailure(err)
 
       return false
     }
+  }
 
-    if (preConditionsResult instanceof Promise) {
-      preConditionsResult.then((result) => {
-        if (result instanceof Error) {
-          runAfterNotifyHandlers(notice, this.__afterNotifyHandlers, result)
-
-          return false
-        }
-        return this.__send(notice, sourceCodeData)
-      })
-
-      return true
-    }
-
-    this.__send(notice, sourceCodeData).catch((_err) => { /* error is already caught and logged */ })
-
-    return true
+  /** The logger is host-supplied, so even reporting a failure gets a guard. */
+  private __logReportingFailure(err: unknown): void {
+    try {
+      this.logger.error('Error report failed: an internal error occurred while reporting', err)
+    } catch (_loggerErr) { /* nothing left to report it with */ }
   }
 
   /**
@@ -233,11 +265,17 @@ export abstract class Client {
       const applyAfterNotify = (partialNotice: Partial<Notice>) => {
         const originalAfterNotify = partialNotice.afterNotify
         partialNotice.afterNotify = (err?: Error) => {
-          originalAfterNotify?.call(this, err)
-          if (err) {
-            return reject(err)
+          // Settle from a `finally` so a throwing handler cannot leave the
+          // caller awaiting forever; its error propagates as it always has.
+          try {
+            originalAfterNotify?.call(this, err)
+          } finally {
+            if (err) {
+              reject(err)
+            } else {
+              resolve()
+            }
           }
-          resolve()
         }
       }
 
@@ -263,7 +301,14 @@ export abstract class Client {
       }
 
       applyAfterNotify(objectToOverride)
-      this.notify(noticeable, name, extra)
+      // `notify` never throws, so a false return is the only signal that the
+      // report was abandoned. Every expected failure has already settled this
+      // promise through the afterNotify hook above (a second reject is a
+      // no-op); this catches the unexpected ones, which would otherwise leave
+      // the caller awaiting forever.
+      if (!this.notify(noticeable, name, extra)) {
+        reject(new Error('Error report failed: see logs for details'))
+      }
     })
   }
 
