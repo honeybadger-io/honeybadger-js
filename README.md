@@ -102,21 +102,29 @@ Releases are performed via [GitHub Actions](https://github.com/honeybadger-io/ho
 
 ### Release Automation
 
-The repository automatically releases new packages when a PR is merged on master using the [**Publish New Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`).
+The repository automatically releases new packages when a PR is merged on master using the [**Publish Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`).
 
-> [!IMPORTANT]
-> NPM releases are authorized through NPM Trusted Publishing. Only one workflow can be configured as a Trusted Publisher at a time. Keep the scheduled workflow configured by default. If you need to manually trigger a different workflow, temporarily switch NPM Trusted Publishing to that workflow, and revert back to the scheduled workflow afterward.
+The same workflow can also be run manually (*Run workflow*) with a `mode` input, for when a release only partially succeeds:
+
+| Mode | What it does |
+| --- | --- |
+| `full` (default) | Runs CI, then `pnpm run release`: bumps versions, generates changelogs, publishes to NPM, uploads to the CDN and creates the GitHub release. This is what a push to `master` runs. |
+| `npm` | Re-publishes the versions already committed to `master` (`lerna publish from-package`), skipping CI. Use when versioning and the GitHub release succeeded but NPM publishing failed. The `@honeybadger-io/js` `postpublish` script runs as part of it, so the CDN is updated too. |
+| `cdn` | Re-uploads the `packages/js` browser bundle to the CDN only, skipping CI. Use when NPM publishing succeeded but the CDN upload failed. |
+
+> [!NOTE]
+> All three modes live in a single workflow file on purpose. NPM Trusted Publishing binds to a workflow *filename* and is configured per package, so running a fallback from a separate workflow file would mean switching the Trusted Publisher on every package and switching it back afterwards. With one file, the fallback modes need no NPM-side changes.
 
 > [!WARNING]
 > Only users with _write_ permissions can trigger this workflow (i.e. Collaborators).
 
 #### Available Commands
 
-- `pnpm run release` - Calculates the next version, commits and publishes to NPM (and to our CDN). This command is executed from the [Publish New Release](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/lerna-publish.yml) workflow.
+- `pnpm run release` - Calculates the next version, commits and publishes to NPM (and to our CDN). This command is executed from the [Publish Release](https://github.com/honeybadger-io/honeybadger-js/blob/master/.github/workflows/lerna-publish.yml) workflow.
 
 ### Releasing Package For The First Time
 
-If you are publishing a new package on NPM, the [**Publish New Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`)
+If you are publishing a new package on NPM, the [**Publish Release** workflow](https://github.com/honeybadger-io/honeybadger-js/actions/workflows/lerna-publish.yml) (`lerna-publish.yml`)
 will fail with a 404 error message. This is because the workflow assumes Trusted Publishing has been set up for all packages, but since this is a new package, there's no way for Trusted Publishing to have been set up.
 Therefore, a manual release is required:
 - Allow the automated release workflow to fail. NPM publishing will fail, but changelog generation and GitHub release will be successful.

@@ -170,13 +170,16 @@ From the root: `pnpm run build` runs `lerna run build --stream` and respects TS 
   - `integration` — only when `core` filter matches; installs Playwright browsers and runs `packages/js` E2E against BrowserStack. Uploads `playwright-report/` on failure.
   - `lint` — `pnpm run lint` on Node 20.
 - **`commitlint.yml`** — validates the PR title against commitlint and posts an upgrade-guide reminder for breaking-change PRs.
-- **`lerna-publish.yml`** (Publish New Release) — push to `master` or manual dispatch. Calls `node.js.yml` first, then runs `pnpm run release` (`lerna publish --conventional-commits`). Uses a GitHub App token, NPM Trusted Publishing (OIDC, hence `id-token: write`), and AWS/Bunny credentials for the CDN.
-- **`npm-publish.yml`** — manual fallback that runs `lerna publish from-package` against whatever versions are already in `master`. Use when the main release workflow partially fails.
-- **`cdn-publish.yml`** — manual fallback that re-runs `packages/js` `postpublish` (S3/CloudFront upload + Bunny purge).
+- **`lerna-publish.yml`** (Publish Release) — the single publish workflow. Runs on push to `master`, or manual dispatch with a `mode` input. Uses a GitHub App token, NPM Trusted Publishing (OIDC, hence `id-token: write`), and AWS/Bunny credentials for the CDN. Modes:
+  - `full` (default, and what a push to `master` runs) — calls `node.js.yml` first, then `pnpm run release` (`lerna publish --conventional-commits`).
+  - `npm` — skips CI and runs `lerna publish from-package` against whatever versions are already in `master`. Fallback for when the `full` run fails at the NPM publish step.
+  - `cdn` — skips CI and re-runs `packages/js` `postpublish` (S3/CloudFront upload + Bunny purge). Fallback for when only the CDN upload fails.
+
+  The mode branching is per-step (`if: env.MODE == '...'`) since the checkout/pnpm/Node/install prelude is shared. The `publish` job needs `if: ${{ !failure() && !cancelled() }}` so it still runs when the `ci` job is skipped.
 
 All workflows use `pnpm/action-setup` (version from `packageManager`) and `actions/setup-node` with `cache: 'pnpm'`.
 
-NPM Trusted Publishing is configured per-package; only one workflow can be the trusted publisher at a time. Default = `lerna-publish.yml`. If you switch it temporarily for a fallback run, switch it back afterwards (called out in the README too).
+NPM Trusted Publishing is configured **per-package** (12 public packages) and binds to a workflow **filename**. That is exactly why all three publish modes live in `lerna-publish.yml` instead of separate files — a fallback in its own file would require flipping the trusted publisher on every package and flipping it back. **Do not rename or split this file** without updating the Trusted Publisher config for every package on npm first.
 
 ## Releases
 
