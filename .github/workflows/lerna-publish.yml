@@ -1,20 +1,26 @@
-name: Publish New Release
+name: Publish Release
+
+# Single entry point for every publish path. All three modes live in this one file on
+# purpose: NPM Trusted Publishing binds to a workflow *filename* and is configured
+# per-package, so a fallback run from a separate workflow would mean flipping the trusted
+# publisher on every package and flipping it back afterwards.
+#
+#   full (default) - run CI, then version + publish to NPM + CDN + create the GitHub release
+#   npm            - re-publish the versions already committed to master (lerna from-package)
+#   cdn            - re-upload the packages/js browser bundle to the CDN only
 on:
   push:
     branches: [ master ]
   workflow_dispatch:
-  workflow_call:
-    secrets:
-      HONEYBADGER_DISTRIBUTION_ID:
-        required: true
-      HONEYBADGER_JS_S3_BUCKET:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-      AWS_ACCESS_KEY_ID:
-        required: true
-      BUNNY_API_KEY:
-        required: true
+    inputs:
+      mode:
+        description: 'full = version + NPM + CDN + GitHub release | npm = re-publish current versions | cdn = re-upload browser bundle only'
+        type: choice
+        default: full
+        options:
+          - full
+          - npm
+          - cdn
 
 concurrency: ci-release
 
@@ -25,15 +31,26 @@ permissions:
 
 jobs:
   ci:
+    # `inputs` is empty on push, so a push to master takes the full release path
+    if: ${{ (inputs.mode || 'full') == 'full' }}
     uses: ./.github/workflows/node.js.yml
     secrets: inherit
 
   publish:
     runs-on: ubuntu-latest
     needs: [ci]
+    # Status functions are required here, otherwise this job is skipped along with `ci`
+    # when `ci` does not run (npm/cdn modes).
+    if: ${{ !failure() && !cancelled() }}
+    env:
+      MODE: ${{ inputs.mode || 'full' }}
     steps:
+      # Only the `full` mode needs elevated write access (lerna pushes the version
+      # commit + tags and creates the GitHub release). The fallback modes fall back to
+      # the default token so an App-token problem can't also block recovery.
       - uses: actions/create-github-app-token@v2
         id: generate-token
+        if: env.MODE == 'full'
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
@@ -41,7 +58,7 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v5
         with:
-          token: ${{ steps.generate-token.outputs.token }}
+          token: ${{ steps.generate-token.outputs.token || github.token }}
           fetch-depth: 0
           ref: master
 
@@ -54,15 +71,19 @@ jobs:
           node-version: '22.x'
           cache: 'pnpm'
 
+      # The root `prepare` script builds every package, which is what produces
+      # packages/js/dist/browser for the CDN upload.
       - name: Install Deps
         run: pnpm install --frozen-lockfile
 
       - name: Git Config
+        if: env.MODE == 'full'
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
       - name: Publish Release
+        if: env.MODE == 'full'
         run: pnpm run release
         env:
           # for lerna
@@ -74,3 +95,37 @@ jobs:
           HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
           HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
           BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
+
+      - name: Publish to NPM
+        if: env.MODE == 'npm'
+        run: pnpm exec lerna publish from-package --yes --loglevel silly
+        env:
+          # the following are needed for the post-publish script of @honeybadger-io/js which pushes new version to CDN
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-east-1"
+          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
+          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
+          BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
+
+      - name: Publish to CDN
+        if: env.MODE == 'cdn'
+        run: |
+          cd packages/js
+          pnpm run postpublish
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-east-1"
+          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
+          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
+          BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo ":white_check_mark: Publish successful (mode: \`$MODE\`)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo ":warning: Publish failed (mode: \`$MODE\`). Check the logs above." >> "$GITHUB_STEP_SUMMARY"
+          fi
