@@ -44,6 +44,14 @@ jobs:
     if: ${{ !failure() && !cancelled() }}
     env:
       MODE: ${{ inputs.mode || 'full' }}
+      # Consumed by the @honeybadger-io/js `postpublish` hook (scripts/release-cdn.sh),
+      # which runs under every mode that publishes.
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: "us-east-1"
+      HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
+      HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
+      BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
     steps:
       # Only the `full` mode needs elevated write access (lerna pushes the version
       # commit + tags and creates the GitHub release). The fallback modes fall back to
@@ -89,37 +97,16 @@ jobs:
           # for lerna
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: "us-east-1"
-          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
-          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
-          BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
 
       - name: Publish to NPM
         if: env.MODE == 'npm'
         run: pnpm exec lerna publish from-package --yes --loglevel silly
-        env:
-          # the following are needed for the post-publish script of @honeybadger-io/js which pushes new version to CDN
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: "us-east-1"
-          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
-          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
-          BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
 
       - name: Publish to CDN
         if: env.MODE == 'cdn'
         run: |
           cd packages/js
           pnpm run postpublish
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: "us-east-1"
-          HONEYBADGER_JS_S3_BUCKET: ${{ secrets.HONEYBADGER_JS_S3_BUCKET }}
-          HONEYBADGER_DISTRIBUTION_ID: ${{ secrets.HONEYBADGER_DISTRIBUTION_ID }}
-          BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
 
       - name: Summary
         if: always()
