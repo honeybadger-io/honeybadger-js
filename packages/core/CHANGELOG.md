@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.11.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.11.0...@honeybadger-io/core@6.11.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **core:** never throw out of notify() on circular context or breadcrumb data ([#1598](https://github.com/honeybadger-io/honeybadger-js/issues/1598)) ([4b810d4](https://github.com/honeybadger-io/honeybadger-js/commit/4b810d4e26741e30f3a1556ed6d1e5fa2a7bc689))
+
+
+
+
+
 # [6.11.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.10.2...@honeybadger-io/core@6.11.0) (2026-07-28)
 
 
