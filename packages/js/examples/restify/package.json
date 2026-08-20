@@ -1,8 +1,0 @@
-{
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "restify": "^8.6.1"
-  }
-}
