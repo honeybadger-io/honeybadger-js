@@ -5,7 +5,6 @@ provider:
   name: aws
   runtime: nodejs22.x
   environment:
-    NODE_ENV: dev
     HONEYBADGER_API_KEY: ${param:HONEYBADGER_API_KEY, env:HONEYBADGER_API_KEY, ''}
 
 plugins:

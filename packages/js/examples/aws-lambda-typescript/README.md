@@ -22,13 +22,18 @@ build plugin.
    ```bash
    npm install
    ```
-2. Authenticate the Serverless Framework. v4 requires an account to run deploys:
+2. Authenticate the Serverless Framework. v4 requires an account for every command that
+   builds or deploys the service, including `serverless package`:
    ```bash
    npx serverless login
    ```
-   It is free for individuals and small businesses; organizations above $2M annual revenue need a
-   paid subscription. See the [v4 upgrade guide](https://www.serverless.com/framework/docs/guides/upgrading-v4).
-   `npm run typecheck` and `npx serverless package` work without logging in.
+   In non-interactive environments set `SERVERLESS_ACCESS_KEY` instead (or
+   `SERVERLESS_LICENSE_KEY` for a self-hosted license). It is free for individuals and small
+   businesses; organizations above $2M annual revenue need a paid subscription. See the
+   [v4 upgrade guide](https://www.serverless.com/framework/docs/guides/upgrading-v4).
+
+   Packaging and deploying also require valid AWS credentials, since the CLI reads service state
+   from SSM and S3. Only `npm run typecheck` runs without any credentials.
 3. Type-check the handlers:
    ```bash
    npm run typecheck
