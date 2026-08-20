@@ -3,21 +3,12 @@ service: aws-lambda-typescript
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs22.x
   environment:
-    NODE_ENV: dev
-    HONEYBADGER_API_KEY: ${param:HONEYBADGER_API_KEY}
+    HONEYBADGER_API_KEY: ${param:HONEYBADGER_API_KEY, env:HONEYBADGER_API_KEY, ''}
 
 plugins:
-  - serverless-plugin-typescript
   - serverless-offline
-
-package:
-  exclude:
-    - config/.env.stg
-    - config/.env.pro
-  include:
-    - config/.env.dev
 
 functions:
   hello:
