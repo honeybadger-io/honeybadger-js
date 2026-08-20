@@ -4,32 +4,46 @@ version: 2
 # dozens of single-dependency pull requests.
 #
 # Notes for future maintainers:
-#   - Each entry needs TWO groups. A group defaults to `applies-to: version-updates`;
-#     security updates are only grouped when a group explicitly declares
-#     `applies-to: security-updates`.
+#   - A group defaults to `applies-to: version-updates`; security updates are only grouped
+#     when a group explicitly declares `applies-to: security-updates`.
+#   - Version-update groups are restricted to `update-types: [minor, patch]` on purpose.
+#     Grouping majors produces pull requests that cannot be merged as a unit: one broken
+#     major blocks every other update in the group. Majors arrive individually so each can
+#     be reviewed, merged, or closed on its own.
+#   - The root entry groups development dependencies only. Anything in `dependencies` there
+#     ships to users, so those updates each get their own pull request.
 #   - `directories` (plural) supports globbing; `directory` (singular) does not.
-#   - Grouping collapses many single-dependency PRs into a few. Whether one grouped PR
-#     spans every directory a glob matches, or Dependabot opens one per matched directory,
-#     is not clearly documented — watch the first grouped run. Add `group-by: dependency-name`
-#     if you want one PR per dependency across all directories in the entry.
-#   - `open-pull-requests-limit` does not apply to security updates, so grouping is the
-#     only effective cap on security-update noise.
+#   - Observed, not guaranteed by this config: grouped runs on the example entries have
+#     produced one pull request spanning several matched directories, e.g. "bump the
+#     nextjs-examples group across 2 directories with 14 updates". The documented way to
+#     consolidate a single dependency across directories is `group-by: dependency-name`,
+#     which no group here sets, so don't depend on that shape holding.
+#   - `open-pull-requests-limit` applies only to version updates, never to security updates.
+#     Grouping reduces security-update pull request volume but is not a hard cap; Dependabot
+#     applies its own internal limit. The example entries group theirs to keep that noise
+#     down. The root entry deliberately does not: those updates can reach code that ships to
+#     users, and each of the four we triaged needed a separate decision, so they are left
+#     individual even though that means more pull requests.
 #   - There is no interaction between this file and Dependabot security alerts: it cannot
 #     stop security PRs, only shape how they are batched.
 
 updates:
   # Workspace packages — the published code. Single root pnpm-lock.yaml.
+  #
+  # Only development-dependency minor/patch updates are grouped here. Majors, anything in
+  # `dependencies` (it ships to users), and security updates each get their own pull request,
+  # because each is a separate decision that needs its own review and its own revert.
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
     versioning-strategy: increase
+    open-pull-requests-limit: 5
     groups:
-      workspace:
+      workspace-dev-minor-patch:
         applies-to: version-updates
-        patterns: ["*"]
-      workspace-security:
-        applies-to: security-updates
+        dependency-type: development
+        update-types: ["minor", "patch"]
         patterns: ["*"]
 
   # Example apps. Not part of the pnpm workspace, not built or tested by CI — they are
@@ -41,6 +55,7 @@ updates:
     groups:
       js-examples:
         applies-to: version-updates
+        update-types: ["minor", "patch"]
         patterns: ["*"]
       js-examples-security:
         applies-to: security-updates
@@ -53,6 +68,7 @@ updates:
     groups:
       nextjs-examples:
         applies-to: version-updates
+        update-types: ["minor", "patch"]
         patterns: ["*"]
       nextjs-examples-security:
         applies-to: security-updates
@@ -65,6 +81,7 @@ updates:
     groups:
       react-examples:
         applies-to: version-updates
+        update-types: ["minor", "patch"]
         patterns: ["*"]
       react-examples-security:
         applies-to: security-updates
@@ -77,6 +94,7 @@ updates:
     groups:
       react-native-examples:
         applies-to: version-updates
+        update-types: ["minor", "patch"]
         patterns: ["*"]
       react-native-examples-security:
         applies-to: security-updates
@@ -89,6 +107,7 @@ updates:
     groups:
       vue-examples:
         applies-to: version-updates
+        update-types: ["minor", "patch"]
         patterns: ["*"]
       vue-examples-security:
         applies-to: security-updates
@@ -101,6 +120,7 @@ updates:
     groups:
       esbuild-plugin-examples:
         applies-to: version-updates
+        update-types: ["minor", "patch"]
         patterns: ["*"]
       esbuild-plugin-examples-security:
         applies-to: security-updates
@@ -113,6 +133,7 @@ updates:
     groups:
       rollup-plugin-examples:
         applies-to: version-updates
+        update-types: ["minor", "patch"]
         patterns: ["*"]
       rollup-plugin-examples-security:
         applies-to: security-updates
@@ -126,6 +147,7 @@ updates:
     groups:
       webpack-example:
         applies-to: version-updates
+        update-types: ["minor", "patch"]
         patterns: ["*"]
       webpack-example-security:
         applies-to: security-updates
