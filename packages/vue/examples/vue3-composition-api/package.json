@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "npm run type-check && npm run build-only",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force"
@@ -20,7 +20,6 @@
     "@types/node": "^22.19.1",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/tsconfig": "^0.9.1",
-    "npm-run-all2": "^8.0.4",
     "typescript": "~5.9.3",
     "vite": "^8.2.1",
     "vite-plugin-vue-devtools": "^8.2.1",
