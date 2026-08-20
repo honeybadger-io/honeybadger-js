@@ -13,10 +13,17 @@ version: 2
 #   - The root entry groups development dependencies only. Anything in `dependencies` there
 #     ships to users, so those updates each get their own pull request.
 #   - `directories` (plural) supports globbing; `directory` (singular) does not.
-#   - A single grouped pull request spans every directory the glob matches: observed as
-#     titles like "bump the nextjs-examples group across 2 directories with 14 updates".
-#   - `open-pull-requests-limit` does not apply to security updates, so grouping is the
-#     only effective cap on security-update noise.
+#   - Observed, not guaranteed by this config: grouped runs on the example entries have
+#     produced one pull request spanning several matched directories, e.g. "bump the
+#     nextjs-examples group across 2 directories with 14 updates". The documented way to
+#     consolidate a single dependency across directories is `group-by: dependency-name`,
+#     which no group here sets, so don't depend on that shape holding.
+#   - `open-pull-requests-limit` applies only to version updates, never to security updates.
+#     Grouping reduces security-update pull request volume but is not a hard cap; Dependabot
+#     applies its own internal limit. The example entries group theirs to keep that noise
+#     down. The root entry deliberately does not: those updates can reach code that ships to
+#     users, and each of the four we triaged needed a separate decision, so they are left
+#     individual even though that means more pull requests.
 #   - There is no interaction between this file and Dependabot security alerts: it cannot
 #     stop security PRs, only shape how they are batched.
 
