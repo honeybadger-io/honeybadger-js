@@ -1,6 +1,10 @@
 {
   "npmClient": "pnpm",
   "version": "independent",
+  "ignoreChanges": [
+    "**/examples/**",
+    "**/example/**"
+  ],
   "command": {
     "version": {
       "message": "chore(release): publish [skip ci]"

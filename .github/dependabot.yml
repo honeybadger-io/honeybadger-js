@@ -1,7 +1,132 @@
-  version:
-  updates:
-      - directory: /
-        package-ecosystem: npm
-        schedule:
-            interval: weekly
-        versioning-strategy: increase
+version: 2
+
+# One entry per owning npm package, so updates arrive grouped per package instead of as
+# dozens of single-dependency pull requests.
+#
+# Notes for future maintainers:
+#   - Each entry needs TWO groups. A group defaults to `applies-to: version-updates`;
+#     security updates are only grouped when a group explicitly declares
+#     `applies-to: security-updates`.
+#   - `directories` (plural) supports globbing; `directory` (singular) does not.
+#   - Grouping collapses many single-dependency PRs into a few. Whether one grouped PR
+#     spans every directory a glob matches, or Dependabot opens one per matched directory,
+#     is not clearly documented — watch the first grouped run. Add `group-by: dependency-name`
+#     if you want one PR per dependency across all directories in the entry.
+#   - `open-pull-requests-limit` does not apply to security updates, so grouping is the
+#     only effective cap on security-update noise.
+#   - There is no interaction between this file and Dependabot security alerts: it cannot
+#     stop security PRs, only shape how they are batched.
+
+updates:
+  # Workspace packages — the published code. Single root pnpm-lock.yaml.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    versioning-strategy: increase
+    groups:
+      workspace:
+        applies-to: version-updates
+        patterns: ["*"]
+      workspace-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  # Example apps. Not part of the pnpm workspace, not built or tested by CI — they are
+  # documentation (see AGENTS.md). Grouped per owning package and checked monthly.
+  - package-ecosystem: npm
+    directories: ["/packages/js/examples/*"]
+    schedule:
+      interval: monthly
+    groups:
+      js-examples:
+        applies-to: version-updates
+        patterns: ["*"]
+      js-examples-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories: ["/packages/nextjs/examples/*"]
+    schedule:
+      interval: monthly
+    groups:
+      nextjs-examples:
+        applies-to: version-updates
+        patterns: ["*"]
+      nextjs-examples-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories: ["/packages/react/examples/*"]
+    schedule:
+      interval: monthly
+    groups:
+      react-examples:
+        applies-to: version-updates
+        patterns: ["*"]
+      react-examples-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories: ["/packages/react-native/examples/*"]
+    schedule:
+      interval: monthly
+    groups:
+      react-native-examples:
+        applies-to: version-updates
+        patterns: ["*"]
+      react-native-examples-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories: ["/packages/vue/examples/*"]
+    schedule:
+      interval: monthly
+    groups:
+      vue-examples:
+        applies-to: version-updates
+        patterns: ["*"]
+      vue-examples-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories: ["/packages/esbuild-plugin/examples/*"]
+    schedule:
+      interval: monthly
+    groups:
+      esbuild-plugin-examples:
+        applies-to: version-updates
+        patterns: ["*"]
+      esbuild-plugin-examples-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories: ["/packages/rollup-plugin/examples/*"]
+    schedule:
+      interval: monthly
+    groups:
+      rollup-plugin-examples:
+        applies-to: version-updates
+        patterns: ["*"]
+      rollup-plugin-examples-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  # Singular `example` directory, so no glob.
+  - package-ecosystem: npm
+    directories: ["/packages/webpack/example"]
+    schedule:
+      interval: monthly
+    groups:
+      webpack-example:
+        applies-to: version-updates
+        patterns: ["*"]
+      webpack-example-security:
+        applies-to: security-updates
+        patterns: ["*"]
