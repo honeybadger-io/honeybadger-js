@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "esbuild": "^0.20.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "esbuild": "^0.28.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "@honeybadger-io/plugin-core": "^1.2.1"
   }
 }
