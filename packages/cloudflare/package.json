@@ -45,7 +45,7 @@
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.3.3",
-    "undici": "^6.27.0"
+    "undici": "^8.10.0"
   },
   "peerDependencies": {
     "@cloudflare/workers-types": "^4"
