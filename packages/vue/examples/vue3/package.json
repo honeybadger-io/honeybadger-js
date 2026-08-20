@@ -7,11 +7,11 @@
     "preview": "vite preview --port 4173"
   },
   "dependencies": {
-    "vue": "^3.2.37",
-    "@honeybadger-io/vue": "^6.0.4"
+    "vue": "^3.5.41",
+    "@honeybadger-io/vue": "^6.2.17"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^2.3.3",
-    "vite": "^2.9.18"
+    "@vitejs/plugin-vue": "^6.0.8",
+    "vite": "^8.2.1"
   }
 }
