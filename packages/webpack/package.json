@@ -48,7 +48,7 @@
     "rimraf": "^3.0.2",
     "sinon": "^14.0.0",
     "watch": "^1.0.2",
-    "webpack": "^5.39.0"
+    "webpack": "^5.109.2"
   },
   "dependencies": {
     "@babel/runtime": "^7.14.5",

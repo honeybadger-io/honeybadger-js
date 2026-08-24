@@ -69,7 +69,7 @@
     }
   },
   "devDependencies": {
-    "@playwright/test": "1.51.0",
+    "@playwright/test": "1.62.1",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^5.0.2",
@@ -90,7 +90,7 @@
     "sinon": "^14.0.0",
     "supertest": "^6.1.6",
     "ts-jest": "^27.1.5",
-    "tsd": "^0.22.0",
+    "tsd": "^0.33.0",
     "typescript": "^4.5.3"
   },
   "publishConfig": {
