@@ -29,9 +29,9 @@ const mainConfig = {
     },
   ],
   external: [
-    'fs',
-    'path',
     'next',
+    'next/server',
+    '@honeybadger-io/js',
   ],
   plugins: [
     commonjs(),
@@ -43,7 +43,7 @@ const mainConfig = {
   ]
 }
 
-// Edge bundle: `withHoneybadger` only, no `fs`/`path`. Selected automatically
+// Edge bundle: the runtime hooks only, no `fs`/`path`. Selected automatically
 // by bundlers (e.g. Next.js) that recognize the `edge-light` exports
 // condition, so edge routes/middleware never pull in the Node-only webpack
 // plugin.
@@ -67,6 +67,8 @@ const edgeConfig = {
   ],
   external: [
     'next',
+    'next/server',
+    '@honeybadger-io/js',
   ],
   plugins: [
     commonjs(),

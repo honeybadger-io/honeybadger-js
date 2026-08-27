@@ -22,34 +22,29 @@ This version is considered suitable for preview.
 
 ## Features
 
-- Automatic reporting of uncaught exceptions (see [Limitations](#limitations))
-- Breadcrumbs
+- Automatic reporting of uncaught server errors via Next.js's `onRequestError` hook —
+  including Server Components, Route Handlers, Server Actions, middleware and the edge runtime
+- Client-side error reporting configured before React hydrates
+- Breadcrumbs, including App Router navigations
 - Source map upload to Honeybadger
-- CLI command to generate Honeybadger configuration files for Next.js runtimes
+- CLI command to generate the Honeybadger instrumentation and configuration files
+
+## Requirements
+
+Next.js 15.4 or later, and Node.js 20.9 or later. Both Turbopack and webpack builds are
+supported.
+
+Earlier versions of this package instrumented the app by injecting configuration files into
+webpack entry points. Turbopack ignores `config.webpack` entirely, so that approach silently
+stopped working once Turbopack became the default builder in Next.js 16. Setup now uses the
+bundler-agnostic [`instrumentation`](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation)
+and [`instrumentation-client`](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client)
+conventions instead. See
+[issue #1434](https://github.com/honeybadger-io/honeybadger-js/issues/1434).
 
 ## Limitations
 
-The following limitations are known to exist and will be tackled in future releases:
-
-- [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1055): A custom error component is used to report uncaught exceptions to Honeybadger. 
-  This is necessary because Next.js does not provide a way to hook into the error handler.
-  This is not a catch-all errors solution.  
-  If you are using the _Pages Router_, there are some caveats to this approach, as reported [here](https://nextjs.org/docs/advanced-features/custom-error-page#caveats).
-  This is a limitation of Next.js, not Honeybadger's Next.js integration.
-  Errors thrown in middlewares or API routes will not be reported to Honeybadger, since when they reach the error component, the response status code is 404 and no error information is available.
-  Additionally, there is an open [issue](https://github.com/vercel/next.js/issues/45535) about 404 being reported with Next.js apps deployed on Vercel, when they should be reported as 500.  
-  If you are using the _App Router_, these limitations do not apply, because errors thrown in middlewares or API routes do not reach the custom error component
-  but are caught by the global `window.onerror` handler. However, some other server errors (i.e. from data fetching methods) will be reported with minimal information, 
-  since Next.js will send a [generic error message](https://nextjs.org/docs/app/building-your-application/routing/error-handling#handling-server-errors) to this component for better security.
 - [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1056): Source maps for the [Edge runtime](https://vercel.com/docs/concepts/functions/edge-functions/edge-runtime) are not supported yet.
-
-## API routes and edge runtime
-
-API routes (`pages/api/*`, `app/api/*`) and edge middleware are not reached by the
-webpack config-file auto-injection. Pass an explicit config as the second argument
-to `withHoneybadger` there — see the
-[Next.js integration guide](https://docs.honeybadger.io/lib/javascript/integration/nextjs)
-for details.
 
 ## Example app
 
