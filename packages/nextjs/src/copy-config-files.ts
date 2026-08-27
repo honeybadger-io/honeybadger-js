@@ -48,8 +48,14 @@ function getTemplate(isAppRouter = false, isGlobalErrorComponent = false) {
     throw new Error('invalid arguments: isGlobalErrorComponent can only be true when isAppRouter is true')
   }
 
-  const extension = isGlobalErrorComponent ? 'tsx' : 'js'
   const templateName = isAppRouter ? '_error_app_router' : '_error'
+
+  // `_error_app_router` ships as a JS/TS pair that differs only by the prop type
+  // annotation, so pick the one matching the target file's extension. Previously this
+  // hardcoded `tsx` for the global-error component, which copied annotated TSX into a
+  // plain `.js` file in JavaScript projects. `_error` is JS-only, so it has no pair.
+  const hasTypedVariant = isAppRouter
+  const extension = hasTypedVariant && usesTypescript() ? 'tsx' : 'js'
 
   return path.resolve(__dirname, '../templates', templateName + '.' + extension)
 }
@@ -68,16 +74,47 @@ function copyGlobalErrorJs(isUnderSrc: boolean) {
   return copyFileWithBackup(sourcePath, targetPath)
 }
 
-async function copyFileWithBackup(sourcePath, targetPath) {
-  const fileAlreadyExists = fs.existsSync(targetPath)
-  if (fileAlreadyExists) {
-    // Don't overwrite an existing file without creating a backup first
-    const backupPath = targetPath + '.bak'
-    if (debug) {
-      console.debug('backing up', targetPath, 'to', backupPath)
-    }
-    await fs.promises.copyFile(targetPath, backupPath)
+/**
+ * `instrumentation` and `instrumentation-client` are Next.js file conventions, so unlike
+ * the `honeybadger.*.config` files they must sit at the project root — or inside `src/`
+ * when the project uses one. The config files stay at the root either way, so the
+ * relative import has to be rewritten when the instrumentation file lands in `src/`.
+ */
+async function copyInstrumentationFile(name: string, isUnderSrc: boolean) {
+  const sourcePath = path.resolve(__dirname, '../templates', name + '.js')
+  const extension = usesTypescript() ? 'ts' : 'js'
+  const targetPath = path.join(isUnderSrc ? 'src' : '', name + '.' + extension)
+
+  let contents = await fs.promises.readFile(sourcePath, 'utf8')
+  if (isUnderSrc) {
+    contents = contents.replace(/(['"])\.\/honeybadger\./g, '$1../honeybadger.')
   }
+
+  await backup(targetPath)
+
+  if (debug) {
+    console.debug('writing', targetPath)
+  }
+
+  return fs.promises.writeFile(targetPath, contents)
+}
+
+async function backup(targetPath) {
+  if (!fs.existsSync(targetPath)) {
+    return
+  }
+
+  // Don't overwrite an existing file without creating a backup first
+  const backupPath = targetPath + '.bak'
+  if (debug) {
+    console.debug('backing up', targetPath, 'to', backupPath)
+  }
+
+  return fs.promises.copyFile(targetPath, backupPath)
+}
+
+async function copyFileWithBackup(sourcePath, targetPath) {
+  await backup(targetPath)
 
   if (debug) {
     console.debug('copying', sourcePath, 'to', targetPath)
@@ -92,8 +129,9 @@ export async function copyConfigFiles() {
   }
 
   const templateDir = path.resolve(__dirname, '../templates')
+  // The browser config is gone: `instrumentation-client` now configures the browser,
+  // and it runs before hydration rather than via a bundler-injected entry point.
   const configFiles = [
-    'honeybadger.browser.config.js',
     'honeybadger.edge.config.js',
     'honeybadger.server.config.js',
   ]
@@ -106,6 +144,9 @@ export async function copyConfigFiles() {
   })
 
   const isUnderSrcFolder = usesSrcFolder()
+
+  copyPromises.push(copyInstrumentationFile('instrumentation', isUnderSrcFolder))
+  copyPromises.push(copyInstrumentationFile('instrumentation-client', isUnderSrcFolder))
 
   if (usesPagesRouter(isUnderSrcFolder)) {
     copyPromises.push(copyErrorJs(isUnderSrcFolder, false))
