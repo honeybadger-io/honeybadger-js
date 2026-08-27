@@ -82,15 +82,31 @@ function copyGlobalErrorJs(isUnderSrc: boolean) {
  */
 async function copyInstrumentationFile(name: string, isUnderSrc: boolean) {
   const sourcePath = path.resolve(__dirname, '../templates', name + '.js')
+  const srcFolder = isUnderSrc ? 'src' : ''
   const extension = usesTypescript() ? 'ts' : 'js'
-  const targetPath = path.join(isUnderSrc ? 'src' : '', name + '.' + extension)
+  const targetPath = path.join(srcFolder, name + '.' + extension)
+
+  // Unlike the honeybadger.* files, `instrumentation` is a shared Next.js convention:
+  // other tools register their own hooks in it. Overwriting it would silently stop them
+  // running, and a .bak file is no help if nobody notices, so leave an existing file
+  // alone and print what to add instead.
+  const existingPath = ['ts', 'js', 'mjs']
+    .map((ext) => path.join(srcFolder, name + '.' + ext))
+    .find((candidate) => fs.existsSync(candidate))
+
+  if (existingPath) {
+    console.log(
+      `\nSkipped ${existingPath} because it already exists — it may register hooks for ` +
+      'other tools.\nAdd Honeybadger to it by hand; see ' +
+      `${path.relative(process.cwd(), sourcePath)} for the contents to merge in.`
+    )
+    return
+  }
 
   let contents = await fs.promises.readFile(sourcePath, 'utf8')
   if (isUnderSrc) {
     contents = contents.replace(/(['"])\.\/honeybadger\./g, '$1../honeybadger.')
   }
-
-  await backup(targetPath)
 
   if (debug) {
     console.debug('writing', targetPath)

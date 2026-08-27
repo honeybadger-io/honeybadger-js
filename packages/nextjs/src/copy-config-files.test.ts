@@ -238,4 +238,53 @@ describe('copy-config-files', () => {
     expect(contents).not.toContain("'../honeybadger.")
   })
 
+  describe('existing instrumentation files', () => {
+    // instrumentation.ts is a shared Next.js convention - other tools register their
+    // register()/onRequestError hooks there. Overwriting it would silently stop them.
+    it('does not overwrite an existing instrumentation file', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'index.ts': 'dummy content' },
+        'tsconfig.json': 'dummy content',
+        'instrumentation.ts': 'export function register() { /* someone else got here first */ }'
+      })
+
+      await copyConfigFiles()
+
+      expect(fs.readFileSync('instrumentation.ts', 'utf8')).toContain('someone else got here first')
+      // and it is left in place rather than shuffled into a .bak nobody reads
+      expect(fs.existsSync('instrumentation.ts.bak')).toBe(false)
+      // the client half is untouched by the server half's presence
+      expect(fs.existsSync('instrumentation-client.ts')).toBe(true)
+    })
+
+    it('detects an existing file with a different extension', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'index.ts': 'dummy content' },
+        'tsconfig.json': 'dummy content',
+        'instrumentation.js': 'export function register() { /* js flavour */ }'
+      })
+
+      await copyConfigFiles()
+
+      // Would otherwise write instrumentation.ts alongside it, and Next.js would resolve
+      // only one of the two.
+      expect(fs.existsSync('instrumentation.ts')).toBe(false)
+      expect(fs.readFileSync('instrumentation.js', 'utf8')).toContain('js flavour')
+    })
+
+    it('still writes both files when neither exists', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'index.ts': 'dummy content' },
+        'tsconfig.json': 'dummy content'
+      })
+
+      await copyConfigFiles()
+
+      expect(fs.existsSync('instrumentation.ts')).toBe(true)
+      expect(fs.existsSync('instrumentation-client.ts')).toBe(true)
+    })
+  })
 })
