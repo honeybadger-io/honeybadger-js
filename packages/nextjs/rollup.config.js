@@ -32,6 +32,7 @@ const mainConfig = {
     'next',
     'next/server',
     '@honeybadger-io/js',
+    '@vercel/otel',
   ],
   plugins: [
     commonjs(),
@@ -69,6 +70,7 @@ const edgeConfig = {
     'next',
     'next/server',
     '@honeybadger-io/js',
+    '@vercel/otel',
   ],
   plugins: [
     commonjs(),
