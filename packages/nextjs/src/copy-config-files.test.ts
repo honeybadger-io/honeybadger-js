@@ -274,6 +274,42 @@ describe('copy-config-files', () => {
       expect(fs.readFileSync('instrumentation.js', 'utf8')).toContain('js flavour')
     })
 
+    it('does not overwrite an existing instrumentation-client file', async () => {
+      // instrumentation-client is a shared convention too: other tools initialise their
+      // browser SDK there, and next.config's instrumentationClientInject exists precisely
+      // because more than one tool expects to run in it.
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'index.ts': 'dummy content' },
+        'tsconfig.json': 'dummy content',
+        'instrumentation-client.ts': '/* another tool initialises the browser here */'
+      })
+
+      await copyConfigFiles()
+
+      expect(fs.readFileSync('instrumentation-client.ts', 'utf8')).toContain('another tool')
+      expect(fs.existsSync('instrumentation-client.ts.bak')).toBe(false)
+      // the server half is unaffected by the client half already existing
+      expect(fs.existsSync('instrumentation.ts')).toBe(true)
+    })
+
+    it('leaves both alone when both already exist', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'tsconfig.json': 'dummy content',
+        'src': {
+          'app': { 'index.ts': 'dummy content' },
+          'instrumentation.ts': '/* existing server hooks */',
+          'instrumentation-client.ts': '/* existing client init */'
+        }
+      })
+
+      await copyConfigFiles()
+
+      expect(fs.readFileSync('src/instrumentation.ts', 'utf8')).toContain('existing server hooks')
+      expect(fs.readFileSync('src/instrumentation-client.ts', 'utf8')).toContain('existing client init')
+    })
+
     it('still writes both files when neither exists', async () => {
       mock({
         'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
