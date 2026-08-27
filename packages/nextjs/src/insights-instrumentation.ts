@@ -81,16 +81,29 @@ export type RequestIds = {
   correlation_id: string
 }
 
-// Shared id precedence. Kept in one place (rather than once per request shape)
-// so the header-name contract documented above is only spelled out once.
-function seedIds(read: (name: string) => string | undefined): RequestIds {
+/**
+ * Shared id precedence. Kept in one place (rather than once per request shape)
+ * so the header-name contract documented above is only spelled out once.
+ *
+ * `fallbacks` lets a caller supply better defaults than a locally generated id.
+ * The OpenTelemetry path passes the span and trace ids: a trace id already has
+ * exactly the semantics we want for a correlation id, since W3C trace context
+ * reuses an inbound `traceparent` and mints a new one when there is none. Callers
+ * that pass nothing keep the original behaviour.
+ */
+function seedIds(
+  read: (name: string) => string | undefined,
+  fallbacks: { requestId?: string; correlationId?: string } = {}
+): RequestIds {
   const requestId =
     read('x-request-id') ??
     read('request-id') ??
+    fallbacks.requestId ??
     generateId()
   const correlationId =
     read('x-correlation-id') ??
     read('x-amzn-trace-id') ??
+    fallbacks.correlationId ??
     requestId
   return { request_id: requestId, correlation_id: correlationId }
 }
@@ -152,4 +165,39 @@ export function emitRequestEvent(req: Request, status: number | undefined, start
 export function emitNodeRequestEvent(req: NodeRequestLike, status: number | undefined, start: number, ids: RequestIds): void {
   const path = typeof req.url === 'string' ? req.url.split('?')[0] : undefined
   emitHandledEvent(req.method, path, status, start, ids)
+}
+
+/**
+ * OpenTelemetry path. Header values are not on the span by default; they arrive as
+ * `http.request.header.*` attributes when the HTTP instrumentation is configured with
+ * `headersToSpanAttributes`. Hyphens become underscores under the older semantic
+ * conventions and are preserved under the stable ones, so both spellings are read.
+ *
+ * When no header is present the span and trace ids are used, so the ids stay
+ * meaningful — and joinable to a trace — on platforms where the HTTP layer is not
+ * visible, such as serverless and the edge runtime.
+ */
+export function seedSpanEventContext(
+  attributes: Record<string, unknown>,
+  spanContext: { spanId?: string; traceId?: string }
+): RequestIds {
+  const read = (name: string): string | undefined => {
+    const lower = name.toLowerCase()
+    for (const key of [
+      `http.request.header.${lower}`,
+      `http.request.header.${lower.replace(/-/g, '_')}`,
+    ]) {
+      const value = attributes[key]
+      const first = Array.isArray(value) ? value[0] : value
+      if (typeof first === 'string' && first.trim().length) {
+        return first.trim()
+      }
+    }
+    return undefined
+  }
+
+  return seedIds(read, {
+    requestId: spanContext.spanId || undefined,
+    correlationId: spanContext.traceId || undefined,
+  })
 }

@@ -63,6 +63,9 @@
   },
   "peerDependencies": {
     "@honeybadger-io/react": ">= 6.1.25",
+    "@opentelemetry/api": ">= 1.9.0 < 2",
+    "@opentelemetry/sdk-trace-base": ">= 2.0.0 < 3",
+    "@vercel/otel": ">= 1.10.0 < 3",
     "next": ">= 15.4.0"
   },
   "dependencies": {
@@ -70,8 +73,11 @@
   },
   "devDependencies": {
     "@honeybadger-io/react": "workspace:^",
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/sdk-trace-base": "^2.10.0",
     "@rollup/plugin-commonjs": "^22.0.0",
     "@types/jest": "^29.5.3",
+    "@vercel/otel": "^2.1.3",
     "jest": "^29.6.1",
     "mock-fs": "^5.2.0",
     "next": "^15.4.0",
@@ -88,5 +94,16 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependenciesMeta": {
+    "@opentelemetry/api": {
+      "optional": true
+    },
+    "@opentelemetry/sdk-trace-base": {
+      "optional": true
+    },
+    "@vercel/otel": {
+      "optional": true
+    }
   }
 }
