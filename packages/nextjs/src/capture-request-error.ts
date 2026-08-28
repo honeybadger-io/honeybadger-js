@@ -68,8 +68,12 @@ export async function captureRequestError(
 
   // Same header precedence as the Insights path, so a fault and the events from the
   // request it failed in carry matching ids.
+  //
+  // Deliberately not written to the event context: outside a `Honeybadger.run()` that
+  // lands on a store shared by the whole process or isolate, so the ids would leak into
+  // later requests' events. `onRequestError` also fires after the request has already
+  // failed, so it is too late to decorate that request's own events anyway.
   const ids = seedNodeRequestEventContext(request.headers)
-  Honeybadger.setEventContext(ids)
 
   await Honeybadger.notifyAsync(error as Error, {
     context: {
