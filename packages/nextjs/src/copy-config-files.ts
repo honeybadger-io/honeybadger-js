@@ -7,30 +7,58 @@ function usesTypescript() {
   return fs.existsSync('tsconfig.json')
 }
 
-function usesSrcFolder() {
-  return fs.existsSync('src')
+/**
+ * Where a router directory actually lives: `''` for the project root, `'src'`, or `null`
+ * when the project does not use that router.
+ *
+ * Previously this was inferred from a single "does a `src` directory exist" check, which
+ * broke the common layout of a root `app/` (or `pages/`) beside a `src/` folder used for
+ * something else: everything was looked for under `src/`, found nothing, and no error
+ * components were written at all. Root wins when a directory somehow exists in both
+ * places, matching Next.js.
+ */
+function locateRouterDir(router: 'app' | 'pages'): string | null {
+  if (fs.existsSync(router)) {
+    return ''
+  }
+
+  if (fs.existsSync(path.join('src', router))) {
+    return 'src'
+  }
+
+  return null
 }
 
-function usesPagesRouter(isUnderSrc: boolean) {
-  const srcFolder = isUnderSrc ? 'src' : ''
+/**
+ * Where Next.js resolves the `instrumentation` files. It derives that directory as the
+ * parent of `pagesDir || appDir`:
+ *
+ *   const rootDir = path.join((pagesDir || appDir)!, '..')
+ *   — packages/next/src/build/index.ts
+ *
+ * So it is the parent of whichever router directory is found, and the Pages Router wins
+ * when a project has both. A project with a root `app/` and a `src/pages/` therefore
+ * resolves instrumentation under `src/`, not at the root.
+ *
+ * Getting this wrong is silent — the file is written somewhere Next.js never reads, so
+ * nothing is instrumented and nothing complains.
+ */
+function instrumentationDir(): string {
+  const pagesDir = locateRouterDir('pages')
+  if (pagesDir !== null) {
+    return pagesDir
+  }
 
-  return fs.existsSync(path.join(srcFolder, 'pages'))
+  return locateRouterDir('app') ?? ''
 }
 
-function usesAppRouter(isUnderSrc: boolean) {
-  const srcFolder = isUnderSrc ? 'src' : ''
-
-  return fs.existsSync(path.join(srcFolder, 'app'))
-}
-
-function getTargetPath(isUnderSrc: boolean, isAppRouter = false, isGlobalErrorComponent = false) {
+function getTargetPath(routerDir: string, isAppRouter = false, isGlobalErrorComponent = false) {
   if (!isAppRouter && isGlobalErrorComponent) {
     throw new Error('invalid arguments: isGlobalErrorComponent can only be true when isAppRouter is true')
   }
 
   const extension = usesTypescript() ? 'tsx' : 'js'
-  let srcFolder = isUnderSrc ? 'src' : ''
-  srcFolder = path.join(srcFolder, isAppRouter ? 'app' : 'pages')
+  const srcFolder = path.join(routerDir, isAppRouter ? 'app' : 'pages')
 
   let fileName = ''
   if (isAppRouter) {
@@ -60,29 +88,30 @@ function getTemplate(isAppRouter = false, isGlobalErrorComponent = false) {
   return path.resolve(__dirname, '../templates', templateName + '.' + extension)
 }
 
-async function copyErrorJs(isUnderSrc: boolean, isAppRouter = false) {
+async function copyErrorJs(routerDir: string, isAppRouter = false) {
   const sourcePath = getTemplate(isAppRouter)
-  const targetPath = getTargetPath(isUnderSrc, isAppRouter)
+  const targetPath = getTargetPath(routerDir, isAppRouter)
 
   return copyFileWithBackup(sourcePath, targetPath)
 }
 
-function copyGlobalErrorJs(isUnderSrc: boolean) {
+function copyGlobalErrorJs(routerDir: string) {
   const sourcePath = getTemplate(true, true)
-  const targetPath = getTargetPath(isUnderSrc, true, true)
+  const targetPath = getTargetPath(routerDir, true, true)
 
   return copyFileWithBackup(sourcePath, targetPath)
 }
 
 /**
  * `instrumentation` and `instrumentation-client` are Next.js file conventions, so unlike
- * the `honeybadger.*.config` files they must sit at the project root — or inside `src/`
- * when the project uses one. The config files stay at the root either way, so the
- * relative import has to be rewritten when the instrumentation file lands in `src/`.
+ * the `honeybadger.*.config` files their location is dictated by Next.js — see
+ * `instrumentationDir` for the rule.
+ *
+ * The config files always stay at the project root, so when the instrumentation file
+ * lands in `src/` instead its relative import has to climb one level.
  */
-async function copyInstrumentationFile(name: string, isUnderSrc: boolean) {
+async function copyInstrumentationFile(name: string, srcFolder: string) {
   const sourcePath = path.resolve(__dirname, '../templates', name + '.js')
-  const srcFolder = isUnderSrc ? 'src' : ''
   const extension = usesTypescript() ? 'ts' : 'js'
   const targetPath = path.join(srcFolder, name + '.' + extension)
 
@@ -104,7 +133,7 @@ async function copyInstrumentationFile(name: string, isUnderSrc: boolean) {
   }
 
   let contents = await fs.promises.readFile(sourcePath, 'utf8')
-  if (isUnderSrc) {
+  if (srcFolder) {
     contents = contents.replace(/(['"])\.\/honeybadger\./g, '$1../honeybadger.')
   }
 
@@ -159,18 +188,19 @@ export async function copyConfigFiles() {
     return fs.promises.copyFile(path.join(templateDir, file), file)
   })
 
-  const isUnderSrcFolder = usesSrcFolder()
+  const instrumentationFolder = instrumentationDir()
+  copyPromises.push(copyInstrumentationFile('instrumentation', instrumentationFolder))
+  copyPromises.push(copyInstrumentationFile('instrumentation-client', instrumentationFolder))
 
-  copyPromises.push(copyInstrumentationFile('instrumentation', isUnderSrcFolder))
-  copyPromises.push(copyInstrumentationFile('instrumentation-client', isUnderSrcFolder))
-
-  if (usesPagesRouter(isUnderSrcFolder)) {
-    copyPromises.push(copyErrorJs(isUnderSrcFolder, false))
+  const pagesDir = locateRouterDir('pages')
+  if (pagesDir !== null) {
+    copyPromises.push(copyErrorJs(pagesDir, false))
   }
 
-  if (usesAppRouter(isUnderSrcFolder)) {
-    copyPromises.push(copyErrorJs(isUnderSrcFolder, true))
-    copyPromises.push(copyGlobalErrorJs(isUnderSrcFolder))
+  const appDir = locateRouterDir('app')
+  if (appDir !== null) {
+    copyPromises.push(copyErrorJs(appDir, true))
+    copyPromises.push(copyGlobalErrorJs(appDir))
   }
 
   await Promise.all(copyPromises);
