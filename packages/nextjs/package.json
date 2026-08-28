@@ -25,6 +25,11 @@
         "import": "./dist/honeybadger-nextjs-edge.esm.js",
         "require": "./dist/honeybadger-nextjs-edge.cjs.js"
       },
+      "browser": {
+        "types": "./dist/client.d.ts",
+        "import": "./dist/honeybadger-nextjs-client.esm.js",
+        "require": "./dist/honeybadger-nextjs-client.cjs.js"
+      },
       "types": "./dist/index.d.ts",
       "import": "./dist/honeybadger-nextjs.esm.js",
       "require": "./dist/honeybadger-nextjs.cjs.js"
@@ -65,7 +70,7 @@
     "@honeybadger-io/react": ">= 6.1.25",
     "@opentelemetry/api": ">= 1.9.0 < 2",
     "@opentelemetry/sdk-trace-base": ">= 2.0.0 < 3",
-    "@vercel/otel": ">= 1.10.0 < 3",
+    "@vercel/otel": ">= 2.0.0 < 3",
     "next": ">= 15.4.0"
   },
   "dependencies": {

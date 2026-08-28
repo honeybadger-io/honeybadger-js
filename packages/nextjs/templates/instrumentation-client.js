@@ -1,4 +1,5 @@
 import { Honeybadger } from '@honeybadger-io/react'
+import { captureRouterTransitionStart } from '@honeybadger-io/nextjs'
 
 export const config = {
   apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
@@ -15,12 +16,7 @@ Honeybadger.configure(config)
 Honeybadger.logger.debug('Honeybadger configured for browser')
 
 /**
- * Records App Router navigations as breadcrumbs, which gives faults a trail of the
- * routes the user visited before the error.
+ * Records App Router navigations as breadcrumbs, giving faults a trail of the routes the
+ * user visited before the error.
  */
-export function onRouterTransitionStart(url, navigationType) {
-  Honeybadger.addBreadcrumb(`Navigated to ${url}`, {
-    category: 'navigation',
-    metadata: { url, navigationType },
-  })
-}
+export const onRouterTransitionStart = captureRouterTransitionStart
