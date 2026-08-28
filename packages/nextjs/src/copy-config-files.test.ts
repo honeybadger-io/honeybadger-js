@@ -323,4 +323,93 @@ describe('copy-config-files', () => {
       expect(fs.existsSync('instrumentation-client.ts')).toBe(true)
     })
   })
+
+  describe('a root router directory beside an unrelated src folder', () => {
+    // The layout that used to break: `src` exists, so everything was looked for under
+    // src/ — src/app was missing, so NO error components were written and the command
+    // still reported success. Next.js also resolves instrumentation at the root here,
+    // so writing it to src/ meant nothing was instrumented at all.
+    it('writes to the root when app/ is at the root', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'index.tsx': 'dummy content' },
+        'src': { 'lib': { 'utils.ts': 'unrelated code' } },
+        'tsconfig.json': 'dummy content'
+      })
+
+      await copyConfigFiles()
+
+      expect(fs.existsSync('instrumentation.ts')).toBe(true)
+      expect(fs.existsSync('src/instrumentation.ts')).toBe(false)
+      expect(fs.existsSync('app/error.tsx')).toBe(true)
+      expect(fs.existsSync('app/global-error.tsx')).toBe(true)
+      expect(fs.existsSync('src/app/error.tsx')).toBe(false)
+    })
+
+    it('writes to the root when pages/ is at the root', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'pages': { 'index.js': 'dummy content' },
+        'src': { 'lib': { 'utils.js': 'unrelated code' } }
+      })
+
+      await copyConfigFiles()
+
+      expect(fs.existsSync('instrumentation.js')).toBe(true)
+      expect(fs.existsSync('src/instrumentation.js')).toBe(false)
+      expect(fs.existsSync('pages/_error.js')).toBe(true)
+    })
+
+    it('keeps the config import relative to the root when the file lands there', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'index.tsx': 'dummy content' },
+        'src': { 'lib': { 'utils.ts': 'unrelated code' } },
+        'tsconfig.json': 'dummy content'
+      })
+
+      await copyConfigFiles()
+
+      // src/ exists, but the file is at the root, so the import must not climb a level.
+      const contents = fs.readFileSync('instrumentation.ts', 'utf8')
+      expect(contents).toContain("import('./honeybadger.server.config')")
+      expect(contents).not.toContain("'../honeybadger.")
+    })
+
+    it('follows the Pages Router when app/ is at the root and pages/ is under src', async () => {
+      // Next derives the instrumentation directory as the parent of `pagesDir || appDir`,
+      // so the Pages Router wins: it looks under src/, not at the root.
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'index.tsx': 'dummy content' },
+        'src': { 'pages': { 'index.tsx': 'dummy content' } },
+        'tsconfig.json': 'dummy content'
+      })
+
+      await copyConfigFiles()
+
+      expect(fs.existsSync('src/instrumentation.ts')).toBe(true)
+      expect(fs.existsSync('instrumentation.ts')).toBe(false)
+      // and the config import has to climb out of src/ to reach the project root
+      expect(fs.readFileSync('src/instrumentation.ts', 'utf8'))
+        .toContain("import('../honeybadger.server.config')")
+      // the error components still follow their own router's location
+      expect(fs.existsSync('app/error.tsx')).toBe(true)
+      expect(fs.existsSync('src/pages/_error.tsx')).toBe(true)
+    })
+
+    it('still uses src/ when the router lives there', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'src': { 'app': { 'index.tsx': 'dummy content' } },
+        'tsconfig.json': 'dummy content'
+      })
+
+      await copyConfigFiles()
+
+      expect(fs.existsSync('src/instrumentation.ts')).toBe(true)
+      expect(fs.existsSync('instrumentation.ts')).toBe(false)
+      expect(fs.existsSync('src/app/error.tsx')).toBe(true)
+    })
+  })
 })
