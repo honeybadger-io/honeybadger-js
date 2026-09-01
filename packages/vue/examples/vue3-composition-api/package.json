@@ -13,7 +13,7 @@
   "dependencies": {
     "@honeybadger-io/js": "^6.16.1",
     "@honeybadger-io/vue": "^6.2.18",
-    "vue": "^3.5.41"
+    "vue": "^3.5.42"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.6",
@@ -23,6 +23,6 @@
     "typescript": "~5.9.3",
     "vite": "^8.2.1",
     "vite-plugin-vue-devtools": "^8.2.1",
-    "vue-tsc": "^3.3.10"
+    "vue-tsc": "^3.3.11"
   }
 }
