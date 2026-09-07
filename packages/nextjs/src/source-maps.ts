@@ -270,12 +270,14 @@ export async function uploadSourceMapsAfterBuild(
     return
   }
 
-  try {
-    if (isDevEnv(uploadOptions.developmentEnvironments)) {
-      log('debug', uploadOptions.silent, `skipping source map upload in ${process.env.NODE_ENV}`)
-      return
-    }
+  // Outside the try/finally below: a build that never intended to upload also never
+  // enabled the browser maps, so there is nothing of ours to clean up.
+  if (isDevEnv(uploadOptions.developmentEnvironments)) {
+    log('debug', uploadOptions.silent, `skipping source map upload in ${process.env.NODE_ENV}`)
+    return
+  }
 
+  try {
     const sourcemaps = await collectSourcemaps(metadata.distDir, uploadOptions.ignorePaths)
 
     if (sourcemaps.length === 0) {
@@ -287,20 +289,33 @@ export async function uploadSourceMapsAfterBuild(
       await uploadSourcemaps(sourcemaps, uploadOptions)
     }
 
-    // Runs even when there was nothing worth uploading: the maps on disk are still served.
-    if (options.deleteBrowserSourcemaps) {
-      await deleteBrowserSourcemapFiles(metadata.distDir, uploadOptions.silent)
-    }
-
     if (uploadOptions.deploy) {
       await sendDeployNotification(uploadOptions)
     }
   } catch (error) {
-    if (uploadOptions.ignoreErrors) {
-      log('error', uploadOptions.silent, `source map upload failed: ${(error as Error).message}`)
-      return
+    if (!uploadOptions.ignoreErrors) {
+      throw error
     }
 
-    throw error
+    log('error', uploadOptions.silent, `source map upload failed: ${(error as Error).message}`)
+  } finally {
+    // Unconditionally, including after a failed upload. We enabled
+    // `productionBrowserSourceMaps`, so these maps ship publicly unless something removes
+    // them — and `ignoreErrors: true`, which the docs recommend so an outage cannot block a
+    // deploy, would otherwise turn every failed upload into published source. Keeping them
+    // to preserve "the only copy" is not worth that: a rebuild regenerates them, whereas a
+    // deploy that served them cannot be recalled.
+    if (options.deleteBrowserSourcemaps) {
+      try {
+        await deleteBrowserSourcemapFiles(metadata.distDir, uploadOptions.silent)
+      } catch (error) {
+        // Never let cleanup mask the upload failure that is already propagating.
+        log(
+          'warn',
+          uploadOptions.silent,
+          `could not clean up browser source maps: ${(error as Error).message}`
+        )
+      }
+    }
   }
 }
