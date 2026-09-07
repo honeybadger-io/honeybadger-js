@@ -42,6 +42,75 @@ and [`instrumentation-client`](https://nextjs.org/docs/app/api-reference/file-co
 conventions instead. See
 [issue #1434](https://github.com/honeybadger-io/honeybadger-js/issues/1434).
 
+## Source maps
+
+Source maps are uploaded automatically after a production build. `withHoneybadgerConfig`
+registers Next.js's `compiler.runAfterProductionCompile` hook, which runs for Turbopack and
+webpack builds alike — the webpack plugin it replaces only ever ran for webpack, and
+Turbopack silently ignored it.
+
+Set the API key and the URL your assets are served from, either as options or via
+`NEXT_PUBLIC_HONEYBADGER_API_KEY` and `NEXT_PUBLIC_HONEYBADGER_ASSETS_URL`:
+
+```js
+// next.config.js
+const { withHoneybadgerConfig } = require('@honeybadger-io/nextjs')
+
+module.exports = withHoneybadgerConfig(nextConfig, {
+  apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
+  assetsUrl: process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL,
+  revision: process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
+})
+```
+
+`assetsUrl` is the public URL of the build output, normally `https://your-site.com/_next`.
+
+Nothing is uploaded, and no warning is raised beyond a single message, if those two values
+are missing — so the hook is safe to leave registered in a project that does not use it.
+Set `disableSourceMapUpload: true` to turn it off explicitly.
+
+### Both browser and server maps are uploaded
+
+Next.js emits no source maps in a production build unless asked, so there would be nothing
+to upload. When upload is configured this package turns on both switches for you:
+
+| Option | Covers | Emitted to |
+| --- | --- | --- |
+| `productionBrowserSourceMaps` | the browser build | `.next/static`, which **is** served publicly |
+| `experimental.serverSourceMaps` | the server build | `.next/server`, which is not served |
+
+Server maps matter because server-side frames stay minified without them. The webpack
+plugin this replaces set `devtool: 'hidden-source-map'` for every compilation, so it
+generated server maps even though it only ever uploaded the browser ones — see
+[#1602](https://github.com/honeybadger-io/honeybadger-js/issues/1602).
+
+> **Note:** server frames are not symbolicated yet. Uploading the maps is only half of it;
+> the frame URLs reported at runtime still need to line up with the `minified_url` the maps
+> were uploaded under, which is the second half of
+> [#1602](https://github.com/honeybadger-io/honeybadger-js/issues/1602). Browser frames
+> symbolicate today.
+
+If you set either option yourself, that is treated as a deliberate choice and the value is
+left exactly as you wrote it.
+
+### Browser maps are removed after upload
+
+Because `productionBrowserSourceMaps` also *serves* the maps it generates, the browser maps
+are **deleted from the build output once they have been uploaded**, so they are not exposed
+to visitors. That reproduces the behaviour of `hidden-source-map`, which Turbopack has no
+equivalent for.
+
+Two things are deliberately left alone:
+
+- **Server maps.** `.next/server` is not served, so there is no exposure to undo, and
+  Next.js reads those maps itself when formatting server-side stack traces.
+- **Maps you asked for.** If you set `productionBrowserSourceMaps: true` yourself, your
+  maps are uploaded but not deleted.
+
+A failed upload fails the build, because Next.js re-throws whatever this hook throws. Set
+`ignoreErrors: true` in the options if you would rather a Honeybadger outage did not block
+a deploy.
+
 ## Limitations
 
 - [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1056): Source maps for the [Edge runtime](https://vercel.com/docs/concepts/functions/edge-functions/edge-runtime) are not supported yet.
