@@ -23,7 +23,12 @@ export type HoneybadgerNextJsConfig = {
   silent?: boolean
   /** Log a failed upload instead of failing the build. */
   ignoreErrors?: boolean
-  /** Globs, matched against the built JavaScript files, whose maps are not uploaded. */
+  /**
+   * Globs whose matching maps are not uploaded. Matched against each built JavaScript
+   * file's *name*, not its path — `main.js` and `**\/main.js` work, `static/chunks/*.js`
+   * never matches. This mirrors the rollup, esbuild and webpack plugins, which all match
+   * with picomatch's `basename` option.
+   */
   ignorePaths?: Array<string>
   /** `NODE_ENV` values for which upload is skipped entirely. */
   developmentEnvironments?: Array<string>
