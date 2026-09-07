@@ -56,6 +56,11 @@ Set the API key and the URL your assets are served from, either as options or vi
 // next.config.js
 const { withHoneybadgerConfig } = require('@honeybadger-io/nextjs')
 
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // ... your existing Next.js config
+}
+
 module.exports = withHoneybadgerConfig(nextConfig, {
   apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
   assetsUrl: process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL,
@@ -64,6 +69,13 @@ module.exports = withHoneybadgerConfig(nextConfig, {
 ```
 
 `assetsUrl` is the public URL of the build output, normally `https://your-site.com/_next`.
+
+> **Requires `next >= 15.4.0`**, the version that introduced
+> `compiler.runAfterProductionCompile`. This is declared as a peer dependency, and it
+> matters for more than just the upload: on an older Next.js, `withHoneybadgerConfig` still
+> switches `productionBrowserSourceMaps` on, but the hook that uploads *and then deletes*
+> the maps never runs — so the maps would be served publicly. Either upgrade, or set
+> `disableSourceMapUpload: true`.
 
 Nothing is uploaded, and no warning is raised beyond a single message, if those two values
 are missing — so the hook is safe to leave registered in a project that does not use it.
