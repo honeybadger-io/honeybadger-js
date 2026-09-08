@@ -26,8 +26,9 @@ This version is considered suitable for preview.
   including Server Components, Route Handlers, Server Actions and middleware
 - Client-side error reporting configured before React hydrates
 - Breadcrumbs, including App Router navigations
-- `request_id`, `correlation_id`, `trace_id` and `span_id` on every fault, matching the
-  `request.handled` Insights event for the same request
+- `request_id` and `correlation_id` on every fault, plus `trace_id` and `span_id` whenever an
+  OpenTelemetry span is active — all matching the `request.handled` Insights event for the
+  same request
 - Source map upload to Honeybadger
 - CLI command to generate the Honeybadger instrumentation and configuration files
 
