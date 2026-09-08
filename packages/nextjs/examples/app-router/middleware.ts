@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // Middleware runs before the request reaches a route, so an error boundary cannot catch it.
