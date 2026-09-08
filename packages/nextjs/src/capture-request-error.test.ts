@@ -2,6 +2,16 @@ import Honeybadger from '@honeybadger-io/js'
 import { captureRequestError } from './capture-request-error'
 import type { RequestErrorContext, RequestErrorRequest } from './capture-request-error'
 
+// Mutable so a test can install or remove the active span. @opentelemetry/api is an
+// optional peer that `activeSpanIds` imports on demand, so this stands in for it.
+const otelMocks: { spanContext?: { traceId: string; spanId: string } } = {}
+jest.mock('@opentelemetry/api', () => ({
+  trace: {
+    getActiveSpan: () =>
+      otelMocks.spanContext ? { spanContext: () => otelMocks.spanContext } : undefined,
+  },
+}))
+
 // Mutable so a test can install or remove `after` without reloading the module:
 // scheduleFlush reads nextServer.after at call time through the namespace.
 const nextServerMocks: { after?: (cb: () => unknown) => void } = {}
@@ -36,6 +46,7 @@ describe('captureRequestError', () => {
   const noticeContext = () => notifyAsync.mock.calls[0][1].context as Record<string, unknown>
 
   beforeEach(() => {
+    otelMocks.spanContext = undefined
     nextServerMocks.after = undefined
     Honeybadger.configure({ apiKey: 'test-key' })
     notifyAsync = jest.spyOn(Honeybadger, 'notifyAsync').mockResolvedValue(undefined as never)
@@ -171,6 +182,64 @@ describe('captureRequestError', () => {
       )
 
       expect(noticeContext().request_id).toBe('req-first')
+    })
+  })
+
+  // The ids the user asked for: request_id unique per request, correlation_id reused from a
+  // header when present, and the span and trace ids alongside both.
+  describe('OpenTelemetry ids', () => {
+    const span = { traceId: '29496aaa5aa2a425827813e30a29eba5', spanId: '1d52951d61351ebc' }
+
+    it('carries the active span and trace ids', async () => {
+      otelMocks.spanContext = span
+
+      await captureRequestError(new Error('boom'), request(), errorContext())
+
+      expect(noticeContext()).toMatchObject({ trace_id: span.traceId, span_id: span.spanId })
+    })
+
+    // Next.js still has the request span active in this hook, and it is the same span the
+    // Insights processor maps to `request.handled` — so seeding both from it is what lets a
+    // fault be joined to its request's events.
+    it('falls back to the span ids for request_id and correlation_id', async () => {
+      otelMocks.spanContext = span
+
+      await captureRequestError(new Error('boom'), request(), errorContext())
+
+      expect(noticeContext()).toMatchObject({
+        request_id: span.spanId,
+        correlation_id: span.traceId,
+      })
+    })
+
+    it('still prefers the headers over the span', async () => {
+      otelMocks.spanContext = span
+
+      await captureRequestError(
+        new Error('boom'),
+        request({ 'x-request-id': 'from-header', 'x-correlation-id': 'correlate-me' }),
+        errorContext()
+      )
+
+      expect(noticeContext()).toMatchObject({
+        request_id: 'from-header',
+        correlation_id: 'correlate-me',
+        // ...and the span ids are still reported, so the trace remains reachable.
+        trace_id: span.traceId,
+        span_id: span.spanId,
+      })
+    })
+
+    // @opentelemetry/api is optional, and no span is active unless a provider is registered.
+    it('omits both when no span is active', async () => {
+      otelMocks.spanContext = undefined
+
+      await captureRequestError(new Error('boom'), request(), errorContext())
+
+      const context = noticeContext()
+      expect(context.trace_id).toBeUndefined()
+      expect(context.span_id).toBeUndefined()
+      expect(context.request_id).toEqual(expect.any(String))
     })
   })
 })
