@@ -18,7 +18,7 @@ export function requestContextWaitUntil(): WaitUntil | undefined {
 }
 
 /**
- * Ensure events are delivered before the serverless/edge runtime freezes, without
+ * Ensure events are delivered before a serverless runtime freezes, without
  * delaying the response where the runtime lets us avoid it.
  *
  * In order of preference: Next.js `after()` (App Router only — it needs App Router
