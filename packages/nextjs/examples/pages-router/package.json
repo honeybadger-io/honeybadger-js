@@ -11,6 +11,7 @@
   "dependencies": {
     "@honeybadger-io/js": "file:../../../js",
     "@honeybadger-io/nextjs": "file:../..",
+    "@honeybadger-io/plugin-core": "file:../../../plugin-core",
     "@honeybadger-io/react": "file:../../../react",
     "next": "^16.3.4",
     "react": "^19.2.8",

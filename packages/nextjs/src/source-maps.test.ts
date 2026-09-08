@@ -18,10 +18,19 @@ function setNodeEnv(value: string | undefined): void {
 
 const uploadSourcemaps = jest.fn()
 const sendDeployNotification = jest.fn()
+// Set to make option resolution blow up, standing in for `cleanOptions` throwing or
+// plugin-core failing to load at all.
+let cleanOptionsError: Error | null = null
 jest.mock('@honeybadger-io/plugin-core', () => {
   const actual = jest.requireActual('@honeybadger-io/plugin-core')
   return {
     ...actual,
+    cleanOptions: (...args: unknown[]) => {
+      if (cleanOptionsError) {
+        throw cleanOptionsError
+      }
+      return (actual as { cleanOptions: (...a: unknown[]) => unknown }).cleanOptions(...args)
+    },
     uploadSourcemaps: (...args: unknown[]) => uploadSourcemaps(...args),
     sendDeployNotification: (...args: unknown[]) => sendDeployNotification(...args),
   }
@@ -216,6 +225,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   let nodeEnv: string | undefined
 
   beforeEach(() => {
+    cleanOptionsError = null
     nodeEnv = process.env.NODE_ENV
     jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     uploadSourcemaps.mockReset().mockResolvedValue(undefined)
@@ -419,6 +429,37 @@ describe('uploadSourceMapsAfterBuild', () => {
       expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
       readdir.mockRestore()
       error.mockRestore()
+    })
+
+    // Resolving the options is itself fallible — cleanOptions can throw, and plugin-core
+    // can fail to load. Doing that outside the error handling meant such a failure ignored
+    // ignoreErrors and skipped cleanup, leaving the maps served.
+    it('removes them when resolving the options failed', async () => {
+      const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      cleanOptionsError = new Error('plugin-core exploded')
+
+      await expect(
+        uploadSourceMapsAfterBuild(
+          { ...configured, ignoreErrors: true },
+          { distDir: '.next', projectDir: '.' },
+          { deleteBrowserSourcemaps: true }
+        )
+      ).resolves.toBeUndefined()
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+      error.mockRestore()
+    })
+
+    it('still fails the build for that failure when ignoreErrors is off', async () => {
+      cleanOptionsError = new Error('plugin-core exploded')
+
+      await expect(
+        uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+          deleteBrowserSourcemaps: true,
+        })
+      ).rejects.toThrow('plugin-core exploded')
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
     })
 
     // A dev/test build never uploads, so it never enabled the maps either — leave the

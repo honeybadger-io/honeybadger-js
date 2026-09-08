@@ -112,6 +112,10 @@ function withoutUndefined<T extends Record<string, unknown>>(options: T): T {
   ) as T
 }
 
+// Mirrors plugin-core's DEFAULT_DEVELOPMENT_ENVIRONMENTS. Duplicated so a development
+// build can be recognised before plugin-core is loaded — see uploadSourceMapsAfterBuild.
+const DEFAULT_DEVELOPMENT_ENVIRONMENTS = ['dev', 'development', 'test']
+
 function isDevEnv(developmentEnvironments: string[]): boolean {
   if (!process.env.NODE_ENV) {
     return false
@@ -282,28 +286,38 @@ export async function uploadSourceMapsAfterBuild(
   metadata: AfterProductionCompileMetadata,
   options: { deleteBrowserSourcemaps?: boolean } = {}
 ): Promise<void> {
-  const uploadOptions = await resolveUploadOptions(honeybadgerNextJsConfig)
-  if (!uploadOptions) {
-    return
-  }
+  // Read from the raw config rather than the resolved options, because the error handling
+  // below has to cover resolving them at all: `cleanOptions` can throw, and loading
+  // plugin-core can fail outright. Doing that outside the try meant a failure there ignored
+  // `ignoreErrors` and skipped the cleanup that keeps browser maps off the wire.
+  const silent = honeybadgerNextJsConfig?.silent ?? true
+  const ignoreErrors = honeybadgerNextJsConfig?.ignoreErrors ?? false
 
-  const { uploadSourcemaps, sendDeployNotification } = await loadPluginCore()
-
-  // Outside the try/finally below: a build that never intended to upload also never
-  // enabled the browser maps, so there is nothing of ours to clean up.
-  if (isDevEnv(uploadOptions.developmentEnvironments)) {
-    log('debug', uploadOptions.silent, `skipping source map upload in ${process.env.NODE_ENV}`)
+  // Outside the try/finally below: a build that never intended to upload also never enabled
+  // the browser maps, so there is nothing of ours to clean up. Decided from the raw config
+  // so it needs no plugin-core.
+  const developmentEnvironments =
+    honeybadgerNextJsConfig?.developmentEnvironments ?? DEFAULT_DEVELOPMENT_ENVIRONMENTS
+  if (isDevEnv(developmentEnvironments)) {
+    log('debug', silent, `skipping source map upload in ${process.env.NODE_ENV}`)
     return
   }
 
   try {
+    const uploadOptions = await resolveUploadOptions(honeybadgerNextJsConfig)
+    if (!uploadOptions) {
+      return
+    }
+
+    const { uploadSourcemaps, sendDeployNotification } = await loadPluginCore()
+
     const sourcemaps = await collectSourcemaps(metadata.distDir, uploadOptions.ignorePaths)
 
     if (sourcemaps.length === 0) {
       // Upload is configured, so finding nothing means something is wrong — a `distDir`
       // that moved, or an `ignorePaths` that matches everything. Silence here would look
       // exactly like success.
-      log('warn', uploadOptions.silent, `found no source maps to upload in ${metadata.distDir}`)
+      log('warn', silent, `found no source maps to upload in ${metadata.distDir}`)
     } else {
       await uploadSourcemaps(sourcemaps, uploadOptions)
     }
@@ -312,11 +326,11 @@ export async function uploadSourceMapsAfterBuild(
       await sendDeployNotification(uploadOptions)
     }
   } catch (error) {
-    if (!uploadOptions.ignoreErrors) {
+    if (!ignoreErrors) {
       throw error
     }
 
-    log('error', uploadOptions.silent, `source map upload failed: ${(error as Error).message}`)
+    log('error', silent, `source map upload failed: ${(error as Error).message}`)
   } finally {
     // Unconditionally, including after a failed upload. We enabled
     // `productionBrowserSourceMaps`, so these maps ship publicly unless something removes
@@ -326,12 +340,12 @@ export async function uploadSourceMapsAfterBuild(
     // deploy that served them cannot be recalled.
     if (options.deleteBrowserSourcemaps) {
       try {
-        await deleteBrowserSourcemapFiles(metadata.distDir, uploadOptions.silent)
+        await deleteBrowserSourcemapFiles(metadata.distDir, silent)
       } catch (error) {
         // Never let cleanup mask the upload failure that is already propagating.
         log(
           'warn',
-          uploadOptions.silent,
+          silent,
           `could not clean up browser source maps: ${(error as Error).message}`
         )
       }
