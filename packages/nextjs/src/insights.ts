@@ -20,7 +20,7 @@ const NEXT_REQUEST_SPAN_TYPE = 'BaseServer.handleRequest'
  *
  * Header values are not span attributes by default. `@vercel/otel` applies this map when
  * it creates the root span, which is the span this processor reads — and, unlike Node's
- * HTTP instrumentation, it works on serverless and the edge runtime too.
+ * HTTP instrumentation, it works on serverless platforms too.
  *
  * Spread it into your own `registerOTel` call if you register OpenTelemetry yourself:
  *
@@ -191,7 +191,7 @@ export type RegisterHoneybadgerInsightsOptions = {
  * `instrumentation.ts`.
  *
  * `@vercel/otel` is an optional peer dependency: it is only needed for Insights, and it
- * is what makes this work on the edge runtime, where the Node SDK cannot load. If you
+ * loads where the full Node SDK cannot, such as serverless platforms. If you
  * already call `registerOTel` yourself, add `honeybadgerSpanProcessor()` to your
  * `spanProcessors` instead of calling this — registering twice would compete for the
  * global provider.

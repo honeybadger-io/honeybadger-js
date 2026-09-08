@@ -23,9 +23,11 @@ This version is considered suitable for preview.
 ## Features
 
 - Automatic reporting of uncaught server errors via Next.js's `onRequestError` hook —
-  including Server Components, Route Handlers, Server Actions, middleware and the edge runtime
+  including Server Components, Route Handlers, Server Actions and middleware
 - Client-side error reporting configured before React hydrates
 - Breadcrumbs, including App Router navigations
+- `request_id`, `correlation_id`, `trace_id` and `span_id` on every fault, matching the
+  `request.handled` Insights event for the same request
 - Source map upload to Honeybadger
 - CLI command to generate the Honeybadger instrumentation and configuration files
 
@@ -125,7 +127,14 @@ a deploy.
 
 ## Limitations
 
-- [Issue link](https://github.com/honeybadger-io/honeybadger-js/issues/1056): Source maps for the [Edge runtime](https://vercel.com/docs/concepts/functions/edge-functions/edge-runtime) are not supported yet.
+- Server-side frames are not symbolicated. The source maps for `.next/server` are uploaded,
+  but the frame paths reported at runtime do not yet match the `minified_url` they were
+  uploaded under — tracked in
+  [#1602](https://github.com/honeybadger-io/honeybadger-js/issues/1602). Browser frames
+  symbolicate.
+- The deprecated `export const runtime = 'edge'` for route handlers is no longer covered by a
+  configuration template or example. Middleware and `instrumentation`, which Next.js also
+  compiles for an edge context, are supported.
 
 ## Example app
 
