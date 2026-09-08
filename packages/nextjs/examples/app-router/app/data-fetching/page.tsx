@@ -1,33 +1,26 @@
+// `searchParams` is a Promise from Next.js 15 onwards, so it has to be awaited.
+type Props = { searchParams: Promise<{ fail?: string }> }
+
+/**
+ * Stands in for a real data source. The example used to call a public placeholder API, which
+ * made the page fail for reasons unrelated to Honeybadger whenever that service changed; the
+ * mechanism being demonstrated is the throw, not the transport.
+ */
 async function getData(fail = false) {
-  let res;
+  await new Promise((resolve) => setTimeout(resolve, 10))
+
   if (fail) {
-    res = await fetch('https://reqres.in/api/login', {
-      method: 'POST',
-      body: JSON.stringify({
-        'username': 'string',
-        'email': 'string',
-        'password': 'string'
-      })
-    });
-  }
-  else {
-    res = await fetch('https://reqres.in/api/users?page=1')
+    // Activates the closest error boundary — app/error.tsx — and is reported to Honeybadger
+    // by `onRequestError` in instrumentation.ts, because this runs on the server.
+    throw new Error('Failed to fetch data: upstream returned 500')
   }
 
-  const result = await res.json();
-
-  // Recommendation: handle errors
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    throw new Error('Failed to fetch data: ' + result.error);
-  }
-
-  return result;
+  return { data: [{ id: 1 }, { id: 2 }, { id: 3 }] }
 }
 
-export default async function Page({ searchParams }: { searchParams?: { fail?: string }  }) {
-  const shouldFail = searchParams?.fail === 'true';
-  const data = await getData(shouldFail);
+export default async function Page({ searchParams }: Props) {
+  const { fail } = await searchParams
+  const data = await getData(fail === 'true')
 
-  return (<div>Data Fetching Error Example: { data.data.length }</div>);
+  return <div>Data Fetching Error Example: {data.data.length}</div>
 }
