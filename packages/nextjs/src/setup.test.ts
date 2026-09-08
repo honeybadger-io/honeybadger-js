@@ -1,3 +1,4 @@
+import type { NextConfig } from 'next'
 import { withHoneybadgerConfig } from './setup'
 
 const uploadSourceMapsAfterBuild = jest.fn()
@@ -7,10 +8,8 @@ jest.mock('./source-maps', () => ({
   isSourceMapUploadConfigured: () => uploadConfigured,
 }))
 
-type Config = Record<string, unknown> & {
-  serverExternalPackages?: string[]
-  compiler?: { runAfterProductionCompile?: (metadata: unknown) => unknown }
-  experimental?: { serverSourceMaps?: boolean }
+type Config = NextConfig & {
+  compiler?: { runAfterProductionCompile?: (metadata: { distDir: string; projectDir: string }) => unknown }
 }
 
 const metadata = { distDir: '.next', projectDir: '/app' }

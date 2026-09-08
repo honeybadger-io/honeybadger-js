@@ -1,8 +1,23 @@
 import fs from 'fs'
 import path from 'path'
 import picomatch from 'picomatch'
-import { cleanOptions, sendDeployNotification, uploadSourcemaps, Types } from '@honeybadger-io/plugin-core'
+// Type-only, so nothing from plugin-core is pulled into the module graph at import time.
+import type { Types } from '@honeybadger-io/plugin-core'
 import { HoneybadgerNextJsConfig } from './types'
+
+/**
+ * Loads plugin-core on demand, never at module scope.
+ *
+ * Its module body runs `fetchRetry(require('node-fetch'))` as a side effect, which throws
+ * `ArgumentError: fetch must be a function` inside the Next.js server runtime. This module
+ * shares a barrel with the runtime instrumentation exports, so a top-level import here took
+ * down `instrumentation.ts` for every app — the hook failed to load and nothing was
+ * instrumented at all. plugin-core is a rollup external, so this stays a real deferred
+ * require in both the CJS and ESM bundles.
+ */
+function loadPluginCore() {
+  return import('@honeybadger-io/plugin-core')
+}
 
 /**
  * The build output directory Next.js serves over HTTP, relative to `distDir`. `.next/static`
@@ -53,9 +68,9 @@ export function isSourceMapUploadConfigured(
  * whatever this hook throws — so validating eagerly would fail the build of every app
  * that simply does not use this feature.
  */
-export function resolveUploadOptions(
+export async function resolveUploadOptions(
   honeybadgerNextJsConfig: HoneybadgerNextJsConfig = {}
-): Types.HbPluginOptions | null {
+): Promise<Types.HbPluginOptions | null> {
   const silent = honeybadgerNextJsConfig.silent ?? true
 
   if (honeybadgerNextJsConfig.disableSourceMapUpload) {
@@ -80,6 +95,8 @@ export function resolveUploadOptions(
   // revision would upload as `undefined` instead of `main`, and a fault whose revision
   // does not match its source map is never symbolicated — so drop empty values instead
   // of passing them through.
+  const { cleanOptions } = await loadPluginCore()
+
   return cleanOptions(withoutUndefined({
     ...provided,
     apiKey,
@@ -265,10 +282,12 @@ export async function uploadSourceMapsAfterBuild(
   metadata: AfterProductionCompileMetadata,
   options: { deleteBrowserSourcemaps?: boolean } = {}
 ): Promise<void> {
-  const uploadOptions = resolveUploadOptions(honeybadgerNextJsConfig)
+  const uploadOptions = await resolveUploadOptions(honeybadgerNextJsConfig)
   if (!uploadOptions) {
     return
   }
+
+  const { uploadSourcemaps, sendDeployNotification } = await loadPluginCore()
 
   // Outside the try/finally below: a build that never intended to upload also never
   // enabled the browser maps, so there is nothing of ours to clean up.

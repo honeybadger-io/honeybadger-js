@@ -29,7 +29,7 @@ const mainConfig = {
   ],
   external: [
     // Node builtins, used by the post-build source map upload. Only the main bundle
-    // touches them — the edge and client entries deliberately exclude that module.
+    // touches them — the client entry deliberately excludes that module.
     'fs',
     'path',
     'next',
@@ -39,6 +39,9 @@ const mainConfig = {
     '@honeybadger-io/plugin-core',
     'picomatch',
     '@vercel/otel',
+    // Optional peer, loaded on demand to read the active span. External so the dynamic
+    // import stays a real deferred require rather than being inlined.
+    '@opentelemetry/api',
   ],
   plugins: [
     commonjs(),
@@ -50,8 +53,9 @@ const mainConfig = {
   ]
 }
 
-// Edge bundle: the runtime hooks only, no `fs`/`path`. Selected automatically by
-// bundlers (e.g. Next.js) that recognize the `edge-light` exports condition.
+// Edge-context bundle: the runtime hooks only, no `fs`/`path`. Selected via the
+// `edge-light` exports condition, which Next.js applies when compiling middleware and
+// `instrumentation` — a context present in every build. See src/edge.ts.
 const edgeConfig = {
   input: 'build/edge.js',
   output: [
@@ -74,8 +78,8 @@ const edgeConfig = {
     'next',
     'next/server',
     '@honeybadger-io/js',
-    '@honeybadger-io/react',
     '@vercel/otel',
+    '@opentelemetry/api',
   ],
   plugins: [
     commonjs(),
@@ -105,6 +109,10 @@ const clientConfig = {
     },
   ],
   external: [
+    // `captureRouterTransitionStart` reaches the singleton through @honeybadger-io/js rather
+    // than @honeybadger-io/react, so that the error-boundary class component is not dragged
+    // into a React Server Components graph.
+    '@honeybadger-io/js',
     '@honeybadger-io/react',
   ],
   plugins: [

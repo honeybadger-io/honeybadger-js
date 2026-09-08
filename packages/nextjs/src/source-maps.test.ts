@@ -5,6 +5,17 @@ import { collectSourcemaps, resolveUploadOptions, uploadSourceMapsAfterBuild } f
 const MAP_WITH_SOURCES = JSON.stringify({ version: 3, sources: ['a.ts'], sourcesContent: ['const a = 1'] })
 const MAP_WITHOUT_SOURCES = JSON.stringify({ version: 3, sources: ['a.ts'], sourcesContent: [] })
 
+// `next`'s type augmentation marks process.env.NODE_ENV readonly, so the tests set it
+// through a mutable view rather than assigning to the typed property.
+function setNodeEnv(value: string | undefined): void {
+  const env = process.env as Record<string, string | undefined>
+  if (value === undefined) {
+    delete env.NODE_ENV
+  } else {
+    env.NODE_ENV = value
+  }
+}
+
 const uploadSourcemaps = jest.fn()
 const sendDeployNotification = jest.fn()
 jest.mock('@honeybadger-io/plugin-core', () => {
@@ -132,57 +143,57 @@ describe('resolveUploadOptions', () => {
     })
   })
 
-  it('returns null when nothing is configured', () => {
+  it('returns null when nothing is configured', async () => {
     // cleanOptions throws on a missing apiKey, and Next re-throws whatever this hook
     // throws — so an unconfigured project must not reach it.
-    expect(resolveUploadOptions({})).toBeNull()
+    await expect(resolveUploadOptions({})).resolves.toBeNull()
   })
 
-  it('returns null when upload is disabled', () => {
-    expect(resolveUploadOptions({
+  it('returns null when upload is disabled', async () => {
+    await expect(resolveUploadOptions({
       disableSourceMapUpload: true,
       apiKey: 'k',
       assetsUrl: 'https://example.com/_next',
-    })).toBeNull()
+    })).resolves.toBeNull()
   })
 
-  it('falls back to the environment variables the templates use', () => {
+  it('falls back to the environment variables the templates use', async () => {
     process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
     process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL = 'https://example.com/_next'
     process.env.NEXT_PUBLIC_HONEYBADGER_REVISION = 'abc123'
 
-    expect(resolveUploadOptions({})).toMatchObject({
+    await expect(resolveUploadOptions({})).resolves.toMatchObject({
       apiKey: 'env-key',
       assetsUrl: 'https://example.com/_next',
       revision: 'abc123',
     })
   })
 
-  it('prefers explicit options over the environment', () => {
+  it('prefers explicit options over the environment', async () => {
     process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
     process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL = 'https://example.com/_next'
 
-    expect(resolveUploadOptions({
+    await expect(resolveUploadOptions({
       apiKey: 'explicit',
       assetsUrl: 'https://cdn.example.com/_next',
-    })).toMatchObject({ apiKey: 'explicit', assetsUrl: 'https://cdn.example.com/_next' })
+    })).resolves.toMatchObject({ apiKey: 'explicit', assetsUrl: 'https://cdn.example.com/_next' })
   })
 
-  it('leaves the default revision alone when none is configured', () => {
+  it('leaves the default revision alone when none is configured', async () => {
     process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
     process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL = 'https://example.com/_next'
 
     // cleanOptions merges as { ...defaults, ...options }, so passing revision: undefined
     // would overwrite the default rather than fall back to it — and a fault whose
     // revision does not match its source map never symbolicates.
-    expect(resolveUploadOptions({})?.revision).toBe('main')
+    expect((await resolveUploadOptions({}))?.revision).toBe('main')
   })
 
-  it('does not let other unset options clobber their defaults', () => {
+  it('does not let other unset options clobber their defaults', async () => {
     process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
     process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL = 'https://example.com/_next'
 
-    const options = resolveUploadOptions({
+    const options = await resolveUploadOptions({
       apiKey: 'k', assetsUrl: 'u', endpoint: undefined, retries: undefined,
     })
 
@@ -190,10 +201,10 @@ describe('resolveUploadOptions', () => {
     expect(options?.retries).toBe(3)
   })
 
-  it('returns null when only one of the two required values is present', () => {
+  it('returns null when only one of the two required values is present', async () => {
     process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
 
-    expect(resolveUploadOptions({})).toBeNull()
+    await expect(resolveUploadOptions({})).resolves.toBeNull()
   })
 })
 
@@ -214,7 +225,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   afterEach(() => {
     mock.restore()
     jest.restoreAllMocks()
-    if (nodeEnv === undefined) { delete process.env.NODE_ENV } else { process.env.NODE_ENV = nodeEnv }
+    setNodeEnv(nodeEnv)
   })
 
   it('does nothing when upload is not configured', async () => {
@@ -226,7 +237,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   })
 
   it('uploads the collected maps', async () => {
-    process.env.NODE_ENV = 'production'
+    setNodeEnv('production')
     mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
 
     await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
@@ -236,7 +247,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   })
 
   it('skips a development build', async () => {
-    process.env.NODE_ENV = 'development'
+    setNodeEnv('development')
     mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
 
     await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
@@ -245,7 +256,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   })
 
   it('sends a deploy notification only when asked', async () => {
-    process.env.NODE_ENV = 'production'
+    setNodeEnv('production')
     mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
 
     await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
@@ -260,7 +271,7 @@ describe('uploadSourceMapsAfterBuild', () => {
 
   describe('deleting the maps after upload', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'production'
+      setNodeEnv('production')
       mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
     })
 
@@ -413,7 +424,7 @@ describe('uploadSourceMapsAfterBuild', () => {
     // A dev/test build never uploads, so it never enabled the maps either — leave the
     // developer's build output alone.
     it('leaves them alone in a development build', async () => {
-      process.env.NODE_ENV = 'development'
+      setNodeEnv('development')
 
       await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
         deleteBrowserSourcemaps: true,
@@ -460,7 +471,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   // which is how a moved distDir or an over-broad ignorePaths goes unnoticed.
   describe('when there is nothing to upload', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'production'
+      setNodeEnv('production')
     })
 
     it('warns instead of reporting a silent success', async () => {
@@ -515,7 +526,7 @@ describe('uploadSourceMapsAfterBuild', () => {
 
   describe('when the upload fails', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'production'
+      setNodeEnv('production')
       mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
       uploadSourcemaps.mockRejectedValue(new Error('honeybadger is down'))
     })

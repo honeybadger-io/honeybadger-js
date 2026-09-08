@@ -47,6 +47,30 @@ type ExperimentalConfig = {
 }
 
 /**
+ * The parts of a Next.js config this function reads.
+ *
+ * Structural on purpose, rather than `import type { NextConfig } from 'next'`. Importing it
+ * would bake whichever Next.js version this package was built against into the published
+ * declaration files, and `NextConfig` is not compatible across the supported range — Next 16
+ * widened `headers()` to return `Header[] | Promise<Header[]>`, so a Next 16 user passing
+ * their own `NextConfig` got a type error against our Next 15 copy of it.
+ *
+ * This is the type the config is *read* through, not the generic constraint. Constraining
+ * to it directly is not possible: the two things callers do are mutually exclusive under
+ * excess-property checking. `NextConfig` is an interface with no index signature, so a
+ * constraint carrying `[key: string]: unknown` rejects it — while a constraint without one
+ * rejects an inline literal that sets any other Next.js option, such as `reactStrictMode`.
+ * So the generic stays `object` and the strictness lives at the call site, where the caller
+ * annotates their own config as `NextConfig`.
+ */
+type NextConfigLike = {
+  serverExternalPackages?: string[]
+  productionBrowserSourceMaps?: boolean
+  experimental?: ExperimentalConfig
+  compiler?: CompilerConfig
+}
+
+/**
  * Registers the source map upload on Next.js's post-compile hook, composing with any hook
  * the project already declares rather than replacing it.
  *
@@ -110,11 +134,13 @@ function withServerSourceMaps(
  * `instrumentation.ts` / `instrumentation-client.ts` conventions, so it works under both
  * Turbopack and webpack. See https://github.com/honeybadger-io/honeybadger-js/issues/1434.
  */
-export function withHoneybadgerConfig<T extends Record<string, unknown>>(
+export function withHoneybadgerConfig<T extends object>(
   config: T = {} as T,
   honeybadgerNextJsConfig?: HoneybadgerNextJsConfig
 ): T {
   _silent = honeybadgerNextJsConfig?.silent ?? true
+
+  const given = config as NextConfigLike
 
   const uploadConfigured = isSourceMapUploadConfigured(honeybadgerNextJsConfig)
 
@@ -127,24 +153,24 @@ export function withHoneybadgerConfig<T extends Record<string, unknown>>(
   // once they are uploaded. An explicit setting is always respected: a project that asked
   // for served source maps keeps them, and keeps them served.
   const enableBrowserSourceMaps =
-    config.productionBrowserSourceMaps === undefined && uploadConfigured
+    given.productionBrowserSourceMaps === undefined && uploadConfigured
 
   const experimental = withServerSourceMaps(
-    config.experimental as ExperimentalConfig | undefined,
+    given.experimental,
     uploadConfigured
   )
 
   return {
     ...config,
-    serverExternalPackages: withHoneybadgerExternalized(config.serverExternalPackages),
-    productionBrowserSourceMaps: enableBrowserSourceMaps ? true : config.productionBrowserSourceMaps,
+    serverExternalPackages: withHoneybadgerExternalized(given.serverExternalPackages),
+    productionBrowserSourceMaps: enableBrowserSourceMaps ? true : given.productionBrowserSourceMaps,
     // Only introduce the key when there is something to put in it, so a config that never
     // mentioned `experimental` does not suddenly grow the field.
     ...(experimental ? { experimental } : {}),
     compiler: withSourceMapUpload(
-      config.compiler as CompilerConfig | undefined,
+      given.compiler,
       honeybadgerNextJsConfig,
       enableBrowserSourceMaps
     ),
-  }
+  } as T
 }
