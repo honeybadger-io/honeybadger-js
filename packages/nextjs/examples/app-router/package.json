@@ -10,6 +10,7 @@
   "dependencies": {
     "@honeybadger-io/js": "file:../../../js",
     "@honeybadger-io/nextjs": "file:../..",
+    "@honeybadger-io/plugin-core": "file:../../../plugin-core",
     "@honeybadger-io/react": "file:../../../react",
     "@opentelemetry/api": "^1.9.1",
     "@vercel/otel": "^2.1.3",
