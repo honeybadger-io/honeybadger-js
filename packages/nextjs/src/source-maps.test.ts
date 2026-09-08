@@ -531,6 +531,37 @@ describe('uploadSourceMapsAfterBuild', () => {
 
     // A directory that does not exist is normal: `.next/server` is absent unless
     // experimental.serverSourceMaps is on.
+    // The deploy notification reads as "the maps for this revision are in place". A failed
+    // upload already skips it by throwing; a build that uploaded nothing must too.
+    it('does not announce a deploy when nothing was uploaded', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      mock({ '.next': { 'static': {} } })
+
+      await uploadSourceMapsAfterBuild(
+        { ...configured, deploy: { environment: 'production' } },
+        { distDir: '.next', projectDir: '.' }
+      )
+
+      expect(sendDeployNotification).not.toHaveBeenCalled()
+      warn.mockRestore()
+    })
+
+    // Bailing out early must not skip the cleanup: the maps are on disk and served whether
+    // or not any of them were worth uploading.
+    it('still removes browser maps when there was nothing to upload', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      // Present on disk, but rejected by collectSourcemaps for having no sourcesContent.
+      mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITHOUT_SOURCES } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+        deleteBrowserSourcemaps: true,
+      })
+
+      expect(uploadSourcemaps).not.toHaveBeenCalled()
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+      warn.mockRestore()
+    })
+
     it('treats a missing distDir as empty rather than an error', async () => {
       mock({})
 

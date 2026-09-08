@@ -318,10 +318,14 @@ export async function uploadSourceMapsAfterBuild(
       // that moved, or an `ignorePaths` that matches everything. Silence here would look
       // exactly like success.
       log('warn', silent, `found no source maps to upload in ${metadata.distDir}`)
-    } else {
-      await uploadSourcemaps(sourcemaps, uploadOptions)
+      return
     }
 
+    await uploadSourcemaps(sourcemaps, uploadOptions)
+
+    // Only after maps actually went up. A failed upload already skips this by throwing, so
+    // announcing a deploy for a build that uploaded nothing was the one inconsistent case —
+    // and it reads as "the maps for this revision are in place" when they are not.
     if (uploadOptions.deploy) {
       await sendDeployNotification(uploadOptions)
     }
