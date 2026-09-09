@@ -20,7 +20,10 @@
         "avoidEscape": true
       }
     ],
-    "indent": ["error", 2],
+    "indent": [
+      "error",
+      2
+    ],
     "no-var": "error",
     "object-curly-spacing": [
       "error",
@@ -42,14 +45,28 @@
   "settings": {
     "import/ignore": [
       "node_modules/react-native/index\\.js$"
+    ],
+    "import/core-modules": [
+      "@vercel/otel"
     ]
   },
-  "env":
-  {
+  "env": {
     "jest": true,
     "browser": true,
     "node": true,
     "es6": true,
     "webextensions": true
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "packages/nextjs/templates/**"
+      ],
+      "settings": {
+        "import/core-modules": [
+          "@honeybadger-io/nextjs"
+        ]
+      }
+    }
+  ]
 }
