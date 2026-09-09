@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.16.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.1...@honeybadger-io/js@6.16.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* **js:** correct language in user feedback form link title ([#1665](https://github.com/honeybadger-io/honeybadger-js/issues/1665)) ([28385aa](https://github.com/honeybadger-io/honeybadger-js/commit/28385aa5552f08c684cc4ea11cffc8db96bc234b))
+
+
+
+
+
 ## [6.16.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.0...@honeybadger-io/js@6.16.1) (2026-08-19)
 
 

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.10](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/cloudflare@0.3.9...@honeybadger-io/cloudflare@0.3.10) (2026-09-09)
+
+**Note:** Version bump only for package @honeybadger-io/cloudflare
+
+
+
+
+
 ## [0.3.9](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/cloudflare@0.3.8...@honeybadger-io/cloudflare@0.3.9) (2026-08-19)
 
 **Note:** Version bump only for package @honeybadger-io/cloudflare
