@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/vue",
-  "version": "6.2.19",
+  "version": "6.2.20",
   "license": "MIT",
   "description": "Honeybadger Vue.js client",
   "author": "Jason Truesdell <jason@yuzuten.com> (https://github.com/JasonTrue)",

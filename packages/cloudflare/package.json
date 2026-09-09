@@ -1,6 +1,6 @@
 {
   "name": "@honeybadger-io/cloudflare",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "description": "Cloudflare Workers integration for Honeybadger",
   "keywords": [
     "cloudflare",

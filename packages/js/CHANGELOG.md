@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.16.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.2...@honeybadger-io/js@6.16.3) (2026-09-09)
+
+
+### Bug Fixes
+
+* **js:** request the feedback form for the js client version ([#1667](https://github.com/honeybadger-io/honeybadger-js/issues/1667)) ([d0d5c18](https://github.com/honeybadger-io/honeybadger-js/commit/d0d5c185e317c26091e28a53a75dd201b4a7701e))
+
+
+
+
+
 ## [6.16.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.1...@honeybadger-io/js@6.16.2) (2026-09-09)
 
 
