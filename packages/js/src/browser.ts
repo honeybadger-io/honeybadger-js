@@ -121,7 +121,10 @@ class Honeybadger extends Client {
   }
 
   private getUserFeedbackSubmitUrl() {
-    return getUserFeedbackScriptUrl(this.getVersion())
+    // The feedback form template is published per major.minor of this package, so the
+    // url must track NOTIFIER.version. It cannot use getVersion(), which reports the
+    // notifier a wrapper package (react, vue) may have installed via setNotifier().
+    return getUserFeedbackScriptUrl(NOTIFIER.version)
   }
 
   /** @internal */
