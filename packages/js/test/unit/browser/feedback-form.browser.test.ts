@@ -2,6 +2,10 @@ import fetch from 'jest-fetch-mock';
 import Singleton, { getUserFeedbackScriptUrl } from '../../../src/browser';
 import { nullLogger } from '../helpers';
 
+// Read before any test can call setNotifier(): the version of @honeybadger-io/js
+// itself, which is the version the feedback form script url must track.
+const clientPackageVersion = Singleton.getVersion()
+
 describe('showUserFeedbackForm', function () {
 
   let client: typeof Singleton
@@ -93,7 +97,27 @@ describe('showUserFeedbackForm', function () {
     expect(window['honeybadgerUserFeedbackOptions']).toMatchObject({
       noticeId: id
     })
-    expect(window.document.head.innerHTML).toMatch(`<script src="${getUserFeedbackScriptUrl(client.getVersion())}" async="true"></script>`)
+    expect(window.document.head.innerHTML).toMatch(`<script src="${getUserFeedbackScriptUrl(clientPackageVersion)}" async="true"></script>`)
+  })
+
+  it('should build the feedback script url from the js client version, not from the notifier', function () {
+    const id = '48b98609-dd3b-48ee-bffc-d51f309a2dfa'
+    client.configure({
+      apiKey: 'testing'
+    })
+    // Wrapper packages (react, vue) overwrite the notifier with their own version on init.
+    client.setNotifier({
+      name: '@honeybadger-io/react',
+      url: 'https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/react',
+      version: '6.1.32'
+    })
+    // @ts-expect-error __lastNoticeId is private
+    client.__lastNoticeId = id
+    client.showUserFeedbackForm()
+
+    expect(client.getVersion()).toBe('6.1.32')
+    expect(window.document.head.innerHTML).toContain(getUserFeedbackScriptUrl(clientPackageVersion))
+    expect(window.document.head.innerHTML).not.toContain('/v6.1/')
   })
 
   it('should add user feedback options in window object', function () {
