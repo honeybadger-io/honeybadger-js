@@ -1,4 +1,6 @@
 import { HoneybadgerNextJsConfig } from './types'
+import { isSourceMapUploadConfigured, uploadSourceMapsAfterBuild } from './source-maps'
+import type { AfterProductionCompileMetadata } from './source-maps'
 
 const HONEYBADGER_JS_PACKAGE = '@honeybadger-io/js'
 
@@ -36,10 +38,75 @@ function withHoneybadgerExternalized(serverExternalPackages: unknown): string[] 
   return [...serverExternalPackages as string[], HONEYBADGER_JS_PACKAGE]
 }
 
+type CompilerConfig = {
+  runAfterProductionCompile?: (metadata: AfterProductionCompileMetadata) => unknown
+}
+
+type ExperimentalConfig = {
+  serverSourceMaps?: boolean
+}
+
 /**
- * Wraps a Next.js config so Honeybadger's build-time requirements are applied.
+ * Registers the source map upload on Next.js's post-compile hook, composing with any hook
+ * the project already declares rather than replacing it.
  *
- * Instrumentation itself is no longer set up here — that moved to the bundler-agnostic
+ * The hook runs for both Turbopack and webpack builds — it is invoked from the generic
+ * build pipeline — which is the whole reason upload moved here from a webpack plugin.
+ * Next.js documents it as being "useful for third-party tools to collect build outputs
+ * like sourcemaps".
+ */
+function withSourceMapUpload(
+  compiler: CompilerConfig | undefined,
+  honeybadgerNextJsConfig: HoneybadgerNextJsConfig | undefined,
+  deleteBrowserSourcemaps: boolean
+): CompilerConfig {
+  const existingHook = compiler?.runAfterProductionCompile
+
+  return {
+    ...compiler,
+    runAfterProductionCompile: async (metadata: AfterProductionCompileMetadata) => {
+      // The project's own hook runs first, and is not swallowed: if it throws, that is
+      // its build failing, not ours.
+      if (typeof existingHook === 'function') {
+        await existingHook(metadata)
+      }
+
+      await uploadSourceMapsAfterBuild(honeybadgerNextJsConfig, metadata, { deleteBrowserSourcemaps })
+    },
+  }
+}
+
+/**
+ * Opts into server source maps, so frames from `.next/server` can be symbolicated too.
+ *
+ * `productionBrowserSourceMaps` covers only the browser build. The webpack plugin this
+ * replaces set `devtool: 'hidden-source-map'` with no `isServer` guard, so it ran for the
+ * browser, server and edge compilations alike — server maps were written to disk even
+ * though that plugin only ever uploaded the client ones, which is
+ * https://github.com/honeybadger-io/honeybadger-js/issues/1602. Without this option the
+ * new hook has strictly less to collect than the old plugin generated.
+ *
+ * Unlike the browser maps, these are never published: `.next/server` is not served, so
+ * they are left in place after upload rather than deleted.
+ */
+function withServerSourceMaps(
+  experimental: ExperimentalConfig | undefined,
+  enable: boolean
+): ExperimentalConfig | undefined {
+  // An explicit setting is the project's call, either way.
+  if (!enable || experimental?.serverSourceMaps !== undefined) {
+    return experimental
+  }
+
+  log('debug', 'enabling experimental.serverSourceMaps so server frames can be symbolicated')
+  return { ...experimental, serverSourceMaps: true }
+}
+
+/**
+ * Wraps a Next.js config so Honeybadger's build-time requirements are applied: the
+ * `@honeybadger-io/js` externalization, and source map upload after a production build.
+ *
+ * Instrumentation itself is not set up here — that moved to the bundler-agnostic
  * `instrumentation.ts` / `instrumentation-client.ts` conventions, so it works under both
  * Turbopack and webpack. See https://github.com/honeybadger-io/honeybadger-js/issues/1434.
  */
@@ -49,8 +116,35 @@ export function withHoneybadgerConfig<T extends Record<string, unknown>>(
 ): T {
   _silent = honeybadgerNextJsConfig?.silent ?? true
 
+  const uploadConfigured = isSourceMapUploadConfigured(honeybadgerNextJsConfig)
+
+  // Next.js does not emit production browser source maps unless asked, so upload would
+  // find nothing to send. The webpack plugin this replaces got them by setting
+  // `devtool: 'hidden-source-map'`, which Turbopack ignores and Next.js has no equivalent
+  // for — `productionBrowserSourceMaps` is the only switch, and it also serves them.
+  //
+  // So turn it on when upload is configured, and have the post-build step delete the maps
+  // once they are uploaded. An explicit setting is always respected: a project that asked
+  // for served source maps keeps them, and keeps them served.
+  const enableBrowserSourceMaps =
+    config.productionBrowserSourceMaps === undefined && uploadConfigured
+
+  const experimental = withServerSourceMaps(
+    config.experimental as ExperimentalConfig | undefined,
+    uploadConfigured
+  )
+
   return {
     ...config,
     serverExternalPackages: withHoneybadgerExternalized(config.serverExternalPackages),
+    productionBrowserSourceMaps: enableBrowserSourceMaps ? true : config.productionBrowserSourceMaps,
+    // Only introduce the key when there is something to put in it, so a config that never
+    // mentioned `experimental` does not suddenly grow the field.
+    ...(experimental ? { experimental } : {}),
+    compiler: withSourceMapUpload(
+      config.compiler as CompilerConfig | undefined,
+      honeybadgerNextJsConfig,
+      enableBrowserSourceMaps
+    ),
   }
 }

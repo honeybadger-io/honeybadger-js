@@ -13,24 +13,26 @@ const honeybadgerNextJsConfig = {
   // Hide debug messages (optional)
   silent: false,
 
-  // More information available at @honeybadger-io/webpack: https://github.com/honeybadger-io/honeybadger-js/tree/master/packages/webpack
-  webpackPluginOptions: {
-    // Required if you want to upload source maps to Honeybadger
-    apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
+  // Source map upload options. These are passed through to @honeybadger-io/plugin-core,
+  // which performs the upload after the production build via Next.js's
+  // compiler.runAfterProductionCompile hook — so it works under Turbopack and webpack
+  // alike.
 
-    // Required if you want to upload source maps to Honeybadger
-    assetsUrl: process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL,
+  // Required if you want to upload source maps to Honeybadger
+  apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
 
-    revision: process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
-    endpoint: 'https://api.honeybadger.io/v1/source_maps',
-    ignoreErrors: false,
-    retries: 3,
-    workerCount: 5,
-    deploy: {
-      environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || process.env.NODE_ENV,
-      repository: 'https://github.com/honeybadger-io/nextjs-with-honeybadger',
-      localUsername: 'subzero10'
-    }
+  // Required if you want to upload source maps to Honeybadger
+  assetsUrl: process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL,
+
+  revision: process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
+  endpoint: 'https://api.honeybadger.io/v1/source_maps',
+  ignoreErrors: false,
+  retries: 3,
+  workerCount: 5,
+  deploy: {
+    environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || process.env.NODE_ENV,
+    repository: 'https://github.com/honeybadger-io/nextjs-with-honeybadger',
+    localUsername: 'subzero10'
   }
 }
 

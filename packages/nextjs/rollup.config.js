@@ -28,10 +28,16 @@ const mainConfig = {
     },
   ],
   external: [
+    // Node builtins, used by the post-build source map upload. Only the main bundle
+    // touches them — the edge and client entries deliberately exclude that module.
+    'fs',
+    'path',
     'next',
     'next/server',
     '@honeybadger-io/js',
     '@honeybadger-io/react',
+    '@honeybadger-io/plugin-core',
+    'picomatch',
     '@vercel/otel',
   ],
   plugins: [
