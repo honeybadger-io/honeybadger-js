@@ -16,6 +16,11 @@ function setNodeEnv(value: string | undefined): void {
   }
 }
 
+// A built file declares its map with a sourceMappingURL comment, which is how the collector
+// pairs the two. Turbopack does not name the map after the chunk, so the comment is the only
+// reliable link.
+const js = (mapName: string) => `code\n//# sourceMappingURL=${mapName}`
+
 const uploadSourcemaps = jest.fn()
 const sendDeployNotification = jest.fn()
 // Set to make option resolution blow up, standing in for `cleanOptions` throwing or
@@ -42,7 +47,7 @@ describe('collectSourcemaps', () => {
   it('pairs each map with its js file, relative to distDir', async () => {
     mock({
       '.next': {
-        'static': { 'chunks': { 'main.js': 'code', 'main.js.map': MAP_WITH_SOURCES } },
+        'static': { 'chunks': { 'main.js': js('main.js.map'), 'main.js.map': MAP_WITH_SOURCES } },
       },
     })
 
@@ -60,8 +65,8 @@ describe('collectSourcemaps', () => {
   it('walks nested directories and both output roots', async () => {
     mock({
       '.next': {
-        'static': { 'chunks': { 'app': { 'page.js': 'code', 'page.js.map': MAP_WITH_SOURCES } } },
-        'server': { 'chunks': { 'handler.js': 'code', 'handler.js.map': MAP_WITH_SOURCES } },
+        'static': { 'chunks': { 'app': { 'page.js': js('page.js.map'), 'page.js.map': MAP_WITH_SOURCES } } },
+        'server': { 'chunks': { 'handler.js': js('handler.js.map'), 'handler.js.map': MAP_WITH_SOURCES } },
       },
     })
 
@@ -72,13 +77,55 @@ describe('collectSourcemaps', () => {
     expect(names).toEqual(['server/chunks/handler.js', 'static/chunks/app/page.js'])
   })
 
+  // Turbopack gives the map its own hash, so the sibling convention finds nothing and every
+  // browser map was silently skipped — uploaded zero, deleted twelve.
+  it('pairs a chunk with a map that is not named after it', async () => {
+    mock({
+      '.next': {
+        'static': {
+          'chunks': {
+            '1mfl5gjk9763d.js': js('33ri1p-shrphb.js.map'),
+            '33ri1p-shrphb.js.map': MAP_WITH_SOURCES,
+          },
+        },
+      },
+    })
+
+    const collected = await collectSourcemaps('.next')
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0]).toMatchObject({
+      // the minified_url is built from this, so it must be the chunk, not the map
+      jsFilename: 'static/chunks/1mfl5gjk9763d.js',
+      sourcemapFilename: 'static/chunks/33ri1p-shrphb.js.map',
+    })
+  })
+
+  it('skips a chunk whose sourceMappingURL points at a missing file', async () => {
+    mock({ '.next': { 'static': { 'a.js': js('gone.js.map') } } })
+
+    await expect(collectSourcemaps('.next')).resolves.toEqual([])
+  })
+
+  it('skips a chunk with an inline data: map, which has nothing to upload', async () => {
+    mock({ '.next': { 'static': { 'a.js': js('data:application/json;base64,e30=') } } })
+
+    await expect(collectSourcemaps('.next')).resolves.toEqual([])
+  })
+
+  it('skips a chunk that declares no map at all', async () => {
+    mock({ '.next': { 'static': { 'a.js': 'code with no comment' } } })
+
+    await expect(collectSourcemaps('.next')).resolves.toEqual([])
+  })
+
   it('skips maps with no sourcesContent', async () => {
     mock({
       '.next': {
         'static': {
-          'useful.js': 'code',
+          'useful.js': js('useful.js.map'),
           'useful.js.map': MAP_WITH_SOURCES,
-          'empty.js': 'code',
+          'empty.js': js('empty.js.map'),
           'empty.js.map': MAP_WITHOUT_SOURCES,
         },
       },
@@ -96,7 +143,7 @@ describe('collectSourcemaps', () => {
   })
 
   it('skips unparseable maps rather than failing the build', async () => {
-    mock({ '.next': { 'static': { 'broken.js': 'code', 'broken.js.map': 'not json' } } })
+    mock({ '.next': { 'static': { 'broken.js': js('broken.js.map'), 'broken.js.map': 'not json' } } })
 
     expect(await collectSourcemaps('.next')).toHaveLength(0)
   })
@@ -104,8 +151,8 @@ describe('collectSourcemaps', () => {
   it('honours ignorePaths', async () => {
     mock({
       '.next': {
-        'static': { 'keep.js': 'code', 'keep.js.map': MAP_WITH_SOURCES },
-        'server': { 'skip.js': 'code', 'skip.js.map': MAP_WITH_SOURCES },
+        'static': { 'keep.js': js('keep.js.map'), 'keep.js.map': MAP_WITH_SOURCES },
+        'server': { 'skip.js': js('skip.js.map'), 'skip.js.map': MAP_WITH_SOURCES },
       },
     })
 
@@ -123,7 +170,7 @@ describe('collectSourcemaps', () => {
   it('ignores files that are not source maps', async () => {
     mock({
       '.next': {
-        'static': { 'main.js': 'code', 'main.js.map': MAP_WITH_SOURCES, 'styles.css': 'css', 'BUILD_ID': 'x' },
+        'static': { 'main.js': js('main.js.map'), 'main.js.map': MAP_WITH_SOURCES, 'styles.css': 'css', 'BUILD_ID': 'x' },
       },
     })
 
@@ -239,7 +286,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   })
 
   it('does nothing when upload is not configured', async () => {
-    mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
+    mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
 
     await uploadSourceMapsAfterBuild({}, { distDir: '.next', projectDir: '.' })
 
@@ -248,7 +295,7 @@ describe('uploadSourceMapsAfterBuild', () => {
 
   it('uploads the collected maps', async () => {
     setNodeEnv('production')
-    mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
+    mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
 
     await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
 
@@ -258,7 +305,7 @@ describe('uploadSourceMapsAfterBuild', () => {
 
   it('skips a development build', async () => {
     setNodeEnv('development')
-    mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
+    mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
 
     await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
 
@@ -267,7 +314,7 @@ describe('uploadSourceMapsAfterBuild', () => {
 
   it('sends a deploy notification only when asked', async () => {
     setNodeEnv('production')
-    mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
+    mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
 
     await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
     expect(sendDeployNotification).not.toHaveBeenCalled()
@@ -282,7 +329,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   describe('deleting the maps after upload', () => {
     beforeEach(() => {
       setNodeEnv('production')
-      mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
     })
 
     // We turn on productionBrowserSourceMaps to have something to upload, and that also
@@ -310,15 +357,15 @@ describe('uploadSourceMapsAfterBuild', () => {
       mock({
         '.next': {
           'static': {
-            'good.js': 'code', 'good.js.map': MAP_WITH_SOURCES,
+            'good.js': js('good.js.map'), 'good.js.map': MAP_WITH_SOURCES,
             // rejected by collectSourcemaps: no sourcesContent
-            'empty.js': 'code', 'empty.js.map': MAP_WITHOUT_SOURCES,
+            'empty.js': js('empty.js.map'), 'empty.js.map': MAP_WITHOUT_SOURCES,
             // rejected by collectSourcemaps: unparseable
-            'broken.js': 'code', 'broken.js.map': 'not json',
+            'broken.js': js('broken.js.map'), 'broken.js.map': 'not json',
             // rejected by collectSourcemaps: no sibling .js
             'orphan.js.map': MAP_WITH_SOURCES,
             // rejected by ignorePaths below
-            'vendor.js': 'code', 'vendor.js.map': MAP_WITH_SOURCES,
+            'vendor.js': js('vendor.js.map'), 'vendor.js.map': MAP_WITH_SOURCES,
           },
         },
       })
@@ -366,8 +413,8 @@ describe('uploadSourceMapsAfterBuild', () => {
     it('never removes server maps, even when asked', async () => {
       mock({
         '.next': {
-          'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES },
-          'server': { 'b.js': 'code', 'b.js.map': MAP_WITH_SOURCES },
+          'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES },
+          'server': { 'b.js': js('b.js.map'), 'b.js.map': MAP_WITH_SOURCES },
         },
       })
 
@@ -551,7 +598,7 @@ describe('uploadSourceMapsAfterBuild', () => {
     it('still removes browser maps when there was nothing to upload', async () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
       // Present on disk, but rejected by collectSourcemaps for having no sourcesContent.
-      mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITHOUT_SOURCES } } })
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITHOUT_SOURCES } } })
 
       await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
         deleteBrowserSourcemaps: true,
@@ -599,7 +646,7 @@ describe('uploadSourceMapsAfterBuild', () => {
   describe('when the upload fails', () => {
     beforeEach(() => {
       setNodeEnv('production')
-      mock({ '.next': { 'static': { 'a.js': 'code', 'a.js.map': MAP_WITH_SOURCES } } })
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
       uploadSourcemaps.mockRejectedValue(new Error('honeybadger is down'))
     })
 
