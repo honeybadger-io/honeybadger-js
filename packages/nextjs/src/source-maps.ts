@@ -168,8 +168,53 @@ async function hasSourcesContent(sourcemapFilePath: string): Promise<boolean> {
   }
 }
 
+// Enough to reach the `sourceMappingURL` comment, which is the last line of a built file.
+const SOURCE_MAPPING_URL_TAIL_BYTES = 2048
+
 /**
- * Finds the `.js` / `.js.map` pairs in the build output.
+ * The source map a built JavaScript file points at, or `null` when it has none.
+ *
+ * Resolved from the file's own `sourceMappingURL` comment rather than by assuming the map
+ * sits beside it as `<name>.js.map`. That sibling convention is webpack's; Turbopack gives
+ * the map an independent hash — `1mfl5gjk9763d.js` points at `33ri1p-shrphb.js.map` — so
+ * assuming it silently matched nothing and every browser map was skipped.
+ *
+ * Only the tail of the file is read, since the comment is always its last line.
+ */
+async function locateSourcemap(jsFilePath: string): Promise<string | null> {
+  let tail: string
+  try {
+    const handle = await fs.promises.open(jsFilePath, 'r')
+    try {
+      const { size } = await handle.stat()
+      const length = Math.min(size, SOURCE_MAPPING_URL_TAIL_BYTES)
+      const buffer = Buffer.alloc(length)
+      await handle.read(buffer, 0, length, size - length)
+      tail = buffer.toString('utf8')
+    } finally {
+      await handle.close()
+    }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    return null
+  }
+
+  const match = /[#@]\s*sourceMappingURL=(\S+)/g.exec(tail)
+  const url = match?.[1]
+
+  // No map, or an inline `data:` map, which there is nothing to upload for.
+  if (!url || url.startsWith('data:')) {
+    return null
+  }
+
+  const sourcemapFilePath = path.resolve(path.dirname(jsFilePath), decodeURIComponent(url))
+
+  return fs.existsSync(sourcemapFilePath) ? sourcemapFilePath : null
+}
+
+/**
+ * Pairs each built `.js` file with the source map it declares.
  *
  * `jsFilename` is the path relative to `distDir`, because that is what `assetsUrl`
  * addresses: the configuration templates point it at `<origin>/_next`, and `.next/x`
@@ -186,23 +231,22 @@ export async function collectSourcemaps(
   distDir: string,
   ignorePaths: string[] = []
 ): Promise<Types.SourcemapInfo[]> {
-  const sourcemapFilePaths: string[] = []
+  const jsFilePaths: string[] = []
   await walk(distDir, (filePath) => {
-    if (filePath.endsWith('.js.map')) {
-      sourcemapFilePaths.push(filePath)
+    if (filePath.endsWith('.js')) {
+      jsFilePaths.push(filePath)
     }
   })
 
   const collected: Types.SourcemapInfo[] = []
 
-  for (const sourcemapFilePath of sourcemapFilePaths) {
-    const jsFilePath = sourcemapFilePath.slice(0, -'.map'.length)
-
-    if (!fs.existsSync(jsFilePath)) {
+  for (const jsFilePath of jsFilePaths) {
+    if (picomatch.isMatch(jsFilePath, ignorePaths, { basename: true })) {
       continue
     }
 
-    if (picomatch.isMatch(jsFilePath, ignorePaths, { basename: true })) {
+    const sourcemapFilePath = await locateSourcemap(jsFilePath)
+    if (!sourcemapFilePath) {
       continue
     }
 
