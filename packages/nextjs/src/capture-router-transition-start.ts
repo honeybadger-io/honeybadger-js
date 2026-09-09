@@ -1,4 +1,9 @@
-import { Honeybadger } from '@honeybadger-io/react';
+// Deliberately @honeybadger-io/js, not @honeybadger-io/react. The react package re-exports
+// this exact singleton, but reaching it through there also pulls in the error-boundary class
+// component — and this module sits in the main barrel that `instrumentation.ts` imports on
+// the server, where React Server Components reject a class component outright under
+// Turbopack.
+import Honeybadger from '@honeybadger-io/js';
 
 /**
  * Navigation types Next.js reports for an App Router transition.

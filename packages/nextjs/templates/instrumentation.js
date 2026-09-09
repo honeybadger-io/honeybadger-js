@@ -6,11 +6,7 @@ import { captureRequestError } from '@honeybadger-io/nextjs'
  * entry-point injection, which Turbopack ignored.
  */
 export async function register() {
-  if (process.env.NEXT_RUNTIME === 'edge') {
-    await import('./honeybadger.edge.config')
-  } else {
-    await import('./honeybadger.server.config')
-  }
+  await import('./honeybadger.server.config')
 
   // Optional: send a `request.handled` Insights event for every request, including
   // successful ones. This needs @vercel/otel installed, since Next.js emits the

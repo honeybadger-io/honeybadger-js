@@ -177,7 +177,6 @@ export async function copyConfigFiles() {
   // The browser config is gone: `instrumentation-client` now configures the browser,
   // and it runs before hydration rather than via a bundler-injected entry point.
   const configFiles = [
-    'honeybadger.edge.config.js',
     'honeybadger.server.config.js',
   ]
 

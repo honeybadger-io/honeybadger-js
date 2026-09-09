@@ -1,8 +1,23 @@
 import fs from 'fs'
 import path from 'path'
 import picomatch from 'picomatch'
-import { cleanOptions, sendDeployNotification, uploadSourcemaps, Types } from '@honeybadger-io/plugin-core'
+// Type-only, so nothing from plugin-core is pulled into the module graph at import time.
+import type { Types } from '@honeybadger-io/plugin-core'
 import { HoneybadgerNextJsConfig } from './types'
+
+/**
+ * Loads plugin-core on demand, never at module scope.
+ *
+ * Its module body runs `fetchRetry(require('node-fetch'))` as a side effect, which throws
+ * `ArgumentError: fetch must be a function` inside the Next.js server runtime. This module
+ * shares a barrel with the runtime instrumentation exports, so a top-level import here took
+ * down `instrumentation.ts` for every app — the hook failed to load and nothing was
+ * instrumented at all. plugin-core is a rollup external, so this stays a real deferred
+ * require in both the CJS and ESM bundles.
+ */
+function loadPluginCore() {
+  return import('@honeybadger-io/plugin-core')
+}
 
 /**
  * The build output directory Next.js serves over HTTP, relative to `distDir`. `.next/static`
@@ -53,9 +68,9 @@ export function isSourceMapUploadConfigured(
  * whatever this hook throws — so validating eagerly would fail the build of every app
  * that simply does not use this feature.
  */
-export function resolveUploadOptions(
+export async function resolveUploadOptions(
   honeybadgerNextJsConfig: HoneybadgerNextJsConfig = {}
-): Types.HbPluginOptions | null {
+): Promise<Types.HbPluginOptions | null> {
   const silent = honeybadgerNextJsConfig.silent ?? true
 
   if (honeybadgerNextJsConfig.disableSourceMapUpload) {
@@ -80,6 +95,8 @@ export function resolveUploadOptions(
   // revision would upload as `undefined` instead of `main`, and a fault whose revision
   // does not match its source map is never symbolicated — so drop empty values instead
   // of passing them through.
+  const { cleanOptions } = await loadPluginCore()
+
   return cleanOptions(withoutUndefined({
     ...provided,
     apiKey,
@@ -94,6 +111,10 @@ function withoutUndefined<T extends Record<string, unknown>>(options: T): T {
     Object.entries(options).filter(([, value]) => value !== undefined)
   ) as T
 }
+
+// Mirrors plugin-core's DEFAULT_DEVELOPMENT_ENVIRONMENTS. Duplicated so a development
+// build can be recognised before plugin-core is loaded — see uploadSourceMapsAfterBuild.
+const DEFAULT_DEVELOPMENT_ENVIRONMENTS = ['dev', 'development', 'test']
 
 function isDevEnv(developmentEnvironments: string[]): boolean {
   if (!process.env.NODE_ENV) {
@@ -147,8 +168,53 @@ async function hasSourcesContent(sourcemapFilePath: string): Promise<boolean> {
   }
 }
 
+// Enough to reach the `sourceMappingURL` comment, which is the last line of a built file.
+const SOURCE_MAPPING_URL_TAIL_BYTES = 2048
+
 /**
- * Finds the `.js` / `.js.map` pairs in the build output.
+ * The source map a built JavaScript file points at, or `null` when it has none.
+ *
+ * Resolved from the file's own `sourceMappingURL` comment rather than by assuming the map
+ * sits beside it as `<name>.js.map`. That sibling convention is webpack's; Turbopack gives
+ * the map an independent hash — `1mfl5gjk9763d.js` points at `33ri1p-shrphb.js.map` — so
+ * assuming it silently matched nothing and every browser map was skipped.
+ *
+ * Only the tail of the file is read, since the comment is always its last line.
+ */
+async function locateSourcemap(jsFilePath: string): Promise<string | null> {
+  let tail: string
+  try {
+    const handle = await fs.promises.open(jsFilePath, 'r')
+    try {
+      const { size } = await handle.stat()
+      const length = Math.min(size, SOURCE_MAPPING_URL_TAIL_BYTES)
+      const buffer = Buffer.alloc(length)
+      await handle.read(buffer, 0, length, size - length)
+      tail = buffer.toString('utf8')
+    } finally {
+      await handle.close()
+    }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    return null
+  }
+
+  const match = /[#@]\s*sourceMappingURL=(\S+)/g.exec(tail)
+  const url = match?.[1]
+
+  // No map, or an inline `data:` map, which there is nothing to upload for.
+  if (!url || url.startsWith('data:')) {
+    return null
+  }
+
+  const sourcemapFilePath = path.resolve(path.dirname(jsFilePath), decodeURIComponent(url))
+
+  return fs.existsSync(sourcemapFilePath) ? sourcemapFilePath : null
+}
+
+/**
+ * Pairs each built `.js` file with the source map it declares.
  *
  * `jsFilename` is the path relative to `distDir`, because that is what `assetsUrl`
  * addresses: the configuration templates point it at `<origin>/_next`, and `.next/x`
@@ -165,23 +231,22 @@ export async function collectSourcemaps(
   distDir: string,
   ignorePaths: string[] = []
 ): Promise<Types.SourcemapInfo[]> {
-  const sourcemapFilePaths: string[] = []
+  const jsFilePaths: string[] = []
   await walk(distDir, (filePath) => {
-    if (filePath.endsWith('.js.map')) {
-      sourcemapFilePaths.push(filePath)
+    if (filePath.endsWith('.js')) {
+      jsFilePaths.push(filePath)
     }
   })
 
   const collected: Types.SourcemapInfo[] = []
 
-  for (const sourcemapFilePath of sourcemapFilePaths) {
-    const jsFilePath = sourcemapFilePath.slice(0, -'.map'.length)
-
-    if (!fs.existsSync(jsFilePath)) {
+  for (const jsFilePath of jsFilePaths) {
+    if (picomatch.isMatch(jsFilePath, ignorePaths, { basename: true })) {
       continue
     }
 
-    if (picomatch.isMatch(jsFilePath, ignorePaths, { basename: true })) {
+    const sourcemapFilePath = await locateSourcemap(jsFilePath)
+    if (!sourcemapFilePath) {
       continue
     }
 
@@ -265,39 +330,55 @@ export async function uploadSourceMapsAfterBuild(
   metadata: AfterProductionCompileMetadata,
   options: { deleteBrowserSourcemaps?: boolean } = {}
 ): Promise<void> {
-  const uploadOptions = resolveUploadOptions(honeybadgerNextJsConfig)
-  if (!uploadOptions) {
-    return
-  }
+  // Read from the raw config rather than the resolved options, because the error handling
+  // below has to cover resolving them at all: `cleanOptions` can throw, and loading
+  // plugin-core can fail outright. Doing that outside the try meant a failure there ignored
+  // `ignoreErrors` and skipped the cleanup that keeps browser maps off the wire.
+  const silent = honeybadgerNextJsConfig?.silent ?? true
+  const ignoreErrors = honeybadgerNextJsConfig?.ignoreErrors ?? false
 
-  // Outside the try/finally below: a build that never intended to upload also never
-  // enabled the browser maps, so there is nothing of ours to clean up.
-  if (isDevEnv(uploadOptions.developmentEnvironments)) {
-    log('debug', uploadOptions.silent, `skipping source map upload in ${process.env.NODE_ENV}`)
+  // Outside the try/finally below: a build that never intended to upload also never enabled
+  // the browser maps, so there is nothing of ours to clean up. Decided from the raw config
+  // so it needs no plugin-core.
+  const developmentEnvironments =
+    honeybadgerNextJsConfig?.developmentEnvironments ?? DEFAULT_DEVELOPMENT_ENVIRONMENTS
+  if (isDevEnv(developmentEnvironments)) {
+    log('debug', silent, `skipping source map upload in ${process.env.NODE_ENV}`)
     return
   }
 
   try {
+    const uploadOptions = await resolveUploadOptions(honeybadgerNextJsConfig)
+    if (!uploadOptions) {
+      return
+    }
+
+    const { uploadSourcemaps, sendDeployNotification } = await loadPluginCore()
+
     const sourcemaps = await collectSourcemaps(metadata.distDir, uploadOptions.ignorePaths)
 
     if (sourcemaps.length === 0) {
       // Upload is configured, so finding nothing means something is wrong — a `distDir`
       // that moved, or an `ignorePaths` that matches everything. Silence here would look
       // exactly like success.
-      log('warn', uploadOptions.silent, `found no source maps to upload in ${metadata.distDir}`)
-    } else {
-      await uploadSourcemaps(sourcemaps, uploadOptions)
+      log('warn', silent, `found no source maps to upload in ${metadata.distDir}`)
+      return
     }
 
+    await uploadSourcemaps(sourcemaps, uploadOptions)
+
+    // Only after maps actually went up. A failed upload already skips this by throwing, so
+    // announcing a deploy for a build that uploaded nothing was the one inconsistent case —
+    // and it reads as "the maps for this revision are in place" when they are not.
     if (uploadOptions.deploy) {
       await sendDeployNotification(uploadOptions)
     }
   } catch (error) {
-    if (!uploadOptions.ignoreErrors) {
+    if (!ignoreErrors) {
       throw error
     }
 
-    log('error', uploadOptions.silent, `source map upload failed: ${(error as Error).message}`)
+    log('error', silent, `source map upload failed: ${(error as Error).message}`)
   } finally {
     // Unconditionally, including after a failed upload. We enabled
     // `productionBrowserSourceMaps`, so these maps ship publicly unless something removes
@@ -307,12 +388,12 @@ export async function uploadSourceMapsAfterBuild(
     // deploy that served them cannot be recalled.
     if (options.deleteBrowserSourcemaps) {
       try {
-        await deleteBrowserSourcemapFiles(metadata.distDir, uploadOptions.silent)
+        await deleteBrowserSourcemapFiles(metadata.distDir, silent)
       } catch (error) {
         // Never let cleanup mask the upload failure that is already propagating.
         log(
           'warn',
-          uploadOptions.silent,
+          silent,
           `could not clean up browser source maps: ${(error as Error).message}`
         )
       }
