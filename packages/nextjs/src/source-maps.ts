@@ -210,7 +210,19 @@ async function locateSourcemap(jsFilePath: string): Promise<string | null> {
     return null
   }
 
-  const sourcemapFilePath = path.resolve(path.dirname(jsFilePath), decodeURIComponent(url))
+  // `decodeURIComponent` throws on malformed escapes such as `bad%.map`. Scoped to just
+  // the decode, because letting it escape would abandon the whole build's upload over one
+  // unreadable footer rather than skipping that single file.
+  let decodedUrl: string
+  try {
+    decodedUrl = decodeURIComponent(url)
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    return null
+  }
+
+  const sourcemapFilePath = path.resolve(path.dirname(jsFilePath), decodedUrl)
 
   return fs.existsSync(sourcemapFilePath) ? sourcemapFilePath : null
 }

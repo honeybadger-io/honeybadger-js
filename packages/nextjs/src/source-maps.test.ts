@@ -120,6 +120,24 @@ describe('collectSourcemaps', () => {
     await expect(collectSourcemaps('.next')).resolves.toEqual([])
   })
 
+  // `decodeURIComponent` throws on a malformed escape, and an uncaught throw here would
+  // lose every other map in the build, not just this one.
+  it('skips a chunk whose sourceMappingURL is malformed, and keeps the rest', async () => {
+    mock({
+      '.next': {
+        'static': {
+          'bad.js': js('bad%.map'),
+          'good.js': js('good.js.map'),
+          'good.js.map': MAP_WITH_SOURCES,
+        },
+      },
+    })
+
+    const collected = await collectSourcemaps('.next')
+
+    expect(collected.map((s) => s.jsFilename)).toEqual(['static/good.js'])
+  })
+
   it('skips a chunk that declares no map at all', async () => {
     mock({ '.next': { 'static': { 'a.js': 'code with no comment' } } })
 
