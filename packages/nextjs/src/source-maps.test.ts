@@ -41,6 +41,13 @@ jest.mock('@honeybadger-io/plugin-core', () => {
   }
 })
 
+// `source-maps.ts` loads plugin-core through a dynamic import, which reads from disk the
+// first time it runs. Resolve it up front, or whichever test happens to trigger it first
+// does so while mock-fs is in control and gets ENOENT for plugin-core's own dist.
+beforeAll(async () => {
+  await import('@honeybadger-io/plugin-core')
+})
+
 describe('collectSourcemaps', () => {
   afterEach(() => mock.restore())
 
@@ -324,6 +331,77 @@ describe('uploadSourceMapsAfterBuild', () => {
       { distDir: '.next', projectDir: '.' }
     )
     expect(sendDeployNotification).toHaveBeenCalledTimes(1)
+  })
+
+  // Honeybadger tests the resolved source against the notice's projectRoot to decide whether
+  // a frame is the user's code. A source still carrying its bundler scheme never matches, so
+  // the fault surfaces an unmapped framework frame instead of the throw site.
+  describe('normalizing the source paths', () => {
+    beforeEach(() => { setNodeEnv('production') })
+
+    // The rewritten copy is deleted as soon as the upload returns, so read it inside the
+    // upload rather than afterwards.
+    let sentSources: string[] = []
+    let sentPaths: string[] = []
+    beforeEach(() => {
+      sentSources = []
+      sentPaths = []
+      uploadSourcemaps.mockImplementation(async (maps: Array<{ sourcemapFilePath: string }>) => {
+        sentPaths = maps.map((m) => m.sourcemapFilePath)
+        sentSources = maps.flatMap((m) =>
+          JSON.parse(fs.readFileSync(m.sourcemapFilePath, 'utf8')).sources as string[])
+      })
+    })
+
+    const uploaded = () => sentPaths
+    const uploadedSources = () => sentSources
+
+    it('strips the Turbopack scheme', async () => {
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': JSON.stringify({
+        version: 3, sources: ['turbopack:///[project]/app/page.tsx'], sourcesContent: ['x'],
+      }) } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      expect(uploadedSources()).toEqual(['app/page.tsx'])
+    })
+
+    it.each([
+      ['webpack://_N_E/./app/page.tsx', 'app/page.tsx'],
+      ['webpack:///./app/page.tsx', 'app/page.tsx'],
+    ])('strips the webpack scheme from %s', async (source, expected) => {
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': JSON.stringify({
+        version: 3, sources: [source], sourcesContent: ['x'],
+      }) } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      expect(uploadedSources()).toEqual([expected])
+    })
+
+    // The map on disk is Next.js's own: it reads the server maps to format stack traces.
+    it('rewrites a copy and leaves the original alone', async () => {
+      const original = JSON.stringify({
+        version: 3, sources: ['turbopack:///[project]/app/page.tsx'], sourcesContent: ['x'],
+      })
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': original } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      expect(uploaded()[0]).not.toContain('.next/static/a.js.map')
+      expect(fs.readFileSync('.next/static/a.js.map', 'utf8')).toBe(original)
+    })
+
+    it('leaves an already-relative source untouched', async () => {
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': JSON.stringify({
+        version: 3, sources: ['app/page.tsx'], sourcesContent: ['x'],
+      }) } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      // Nothing to rewrite, so the original file is uploaded rather than a copy.
+      expect(uploaded()[0]).toContain('.next/static/a.js.map')
+    })
   })
 
   describe('deleting the maps after upload', () => {

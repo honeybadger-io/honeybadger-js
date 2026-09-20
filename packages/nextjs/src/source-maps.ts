@@ -1,4 +1,5 @@
 import fs from 'fs'
+import os from 'os'
 import path from 'path'
 import picomatch from 'picomatch'
 // Type-only, so nothing from plugin-core is pulled into the module graph at import time.
@@ -10,10 +11,9 @@ import { HoneybadgerNextJsConfig } from './types'
  *
  * Its module body runs `fetchRetry(require('node-fetch'))` as a side effect, which throws
  * `ArgumentError: fetch must be a function` inside the Next.js server runtime. This module
- * shares a barrel with the runtime instrumentation exports, so a top-level import here took
- * down `instrumentation.ts` for every app — the hook failed to load and nothing was
- * instrumented at all. plugin-core is a rollup external, so this stays a real deferred
- * require in both the CJS and ESM bundles.
+ * shares a barrel with the runtime instrumentation exports, so a top-level import here
+ * would break `instrumentation.ts` for every app. plugin-core is a rollup external, so this
+ * stays a real deferred require in both the CJS and ESM bundles.
  */
 function loadPluginCore() {
   return import('@honeybadger-io/plugin-core')
@@ -176,8 +176,7 @@ const SOURCE_MAPPING_URL_TAIL_BYTES = 2048
  *
  * Resolved from the file's own `sourceMappingURL` comment rather than by assuming the map
  * sits beside it as `<name>.js.map`. That sibling convention is webpack's; Turbopack gives
- * the map an independent hash — `1mfl5gjk9763d.js` points at `33ri1p-shrphb.js.map` — so
- * assuming it silently matched nothing and every browser map was skipped.
+ * the map an independent hash — `1mfl5gjk9763d.js` points at `33ri1p-shrphb.js.map`.
  *
  * Only the tail of the file is read, since the comment is always its last line.
  */
@@ -200,8 +199,11 @@ async function locateSourcemap(jsFilePath: string): Promise<string | null> {
     return null
   }
 
-  const match = /[#@]\s*sourceMappingURL=(\S+)/g.exec(tail)
-  const url = match?.[1]
+  // The last comment wins, per the source map spec. No Next.js chunk currently carries
+  // two, but a bundled library that mentions `sourceMappingURL` in its tail would
+  // otherwise mispair the map.
+  const matches = [...tail.matchAll(/[#@]\s*sourceMappingURL=(\S+)/g)]
+  const url = matches.at(-1)?.[1]
 
   // No map, or an inline `data:` map, which there is nothing to upload for.
   if (!url || url.startsWith('data:')) {
@@ -269,12 +271,96 @@ export async function collectSourcemaps(
 }
 
 /**
+ * Bundler URL schemes that appear in a map's `sources`.
+ *
+ * Turbopack writes `turbopack:///[project]/app/page.tsx`; webpack writes
+ * `webpack://_N_E/./app/page.tsx` or `webpack:///./app/page.tsx`.
+ */
+const SOURCE_SCHEME_PREFIXES = [
+  /^turbopack:\/\/\/\[[^\]]+\]\//,
+  /^webpack:\/\/[^/]*\/(\.\/)?/,
+]
+
+function normalizeSource(source: string): string {
+  for (const prefix of SOURCE_SCHEME_PREFIXES) {
+    const normalized = source.replace(prefix, '')
+    if (normalized !== source) {
+      return normalized
+    }
+  }
+
+  return source
+}
+
+/**
+ * Rewrites each map's `sources` to project-relative paths, in a throwaway copy.
+ *
+ * Honeybadger decides whether a mapped frame is *your* code by testing the resolved source
+ * against the notice's `projectRoot`, which the browser client defaults to the page origin.
+ * A source still carrying its bundler scheme never matches, so the frame is treated as
+ * library code and the fault surfaces the next frame instead — for a React app, an unmapped
+ * framework chunk. Stripping the scheme leaves a relative path, which Honeybadger resolves
+ * against the minified URL and therefore under the origin.
+ *
+ * Done here rather than by asking users to set `projectRoot` to a bundler-specific prefix,
+ * because that value differs between Turbopack and webpack and cannot be chosen correctly
+ * from client config.
+ *
+ * The originals on disk are untouched: Next.js reads the server maps itself.
+ */
+async function withNormalizedSources(
+  sourcemaps: Types.SourcemapInfo[]
+): Promise<{ sourcemaps: Types.SourcemapInfo[]; cleanup: () => Promise<void> }> {
+  const unchanged = { sourcemaps, cleanup: async () => undefined }
+  if (sourcemaps.length === 0) {
+    return unchanged
+  }
+
+  let tempDir: string
+  try {
+    tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'honeybadger-sourcemaps-'))
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    // Uploading unnormalized maps beats not uploading at all.
+    return unchanged
+  }
+
+  const cleanup = () => fs.promises.rm(tempDir, { recursive: true, force: true })
+  const normalized: Types.SourcemapInfo[] = []
+
+  for (const [index, sourcemap] of sourcemaps.entries()) {
+    try {
+      const parsed = JSON.parse(await fs.promises.readFile(sourcemap.sourcemapFilePath, 'utf8'))
+      const sources: unknown = parsed.sources
+
+      if (!Array.isArray(sources) || !sources.some((source) => normalizeSource(String(source)) !== source)) {
+        normalized.push(sourcemap)
+        continue
+      }
+
+      parsed.sources = sources.map((source) => normalizeSource(String(source)))
+      // Named by position, so two maps can never collide in the temp directory.
+      const copyPath = path.join(tempDir, `${index}.js.map`)
+      await fs.promises.writeFile(copyPath, JSON.stringify(parsed))
+      normalized.push({ ...sourcemap, sourcemapFilePath: copyPath })
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    catch (error) {
+      // A map we cannot rewrite is still worth uploading as it is.
+      normalized.push(sourcemap)
+    }
+  }
+
+  return { sourcemaps: normalized, cleanup }
+}
+
+/**
  * Removes the *browser* source map files after they have been uploaded.
  *
- * Only for maps this package caused to be generated. The predecessor to this hook built
- * them with webpack's `hidden-source-map`, so they were never served; Next.js has no
- * hidden equivalent, and its `productionBrowserSourceMaps` publishes them. Deleting after
- * upload restores the old outcome — Honeybadger has the maps, visitors do not.
+ * Only for maps this package caused to be generated. `productionBrowserSourceMaps`
+ * publishes what it generates and Next.js has no hidden-source-map equivalent, so deleting
+ * after upload is what keeps them out of visitors' hands.
  *
  * Server maps are deliberately left alone. `.next/server` is not served, so there is no
  * exposure to undo, and Next.js reads those maps itself when it formats server-side stack
@@ -319,8 +405,7 @@ async function deleteBrowserSourcemapFiles(distDir: string, silent: boolean): Pr
  * Uploads the build's source maps to Honeybadger.
  *
  * Registered by `withHoneybadgerConfig` on Next.js's `compiler.runAfterProductionCompile`
- * hook, which runs for both Turbopack and webpack builds — unlike the webpack plugin this
- * replaces, which Turbopack ignored entirely.
+ * hook, which runs for both Turbopack and webpack builds.
  *
  * Next.js re-throws whatever this hook throws, which would fail the user's build, so a
  * failed upload is only allowed to propagate when `ignoreErrors` is off.
@@ -365,7 +450,12 @@ export async function uploadSourceMapsAfterBuild(
       return
     }
 
-    await uploadSourcemaps(sourcemaps, uploadOptions)
+    const normalized = await withNormalizedSources(sourcemaps)
+    try {
+      await uploadSourcemaps(normalized.sourcemaps, uploadOptions)
+    } finally {
+      await normalized.cleanup()
+    }
 
     // Only after maps actually went up. A failed upload already skips this by throwing, so
     // announcing a deploy for a build that uploaded nothing was the one inconsistent case —

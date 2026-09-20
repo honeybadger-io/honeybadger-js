@@ -31,6 +31,7 @@ const mainConfig = {
     // Node builtins, used by the post-build source map upload. Only the main bundle
     // touches them — the client entry deliberately excludes that module.
     'fs',
+    'os',
     'path',
     'next',
     'next/server',
