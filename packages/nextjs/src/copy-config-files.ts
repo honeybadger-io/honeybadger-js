@@ -11,11 +11,9 @@ function usesTypescript() {
  * Where a router directory actually lives: `''` for the project root, `'src'`, or `null`
  * when the project does not use that router.
  *
- * Previously this was inferred from a single "does a `src` directory exist" check, which
- * broke the common layout of a root `app/` (or `pages/`) beside a `src/` folder used for
- * something else: everything was looked for under `src/`, found nothing, and no error
- * components were written at all. Root wins when a directory somehow exists in both
- * places, matching Next.js.
+ * A root `app/` (or `pages/`) can sit beside a `src/` folder used for something else, so
+ * this locates each directory rather than assuming a layout. Root wins when a directory
+ * somehow exists in both places, matching Next.js.
  */
 function locateRouterDir(router: 'app' | 'pages'): string | null {
   if (fs.existsSync(router)) {
@@ -79,9 +77,8 @@ function getTemplate(isAppRouter = false, isGlobalErrorComponent = false) {
   const templateName = isAppRouter ? '_error_app_router' : '_error'
 
   // `_error_app_router` ships as a JS/TS pair that differs only by the prop type
-  // annotation, so pick the one matching the target file's extension. Previously this
-  // hardcoded `tsx` for the global-error component, which copied annotated TSX into a
-  // plain `.js` file in JavaScript projects. `_error` is JS-only, so it has no pair.
+  // annotation, so pick the one matching the target file's extension. `_error` is JS-only,
+  // so it has no pair.
   const hasTypedVariant = isAppRouter
   const extension = hasTypedVariant && usesTypescript() ? 'tsx' : 'js'
 

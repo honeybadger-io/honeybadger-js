@@ -2,8 +2,7 @@ import { captureRequestError, registerHoneybadgerInsights } from '@honeybadger-i
 
 /**
  * Runs once per server instance, before any request is handled. This is how Honeybadger is
- * configured under both Turbopack and webpack — it replaces the old webpack entry-point
- * injection, which Turbopack ignored entirely.
+ * configured, under both Turbopack and webpack.
  */
 export async function register() {
   await import('./honeybadger.server.config')
@@ -18,7 +17,6 @@ export async function register() {
 
 /**
  * Reports server errors to Honeybadger. Covers Server Components, Route Handlers, Server
- * Actions and middleware — including API routes, which the error-component approach this
- * replaces could never reach.
+ * Actions, middleware and API routes.
  */
 export const onRequestError = captureRequestError

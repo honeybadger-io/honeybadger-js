@@ -21,7 +21,7 @@ const serverScenarios = [
   {
     href: '/api/hello?fail=true',
     title: 'Route Handler',
-    detail: 'API routes used to need an explicit wrapper; instrumentation covers them now.',
+    detail: 'Reported by onRequestError in instrumentation.ts, with no per-handler wrapper.',
   },
   {
     href: '/middleware-test',

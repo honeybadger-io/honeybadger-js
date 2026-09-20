@@ -2,9 +2,8 @@
 type Props = { searchParams: Promise<{ fail?: string }> }
 
 /**
- * Stands in for a real data source. The example used to call a public placeholder API, which
- * made the page fail for reasons unrelated to Honeybadger whenever that service changed; the
- * mechanism being demonstrated is the throw, not the transport.
+ * Stands in for a real data source. Deliberately not a network call: the mechanism being
+ * demonstrated is the throw, not the transport.
  */
 async function getData(fail = false) {
   await new Promise((resolve) => setTimeout(resolve, 10))

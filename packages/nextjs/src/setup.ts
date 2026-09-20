@@ -74,10 +74,9 @@ type NextConfigLike = {
  * Registers the source map upload on Next.js's post-compile hook, composing with any hook
  * the project already declares rather than replacing it.
  *
- * The hook runs for both Turbopack and webpack builds — it is invoked from the generic
- * build pipeline — which is the whole reason upload moved here from a webpack plugin.
- * Next.js documents it as being "useful for third-party tools to collect build outputs
- * like sourcemaps".
+ * The hook is invoked from Next.js's generic build pipeline, so it runs for both Turbopack
+ * and webpack builds. Next.js documents it as being "useful for third-party tools to
+ * collect build outputs like sourcemaps".
  */
 function withSourceMapUpload(
   compiler: CompilerConfig | undefined,
@@ -103,12 +102,10 @@ function withSourceMapUpload(
 /**
  * Opts into server source maps, so frames from `.next/server` can be symbolicated too.
  *
- * `productionBrowserSourceMaps` covers only the browser build. The webpack plugin this
- * replaces set `devtool: 'hidden-source-map'` with no `isServer` guard, so it ran for the
- * browser, server and edge compilations alike — server maps were written to disk even
- * though that plugin only ever uploaded the client ones, which is
- * https://github.com/honeybadger-io/honeybadger-js/issues/1602. Without this option the
- * new hook has strictly less to collect than the old plugin generated.
+ * `productionBrowserSourceMaps` covers only the browser build, so without this option
+ * there are no server maps to collect at all. Whether the uploaded server maps actually
+ * match the frames reported at runtime is tracked in
+ * https://github.com/honeybadger-io/honeybadger-js/issues/1602.
  *
  * Unlike the browser maps, these are never published: `.next/server` is not served, so
  * they are left in place after upload rather than deleted.
@@ -145,9 +142,8 @@ export function withHoneybadgerConfig<T extends object>(
   const uploadConfigured = isSourceMapUploadConfigured(honeybadgerNextJsConfig)
 
   // Next.js does not emit production browser source maps unless asked, so upload would
-  // find nothing to send. The webpack plugin this replaces got them by setting
-  // `devtool: 'hidden-source-map'`, which Turbopack ignores and Next.js has no equivalent
-  // for — `productionBrowserSourceMaps` is the only switch, and it also serves them.
+  // find nothing to send. `productionBrowserSourceMaps` is the only switch, and it also
+  // serves the maps it generates.
   //
   // So turn it on when upload is configured, and have the post-build step delete the maps
   // once they are uploaded. An explicit setting is always respected: a project that asked

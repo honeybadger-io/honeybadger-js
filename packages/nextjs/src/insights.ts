@@ -5,9 +5,8 @@ import { scheduleFlush } from './flush';
 /**
  * Next.js instruments itself with OpenTelemetry and emits one root span per request,
  * `[http.method] [next.route]`, tagged `next.span_type: BaseServer.handleRequest`. Its
- * attributes carry the method, route, target and status — essentially the payload the
- * old `withHoneybadger` wrapper assembled by hand — so mapping that span to a
- * `request.handled` event replaces the wrapper without needing to wrap anything.
+ * attributes carry the method, route, target and status, so mapping that span to a
+ * `request.handled` event reports every request without wrapping any handler.
  *
  * Next instruments but does not export: spans only reach us once a tracer provider with
  * this processor is registered. See `registerHoneybadgerInsights`.

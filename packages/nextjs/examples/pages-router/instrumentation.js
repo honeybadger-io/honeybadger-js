@@ -2,8 +2,7 @@ import { captureRequestError } from '@honeybadger-io/nextjs'
 
 /**
  * Runs once per server instance, before any request is handled. This is how Honeybadger is
- * configured under both Turbopack and webpack — it replaces the old webpack entry-point
- * injection, which Turbopack ignored entirely.
+ * configured, under both Turbopack and webpack.
  */
 export async function register() {
   await import('./honeybadger.server.config')

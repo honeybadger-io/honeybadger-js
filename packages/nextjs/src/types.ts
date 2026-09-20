@@ -1,12 +1,6 @@
 /**
  * Options for `withHoneybadgerConfig`.
  *
- * These are flat. The source map options used to sit under a nested `webpackPluginOptions`
- * key, named after the `@honeybadger-io/webpack` plugin that did the upload — but Turbopack
- * ignores webpack plugins entirely, so that plugin is gone and upload now runs on Next.js's
- * `compiler.runAfterProductionCompile` hook. The nesting and the name described machinery
- * that no longer exists, and `silent` had to be declared twice to work around it.
- *
  * `apiKey` and `assetsUrl` are what enable source map upload; both fall back to
  * `NEXT_PUBLIC_HONEYBADGER_API_KEY` and `NEXT_PUBLIC_HONEYBADGER_ASSETS_URL`. Everything
  * else is optional and defaulted by `@honeybadger-io/plugin-core`.

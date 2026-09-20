@@ -9,8 +9,7 @@ export const config = {
 }
 
 // This file runs after the document loads but before React hydrates, so the client is
-// instrumented before any component code can throw. It replaces the
-// honeybadger.browser.config.js that the webpack plugin used to inject.
+// instrumented before any component code can throw.
 //
 // `onRouterTransitionStart` is deliberately not exported here: it is an App Router hook, so
 // it would never be called in this example.

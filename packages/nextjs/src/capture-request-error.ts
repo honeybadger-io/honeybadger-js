@@ -53,10 +53,8 @@ function isNextControlFlowError(error: unknown): boolean {
  * export const onRequestError = captureRequestError
  * ```
  *
- * This replaces the old `withHoneybadger` handler wrapper. Unlike that wrapper — and
- * unlike the error-component approach it also replaces — this reaches Server Components,
- * Route Handlers, Server Actions and middleware, and it receives the real error rather
- * than the generic message Next.js hands to an error component.
+ * Reaches Server Components, Route Handlers, Server Actions and middleware, and receives
+ * the real error rather than the generic message Next.js hands to an error component.
  */
 export async function captureRequestError(
   error: unknown,

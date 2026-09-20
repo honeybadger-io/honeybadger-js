@@ -9,10 +9,8 @@ export const config = {
   insights: { enabled: true, http: true },
 }
 
-// `projectRoot` used to be pinned to 'webpack:///./' here, and a beforeNotify handler
-// rewrote `.next/server` paths to sit under the assets URL. Both were workarounds for
-// matching webpack's source map paths, and neither survives Turbopack — it emits relative
-// filesystem paths rather than `webpack://` URLs. Server-side frame matching is tracked in
+// Server-side frames are not symbolicated yet: the paths reported at runtime do not match
+// the source maps uploaded for `.next/server`. Tracked in
 // https://github.com/honeybadger-io/honeybadger-js/issues/1602
 Honeybadger.configure(config)
 Honeybadger.logger.debug('Honeybadger configured for server')
