@@ -411,4 +411,63 @@ describe('copy-config-files', () => {
       expect(fs.existsSync('src/app/error.tsx')).toBe(true)
     })
   })
+
+  // Page rendering is a different module context from `instrumentation`, so the Honeybadger
+  // configured there is not the one server-rendered code sees. The script cannot write this
+  // import itself — `app/layout.tsx` holds the project's own markup — so it prints it.
+  describe('the server-rendering note', () => {
+    const printed = () =>
+      (console.log as jest.Mock).mock.calls.map((c) => String(c[0])).join('\n')
+
+    it('points App Router projects at the root layout', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'page.js': 'dummy content' },
+      })
+
+      await copyConfigFiles()
+
+      expect(printed()).toContain("import '../honeybadger.server.config'")
+      expect(printed()).toContain(path.join('app', 'layout.tsx'))
+    })
+
+    it('points Pages Router projects at _document', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'pages': { 'index.js': 'dummy content' },
+      })
+
+      await copyConfigFiles()
+
+      expect(printed()).toContain("import '../honeybadger.server.config'")
+      expect(printed()).toContain(path.join('pages', '_document.js'))
+    })
+
+    // The config files stay at the project root, so a router under `src` is one level deeper.
+    it('climbs an extra level when the router lives under src', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'src': { 'app': { 'page.js': 'dummy content' } },
+      })
+
+      await copyConfigFiles()
+
+      expect(printed()).toContain("import '../../honeybadger.server.config'")
+      expect(printed()).toContain(path.join('src', 'app', 'layout.tsx'))
+    })
+
+    // Each target gets its own depth: a root `app/` beside a `src/pages/` needs both.
+    it('computes the depth per router when the two are at different levels', async () => {
+      mock({
+        'templates': mock.load(path.resolve(__dirname, '..', 'templates')),
+        'app': { 'page.js': 'dummy content' },
+        'src': { 'pages': { 'index.js': 'dummy content' } },
+      })
+
+      await copyConfigFiles()
+
+      expect(printed()).toContain(`import '../honeybadger.server.config'   in ${path.join('app', 'layout.tsx')}`)
+      expect(printed()).toContain(`import '../../honeybadger.server.config'   in ${path.join('src', 'pages', '_document.js')}`)
+    })
+  })
 })

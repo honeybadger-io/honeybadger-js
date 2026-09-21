@@ -165,6 +165,50 @@ async function copyFileWithBackup(sourcePath, targetPath) {
   return fs.promises.copyFile(sourcePath, targetPath)
 }
 
+/**
+ * Tells the user where to configure Honeybadger for server-rendered code.
+ *
+ * Next.js compiles page rendering into a different module context from `instrumentation`,
+ * and each context gets its own copy of `@honeybadger-io/js` with its own singleton. The
+ * instance `register()` configures is therefore not the one a Server Component,
+ * `getServerSideProps` or `getInitialProps` sees, so a `Honeybadger.notify()` call from
+ * there would silently do nothing.
+ *
+ * Automatic reporting is unaffected: `onRequestError` runs in the instrumented context and
+ * the error components report from the browser. Only manual calls from server-rendered code
+ * need this, so it is printed as guidance rather than written into a file the project owns —
+ * `app/layout.tsx` holds the application's own markup, and `_document` may not exist.
+ */
+function printServerRenderingNote(appDir: string | null, pagesDir: string | null): void {
+  // The config files stay at the project root, so the import climbs out of the router
+  // directory — one extra level when that router lives under `src`. Computed per target,
+  // because a project can have a root `app/` beside a `src/pages/`.
+  const entry = (routerDir: string, file: string, label: string) => {
+    const specifier = '../'.repeat(routerDir ? 2 : 1) + 'honeybadger.server.config'
+    return `  import '${specifier}'   in ${path.join(routerDir, file)}   (${label})`
+  }
+
+  const lines: string[] = []
+  if (appDir !== null) {
+    lines.push(entry(appDir, path.join('app', 'layout.tsx'), 'App Router'))
+  }
+  if (pagesDir !== null) {
+    lines.push(entry(pagesDir, path.join('pages', '_document.js'), 'Pages Router'))
+  }
+
+  if (lines.length === 0) {
+    return
+  }
+
+  console.log(
+    '\nIf you call Honeybadger.notify() yourself from a Server Component, ' +
+    'getServerSideProps\nor getInitialProps, add this import so Honeybadger is configured ' +
+    'in that context too:\n\n' +
+    lines.join('\n') +
+    '\n\nAutomatic error reporting already works without it.'
+  )
+}
+
 export async function copyConfigFiles() {
   if (debug) {
     console.debug('cwd', process.cwd())
@@ -202,4 +246,5 @@ export async function copyConfigFiles() {
   await Promise.all(copyPromises);
 
   console.log('Done copying config files.')
+  printServerRenderingNote(appDir, pagesDir)
 }
