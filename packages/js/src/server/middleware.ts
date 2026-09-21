@@ -1,4 +1,5 @@
 import url from 'url'
+import type { ParsedUrlQueryInput } from 'querystring'
 import { NextFunction, Request, Response } from 'express'
 import { Client, Types, Util } from '@honeybadger-io/core'
 import {
@@ -14,13 +15,15 @@ function fullUrl(req: Request): string {
   // @ts-ignore The old @types/node incorrectly defines `address` as string|Address
   const port = address ? address.port : undefined
 
-  // @ts-ignore
   return url.format({
     protocol: req.protocol,
     hostname: req.hostname,
     port: port,
     pathname: req.path,
-    query: req.query
+    // Express types `query` as `ParsedQs`, which permits arbitrarily nested objects, while
+    // `url.format` accepts `ParsedUrlQueryInput`. The two agree for the flat values a real
+    // query string produces, and `format` stringifies anything deeper either way.
+    query: req.query as ParsedUrlQueryInput
   })
 }
 
