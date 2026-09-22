@@ -26,6 +26,15 @@ function loadPluginCore() {
 const BROWSER_OUTPUT_DIR = 'static'
 
 /**
+ * The directories inside `distDir` whose JavaScript is actually shipped, and so the only
+ * ones worth collecting maps from. `distDir` also holds build tooling — `build/chunks`,
+ * `cache`, `required-server-files.js` — and a `standalone` copy of the server when that
+ * output mode is on. Walking all of it uploads maps under a `minified_url` no request can
+ * ever produce.
+ */
+const OUTPUT_DIRS = [BROWSER_OUTPUT_DIR, 'server']
+
+/**
  * Metadata Next.js passes to `compiler.runAfterProductionCompile`.
  */
 export type AfterProductionCompileMetadata = {
@@ -234,7 +243,7 @@ async function locateSourcemap(jsFilePath: string): Promise<string | null> {
  * addresses: the configuration templates point it at `<origin>/_next`, and `.next/x`
  * is served at `/_next/x`. `uploadSourcemap` builds `minified_url` by joining the two.
  *
- * Both `static/` and `server/` are walked. Server maps exist only when
+ * Only `static/` and `server/` are walked — see `OUTPUT_DIRS`. Server maps exist only when
  * `experimental.serverSourceMaps` is on, which `withHoneybadgerConfig` enables alongside
  * upload. Server chunks are not served over HTTP, so whether their frames match the
  * uploaded `minified_url` depends on the runtime path rewriting tracked in #1602 — but
@@ -246,11 +255,13 @@ export async function collectSourcemaps(
   ignorePaths: string[] = []
 ): Promise<Types.SourcemapInfo[]> {
   const jsFilePaths: string[] = []
-  await walk(distDir, (filePath) => {
-    if (filePath.endsWith('.js')) {
-      jsFilePaths.push(filePath)
-    }
-  })
+  for (const outputDir of OUTPUT_DIRS) {
+    await walk(path.join(distDir, outputDir), (filePath) => {
+      if (filePath.endsWith('.js')) {
+        jsFilePaths.push(filePath)
+      }
+    })
+  }
 
   const collected: Types.SourcemapInfo[] = []
 

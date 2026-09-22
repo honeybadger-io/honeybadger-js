@@ -144,6 +144,27 @@ describe('collectSourcemaps', () => {
     await expect(collectSourcemaps('.next')).resolves.toEqual([])
   })
 
+  // `distDir` also holds build tooling and, in standalone mode, a second copy of the
+  // server. None of it is served, so a map found there would upload under a minified_url
+  // no request can produce.
+  it('ignores JavaScript outside the served output roots', async () => {
+    mock({
+      '.next': {
+        'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES },
+        'server': { 'b.js': js('b.js.map'), 'b.js.map': MAP_WITH_SOURCES },
+        'build': { 'chunks': { 'tooling.js': js('tooling.js.map'), 'tooling.js.map': MAP_WITH_SOURCES } },
+        'cache': { 'cached.js': js('cached.js.map'), 'cached.js.map': MAP_WITH_SOURCES },
+        'standalone': { 'server.js': js('server.js.map'), 'server.js.map': MAP_WITH_SOURCES },
+        'required-server-files.js': js('required-server-files.js.map'),
+        'required-server-files.js.map': MAP_WITH_SOURCES,
+      },
+    })
+
+    const collected = (await collectSourcemaps('.next')).map((s) => s.jsFilename).sort()
+
+    expect(collected).toEqual(['server/b.js', 'static/a.js'])
+  })
+
   it('skips maps with no sourcesContent', async () => {
     mock({
       '.next': {
