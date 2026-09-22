@@ -1,0 +1,789 @@
+import fs from 'fs'
+import mock from 'mock-fs'
+import { collectSourcemaps, resolveUploadOptions, uploadSourceMapsAfterBuild } from './source-maps'
+
+const MAP_WITH_SOURCES = JSON.stringify({ version: 3, sources: ['a.ts'], sourcesContent: ['const a = 1'] })
+const MAP_WITHOUT_SOURCES = JSON.stringify({ version: 3, sources: ['a.ts'], sourcesContent: [] })
+
+// `next`'s type augmentation marks process.env.NODE_ENV readonly, so the tests set it
+// through a mutable view rather than assigning to the typed property.
+function setNodeEnv(value: string | undefined): void {
+  const env = process.env as Record<string, string | undefined>
+  if (value === undefined) {
+    delete env.NODE_ENV
+  } else {
+    env.NODE_ENV = value
+  }
+}
+
+// A built file declares its map with a sourceMappingURL comment, which is how the collector
+// pairs the two. Turbopack does not name the map after the chunk, so the comment is the only
+// reliable link.
+const js = (mapName: string) => `code\n//# sourceMappingURL=${mapName}`
+
+const uploadSourcemaps = jest.fn()
+const sendDeployNotification = jest.fn()
+// Set to make option resolution blow up, standing in for `cleanOptions` throwing or
+// plugin-core failing to load at all.
+let cleanOptionsError: Error | null = null
+jest.mock('@honeybadger-io/plugin-core', () => {
+  const actual = jest.requireActual('@honeybadger-io/plugin-core')
+  return {
+    ...actual,
+    cleanOptions: (...args: unknown[]) => {
+      if (cleanOptionsError) {
+        throw cleanOptionsError
+      }
+      return (actual as { cleanOptions: (...a: unknown[]) => unknown }).cleanOptions(...args)
+    },
+    uploadSourcemaps: (...args: unknown[]) => uploadSourcemaps(...args),
+    sendDeployNotification: (...args: unknown[]) => sendDeployNotification(...args),
+  }
+})
+
+// `source-maps.ts` loads plugin-core through a dynamic import, which reads from disk the
+// first time it runs. Resolve it up front, or whichever test happens to trigger it first
+// does so while mock-fs is in control and gets ENOENT for plugin-core's own dist.
+beforeAll(async () => {
+  await import('@honeybadger-io/plugin-core')
+})
+
+describe('collectSourcemaps', () => {
+  afterEach(() => mock.restore())
+
+  it('pairs each map with its js file, relative to distDir', async () => {
+    mock({
+      '.next': {
+        'static': { 'chunks': { 'main.js': js('main.js.map'), 'main.js.map': MAP_WITH_SOURCES } },
+      },
+    })
+
+    const collected = await collectSourcemaps('.next')
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0]).toMatchObject({
+      // assetsUrl points at <origin>/_next, and .next/static/... is served at
+      // /_next/static/..., so the name must be relative to distDir.
+      jsFilename: 'static/chunks/main.js',
+      sourcemapFilename: 'static/chunks/main.js.map',
+    })
+  })
+
+  it('walks nested directories and both output roots', async () => {
+    mock({
+      '.next': {
+        'static': { 'chunks': { 'app': { 'page.js': js('page.js.map'), 'page.js.map': MAP_WITH_SOURCES } } },
+        'server': { 'chunks': { 'handler.js': js('handler.js.map'), 'handler.js.map': MAP_WITH_SOURCES } },
+      },
+    })
+
+    const names = (await collectSourcemaps('.next')).map((s) => s.jsFilename).sort()
+
+    // Server chunks are included: not uploading them is exactly why server frames stay
+    // minified today (#1602).
+    expect(names).toEqual(['server/chunks/handler.js', 'static/chunks/app/page.js'])
+  })
+
+  // Turbopack gives the map its own hash, so the sibling convention finds nothing and every
+  // browser map was silently skipped — uploaded zero, deleted twelve.
+  it('pairs a chunk with a map that is not named after it', async () => {
+    mock({
+      '.next': {
+        'static': {
+          'chunks': {
+            '1mfl5gjk9763d.js': js('33ri1p-shrphb.js.map'),
+            '33ri1p-shrphb.js.map': MAP_WITH_SOURCES,
+          },
+        },
+      },
+    })
+
+    const collected = await collectSourcemaps('.next')
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0]).toMatchObject({
+      // the minified_url is built from this, so it must be the chunk, not the map
+      jsFilename: 'static/chunks/1mfl5gjk9763d.js',
+      sourcemapFilename: 'static/chunks/33ri1p-shrphb.js.map',
+    })
+  })
+
+  it('skips a chunk whose sourceMappingURL points at a missing file', async () => {
+    mock({ '.next': { 'static': { 'a.js': js('gone.js.map') } } })
+
+    await expect(collectSourcemaps('.next')).resolves.toEqual([])
+  })
+
+  it('skips a chunk with an inline data: map, which has nothing to upload', async () => {
+    mock({ '.next': { 'static': { 'a.js': js('data:application/json;base64,e30=') } } })
+
+    await expect(collectSourcemaps('.next')).resolves.toEqual([])
+  })
+
+  // `decodeURIComponent` throws on a malformed escape, and an uncaught throw here would
+  // lose every other map in the build, not just this one.
+  it('skips a chunk whose sourceMappingURL is malformed, and keeps the rest', async () => {
+    mock({
+      '.next': {
+        'static': {
+          'bad.js': js('bad%.map'),
+          'good.js': js('good.js.map'),
+          'good.js.map': MAP_WITH_SOURCES,
+        },
+      },
+    })
+
+    const collected = await collectSourcemaps('.next')
+
+    expect(collected.map((s) => s.jsFilename)).toEqual(['static/good.js'])
+  })
+
+  it('skips a chunk that declares no map at all', async () => {
+    mock({ '.next': { 'static': { 'a.js': 'code with no comment' } } })
+
+    await expect(collectSourcemaps('.next')).resolves.toEqual([])
+  })
+
+  // `distDir` also holds build tooling and, in standalone mode, a second copy of the
+  // server. None of it is served, so a map found there would upload under a minified_url
+  // no request can produce.
+  it('ignores JavaScript outside the served output roots', async () => {
+    mock({
+      '.next': {
+        'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES },
+        'server': { 'b.js': js('b.js.map'), 'b.js.map': MAP_WITH_SOURCES },
+        'build': { 'chunks': { 'tooling.js': js('tooling.js.map'), 'tooling.js.map': MAP_WITH_SOURCES } },
+        'cache': { 'cached.js': js('cached.js.map'), 'cached.js.map': MAP_WITH_SOURCES },
+        'standalone': { 'server.js': js('server.js.map'), 'server.js.map': MAP_WITH_SOURCES },
+        'required-server-files.js': js('required-server-files.js.map'),
+        'required-server-files.js.map': MAP_WITH_SOURCES,
+      },
+    })
+
+    const collected = (await collectSourcemaps('.next')).map((s) => s.jsFilename).sort()
+
+    expect(collected).toEqual(['server/b.js', 'static/a.js'])
+  })
+
+  it('skips maps with no sourcesContent', async () => {
+    mock({
+      '.next': {
+        'static': {
+          'useful.js': js('useful.js.map'),
+          'useful.js.map': MAP_WITH_SOURCES,
+          'empty.js': js('empty.js.map'),
+          'empty.js.map': MAP_WITHOUT_SOURCES,
+        },
+      },
+    })
+
+    const names = (await collectSourcemaps('.next')).map((s) => s.jsFilename)
+
+    expect(names).toEqual(['static/useful.js'])
+  })
+
+  it('skips a map whose js file is missing', async () => {
+    mock({ '.next': { 'static': { 'orphan.js.map': MAP_WITH_SOURCES } } })
+
+    expect(await collectSourcemaps('.next')).toHaveLength(0)
+  })
+
+  it('skips unparseable maps rather than failing the build', async () => {
+    mock({ '.next': { 'static': { 'broken.js': js('broken.js.map'), 'broken.js.map': 'not json' } } })
+
+    expect(await collectSourcemaps('.next')).toHaveLength(0)
+  })
+
+  it('honours ignorePaths', async () => {
+    mock({
+      '.next': {
+        'static': { 'keep.js': js('keep.js.map'), 'keep.js.map': MAP_WITH_SOURCES },
+        'server': { 'skip.js': js('skip.js.map'), 'skip.js.map': MAP_WITH_SOURCES },
+      },
+    })
+
+    const names = (await collectSourcemaps('.next', ['skip.js'])).map((s) => s.jsFilename)
+
+    expect(names).toEqual(['static/keep.js'])
+  })
+
+  it('returns nothing when the build directory is absent', async () => {
+    mock({})
+
+    expect(await collectSourcemaps('.next')).toHaveLength(0)
+  })
+
+  it('ignores files that are not source maps', async () => {
+    mock({
+      '.next': {
+        'static': { 'main.js': js('main.js.map'), 'main.js.map': MAP_WITH_SOURCES, 'styles.css': 'css', 'BUILD_ID': 'x' },
+      },
+    })
+
+    expect(await collectSourcemaps('.next')).toHaveLength(1)
+  })
+})
+
+describe('resolveUploadOptions', () => {
+  const envKeys = [
+    'NEXT_PUBLIC_HONEYBADGER_API_KEY',
+    'NEXT_PUBLIC_HONEYBADGER_ASSETS_URL',
+    'NEXT_PUBLIC_HONEYBADGER_REVISION',
+  ]
+  const saved: Record<string, string | undefined> = {}
+
+  beforeEach(() => {
+    envKeys.forEach((key) => { saved[key] = process.env[key]; delete process.env[key] })
+    // The unconfigured cases warn by design; keep the test output readable.
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    envKeys.forEach((key) => {
+      if (saved[key] === undefined) { delete process.env[key] } else { process.env[key] = saved[key] }
+    })
+  })
+
+  it('returns null when nothing is configured', async () => {
+    // cleanOptions throws on a missing apiKey, and Next re-throws whatever this hook
+    // throws — so an unconfigured project must not reach it.
+    await expect(resolveUploadOptions({})).resolves.toBeNull()
+  })
+
+  it('returns null when upload is disabled', async () => {
+    await expect(resolveUploadOptions({
+      disableSourceMapUpload: true,
+      apiKey: 'k',
+      assetsUrl: 'https://example.com/_next',
+    })).resolves.toBeNull()
+  })
+
+  it('falls back to the environment variables the templates use', async () => {
+    process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
+    process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL = 'https://example.com/_next'
+    process.env.NEXT_PUBLIC_HONEYBADGER_REVISION = 'abc123'
+
+    await expect(resolveUploadOptions({})).resolves.toMatchObject({
+      apiKey: 'env-key',
+      assetsUrl: 'https://example.com/_next',
+      revision: 'abc123',
+    })
+  })
+
+  it('prefers explicit options over the environment', async () => {
+    process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
+    process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL = 'https://example.com/_next'
+
+    await expect(resolveUploadOptions({
+      apiKey: 'explicit',
+      assetsUrl: 'https://cdn.example.com/_next',
+    })).resolves.toMatchObject({ apiKey: 'explicit', assetsUrl: 'https://cdn.example.com/_next' })
+  })
+
+  it('leaves the default revision alone when none is configured', async () => {
+    process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
+    process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL = 'https://example.com/_next'
+
+    // cleanOptions merges as { ...defaults, ...options }, so passing revision: undefined
+    // would overwrite the default rather than fall back to it — and a fault whose
+    // revision does not match its source map never symbolicates.
+    expect((await resolveUploadOptions({}))?.revision).toBe('main')
+  })
+
+  it('does not let other unset options clobber their defaults', async () => {
+    process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
+    process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL = 'https://example.com/_next'
+
+    const options = await resolveUploadOptions({
+      apiKey: 'k', assetsUrl: 'u', endpoint: undefined, retries: undefined,
+    })
+
+    expect(options?.endpoint).toBe('https://api.honeybadger.io/v1/source_maps')
+    expect(options?.retries).toBe(3)
+  })
+
+  it('returns null when only one of the two required values is present', async () => {
+    process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY = 'env-key'
+
+    await expect(resolveUploadOptions({})).resolves.toBeNull()
+  })
+})
+
+describe('uploadSourceMapsAfterBuild', () => {
+  const configured = {
+    apiKey: 'k',
+    assetsUrl: 'https://example.com/_next',
+  }
+  let nodeEnv: string | undefined
+
+  beforeEach(() => {
+    cleanOptionsError = null
+    nodeEnv = process.env.NODE_ENV
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    uploadSourcemaps.mockReset().mockResolvedValue(undefined)
+    sendDeployNotification.mockReset().mockResolvedValue(undefined)
+  })
+
+  afterEach(() => {
+    mock.restore()
+    jest.restoreAllMocks()
+    setNodeEnv(nodeEnv)
+  })
+
+  it('does nothing when upload is not configured', async () => {
+    mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
+
+    await uploadSourceMapsAfterBuild({}, { distDir: '.next', projectDir: '.' })
+
+    expect(uploadSourcemaps).not.toHaveBeenCalled()
+  })
+
+  it('uploads the collected maps', async () => {
+    setNodeEnv('production')
+    mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
+
+    await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+    expect(uploadSourcemaps).toHaveBeenCalledTimes(1)
+    expect(uploadSourcemaps.mock.calls[0][0]).toHaveLength(1)
+  })
+
+  it('skips a development build', async () => {
+    setNodeEnv('development')
+    mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
+
+    await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+    expect(uploadSourcemaps).not.toHaveBeenCalled()
+  })
+
+  it('sends a deploy notification only when asked', async () => {
+    setNodeEnv('production')
+    mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
+
+    await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+    expect(sendDeployNotification).not.toHaveBeenCalled()
+
+    await uploadSourceMapsAfterBuild(
+      { ...configured, deploy: { environment: 'production' } },
+      { distDir: '.next', projectDir: '.' }
+    )
+    expect(sendDeployNotification).toHaveBeenCalledTimes(1)
+  })
+
+  // Honeybadger tests the resolved source against the notice's projectRoot to decide whether
+  // a frame is the user's code. A source still carrying its bundler scheme never matches, so
+  // the fault surfaces an unmapped framework frame instead of the throw site.
+  describe('normalizing the source paths', () => {
+    beforeEach(() => { setNodeEnv('production') })
+
+    // The rewritten copy is deleted as soon as the upload returns, so read it inside the
+    // upload rather than afterwards.
+    let sentSources: string[] = []
+    let sentPaths: string[] = []
+    beforeEach(() => {
+      sentSources = []
+      sentPaths = []
+      uploadSourcemaps.mockImplementation(async (maps: Array<{ sourcemapFilePath: string }>) => {
+        sentPaths = maps.map((m) => m.sourcemapFilePath)
+        sentSources = maps.flatMap((m) =>
+          JSON.parse(fs.readFileSync(m.sourcemapFilePath, 'utf8')).sources as string[])
+      })
+    })
+
+    const uploaded = () => sentPaths
+    const uploadedSources = () => sentSources
+
+    it('strips the Turbopack scheme', async () => {
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': JSON.stringify({
+        version: 3, sources: ['turbopack:///[project]/app/page.tsx'], sourcesContent: ['x'],
+      }) } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      expect(uploadedSources()).toEqual(['app/page.tsx'])
+    })
+
+    it.each([
+      ['webpack://_N_E/./app/page.tsx', 'app/page.tsx'],
+      ['webpack:///./app/page.tsx', 'app/page.tsx'],
+    ])('strips the webpack scheme from %s', async (source, expected) => {
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': JSON.stringify({
+        version: 3, sources: [source], sourcesContent: ['x'],
+      }) } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      expect(uploadedSources()).toEqual([expected])
+    })
+
+    // The map on disk is Next.js's own: it reads the server maps to format stack traces.
+    it('rewrites a copy and leaves the original alone', async () => {
+      const original = JSON.stringify({
+        version: 3, sources: ['turbopack:///[project]/app/page.tsx'], sourcesContent: ['x'],
+      })
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': original } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      expect(uploaded()[0]).not.toContain('.next/static/a.js.map')
+      expect(fs.readFileSync('.next/static/a.js.map', 'utf8')).toBe(original)
+    })
+
+    it('leaves an already-relative source untouched', async () => {
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': JSON.stringify({
+        version: 3, sources: ['app/page.tsx'], sourcesContent: ['x'],
+      }) } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      // Nothing to rewrite, so the original file is uploaded rather than a copy.
+      expect(uploaded()[0]).toContain('.next/static/a.js.map')
+    })
+  })
+
+  describe('deleting the maps after upload', () => {
+    beforeEach(() => {
+      setNodeEnv('production')
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
+    })
+
+    // We turn on productionBrowserSourceMaps to have something to upload, and that also
+    // serves them. Deleting afterwards restores what hidden-source-map used to give us.
+    it('removes them when asked', async () => {
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+        deleteBrowserSourcemaps: true,
+      })
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+      // the JavaScript itself is untouched
+      expect(fs.existsSync('.next/static/a.js')).toBe(true)
+    })
+
+    it('leaves them when not asked', async () => {
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(true)
+    })
+
+    // Cleanup exists because we enabled `productionBrowserSourceMaps`, which serves what
+    // it generates. A map we declined to upload is still served, so scoping deletion to
+    // successful uploads would leak exactly the maps that failed the collection filters.
+    it('removes browser maps that were never uploaded', async () => {
+      mock({
+        '.next': {
+          'static': {
+            'good.js': js('good.js.map'), 'good.js.map': MAP_WITH_SOURCES,
+            // rejected by collectSourcemaps: no sourcesContent
+            'empty.js': js('empty.js.map'), 'empty.js.map': MAP_WITHOUT_SOURCES,
+            // rejected by collectSourcemaps: unparseable
+            'broken.js': js('broken.js.map'), 'broken.js.map': 'not json',
+            // rejected by collectSourcemaps: no sibling .js
+            'orphan.js.map': MAP_WITH_SOURCES,
+            // rejected by ignorePaths below
+            'vendor.js': js('vendor.js.map'), 'vendor.js.map': MAP_WITH_SOURCES,
+          },
+        },
+      })
+
+      await uploadSourceMapsAfterBuild(
+        {
+          ...configured,
+          ignorePaths: ['**/vendor.js'],
+        },
+        { distDir: '.next', projectDir: '.' },
+        { deleteBrowserSourcemaps: true }
+      )
+
+      // Only `good.js.map` was uploadable...
+      expect(uploadSourcemaps).toHaveBeenCalledTimes(1)
+      expect(uploadSourcemaps.mock.calls[0][0].map((s: { jsFilename: string }) => s.jsFilename))
+        .toEqual(['static/good.js'])
+      // ...but every one of them is gone from the served output.
+      expect(fs.readdirSync('.next/static').filter((f) => f.endsWith('.js.map'))).toEqual([])
+    })
+
+    // Failing to delete means a map this package caused to be served stays served, so it
+    // must not hide behind the default `silent: true`.
+    it('warns loudly, and does not fail the build, when a map cannot be deleted', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const unlink = jest.spyOn(fs.promises, 'unlink')
+        .mockRejectedValue(Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }))
+
+      await expect(
+        uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+          deleteBrowserSourcemaps: true,
+        })
+      ).resolves.toBeUndefined()
+
+      expect(warn).toHaveBeenCalledWith(
+        '[HoneybadgerNextJs]',
+        expect.stringContaining('will be served')
+      )
+      unlink.mockRestore()
+      warn.mockRestore()
+    })
+
+    // `.next/server` is never served, so there is no exposure to undo — and Next.js reads
+    // these maps itself to format server-side stack traces.
+    it('never removes server maps, even when asked', async () => {
+      mock({
+        '.next': {
+          'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES },
+          'server': { 'b.js': js('b.js.map'), 'b.js.map': MAP_WITH_SOURCES },
+        },
+      })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+        deleteBrowserSourcemaps: true,
+      })
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+      expect(fs.existsSync('.next/server/b.js.map')).toBe(true)
+    })
+
+    // The maps are regenerated by the next build; a deploy that served them is not
+    // recallable. So exposure wins over keeping "the only copy".
+    it('removes them even when the upload failed', async () => {
+      uploadSourcemaps.mockRejectedValue(new Error('honeybadger is down'))
+
+      await expect(
+        uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+          deleteBrowserSourcemaps: true,
+        })
+      ).rejects.toThrow('honeybadger is down')
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+    })
+
+    // The dangerous combination: `ignoreErrors` is what the docs recommend so a Honeybadger
+    // outage cannot block a deploy, which means a failed upload produces a *successful*
+    // build. Skipping cleanup there would publish the source of every such build.
+    it('removes them when a failed upload is ignored', async () => {
+      const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      uploadSourcemaps.mockRejectedValue(new Error('honeybadger is down'))
+
+      await expect(
+        uploadSourceMapsAfterBuild(
+          { ...configured, ignoreErrors: true },
+          { distDir: '.next', projectDir: '.' },
+          { deleteBrowserSourcemaps: true }
+        )
+      ).resolves.toBeUndefined()
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+      error.mockRestore()
+    })
+
+    // Collection runs before upload, so its failures take the same path.
+    it('removes them when collection itself failed', async () => {
+      const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      const readdir = jest.spyOn(fs.promises, 'readdir')
+      readdir.mockRejectedValueOnce(Object.assign(new Error('EACCES'), { code: 'EACCES' }))
+
+      await expect(
+        uploadSourceMapsAfterBuild(
+          { ...configured, ignoreErrors: true },
+          { distDir: '.next', projectDir: '.' },
+          { deleteBrowserSourcemaps: true }
+        )
+      ).resolves.toBeUndefined()
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+      readdir.mockRestore()
+      error.mockRestore()
+    })
+
+    // Resolving the options is itself fallible — cleanOptions can throw, and plugin-core
+    // can fail to load. Doing that outside the error handling meant such a failure ignored
+    // ignoreErrors and skipped cleanup, leaving the maps served.
+    it('removes them when resolving the options failed', async () => {
+      const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      cleanOptionsError = new Error('plugin-core exploded')
+
+      await expect(
+        uploadSourceMapsAfterBuild(
+          { ...configured, ignoreErrors: true },
+          { distDir: '.next', projectDir: '.' },
+          { deleteBrowserSourcemaps: true }
+        )
+      ).resolves.toBeUndefined()
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+      error.mockRestore()
+    })
+
+    it('still fails the build for that failure when ignoreErrors is off', async () => {
+      cleanOptionsError = new Error('plugin-core exploded')
+
+      await expect(
+        uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+          deleteBrowserSourcemaps: true,
+        })
+      ).rejects.toThrow('plugin-core exploded')
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+    })
+
+    // A dev/test build never uploads, so it never enabled the maps either — leave the
+    // developer's build output alone.
+    it('leaves them alone in a development build', async () => {
+      setNodeEnv('development')
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+        deleteBrowserSourcemaps: true,
+      })
+
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(true)
+    })
+
+    // Cleanup must not replace the error the caller is about to see. Collection walks the
+    // same directories as cleanup, so the failure has to start only once upload has run —
+    // otherwise collection throws first and the scenario never happens.
+    it('does not let a cleanup failure mask the upload failure', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const realReaddir = fs.promises.readdir
+      let cleanupPhase = false
+
+      uploadSourcemaps.mockImplementation(async () => {
+        cleanupPhase = true
+        throw new Error('honeybadger is down')
+      })
+      const readdir = jest.spyOn(fs.promises, 'readdir').mockImplementation(((...args: unknown[]) => {
+        if (cleanupPhase) {
+          return Promise.reject(Object.assign(new Error('EACCES'), { code: 'EACCES' }))
+        }
+        return (realReaddir as (...a: unknown[]) => unknown)(...args)
+      }) as never)
+
+      await expect(
+        uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+          deleteBrowserSourcemaps: true,
+        })
+      ).rejects.toThrow('honeybadger is down')
+
+      expect(warn).toHaveBeenCalledWith(
+        '[HoneybadgerNextJs]',
+        expect.stringContaining('could not clean up browser source maps')
+      )
+      readdir.mockRestore()
+      warn.mockRestore()
+    })
+  })
+
+  // A configured upload that finds nothing looks identical to success in the build log,
+  // which is how a moved distDir or an over-broad ignorePaths goes unnoticed.
+  describe('when there is nothing to upload', () => {
+    beforeEach(() => {
+      setNodeEnv('production')
+    })
+
+    it('warns instead of reporting a silent success', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      mock({ '.next': { 'static': {} } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+
+      expect(uploadSourcemaps).not.toHaveBeenCalled()
+      expect(warn).toHaveBeenCalledWith(
+        '[HoneybadgerNextJs]',
+        expect.stringContaining('found no source maps to upload')
+      )
+      warn.mockRestore()
+    })
+
+    // A directory that does not exist is normal: `.next/server` is absent unless
+    // experimental.serverSourceMaps is on.
+    // The deploy notification reads as "the maps for this revision are in place". A failed
+    // upload already skips it by throwing; a build that uploaded nothing must too.
+    it('does not announce a deploy when nothing was uploaded', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      mock({ '.next': { 'static': {} } })
+
+      await uploadSourceMapsAfterBuild(
+        { ...configured, deploy: { environment: 'production' } },
+        { distDir: '.next', projectDir: '.' }
+      )
+
+      expect(sendDeployNotification).not.toHaveBeenCalled()
+      warn.mockRestore()
+    })
+
+    // Bailing out early must not skip the cleanup: the maps are on disk and served whether
+    // or not any of them were worth uploading.
+    it('still removes browser maps when there was nothing to upload', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      // Present on disk, but rejected by collectSourcemaps for having no sourcesContent.
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITHOUT_SOURCES } } })
+
+      await uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' }, {
+        deleteBrowserSourcemaps: true,
+      })
+
+      expect(uploadSourcemaps).not.toHaveBeenCalled()
+      expect(fs.existsSync('.next/static/a.js.map')).toBe(false)
+      warn.mockRestore()
+    })
+
+    it('treats a missing distDir as empty rather than an error', async () => {
+      mock({})
+
+      await expect(collectSourcemaps('.next')).resolves.toEqual([])
+    })
+
+    // Anything other than ENOENT would silently shrink the upload to whatever happened to
+    // be readable, which is worse than failing.
+    it('propagates a readdir failure that is not a missing directory', async () => {
+      const readdir = jest.spyOn(fs.promises, 'readdir')
+        .mockRejectedValue(Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }))
+
+      await expect(collectSourcemaps('.next')).rejects.toThrow('EACCES')
+
+      readdir.mockRestore()
+    })
+
+    it('lets ignoreErrors govern that failure like any other', async () => {
+      const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      const readdir = jest.spyOn(fs.promises, 'readdir')
+        .mockRejectedValue(Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }))
+
+      await expect(
+        uploadSourceMapsAfterBuild(
+          { ...configured, ignoreErrors: true },
+          { distDir: '.next', projectDir: '.' }
+        )
+      ).resolves.toBeUndefined()
+
+      readdir.mockRestore()
+      error.mockRestore()
+    })
+  })
+
+  describe('when the upload fails', () => {
+    beforeEach(() => {
+      setNodeEnv('production')
+      mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
+      uploadSourcemaps.mockRejectedValue(new Error('honeybadger is down'))
+    })
+
+    it('fails the build by default, because Next re-throws this hook', async () => {
+      await expect(
+        uploadSourceMapsAfterBuild(configured, { distDir: '.next', projectDir: '.' })
+      ).rejects.toThrow('honeybadger is down')
+    })
+
+    it('does not fail the build when ignoreErrors is set', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => undefined)
+
+      await expect(
+        uploadSourceMapsAfterBuild(
+          { ...configured, ignoreErrors: true },
+          { distDir: '.next', projectDir: '.' }
+        )
+      ).resolves.toBeUndefined()
+
+      expect(uploadSourcemaps).toHaveBeenCalled()
+    })
+  })
+})

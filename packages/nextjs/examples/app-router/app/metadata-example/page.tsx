@@ -1,21 +1,18 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next'
 
-type Props = {
-  params: { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
+// `searchParams` is a Promise from Next.js 15 onwards, so it has to be awaited.
+type Props = { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }
 
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { fail } = await searchParams
 
-
-export function generateMetadata({ searchParams }: Props): Metadata {
-
-  if (searchParams.fail === 'true') {
-    throw new Error('failing on purpose');
+  // Thrown outside the component tree, where an error boundary cannot reach it.
+  // `onRequestError` still reports it.
+  if (fail === 'true') {
+    throw new Error('failing on purpose')
   }
 
-  return {
-    title: 'Metadata Example - App Router'
-  }
+  return { title: 'Metadata Example - App Router' }
 }
 
 export default function MetadataExample() {
@@ -23,5 +20,5 @@ export default function MetadataExample() {
     <div>
       <p>A page with generateMetadata</p>
     </div>
-  );
+  )
 }

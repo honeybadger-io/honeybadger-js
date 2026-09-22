@@ -7,9 +7,8 @@ const sourcemapPathTransform = relativePath => {
   return path.relative('src', relativePath)
 }
 
-// Main bundle: full public surface, including the Node-only webpack plugin
-// (requires `fs`/`path`). Consumed by tools that don't understand the
-// `edge-light` exports condition.
+// Main bundle: full public surface. Consumed by next.config and the server runtime, and
+// by tools that don't understand the `edge-light` or `browser` exports conditions.
 const mainConfig = {
   input: 'build/index.js',
   output: [
@@ -29,9 +28,21 @@ const mainConfig = {
     },
   ],
   external: [
+    // Node builtins, used by the post-build source map upload. Only the main bundle
+    // touches them — the client entry deliberately excludes that module.
     'fs',
+    'os',
     'path',
     'next',
+    'next/server',
+    '@honeybadger-io/js',
+    '@honeybadger-io/react',
+    '@honeybadger-io/plugin-core',
+    'picomatch',
+    '@vercel/otel',
+    // Optional peer, loaded on demand to read the active span. External so the dynamic
+    // import stays a real deferred require rather than being inlined.
+    '@opentelemetry/api',
   ],
   plugins: [
     commonjs(),
@@ -43,10 +54,9 @@ const mainConfig = {
   ]
 }
 
-// Edge bundle: `withHoneybadger` only, no `fs`/`path`. Selected automatically
-// by bundlers (e.g. Next.js) that recognize the `edge-light` exports
-// condition, so edge routes/middleware never pull in the Node-only webpack
-// plugin.
+// Edge-context bundle: the runtime hooks only, no `fs`/`path`. Selected via the
+// `edge-light` exports condition, which Next.js applies when compiling middleware and
+// `instrumentation` — a context present in every build. See src/edge.ts.
 const edgeConfig = {
   input: 'build/edge.js',
   output: [
@@ -67,10 +77,48 @@ const edgeConfig = {
   ],
   external: [
     'next',
+    'next/server',
+    '@honeybadger-io/js',
+    '@vercel/otel',
+    '@opentelemetry/api',
   ],
   plugins: [
     commonjs(),
   ]
 }
 
-export default [mainConfig, edgeConfig]
+// Browser bundle: what `instrumentation-client` imports, and nothing else. Selected via
+// the `browser` exports condition so a client build does not pull in the server hooks —
+// `flush` imports `next/server` at the top level, which would ship dead server code to
+// every visitor.
+const clientConfig = {
+  input: 'build/client.js',
+  output: [
+    {
+      file: 'dist/honeybadger-nextjs-client.cjs.js',
+      exports: 'named',
+      format: 'cjs',
+      sourcemap: true,
+      sourcemapPathTransform,
+    },
+    {
+      file: 'dist/honeybadger-nextjs-client.esm.js',
+      format: 'es',
+      exports: 'named',
+      sourcemap: true,
+      sourcemapPathTransform,
+    },
+  ],
+  external: [
+    // `captureRouterTransitionStart` reaches the singleton through @honeybadger-io/js rather
+    // than @honeybadger-io/react, so that the error-boundary class component is not dragged
+    // into a React Server Components graph.
+    '@honeybadger-io/js',
+    '@honeybadger-io/react',
+  ],
+  plugins: [
+    commonjs(),
+  ]
+}
+
+export default [mainConfig, edgeConfig, clientConfig]
