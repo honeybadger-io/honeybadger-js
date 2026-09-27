@@ -90,6 +90,21 @@ describe('getOrCreateSingleton', () => {
     expect(global[singletonKey('server', VERSION)]).toBe(stored)
   })
 
+  it('still returns a client when reading the global object throws', () => {
+    const client = clientLike('created')
+    const hostile = {} as Record<string, unknown>
+    Object.defineProperty(hostile, singletonKey('server', VERSION), {
+      get() { throw new Error('nope') },
+    })
+
+    expect(getOrCreateSingleton('server', VERSION, () => client, hostile)).toBe(client)
+  })
+
+  it('lets a failure to build the client propagate', () => {
+    expect(() => getOrCreateSingleton('server', VERSION, () => { throw new Error('boom') }, global))
+      .toThrow('boom')
+  })
+
   it('still returns a client when the global object is frozen', () => {
     const client = clientLike('created')
     const frozen = Object.freeze({}) as Record<string, unknown>

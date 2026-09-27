@@ -14,12 +14,29 @@ const KEY = singletonKey('server', loadCopy().getVersion())
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const global = globalThis as any
 
+// Configuring a server client installs process listeners, and every module reload here
+// builds another one. Only the listeners this suite added are removed: `process` is
+// shared with the rest of the run, so anything already registered has to survive.
+const EVENTS = ['uncaughtException', 'unhandledRejection', 'SIGTERM', 'SIGINT', 'beforeExit']
+// `process.listeners` is typed for signals only; these event names are not all signals.
+const listenersFor = (event: string) => process.listeners(event as NodeJS.Signals)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let preexisting: Record<string, any[]>
+
 describe('server singleton', () => {
+  beforeEach(() => {
+    preexisting = {}
+    EVENTS.forEach((event) => { preexisting[event] = listenersFor(event) })
+  })
+
   afterEach(() => {
     delete global[KEY]
     jest.resetModules()
-    process.removeAllListeners('uncaughtException')
-    process.removeAllListeners('unhandledRejection')
+    EVENTS.forEach((event) => {
+      listenersFor(event)
+        .filter((listener) => !preexisting[event].includes(listener))
+        .forEach((listener) => process.removeListener(event as NodeJS.Signals, listener))
+    })
   })
 
   it('hands the same client to every copy of the module', () => {

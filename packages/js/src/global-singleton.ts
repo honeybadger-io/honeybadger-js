@@ -63,18 +63,41 @@ export function getOrCreateSingleton<T>(
   create: () => T,
   _global: GlobalLike = Util.globalThisOrWindow() as unknown as GlobalLike
 ): T {
-  if (!_global || _global[DISABLE_GLOBAL_SINGLETON_KEY] === true) {
+  if (!_global) {
     return create()
   }
 
   const key = singletonKey(target, version)
+  let shared: T
+  let canShare = false
 
-  const existing = _global[key]
-  if (isSingleton(existing)) {
-    return existing as T
+  // Reading the global object can throw as easily as writing to it can: the opt-out
+  // flag, the slot and the marker are all ordinary properties, and a host or another
+  // script may have installed a getter on any of them. `create()` stays outside, so a
+  // genuine failure to build the client still propagates.
+  try {
+    if (_global[DISABLE_GLOBAL_SINGLETON_KEY] !== true) {
+      canShare = true
+
+      const existing = _global[key]
+      if (isSingleton(existing)) {
+        shared = existing as T
+      }
+    }
+  }
+  catch (_e) {
+    canShare = false
+  }
+
+  if (shared) {
+    return shared
   }
 
   const created = create()
+
+  if (!canShare) {
+    return created
+  }
 
   try {
     markAsSingleton(created)
