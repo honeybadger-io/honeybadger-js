@@ -32,8 +32,10 @@ export function withHoneybadger<Env>(
       const fetchHandler = fn as NonNullable<ExportedHandler<Env>['fetch']>
       handler.fetch = async (request, env, ctx) => {
         const config = getConfig(env)
-        if (config.apiKey && !isHbConfigured()) {
-          Honeybadger.configure(config)
+        if (config.apiKey) {
+          if (!isHbConfigured()) {
+            Honeybadger.configure(config)
+          }
           Honeybadger.setContext({ url: request.url, method: request.method })
         }
         try {
@@ -54,8 +56,10 @@ export function withHoneybadger<Env>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey && !isHbConfigured()) {
-          Honeybadger.configure(config)
+        if (config.apiKey) {
+          if (!isHbConfigured()) {
+            Honeybadger.configure(config)
+          }
           Honeybadger.setContext({
             cron: controller.cron,
             scheduledTime: controller.scheduledTime,
@@ -79,8 +83,10 @@ export function withHoneybadger<Env>(
         ctx: ExecutionContext
       ) => {
         const config = getConfig(env)
-        if (config.apiKey && !isHbConfigured()) {
-          Honeybadger.configure(config)
+        if (config.apiKey) {
+          if (!isHbConfigured()) {
+            Honeybadger.configure(config)
+          }
           Honeybadger.setContext({
             queue: batch.queue,
             messageCount: batch.messages.length,
