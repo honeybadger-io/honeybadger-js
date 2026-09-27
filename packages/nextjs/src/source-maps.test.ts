@@ -316,10 +316,15 @@ describe('uploadSourceMapsAfterBuild', () => {
     assetsUrl: 'https://example.com/_next',
   }
   let nodeEnv: string | undefined
+  // A developer with these exported would otherwise see different behaviour from CI, and a
+  // test that clears them would leak that into the ones after it.
+  const envKeys = ['NEXT_PUBLIC_HONEYBADGER_API_KEY', 'NEXT_PUBLIC_HONEYBADGER_ASSETS_URL']
+  const savedEnv: Record<string, string | undefined> = {}
 
   beforeEach(() => {
     cleanOptionsError = null
     nodeEnv = process.env.NODE_ENV
+    envKeys.forEach((key) => { savedEnv[key] = process.env[key] })
     jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     uploadSourcemaps.mockReset().mockResolvedValue(undefined)
     sendDeployNotification.mockReset().mockResolvedValue(undefined)
@@ -329,9 +334,18 @@ describe('uploadSourceMapsAfterBuild', () => {
     mock.restore()
     jest.restoreAllMocks()
     setNodeEnv(nodeEnv)
+    envKeys.forEach((key) => {
+      if (savedEnv[key] === undefined) { delete process.env[key] } else { process.env[key] = savedEnv[key] }
+    })
   })
 
+  // `production` is required for this to test anything: jest runs with NODE_ENV=test, which
+  // is a development environment, so the dev guard would return before the configuration
+  // check was ever reached. The env vars are cleared for the same reason — the fallback
+  // would otherwise make an empty config look configured.
   it('does nothing when upload is not configured', async () => {
+    setNodeEnv('production')
+    envKeys.forEach((key) => delete process.env[key])
     mock({ '.next': { 'static': { 'a.js': js('a.js.map'), 'a.js.map': MAP_WITH_SOURCES } } })
 
     await uploadSourceMapsAfterBuild({}, { distDir: '.next', projectDir: '.' })
