@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.13](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/cloudflare@0.3.12...@honeybadger-io/cloudflare@0.3.13) (2026-09-27)
+
+
+### Bug Fixes
+
+* share the js singleton across duplicate module copies ([#1670](https://github.com/honeybadger-io/honeybadger-js/issues/1670)) ([39f94ca](https://github.com/honeybadger-io/honeybadger-js/commit/39f94ca58989c13523cda58c17ba7e84593571c3))
+
+
+
+
+
 ## [0.3.12](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/cloudflare@0.3.11...@honeybadger-io/cloudflare@0.3.12) (2026-09-22)
 
 **Note:** Version bump only for package @honeybadger-io/cloudflare

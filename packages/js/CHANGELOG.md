@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.16.5](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.4...@honeybadger-io/js@6.16.5) (2026-09-27)
+
+
+### Bug Fixes
+
+* share the js singleton across duplicate module copies ([#1670](https://github.com/honeybadger-io/honeybadger-js/issues/1670)) ([39f94ca](https://github.com/honeybadger-io/honeybadger-js/commit/39f94ca58989c13523cda58c17ba7e84593571c3))
+
+
+
+
+
 ## [6.16.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.3...@honeybadger-io/js@6.16.4) (2026-09-22)
 
 **Note:** Version bump only for package @honeybadger-io/js
