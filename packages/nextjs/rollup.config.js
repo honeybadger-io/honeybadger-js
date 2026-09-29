@@ -36,7 +36,6 @@ const mainConfig = {
     'next',
     'next/server',
     '@honeybadger-io/js',
-    '@honeybadger-io/react',
     '@honeybadger-io/plugin-core',
     'picomatch',
     '@vercel/otel',
@@ -110,11 +109,7 @@ const clientConfig = {
     },
   ],
   external: [
-    // `captureRouterTransitionStart` reaches the singleton through @honeybadger-io/js rather
-    // than @honeybadger-io/react, so that the error-boundary class component is not dragged
-    // into a React Server Components graph.
     '@honeybadger-io/js',
-    '@honeybadger-io/react',
   ],
   plugins: [
     commonjs(),
