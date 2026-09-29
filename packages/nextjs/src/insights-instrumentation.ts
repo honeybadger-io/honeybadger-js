@@ -3,7 +3,7 @@ import Honeybadger from '@honeybadger-io/js';
 /**
  * Edge-safe equivalents of the inbound instrumentation helpers in
  * `@honeybadger-io/js` (src/server/instrumentation/http_event.ts). They are
- * duplicated here because this module must also load on the edge runtime where
+ * duplicated here because this module must load in every runtime where
  * Node builtins (the `crypto` module, `process.hrtime`) are unavailable. Keep
  * the header names and the `request_id` / `correlation_id` contract in sync
  * with that file.
@@ -75,34 +75,92 @@ function readNodeHeader(headers: NodeHeaders, name: string): string | undefined 
 }
 
 // A type alias (not an interface) so it stays assignable to the
-// Record<string, unknown> that setEventContext expects.
+// Record<string, unknown> that event payloads expect.
 export type RequestIds = {
   request_id: string
   correlation_id: string
+  // Present only when an OpenTelemetry span is available. Carried alongside the two ids
+  // above rather than folded into them, so a fault can be joined to the trace — and to the
+  // `request.handled` events — of the request it failed in.
+  trace_id?: string
+  span_id?: string
 }
 
-// Shared id precedence. Kept in one place (rather than once per request shape)
-// so the header-name contract documented above is only spelled out once.
-function seedIds(read: (name: string) => string | undefined): RequestIds {
+/**
+ * Span and trace ids, when OpenTelemetry is in play.
+ */
+export type SpanIds = { traceId?: string; spanId?: string }
+
+/**
+ * Shared id precedence. Kept in one place (rather than once per request shape)
+ * so the header-name contract documented above is only spelled out once.
+ *
+ * The span ids do double duty. They are emitted as `trace_id` / `span_id`, and they also
+ * back-fill `request_id` / `correlation_id` when no header supplied them — a trace id
+ * already has exactly the semantics we want for a correlation id, since W3C trace context
+ * reuses an inbound `traceparent` and mints a new one when there is none.
+ *
+ * That double duty is what makes a fault joinable to its request's events: both paths seed
+ * from the same span, so with no id headers present a fault and its `request.handled` event
+ * carry identical values for all four.
+ */
+function seedIds(
+  read: (name: string) => string | undefined,
+  span: SpanIds = {}
+): RequestIds {
   const requestId =
     read('x-request-id') ??
     read('request-id') ??
+    span.spanId ??
     generateId()
   const correlationId =
     read('x-correlation-id') ??
     read('x-amzn-trace-id') ??
+    span.traceId ??
     requestId
-  return { request_id: requestId, correlation_id: correlationId }
+
+  const ids: RequestIds = { request_id: requestId, correlation_id: correlationId }
+  if (span.traceId) {
+    ids.trace_id = span.traceId
+  }
+  if (span.spanId) {
+    ids.span_id = span.spanId
+  }
+
+  return ids
+}
+
+/**
+ * The active span's ids, or an empty object when OpenTelemetry is not in play.
+ *
+ * `@opentelemetry/api` is an optional peer dependency, and this module is reachable from
+ * every runtime entry point, so it is loaded on demand and any failure to resolve it is
+ * treated as "no tracing configured" rather than an error.
+ */
+export async function activeSpanIds(): Promise<SpanIds> {
+  try {
+    const { trace } = await import('@opentelemetry/api')
+    const spanContext = trace.getActiveSpan()?.spanContext()
+    if (!spanContext) {
+      return {}
+    }
+
+    return { traceId: spanContext.traceId, spanId: spanContext.spanId }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    return {}
+  }
 }
 
 // App Router / middleware: headers are a web `Headers` instance.
-export function seedRequestEventContext(headers: Headers): RequestIds {
-  return seedIds((name) => readHeader(headers, name))
+export function seedRequestEventContext(headers: Headers, span: SpanIds = {}): RequestIds {
+  return seedIds((name) => readHeader(headers, name), span)
 }
 
 // Pages Router: headers are a Node bag (Pages routes are Node-only, never edge).
-export function seedNodeRequestEventContext(headers: NodeHeaders): RequestIds {
-  return seedIds((name) => readNodeHeader(headers, name))
+export function seedNodeRequestEventContext(headers: NodeHeaders, span: SpanIds = {}): RequestIds {
+  return seedIds((name) => readNodeHeader(headers, name), span)
 }
 
 export function now(): number {
@@ -117,7 +175,7 @@ export function insightsHttpEnabled(): boolean {
 }
 
 // The ids are embedded directly in the payload (instead of relying on the
-// store's eventContext merge) so the event carries them even on the edge
+// store's eventContext merge) so the event carries them even where the
 // runtime, where there is no per-request store isolation. On the Node.js
 // runtime they match the seeded event context, so embedding is a no-op.
 function emitHandledEvent(method: string | undefined, path: string | undefined, status: number | undefined, start: number, ids: RequestIds): void {
@@ -152,4 +210,39 @@ export function emitRequestEvent(req: Request, status: number | undefined, start
 export function emitNodeRequestEvent(req: NodeRequestLike, status: number | undefined, start: number, ids: RequestIds): void {
   const path = typeof req.url === 'string' ? req.url.split('?')[0] : undefined
   emitHandledEvent(req.method, path, status, start, ids)
+}
+
+/**
+ * OpenTelemetry path. Header values are not on the span by default; they arrive as
+ * `http.request.header.*` attributes when the HTTP instrumentation is configured with
+ * `headersToSpanAttributes`. Hyphens become underscores under the older semantic
+ * conventions and are preserved under the stable ones, so both spellings are read.
+ *
+ * When no header is present the span and trace ids are used, so the ids stay
+ * meaningful — and joinable to a trace — on platforms where the HTTP layer is not
+ * visible, such as serverless platforms.
+ */
+export function seedSpanEventContext(
+  attributes: Record<string, unknown>,
+  spanContext: SpanIds
+): RequestIds {
+  const read = (name: string): string | undefined => {
+    const lower = name.toLowerCase()
+    for (const key of [
+      `http.request.header.${lower}`,
+      `http.request.header.${lower.replace(/-/g, '_')}`,
+    ]) {
+      const value = attributes[key]
+      const first = Array.isArray(value) ? value[0] : value
+      if (typeof first === 'string' && first.trim().length) {
+        return first.trim()
+      }
+    }
+    return undefined
+  }
+
+  return seedIds(read, {
+    traceId: spanContext.traceId || undefined,
+    spanId: spanContext.spanId || undefined,
+  })
 }

@@ -1,14 +1,11 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server'
 
-// This function can be marked `async` if using `await` inside
+// Middleware runs before the request reaches a route, so an error boundary cannot catch it.
+// `onRequestError` in instrumentation.ts reports it.
 export function middleware(request: NextRequest) {
-  throw new Error('thrown in middleware');
-
-  return NextResponse.redirect(new URL('/home', request.url));
+  throw new Error(`thrown in middleware for ${request.nextUrl.pathname}`)
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
   matcher: '/middleware-test',
-};
+}
