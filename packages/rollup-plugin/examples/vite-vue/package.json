@@ -11,7 +11,7 @@
   "dependencies": {
     "@honeybadger-io/js": "^4.9.3",
     "@honeybadger-io/vue": "^4.9.3",
-    "vue": "^3.2.45"
+    "vue": "^3.5.42"
   },
   "devDependencies": {
     "@honeybadger-io/rollup-plugin": "file:../..",
