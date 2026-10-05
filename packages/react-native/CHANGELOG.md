@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.4.17](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.4.16...@honeybadger-io/react-native@6.4.17) (2026-10-05)
+
+
+### Bug Fixes
+
+* **react-native:** send pre-serialized events batches without re-encoding ([#1672](https://github.com/honeybadger-io/honeybadger-js/issues/1672)) ([1c55d14](https://github.com/honeybadger-io/honeybadger-js/commit/1c55d1472407739b6222e84c124a9d50c16d124e))
+
+
+
+
+
 ## [6.4.16](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.4.15...@honeybadger-io/react-native@6.4.16) (2026-08-19)
 
 **Note:** Version bump only for package @honeybadger-io/react-native
