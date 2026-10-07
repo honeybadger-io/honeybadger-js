@@ -16,11 +16,8 @@ The documentation includes a detailed [Next.js integration guide](https://docs.h
 This repository contains two example apps using this package. Follow the README in each one
 to run it.
 
-- [`examples/app-router`](./examples/app-router) — App Router on Next.js 16, built with
-  Turbopack and instrumented entirely through `instrumentation.ts` and
-  `instrumentation-client.ts`.
-- [`examples/pages-router`](./examples/pages-router) — Pages Router, with server errors
-  reported from `instrumentation.js` and client errors from `_app.js` and `_error.js`.
+- [`examples/app-router`](./examples/app-router) — App Router, on Next.js 16 with Turbopack.
+- [`examples/pages-router`](./examples/pages-router) — Pages Router.
 
 ## Development
 
