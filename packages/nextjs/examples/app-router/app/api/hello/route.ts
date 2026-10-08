@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { withHoneybadger } from '@honeybadger-io/nextjs'
-import { config } from '../../../honeybadger.server.config'
+import type { NextRequest } from 'next/server'
 
-// API routes are not covered by the webpack config-file injection (that only
-// targets `pages/_app` / `pages/_document` / `pages/_error` / `main-app`), so
-// Honeybadger must be configured explicitly here. Passing `config` reuses the
-// same settings as `honeybadger.server.config.js` instead of duplicating them.
-export const GET = withHoneybadger(async () => {
+// No wrapper needed: `onRequestError` in instrumentation.ts reports errors thrown here.
+export const GET = async (request: NextRequest) => {
+  if (request.nextUrl.searchParams.get('fail') === 'true') {
+    throw new Error('thrown from an app-router route handler')
+  }
+
   return NextResponse.json({ message: 'hello from app-router api route' })
-}, config)
+}

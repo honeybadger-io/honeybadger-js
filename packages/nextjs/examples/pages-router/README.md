@@ -4,8 +4,10 @@ This is a simple example showing how to use
 [Honeybadger](https://www.honeybadger.io/for/javascript) to catch & report
 errors on both client + server side in Next.js.
 
-- `_app.js` renders on both the server and client. It initializes Honeybadger to catch any unhandled exceptions
-- `_error.js` is rendered by Next.js while handling certain types of exceptions for you. It is overridden so those exceptions can be passed along to Honeybadger
+- `instrumentation.js` configures Honeybadger on the server and exports `onRequestError`, which reports server errors — including those from API routes and `getServerSideProps`
+- `instrumentation-client.js` configures Honeybadger in the browser, after the document loads but before React hydrates
+- `_app.js` wraps the app in `HoneybadgerErrorBoundary` to catch errors thrown while rendering
+- `_error.js` is rendered by Next.js while handling certain types of exceptions for you. It reports only client-side errors; server errors are skipped there because `onRequestError` already reports them
 - `next.config.js` enables source maps in production and uploads them to Honeybadger
 
 ## Getting Started

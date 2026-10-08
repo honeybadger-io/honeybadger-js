@@ -2,11 +2,16 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## What is this?
 
-This project demonstrates Honeybadger's error reporting for Next.js, using the new App Router that comes with Next.js v13:
+This project demonstrates Honeybadger's error reporting for Next.js 16 with the App Router,
+built with Turbopack. Instrumentation comes entirely from `instrumentation.ts` and
+`instrumentation-client.ts` — nothing wraps a handler by hand. Open the home page for a list
+of the scenarios; each one throws on purpose:
 - Error thrown while rendering in `app/counter/page.tsx` (`http://localhost:3000/counter?fail=true`).
 - Error thrown while data fetching in `app/data-fetching/page.tsx` (`http://localhost:3000/data-fetching?fail=true`).
 - Error thrown in `generateMetadata`, found in `app/metadata-example/page.tsx` (`http://localhost:3000/metadata-example?fail=true`).
-- Error thrown in middleware (`http://localhost:3000/middleware-test`), which will be caught with the global `window.onerror` handler.
+- Error thrown in a Route Handler (`http://localhost:3000/api/hello?fail=true`).
+- Error thrown in middleware (`http://localhost:3000/middleware-test`).
+- Error thrown from a browser event handler, from the button on the home page.
 
 ## Getting Started
 First, install node modules: 
@@ -30,7 +35,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You must add the following environment variables to use Honeybadger in this project:
 
 - `NEXT_PUBLIC_HONEYBADGER_API_KEY` - The API key from your **project settings page** in [Honeybadger](https://app.honeybadger.io).
-- `NEXT_PUBLIC_HONEYBADGER_ASSETS_URL` - Required by [honeybadger-webpack](https://github.com/honeybadger-io/honeybadger-webpack#configuration) to upload source maps to Honeybadger. Replace `[host]` with your domain name: `https://[host]/_next` (if using Vercel's domain, the host looks like this: `[your app name].vercel.app`)
+- `NEXT_PUBLIC_HONEYBADGER_ASSETS_URL` - The public URL of the build output, needed to upload source maps. Replace `[host]` with your domain name: `https://[host]/_next` (if using Vercel's domain, the host looks like this: `[your app name].vercel.app`)
 - `NEXT_PUBLIC_HONEYBADGER_REVISION` - The version (i.e. 1.0.0) of your the app. This is necessary to in order to apply source maps to errors in Honeybadger.
 
 ## Learn More

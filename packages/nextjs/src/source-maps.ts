@@ -1,0 +1,515 @@
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+import picomatch from 'picomatch'
+// Type-only, so nothing from plugin-core is pulled into the module graph at import time.
+import type { Types } from '@honeybadger-io/plugin-core'
+import { HoneybadgerNextJsConfig } from './types'
+
+/**
+ * Loads plugin-core on demand, never at module scope.
+ *
+ * Its module body runs `fetchRetry(require('node-fetch'))` as a side effect, which throws
+ * `ArgumentError: fetch must be a function` inside the Next.js server runtime. This module
+ * shares a barrel with the runtime instrumentation exports, so a top-level import here
+ * would break `instrumentation.ts` for every app. plugin-core is a rollup external, so this
+ * stays a real deferred require in both the CJS and ESM bundles.
+ */
+function loadPluginCore() {
+  return import('@honeybadger-io/plugin-core')
+}
+
+/**
+ * The build output directory Next.js serves over HTTP, relative to `distDir`. `.next/static`
+ * is published at `/_next/static`; everything else in `distDir` is not served.
+ */
+const BROWSER_OUTPUT_DIR = 'static'
+
+/**
+ * The directories inside `distDir` whose JavaScript is actually shipped, and so the only
+ * ones worth collecting maps from. `distDir` also holds build tooling — `build/chunks`,
+ * `cache`, `required-server-files.js` — and a `standalone` copy of the server when that
+ * output mode is on. Walking all of it uploads maps under a `minified_url` no request can
+ * ever produce.
+ */
+const OUTPUT_DIRS = [BROWSER_OUTPUT_DIR, 'server']
+
+/**
+ * Metadata Next.js passes to `compiler.runAfterProductionCompile`.
+ */
+export type AfterProductionCompileMetadata = {
+  distDir: string
+  projectDir: string
+}
+
+function log(type: 'error' | 'warn' | 'debug', silent: boolean, msg: string): void {
+  if (['error', 'warn'].includes(type) || !silent) {
+    console[type]('[HoneybadgerNextJs]', msg)
+  }
+}
+
+/**
+ * Whether the project has configured source map upload.
+ *
+ * Separate from `resolveUploadOptions` because `withHoneybadgerConfig` needs the answer
+ * while building the config, and must not emit the "not configured" warning there — the
+ * hook will do that once, at build time.
+ */
+export function isSourceMapUploadConfigured(
+  honeybadgerNextJsConfig: HoneybadgerNextJsConfig = {}
+): boolean {
+  if (honeybadgerNextJsConfig.disableSourceMapUpload) {
+    return false
+  }
+
+  const apiKey = honeybadgerNextJsConfig.apiKey || process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY
+  const assetsUrl = honeybadgerNextJsConfig.assetsUrl || process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL
+
+  return Boolean(apiKey && assetsUrl)
+}
+
+/**
+ * Resolves the upload options, falling back to the same environment variables the
+ * configuration templates use.
+ *
+ * Returns `null` rather than throwing when the project has not configured source map
+ * upload. `cleanOptions` throws on a missing `apiKey`/`assetsUrl`, and Next.js re-throws
+ * whatever this hook throws — so validating eagerly would fail the build of every app
+ * that simply does not use this feature.
+ */
+export async function resolveUploadOptions(
+  honeybadgerNextJsConfig: HoneybadgerNextJsConfig = {}
+): Promise<Types.HbPluginOptions | null> {
+  const silent = honeybadgerNextJsConfig.silent ?? true
+
+  if (honeybadgerNextJsConfig.disableSourceMapUpload) {
+    log('debug', silent, 'source map upload disabled')
+    return null
+  }
+
+  // `disableSourceMapUpload` is this package's own switch, handled above; everything else
+  // on the config is a plugin-core option and passes straight through.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { disableSourceMapUpload, ...provided } = honeybadgerNextJsConfig
+  const apiKey = provided.apiKey || process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY
+  const assetsUrl = provided.assetsUrl || process.env.NEXT_PUBLIC_HONEYBADGER_ASSETS_URL
+
+  if (!apiKey || !assetsUrl) {
+    log('warn', silent, 'skipping source map upload; set apiKey and assetsUrl to enable it')
+    return null
+  }
+
+  // `cleanOptions` merges as `{ ...defaults, ...options }`, so a key present with an
+  // `undefined` value overwrites the default rather than falling back to it. An unset
+  // revision would upload as `undefined` instead of `main`, and a fault whose revision
+  // does not match its source map is never symbolicated — so drop empty values instead
+  // of passing them through.
+  const { cleanOptions } = await loadPluginCore()
+
+  return cleanOptions(withoutUndefined({
+    ...provided,
+    apiKey,
+    assetsUrl,
+    revision: provided.revision || process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
+    silent,
+  }))
+}
+
+function withoutUndefined<T extends Record<string, unknown>>(options: T): T {
+  return Object.fromEntries(
+    Object.entries(options).filter(([, value]) => value !== undefined)
+  ) as T
+}
+
+// Mirrors plugin-core's DEFAULT_DEVELOPMENT_ENVIRONMENTS. Duplicated so a development
+// build can be recognised before plugin-core is loaded — see uploadSourceMapsAfterBuild.
+const DEFAULT_DEVELOPMENT_ENVIRONMENTS = ['dev', 'development', 'test']
+
+function isDevEnv(developmentEnvironments: string[]): boolean {
+  if (!process.env.NODE_ENV) {
+    return false
+  }
+
+  return developmentEnvironments.includes(process.env.NODE_ENV)
+}
+
+async function walk(dir: string, onFile: (filePath: string) => void): Promise<void> {
+  let entries: fs.Dirent[]
+  try {
+    entries = await fs.promises.readdir(dir, { withFileTypes: true })
+  }
+  catch (error) {
+    // A build output directory that isn't there is not an error worth failing on — the
+    // server tree does not exist unless `experimental.serverSourceMaps` is on. Anything
+    // else (permissions, I/O) would silently shrink the upload to whatever happened to be
+    // readable, so let it propagate and be governed by `ignoreErrors`.
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return
+    }
+
+    throw error
+  }
+
+  for (const entry of entries) {
+    const entryPath = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      await walk(entryPath, onFile)
+    } else if (entry.isFile()) {
+      onFile(entryPath)
+    }
+  }
+}
+
+/**
+ * A source map is only worth uploading when it carries the original sources. Next.js
+ * emits maps without `sourcesContent` for some outputs, and those symbolicate to
+ * nothing. Same check the rollup and esbuild plugins apply.
+ */
+async function hasSourcesContent(sourcemapFilePath: string): Promise<boolean> {
+  try {
+    const contents = await fs.promises.readFile(sourcemapFilePath, 'utf8')
+    const parsed = JSON.parse(contents)
+    return Array.isArray(parsed.sourcesContent) && parsed.sourcesContent.length > 0
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    return false
+  }
+}
+
+// Enough to reach the `sourceMappingURL` comment, which is the last line of a built file.
+const SOURCE_MAPPING_URL_TAIL_BYTES = 2048
+
+/**
+ * The source map a built JavaScript file points at, or `null` when it has none.
+ *
+ * Resolved from the file's own `sourceMappingURL` comment rather than by assuming the map
+ * sits beside it as `<name>.js.map`. That sibling convention is webpack's; Turbopack gives
+ * the map an independent hash — `1mfl5gjk9763d.js` points at `33ri1p-shrphb.js.map`.
+ *
+ * Only the tail of the file is read, since the comment is always its last line.
+ */
+async function locateSourcemap(jsFilePath: string): Promise<string | null> {
+  let tail: string
+  try {
+    const handle = await fs.promises.open(jsFilePath, 'r')
+    try {
+      const { size } = await handle.stat()
+      const length = Math.min(size, SOURCE_MAPPING_URL_TAIL_BYTES)
+      const buffer = Buffer.alloc(length)
+      await handle.read(buffer, 0, length, size - length)
+      tail = buffer.toString('utf8')
+    } finally {
+      await handle.close()
+    }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    return null
+  }
+
+  // The last comment wins, per the source map spec. No Next.js chunk currently carries
+  // two, but a bundled library that mentions `sourceMappingURL` in its tail would
+  // otherwise mispair the map.
+  const matches = [...tail.matchAll(/[#@]\s*sourceMappingURL=(\S+)/g)]
+  const url = matches.at(-1)?.[1]
+
+  // No map, or an inline `data:` map, which there is nothing to upload for.
+  if (!url || url.startsWith('data:')) {
+    return null
+  }
+
+  // `decodeURIComponent` throws on malformed escapes such as `bad%.map`. Scoped to just
+  // the decode, because letting it escape would abandon the whole build's upload over one
+  // unreadable footer rather than skipping that single file.
+  let decodedUrl: string
+  try {
+    decodedUrl = decodeURIComponent(url)
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    return null
+  }
+
+  const sourcemapFilePath = path.resolve(path.dirname(jsFilePath), decodedUrl)
+
+  return fs.existsSync(sourcemapFilePath) ? sourcemapFilePath : null
+}
+
+/**
+ * Pairs each built `.js` file with the source map it declares.
+ *
+ * `jsFilename` is the path relative to `distDir`, because that is what `assetsUrl`
+ * addresses: the configuration templates point it at `<origin>/_next`, and `.next/x`
+ * is served at `/_next/x`. `uploadSourcemap` builds `minified_url` by joining the two.
+ *
+ * Only `static/` and `server/` are walked — see `OUTPUT_DIRS`. Server maps exist only when
+ * `experimental.serverSourceMaps` is on, which `withHoneybadgerConfig` enables alongside
+ * upload. Server chunks are not served over HTTP, so whether their frames match the
+ * uploaded `minified_url` depends on the runtime path rewriting tracked in #1602 — but
+ * not uploading them at all guarantees server frames stay minified, which is the defect
+ * that issue reports.
+ */
+export async function collectSourcemaps(
+  distDir: string,
+  ignorePaths: string[] = []
+): Promise<Types.SourcemapInfo[]> {
+  const jsFilePaths: string[] = []
+  for (const outputDir of OUTPUT_DIRS) {
+    await walk(path.join(distDir, outputDir), (filePath) => {
+      if (filePath.endsWith('.js')) {
+        jsFilePaths.push(filePath)
+      }
+    })
+  }
+
+  const collected: Types.SourcemapInfo[] = []
+
+  for (const jsFilePath of jsFilePaths) {
+    if (picomatch.isMatch(jsFilePath, ignorePaths, { basename: true })) {
+      continue
+    }
+
+    const sourcemapFilePath = await locateSourcemap(jsFilePath)
+    if (!sourcemapFilePath) {
+      continue
+    }
+
+    if (!await hasSourcesContent(sourcemapFilePath)) {
+      continue
+    }
+
+    // Posix separators: these become URL paths.
+    const jsFilename = path.relative(distDir, jsFilePath).split(path.sep).join('/')
+
+    collected.push({
+      sourcemapFilename: path.relative(distDir, sourcemapFilePath).split(path.sep).join('/'),
+      sourcemapFilePath,
+      jsFilename,
+      jsFilePath,
+    })
+  }
+
+  return collected
+}
+
+/**
+ * Bundler URL schemes that appear in a map's `sources`.
+ *
+ * Turbopack writes `turbopack:///[project]/app/page.tsx`; webpack writes
+ * `webpack://_N_E/./app/page.tsx` or `webpack:///./app/page.tsx`.
+ */
+const SOURCE_SCHEME_PREFIXES = [
+  /^turbopack:\/\/\/\[[^\]]+\]\//,
+  /^webpack:\/\/[^/]*\/(\.\/)?/,
+]
+
+function normalizeSource(source: string): string {
+  for (const prefix of SOURCE_SCHEME_PREFIXES) {
+    const normalized = source.replace(prefix, '')
+    if (normalized !== source) {
+      return normalized
+    }
+  }
+
+  return source
+}
+
+/**
+ * Rewrites each map's `sources` to project-relative paths, in a throwaway copy.
+ *
+ * Honeybadger decides whether a mapped frame is *your* code by testing the resolved source
+ * against the notice's `projectRoot`, which the browser client defaults to the page origin.
+ * A source still carrying its bundler scheme never matches, so the frame is treated as
+ * library code and the fault surfaces the next frame instead — for a React app, an unmapped
+ * framework chunk. Stripping the scheme leaves a relative path, which Honeybadger resolves
+ * against the minified URL and therefore under the origin.
+ *
+ * Done here rather than by asking users to set `projectRoot` to a bundler-specific prefix,
+ * because that value differs between Turbopack and webpack and cannot be chosen correctly
+ * from client config.
+ *
+ * The originals on disk are untouched: Next.js reads the server maps itself.
+ */
+async function withNormalizedSources(
+  sourcemaps: Types.SourcemapInfo[]
+): Promise<{ sourcemaps: Types.SourcemapInfo[]; cleanup: () => Promise<void> }> {
+  const unchanged = { sourcemaps, cleanup: async () => undefined }
+  if (sourcemaps.length === 0) {
+    return unchanged
+  }
+
+  let tempDir: string
+  try {
+    tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'honeybadger-sourcemaps-'))
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch (error) {
+    // Uploading unnormalized maps beats not uploading at all.
+    return unchanged
+  }
+
+  const cleanup = () => fs.promises.rm(tempDir, { recursive: true, force: true })
+  const normalized: Types.SourcemapInfo[] = []
+
+  for (const [index, sourcemap] of sourcemaps.entries()) {
+    try {
+      const parsed = JSON.parse(await fs.promises.readFile(sourcemap.sourcemapFilePath, 'utf8'))
+      const sources: unknown = parsed.sources
+
+      if (!Array.isArray(sources) || !sources.some((source) => normalizeSource(String(source)) !== source)) {
+        normalized.push(sourcemap)
+        continue
+      }
+
+      parsed.sources = sources.map((source) => normalizeSource(String(source)))
+      // Named by position, so two maps can never collide in the temp directory.
+      const copyPath = path.join(tempDir, `${index}.js.map`)
+      await fs.promises.writeFile(copyPath, JSON.stringify(parsed))
+      normalized.push({ ...sourcemap, sourcemapFilePath: copyPath })
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    catch (error) {
+      // A map we cannot rewrite is still worth uploading as it is.
+      normalized.push(sourcemap)
+    }
+  }
+
+  return { sourcemaps: normalized, cleanup }
+}
+
+/**
+ * Removes the *browser* source map files after they have been uploaded.
+ *
+ * Only for maps this package caused to be generated. `productionBrowserSourceMaps`
+ * publishes what it generates and Next.js has no hidden-source-map equivalent, so deleting
+ * after upload is what keeps them out of visitors' hands.
+ *
+ * Server maps are deliberately left alone. `.next/server` is not served, so there is no
+ * exposure to undo, and Next.js reads those maps itself when it formats server-side stack
+ * traces — deleting them would degrade the project's own logs for no benefit.
+ *
+ * The `sourceMappingURL` comments in the emitted JavaScript are left behind, so a browser
+ * that goes looking will get a 404 rather than the source.
+ */
+async function deleteBrowserSourcemapFiles(distDir: string, silent: boolean): Promise<void> {
+  // Deliberately every `.js.map` under `static`, not just the ones that were uploaded.
+  // `collectSourcemaps` drops maps that are ignored, malformed, unpaired, or missing
+  // `sourcesContent` — all of which Next.js still serves. Deleting only what we uploaded
+  // would leave exactly those behind, publicly readable, because of an option we turned on.
+  const mapFilePaths: string[] = []
+  await walk(path.join(distDir, BROWSER_OUTPUT_DIR), (filePath) => {
+    if (filePath.endsWith('.js.map')) {
+      mapFilePaths.push(filePath)
+    }
+  })
+
+  let deleted = 0
+  for (const mapFilePath of mapFilePaths) {
+    try {
+      await fs.promises.unlink(mapFilePath)
+      deleted++
+    } catch (error) {
+      // Loud, and not gated behind `silent`: a map we failed to remove is one this package
+      // caused to be served. That is exposure, not cleanup noise.
+      log(
+        'warn',
+        silent,
+        `could not delete ${path.relative(distDir, mapFilePath)}, so it will be served ` +
+        `publicly: ${(error as Error).message}`
+      )
+    }
+  }
+
+  log('debug', silent, `deleted ${deleted} browser source map file(s) from the build output`)
+}
+
+/**
+ * Uploads the build's source maps to Honeybadger.
+ *
+ * Registered by `withHoneybadgerConfig` on Next.js's `compiler.runAfterProductionCompile`
+ * hook, which runs for both Turbopack and webpack builds.
+ *
+ * Next.js re-throws whatever this hook throws, which would fail the user's build, so a
+ * failed upload is only allowed to propagate when `ignoreErrors` is off.
+ */
+export async function uploadSourceMapsAfterBuild(
+  honeybadgerNextJsConfig: HoneybadgerNextJsConfig | undefined,
+  metadata: AfterProductionCompileMetadata,
+  options: { deleteBrowserSourcemaps?: boolean } = {}
+): Promise<void> {
+  // Read from the raw config rather than the resolved options, because the error handling
+  // below has to cover resolving them at all: `cleanOptions` can throw, and loading
+  // plugin-core can fail outright. Doing that outside the try meant a failure there ignored
+  // `ignoreErrors` and skipped the cleanup that keeps browser maps off the wire.
+  const silent = honeybadgerNextJsConfig?.silent ?? true
+  const ignoreErrors = honeybadgerNextJsConfig?.ignoreErrors ?? false
+
+  // Outside the try/finally below: a build that never intended to upload also never enabled
+  // the browser maps, so there is nothing of ours to clean up. Decided from the raw config
+  // so it needs no plugin-core.
+  const developmentEnvironments =
+    honeybadgerNextJsConfig?.developmentEnvironments ?? DEFAULT_DEVELOPMENT_ENVIRONMENTS
+  if (isDevEnv(developmentEnvironments)) {
+    log('debug', silent, `skipping source map upload in ${process.env.NODE_ENV}`)
+    return
+  }
+
+  try {
+    const uploadOptions = await resolveUploadOptions(honeybadgerNextJsConfig)
+    if (!uploadOptions) {
+      return
+    }
+
+    const { uploadSourcemaps, sendDeployNotification } = await loadPluginCore()
+
+    const sourcemaps = await collectSourcemaps(metadata.distDir, uploadOptions.ignorePaths)
+
+    if (sourcemaps.length === 0) {
+      // Upload is configured, so finding nothing means something is wrong — a `distDir`
+      // that moved, or an `ignorePaths` that matches everything. Silence here would look
+      // exactly like success.
+      log('warn', silent, `found no source maps to upload in ${metadata.distDir}`)
+      return
+    }
+
+    const normalized = await withNormalizedSources(sourcemaps)
+    try {
+      await uploadSourcemaps(normalized.sourcemaps, uploadOptions)
+    } finally {
+      await normalized.cleanup()
+    }
+
+    // Only after maps actually went up. A failed upload already skips this by throwing, so
+    // announcing a deploy for a build that uploaded nothing was the one inconsistent case —
+    // and it reads as "the maps for this revision are in place" when they are not.
+    if (uploadOptions.deploy) {
+      await sendDeployNotification(uploadOptions)
+    }
+  } catch (error) {
+    if (!ignoreErrors) {
+      throw error
+    }
+
+    log('error', silent, `source map upload failed: ${(error as Error).message}`)
+  } finally {
+    // Unconditionally, including after a failed upload. We enabled
+    // `productionBrowserSourceMaps`, so these maps ship publicly unless something removes
+    // them — and `ignoreErrors: true`, which the docs recommend so an outage cannot block a
+    // deploy, would otherwise turn every failed upload into published source. Keeping them
+    // to preserve "the only copy" is not worth that: a rebuild regenerates them, whereas a
+    // deploy that served them cannot be recalled.
+    if (options.deleteBrowserSourcemaps) {
+      try {
+        await deleteBrowserSourcemapFiles(metadata.distDir, silent)
+      } catch (error) {
+        // Never let cleanup mask the upload failure that is already propagating.
+        log(
+          'warn',
+          silent,
+          `could not clean up browser source maps: ${(error as Error).message}`
+        )
+      }
+    }
+  }
+}
