@@ -608,6 +608,48 @@ export function filterUrl(url: string, filters: string[]): string {
 const URL_METADATA_KEYS = ['url', 'from', 'to', 'href']
 
 /**
+ * Recursively rewrites the query string of every URL-bearing value.
+ *
+ * Nested as well as top-level: a breadcrumb may well carry
+ * `metadata: { request: { url: '/checkout?token=secret' } }`, and `filter` leaves that URL
+ * alone because the key `request` matches no filter.
+ *
+ * Safe to recurse without a seen-list because `filter` has already run: it replaces a
+ * circular reference with a string, so what arrives here is acyclic.
+ */
+function filterUrlValues(value: unknown, filters: string[]): unknown {
+  if (is('Array', value)) {
+    return (value as unknown[]).map((entry) => filterUrlValues(entry, filters))
+  }
+
+  if (!is('Object', value)) {
+    return value
+  }
+
+  const result = {} as Record<string, unknown>
+  const source = value as Record<string, unknown>
+
+  // Own enumerable keys only, assigned with `defineProperty`: a plain `result[key] =` would
+  // reassign the prototype rather than create a property for a key named `__proto__`, and
+  // breadcrumb metadata is host-supplied.
+  Object.keys(source).forEach((key) => {
+    const entry = source[key]
+    const filtered = URL_METADATA_KEYS.includes(key.toLowerCase()) && typeof entry === 'string'
+      ? filterUrl(entry, filters)
+      : filterUrlValues(entry, filters)
+
+    Object.defineProperty(result, key, {
+      value: filtered,
+      enumerable: true,
+      writable: true,
+      configurable: true
+    })
+  })
+
+  return result
+}
+
+/**
  * Applies `filters` to a breadcrumb trail.
  *
  * Metadata is filtered by key, exactly as `params` and `session` are, and any value under a
@@ -627,17 +669,12 @@ export function filterBreadcrumbs(trail: BreadcrumbRecord[], filters: string[]):
       return breadcrumb
     }
 
-    const metadata = filter(breadcrumb.metadata, filters)
+    // `filter` runs first, so a key-matched value is already '[FILTERED]' by the time the
+    // URL pass sees it. Passing that through `filterUrl` is harmless: it holds no '?', so
+    // it is returned untouched.
+    const metadata = filterUrlValues(filter(breadcrumb.metadata, filters), filters)
 
-    URL_METADATA_KEYS.forEach((key) => {
-      // `filter` runs first, so a key-matched value is already '[FILTERED]' by now. Passing
-      // it through `filterUrl` is harmless: it holds no '?', so it is returned untouched.
-      if (typeof metadata[key] === 'string') {
-        metadata[key] = filterUrl(metadata[key] as string, filters)
-      }
-    })
-
-    return { ...breadcrumb, metadata }
+    return { ...breadcrumb, metadata: metadata as Record<string, unknown> }
   })
 }
 

@@ -53,6 +53,58 @@ describe('utils', function () {
       })
     })
 
+    it('filters a url nested below a key that matches no filter', function () {
+      const [result] = filterBreadcrumbs([crumb({
+        request: { url: '/checkout?token=abc', method: 'GET' }
+      })], ['token'])
+
+      expect(result.metadata.request).toEqual({ url: '/checkout?token=[FILTERED]', method: 'GET' })
+    })
+
+    it('filters urls inside an array of nested objects', function () {
+      const [result] = filterBreadcrumbs([crumb({
+        requests: [{ url: '/a?token=abc' }, { url: '/b?token=def' }]
+      })], ['token'])
+
+      expect(result.metadata.requests).toEqual([
+        { url: '/a?token=[FILTERED]' },
+        { url: '/b?token=[FILTERED]' }
+      ])
+    })
+
+    it('matches a url-bearing key regardless of case', function () {
+      const [result] = filterBreadcrumbs([crumb({ URL: '/checkout?token=abc' })], ['token'])
+
+      expect(result.metadata.URL).toEqual('/checkout?token=[FILTERED]')
+    })
+
+    // `filter` runs first and assigns with `newObj[k] =`, which for a key named `__proto__`
+    // swaps that object's prototype instead of adding a property. Nothing global is
+    // polluted, and copying own keys into a fresh object here drops the inherited value
+    // again -- this pins that down so a future rewrite cannot quietly carry it into the
+    // payload.
+    it('does not carry a __proto__ key through to the payload', function () {
+      const metadata = JSON.parse('{"nested": {"__proto__": {"polluted": true}, "url": "/a?token=abc"}}')
+
+      const [result] = filterBreadcrumbs([crumb(metadata)], ['token'])
+
+      const nested = result.metadata.nested as Record<string, unknown>
+      expect(({} as Record<string, unknown>).polluted).toBeUndefined()
+      expect(Object.getPrototypeOf(nested)).toBe(Object.prototype)
+      expect(nested.polluted).toBeUndefined()
+      expect(nested.url).toEqual('/a?token=[FILTERED]')
+      expect(JSON.stringify(result.metadata)).not.toContain('polluted')
+    })
+
+    it('does not throw on metadata holding a circular reference', function () {
+      const metadata: Record<string, unknown> = { url: '/checkout?token=abc' }
+      metadata.self = metadata
+
+      const [result] = filterBreadcrumbs([crumb(metadata)], ['token'])
+
+      expect(result.metadata.url).toEqual('/checkout?token=[FILTERED]')
+    })
+
     it('leaves a query string alone when no filter matches', function () {
       const [result] = filterBreadcrumbs([crumb({ url: '/checkout?step=2' })], ['token'])
 
