@@ -26,7 +26,11 @@ export type RouterTransitionType = 'push' | 'replace' | 'traverse'
  * reject.
  */
 export function captureRouterTransitionStart(url: string, navigationType: RouterTransitionType): void {
-  Honeybadger.addBreadcrumb(`Navigated to ${url}`, {
+  // The message carries the path alone and the full URL goes in the metadata, where the
+  // configured `filters` are applied to its query string when the payload is built. This is
+  // the same split the browser integration already uses for its XHR and fetch breadcrumbs,
+  // whose messages are built from `localURLPathname`.
+  Honeybadger.addBreadcrumb(`Navigated to ${url.split('?')[0]}`, {
     category: 'navigation',
     metadata: { url, navigationType },
   })

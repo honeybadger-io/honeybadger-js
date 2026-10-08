@@ -45,6 +45,16 @@ function isNextControlFlowError(error: unknown): boolean {
 }
 
 /**
+ * The path with any query string removed.
+ *
+ * Next.js reports `path` with the query attached (`/blog?name=foo`), and this value is
+ * written to the user's context, which `filters` never touch.
+ */
+function requestPath(path: string): string {
+  return typeof path === 'string' ? path.split('?')[0] : path
+}
+
+/**
  * Reports errors passed to Next.js's `onRequestError` instrumentation hook.
  *
  * Wire it up in `instrumentation.ts`:
@@ -78,9 +88,14 @@ export async function captureRequestError(
   const ids = seedNodeRequestEventContext(request.headers, await activeSpanIds())
 
   await Honeybadger.notifyAsync(error as Error, {
+    // The full path, query string included, goes on `url` so the configured `filters` are
+    // applied to it -- `filterUrl` runs over this field when the payload is built. Context
+    // is deliberately never filtered, since it is the user's own bag, so the copy below is
+    // reduced to the bare path rather than repeating an unfiltered query string there.
+    url: request.path,
     context: {
       ...ids,
-      path: request.path,
+      path: requestPath(request.path),
       method: request.method,
       router_kind: context.routerKind,
       route_path: context.routePath,
