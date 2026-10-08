@@ -15,6 +15,7 @@ import {
   logger,
   filter,
   filterUrl,
+  filterBreadcrumbs,
   logDeprecatedMethod,
   getSourceForBacktrace
 } from '../src/util'
@@ -22,6 +23,67 @@ import { EventPayload } from '../src/types'
 import { nullLogger, TestClient, TestTransport } from './helpers'
 
 describe('utils', function () {
+  describe('filterBreadcrumbs', function () {
+    const crumb = (metadata, message = 'Page changed') => ({
+      category: 'navigation',
+      message,
+      metadata,
+      timestamp: '2026-01-01T00:00:00.000Z'
+    })
+
+    it('filters metadata by key, like params and session', function () {
+      const [result] = filterBreadcrumbs([crumb({ password: 'hunter2', status_code: 200 })], ['password'])
+
+      expect(result.metadata).toEqual({ password: '[FILTERED]', status_code: 200 })
+    })
+
+    it('filters the query string of every url-bearing key', function () {
+      const [result] = filterBreadcrumbs([crumb({
+        url: '/checkout?token=abc',
+        from: 'https://example.com/a?token=abc',
+        to: 'https://example.com/b?token=abc',
+        href: '/c?token=abc'
+      })], ['token'])
+
+      expect(result.metadata).toEqual({
+        url: '/checkout?token=[FILTERED]',
+        from: 'https://example.com/a?token=[FILTERED]',
+        to: 'https://example.com/b?token=[FILTERED]',
+        href: '/c?token=[FILTERED]'
+      })
+    })
+
+    it('leaves a query string alone when no filter matches', function () {
+      const [result] = filterBreadcrumbs([crumb({ url: '/checkout?step=2' })], ['token'])
+
+      expect(result.metadata.url).toEqual('/checkout?step=2')
+    })
+
+    it('does not rewrite a non-url value that happens to contain a question mark', function () {
+      const [result] = filterBreadcrumbs([crumb({ label: 'ready?token=abc' })], ['token'])
+
+      expect(result.metadata.label).toEqual('ready?token=abc')
+    })
+
+    it('leaves a crumb without object metadata untouched', function () {
+      const withoutMetadata = crumb(undefined)
+
+      expect(filterBreadcrumbs([withoutMetadata], ['token'])).toEqual([withoutMetadata])
+    })
+
+    it('does not mutate the breadcrumb it was given', function () {
+      const original = crumb({ url: '/checkout?token=abc' })
+
+      filterBreadcrumbs([original], ['token'])
+
+      expect(original.metadata.url).toEqual('/checkout?token=abc')
+    })
+
+    it('returns an empty trail for a non-array', function () {
+      expect(filterBreadcrumbs(undefined, ['token'])).toEqual([])
+    })
+  })
+
   describe('filterUrl', function () {
     it('filters query string', function () {
       expect(filterUrl('https://www.example.com/?secret=value', ['secret'])).toEqual('https://www.example.com/?secret=[FILTERED]')

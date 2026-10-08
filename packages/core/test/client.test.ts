@@ -1163,6 +1163,33 @@ describe('client', function () {
       expect(payload.breadcrumbs.trail[0].message).toEqual('expected message')
     })
 
+    it('applies filters to a query string in breadcrumb metadata', function () {
+      client.configure({
+        apiKey: 'testing',
+        filters: ['token']
+      })
+
+      client.addBreadcrumb('Navigated to /checkout', {
+        category: 'navigation',
+        metadata: { url: '/checkout?token=abc&step=2' }
+      })
+      const payload = client.getPayload('message')
+
+      expect(payload.breadcrumbs.trail[0].metadata.url).toEqual('/checkout?token=[FILTERED]&step=2')
+    })
+
+    it('applies filters to breadcrumb metadata by key', function () {
+      client.configure({
+        apiKey: 'testing',
+        filters: ['password']
+      })
+
+      client.addBreadcrumb('login', { metadata: { password: 'hunter2' } })
+      const payload = client.getPayload('message')
+
+      expect(payload.breadcrumbs.trail[0].metadata.password).toEqual('[FILTERED]')
+    })
+
     it('sends empty breadcrumbs when disabled', function () {
       client.configure({
         apiKey: 'testing',
