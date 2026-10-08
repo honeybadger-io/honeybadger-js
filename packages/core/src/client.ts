@@ -13,6 +13,7 @@ import {
   generateStackTrace,
   filter,
   filterUrl,
+  filterBreadcrumbs,
   formatCGIData,
   getSourceForBacktrace,
   runAfterNotifyHandlers,
@@ -474,7 +475,7 @@ export abstract class Client {
       notifier: this.__notifier,
       breadcrumbs: {
         enabled: !!this.config.breadcrumbsEnabled,
-        trail: notice.__breadcrumbs || []
+        trail: filterBreadcrumbs(notice.__breadcrumbs || [], this.config.filters)
       },
       error: {
         class: notice.name,

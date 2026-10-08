@@ -103,7 +103,7 @@ describe('withHoneybadger', () => {
       ).rejects.toThrow('fetch failed')
 
       expect(waitUntil).toHaveBeenCalled()
-      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error))
+      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error), { url: expect.any(String) })
     })
 
     it('on success, returns handler response without reporting', async () => {
@@ -143,6 +143,33 @@ describe('withHoneybadger', () => {
       expect(mockSetContext).toHaveBeenCalledWith({
         url: 'https://example.com/foo',
         method: 'POST',
+      })
+    })
+
+    // Context is never filtered, so the query string must not be put there. The full url
+    // goes on the notice, where core applies the configured `filters` to it.
+    it('keeps the query string out of the context and puts the full url on the notice', async () => {
+      const env = { HONEYBADGER_API_KEY: 'key' }
+      const boom = new Error('boom')
+      const handler = {
+        fetch: jest.fn().mockRejectedValue(boom),
+      }
+      const wrapped = withHoneybadger(
+        (e: typeof env) => ({ apiKey: e.HONEYBADGER_API_KEY }),
+        handler
+      )
+      const request = new Request('https://example.com/checkout?token=secret&step=2', { method: 'GET' })
+
+      await expect(
+        wrapped.fetch!(request as unknown as Parameters<typeof wrapped.fetch>[0], env, mockCtx as unknown as ExecutionContext)
+      ).rejects.toThrow('boom')
+
+      expect(mockSetContext).toHaveBeenCalledWith({
+        url: 'https://example.com/checkout',
+        method: 'GET',
+      })
+      expect(mockNotifyAsync).toHaveBeenCalledWith(boom, {
+        url: 'https://example.com/checkout?token=secret&step=2',
       })
     })
 
@@ -216,7 +243,7 @@ describe('withHoneybadger', () => {
       ).rejects.toThrow('scheduled failed')
 
       expect(waitUntil).toHaveBeenCalled()
-      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error))
+      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error), {})
     })
   })
 
@@ -240,7 +267,7 @@ describe('withHoneybadger', () => {
       ).rejects.toThrow('queue failed')
 
       expect(waitUntil).toHaveBeenCalled()
-      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error))
+      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error), {})
     })
   })
 

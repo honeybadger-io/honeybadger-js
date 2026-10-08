@@ -11,12 +11,23 @@ function isHbConfigured() {
   return Honeybadger.config.apiKey.length > 0
 }
 
-function reportError(error: unknown): Promise<void> {
+function reportError(error: unknown, notice: Partial<Types.Notice> = {}): Promise<void> {
   if (!isHbConfigured()) {
     return Promise.resolve()
   }
   const noticeable = error instanceof Error ? error : new Error(String(error))
-  return Honeybadger.notifyAsync(noticeable)
+  return Honeybadger.notifyAsync(noticeable, notice)
+}
+
+/**
+ * The url without its query string.
+ *
+ * `request.url` is absolute in a Worker, query string included, and context is never
+ * filtered -- it is the user's own bag. The full url goes on the notice instead, where the
+ * configured `filters` are applied to it.
+ */
+function urlWithoutQuery(url: string): string {
+  return typeof url === 'string' ? url.split('?')[0] : url
 }
 
 export function withHoneybadger<Env>(
@@ -36,12 +47,12 @@ export function withHoneybadger<Env>(
           if (!isHbConfigured()) {
             Honeybadger.configure(config)
           }
-          Honeybadger.setContext({ url: request.url, method: request.method })
+          Honeybadger.setContext({ url: urlWithoutQuery(request.url), method: request.method })
         }
         try {
           return await fetchHandler(request, env, ctx)
         } catch (error: unknown) {
-          ctx.waitUntil(reportError(error))
+          ctx.waitUntil(reportError(error, { url: request.url }))
           throw error
         }
       }

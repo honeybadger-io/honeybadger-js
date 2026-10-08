@@ -66,12 +66,28 @@ describe('captureRequestError', () => {
     expect(notifyAsync).toHaveBeenCalledTimes(1)
     expect(notifyAsync.mock.calls[0][0]).toBe(error)
     expect(noticeContext()).toMatchObject({
-      path: '/api/hello?x=1',
+      path: '/api/hello',
       method: 'POST',
       router_kind: 'App Router',
       route_path: '/api/hello',
       route_type: 'route',
     })
+  })
+
+  // `filters` never apply to context, so the query string must not be repeated there. The
+  // full path goes on `url`, which core runs through `filterUrl` when building the payload.
+  it('keeps the query string out of the context and puts the full path on the url', async () => {
+    await captureRequestError(new Error('boom'), request(), errorContext())
+
+    expect(noticeContext().path).toEqual('/api/hello')
+    expect(notifyAsync.mock.calls[0][1].url).toEqual('/api/hello?x=1')
+  })
+
+  it('reports a path that has no query string unchanged', async () => {
+    await captureRequestError(new Error('boom'), { ...request(), path: '/api/hello' }, errorContext())
+
+    expect(noticeContext().path).toEqual('/api/hello')
+    expect(notifyAsync.mock.calls[0][1].url).toEqual('/api/hello')
   })
 
   it('schedules a flush so the report survives a frozen invocation', async () => {
