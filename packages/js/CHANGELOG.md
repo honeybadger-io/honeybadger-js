@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.16.6](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.5...@honeybadger-io/js@6.16.6) (2026-10-08)
+
+
+### Bug Fixes
+
+* **core:** apply filters to query strings wherever a URL is reported ([#1677](https://github.com/honeybadger-io/honeybadger-js/issues/1677)) ([d49aec8](https://github.com/honeybadger-io/honeybadger-js/commit/d49aec824312da0fe72e1db701a0992ec2905dd5))
+
+
+
+
+
 ## [6.16.5](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.4...@honeybadger-io/js@6.16.5) (2026-09-27)
 
 
