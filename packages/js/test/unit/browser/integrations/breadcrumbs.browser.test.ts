@@ -126,3 +126,69 @@ describe('breadcrumbs click integration, end to end', function () {
     expect(click.metadata.event.nativeEvent).toEqual('[RECURSION]')
   })
 })
+
+describe('breadcrumbs fetch integration', function () {
+  let client, mockAddBreadcrumb, fakeWindow, originalDocument, originalFetch
+
+  beforeEach(function () {
+    client = new TestClient(
+      { logger: nullLogger(), breadcrumbsEnabled: { network: true } },
+      new TestTransport()
+    )
+    mockAddBreadcrumb = jest.fn()
+    client.addBreadcrumb = mockAddBreadcrumb
+
+    // `nativeFetch()` reads the real global, not the window passed to the plugin, and skips
+    // instrumentation unless fetch looks native. jsdom ships no fetch, so stand one in.
+    originalFetch = global.fetch
+    const nativeLooking = () => Promise.resolve({ status: 200 })
+    nativeLooking.toString = () => 'function fetch() { [native code] }'
+    global.fetch = nativeLooking as never
+
+    fakeWindow = {
+      fetch: () => Promise.resolve({ status: 200 }),
+      addEventListener: () => undefined,
+      location: { href: 'https://example.com' },
+      history: {}
+    }
+  })
+
+  afterEach(function () {
+    global.fetch = originalFetch
+    if (originalDocument) {
+      global.document = originalDocument
+      originalDocument = undefined
+    }
+  })
+
+  function withoutDocument(run) {
+    originalDocument = global.document
+    delete global.document
+    return run()
+  }
+
+  it('keeps the query string out of the message where there is no document', async function () {
+    // Cloudflare Workers and other document-free runtimes take the branch that cannot call
+    // localURLPathname. Nothing filters a breadcrumb message, so the query must not be in it.
+    await withoutDocument(() => {
+      breadcrumbs(fakeWindow).load(client)
+      return fakeWindow.fetch('https://example.com/data?token=secret')
+    })
+
+    expect(mockAddBreadcrumb.mock.calls[0][0]).toEqual('GET https://example.com/data')
+    expect(mockAddBreadcrumb.mock.calls[0][1].metadata.url).toEqual('https://example.com/data?token=secret')
+  })
+
+  it('drops the query via localURLPathname where a document is available', async function () {
+    breadcrumbs(fakeWindow).load(client)
+
+    // Cross-origin relative to jsdom's document.URL, so the origin is kept and the query
+    // dropped.
+    await fakeWindow.fetch('https://example.com/data?token=secret')
+    // Same-origin, so only the pathname survives.
+    await fakeWindow.fetch('/data?token=secret')
+
+    expect(mockAddBreadcrumb.mock.calls[0][0]).toEqual('GET https://example.com/data')
+    expect(mockAddBreadcrumb.mock.calls[1][0]).toEqual('GET /data')
+  })
+})

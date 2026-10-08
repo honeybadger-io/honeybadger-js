@@ -207,7 +207,10 @@ export default function (_window = globalThisOrWindow()): Types.Plugin {
             }
 
             // localURLPathname cant be constructed for CF workers due to reliance on "document".
-            const message = `${method} ${typeof document === 'undefined' ? url : localURLPathname(url)}`
+            // Drop the query string by hand there: nothing filters a breadcrumb message, and
+            // localURLPathname would have removed it on the branch we cannot take, so leaving
+            // the raw url in would report a secret the configured `filters` were meant to catch.
+            const message = `${method} ${typeof document === 'undefined' ? url.split('?')[0] : localURLPathname(url)}`
             const metadata = {
               type: 'fetch',
               method,
