@@ -55,6 +55,11 @@ Honeybadger.addBreadcrumb('Test event', {
   metadata: { user_id: 1, foo: 'bar' }
 })
 
+Honeybadger.beforeBreadcrumb((breadcrumb) => {
+  if (breadcrumb.category === 'request' && /\/telemetry/.test(String(breadcrumb.metadata.url))) { return false }
+  breadcrumb.message = breadcrumb.message.toUpperCase()
+})
+
 Honeybadger.beforeNotify(function(notice){
   notice.stack
   notice.name = 'ExampleError'

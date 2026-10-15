@@ -1219,6 +1219,106 @@ describe('client', function () {
     })
   })
 
+  describe('beforeBreadcrumb', function () {
+    it('drops a breadcrumb when a handler returns false', function () {
+      client.beforeBreadcrumb((crumb) => crumb.metadata.url !== '/telemetry')
+
+      client.addBreadcrumb('POST /telemetry', { category: 'request', metadata: { url: '/telemetry' } })
+      client.addBreadcrumb('GET /api/users', { category: 'request', metadata: { url: '/api/users' } })
+
+      expect(client.__getBreadcrumbs().map(c => c.message)).toEqual(['GET /api/users'])
+    })
+
+    it('keeps a breadcrumb when a handler returns nothing', function () {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      client.beforeBreadcrumb(() => {})
+
+      client.addBreadcrumb('expected message')
+
+      expect(client.__getBreadcrumbs().length).toEqual(1)
+    })
+
+    it('passes the breadcrumb with its defaults applied', function () {
+      let seen
+      client.beforeBreadcrumb((crumb) => { seen = crumb })
+
+      client.addBreadcrumb('expected message')
+
+      expect(seen).toEqual({
+        message: 'expected message',
+        category: 'custom',
+        metadata: {},
+        timestamp: expect.any(String)
+      })
+    })
+
+    it('stores changes a handler makes to the breadcrumb', function () {
+      client.beforeBreadcrumb((crumb) => {
+        crumb.message = 'changed message'
+        crumb.metadata.extra = 'value'
+      })
+
+      client.addBreadcrumb('original message', { metadata: { key: 'value' } })
+
+      const crumb = client.__getBreadcrumbs()[0]
+      expect(crumb.message).toEqual('changed message')
+      expect(crumb.metadata).toEqual({ key: 'value', extra: 'value' })
+    })
+
+    it('does not change the metadata object the caller passed in', function () {
+      const metadata = { key: 'value' }
+      client.beforeBreadcrumb((crumb) => { crumb.metadata.extra = 'value' })
+
+      client.addBreadcrumb('message', { metadata })
+
+      expect(metadata).toEqual({ key: 'value' })
+    })
+
+    it('runs handlers in the order they were added', function () {
+      const calls: string[] = []
+      client.beforeBreadcrumb(() => { calls.push('first') })
+      client.beforeBreadcrumb(() => { calls.push('second') })
+
+      client.addBreadcrumb('message')
+
+      expect(calls).toEqual(['first', 'second'])
+    })
+
+    it('keeps the breadcrumb and runs later handlers when a handler throws', function () {
+      const errorSpy = jest.spyOn(client.logger, 'error')
+      client.beforeBreadcrumb(() => { throw new Error('boom') })
+      client.beforeBreadcrumb((crumb) => { crumb.message = 'after throw' })
+
+      expect(() => client.addBreadcrumb('message')).not.toThrow()
+
+      expect(client.__getBreadcrumbs().map(c => c.message)).toEqual(['after throw'])
+      expect(errorSpy).toHaveBeenCalledWith('beforeBreadcrumb handler threw; continuing', expect.any(Error))
+    })
+
+    it('does not re-run handlers for breadcrumbs added while handlers are running', function () {
+      // In the browser, console instrumentation turns the logger's own
+      // console.error call into a breadcrumb, which re-enters addBreadcrumb.
+      client.configure({
+        logger: { ...nullLogger(), error: (...args) => { client.addBreadcrumb(args.join(' '), { category: 'log' }) } }
+      })
+      let calls = 0
+      client.beforeBreadcrumb(() => { calls++; throw new Error('boom') })
+
+      client.addBreadcrumb('message')
+
+      expect(calls).toEqual(1)
+      expect(client.__getBreadcrumbs().map(c => c.message)).toEqual([
+        '[Honeybadger] beforeBreadcrumb handler threw; continuing Error: boom',
+        'message'
+      ])
+    })
+
+    it('is chainable', function () {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      expect(client.beforeBreadcrumb(() => {})).toBe(client)
+    })
+  })
+
   describe('event', function () {
     it('sends an event with only a payload object', function (done) {
       const transport = client.transport();

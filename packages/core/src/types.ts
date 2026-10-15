@@ -73,6 +73,10 @@ export interface BeforeEventHandler {
   (event: EventPayload): boolean | void | Promise<boolean | void>
 }
 
+export interface BeforeBreadcrumbHandler {
+  (breadcrumb: BreadcrumbRecord): boolean | void
+}
+
 export interface AfterNotifyHandler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (error: any, notice?: Notice): void | Promise<void>
