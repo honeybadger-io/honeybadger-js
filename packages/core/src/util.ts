@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import * as stackTraceParser from 'stacktrace-parser'
 import {
-  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, BeforeEventHandler, AfterNotifyHandler, Config, BrowserConfig, EventPayload, BreadcrumbRecord
+  Logger, BacktraceFrame, Notice, Noticeable, BeforeNotifyHandler, BeforeEventHandler, BeforeBreadcrumbHandler, AfterNotifyHandler, Config, BrowserConfig, EventPayload, BreadcrumbRecord
 } from './types'
 
 export function merge<T1 extends Record<string, unknown>, T2 extends Record<string, unknown>>(obj1: T1, obj2: T2): T1 & T2 {
@@ -190,6 +190,28 @@ export async function runBeforeEventHandlers(
     } catch (err) {
       // A buggy handler should not suppress unrelated events. Log and treat as no-op.
       logger?.error('beforeEvent handler threw; continuing', err)
+      continue
+    }
+    if (result === false) {
+      return false
+    }
+  }
+  return true
+}
+
+export function runBeforeBreadcrumbHandlers(
+  breadcrumb: BreadcrumbRecord,
+  handlers: BeforeBreadcrumbHandler[],
+  logger?: Logger
+): boolean {
+  for (let i = 0, len = handlers.length; i < len; i++) {
+    let result: ReturnType<BeforeBreadcrumbHandler>
+    try {
+      result = handlers[i](breadcrumb)
+    } catch (err) {
+      // Breadcrumbs are recorded inside instrumented fetch/XHR/DOM callbacks,
+      // so a buggy handler must not throw into the host app. Log and treat as no-op.
+      logger?.error('beforeBreadcrumb handler threw; continuing', err)
       continue
     }
     if (result === false) {
