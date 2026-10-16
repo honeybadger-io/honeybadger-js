@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.12.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.11.2...@honeybadger-io/core@6.12.0) (2026-10-16)
+
+
+### Features
+
+* **core:** add beforeBreadcrumb hook ([#1678](https://github.com/honeybadger-io/honeybadger-js/issues/1678)) ([bda6dcd](https://github.com/honeybadger-io/honeybadger-js/commit/bda6dcdc3ef1e4598d0bd73a94da4766fb8704c2))
+
+
+
+
+
 ## [6.11.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/core@6.11.1...@honeybadger-io/core@6.11.2) (2026-10-08)
 
 

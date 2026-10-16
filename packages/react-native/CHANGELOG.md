@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.4.19](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.4.18...@honeybadger-io/react-native@6.4.19) (2026-10-16)
+
+**Note:** Version bump only for package @honeybadger-io/react-native
+
+
+
+
+
 ## [6.4.18](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/react-native@6.4.17...@honeybadger-io/react-native@6.4.18) (2026-10-08)
 
 **Note:** Version bump only for package @honeybadger-io/react-native
