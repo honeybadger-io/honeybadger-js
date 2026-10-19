@@ -7,6 +7,7 @@ import timers from './browser/integrations/timers'
 import eventListeners from './browser/integrations/event_listeners'
 import { BrowserTransport } from './browser/transport'
 import { BrowserFeedbackForm } from './browser/feedback-form';
+import { getOrCreateSingleton } from './global-singleton'
 
 const { merge, filter, objectIsExtensible, globalThisOrWindow } = Util
 
@@ -121,7 +122,10 @@ class Honeybadger extends Client {
   }
 
   private getUserFeedbackSubmitUrl() {
-    return getUserFeedbackScriptUrl(this.getVersion())
+    // The feedback form template is published per major.minor of this package, so the
+    // url must track NOTIFIER.version. It cannot use getVersion(), which reports the
+    // notifier a wrapper package (react, vue) may have installed via setNotifier().
+    return getUserFeedbackScriptUrl(NOTIFIER.version)
   }
 
   /** @internal */
@@ -233,18 +237,21 @@ const userAgent = () => {
   return `Honeybadger JS Browser Client ${NOTIFIER.version}; n/a; n/a`
 }
 
-const singleton = new Honeybadger({
-  __plugins: [
-    onError(),
-    onUnhandledRejection(),
-    timers(),
-    eventListeners(),
-    breadcrumbs(),
-    CorePlugins.consoleEvents(),
-  ]
-})
+const singleton = getOrCreateSingleton('browser', NOTIFIER.version, () => {
+  const client = new Honeybadger({
+    __plugins: [
+      onError(),
+      onUnhandledRejection(),
+      timers(),
+      eventListeners(),
+      breadcrumbs(),
+      CorePlugins.consoleEvents(),
+    ]
+  })
+  client.setNotifier(NOTIFIER)
 
-singleton.setNotifier(NOTIFIER)
+  return client
+})
 
 export { Types } from '@honeybadger-io/core'
 export default singleton

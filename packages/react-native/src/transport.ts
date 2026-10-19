@@ -56,6 +56,12 @@ export class Transport implements Types.Transport {
     options: Types.TransportOptions,
     payload: T
   ): string {
+    // The events worker passes a pre-serialized NDJSON string (one JSON object
+    // per line). Send it untouched; stringifying it again would double-encode
+    // the whole batch into a single JSON string, which the API rejects.
+    if (typeof payload === 'string') {
+      return payload
+    }
     const body = Util.sanitize(payload, options.maxObjectDepth)
     return JSON.stringify(body)
   }

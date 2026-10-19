@@ -3,6 +3,69 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.17.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.6...@honeybadger-io/js@6.17.0) (2026-10-16)
+
+
+### Features
+
+* **core:** add beforeBreadcrumb hook ([#1678](https://github.com/honeybadger-io/honeybadger-js/issues/1678)) ([bda6dcd](https://github.com/honeybadger-io/honeybadger-js/commit/bda6dcdc3ef1e4598d0bd73a94da4766fb8704c2))
+
+
+
+
+
+## [6.16.6](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.5...@honeybadger-io/js@6.16.6) (2026-10-08)
+
+
+### Bug Fixes
+
+* **core:** apply filters to query strings wherever a URL is reported ([#1677](https://github.com/honeybadger-io/honeybadger-js/issues/1677)) ([d49aec8](https://github.com/honeybadger-io/honeybadger-js/commit/d49aec824312da0fe72e1db701a0992ec2905dd5))
+
+
+
+
+
+## [6.16.5](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.4...@honeybadger-io/js@6.16.5) (2026-09-27)
+
+
+### Bug Fixes
+
+* share the js singleton across duplicate module copies ([#1670](https://github.com/honeybadger-io/honeybadger-js/issues/1670)) ([39f94ca](https://github.com/honeybadger-io/honeybadger-js/commit/39f94ca58989c13523cda58c17ba7e84593571c3))
+
+
+
+
+
+## [6.16.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.3...@honeybadger-io/js@6.16.4) (2026-09-22)
+
+**Note:** Version bump only for package @honeybadger-io/js
+
+
+
+
+
+## [6.16.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.2...@honeybadger-io/js@6.16.3) (2026-09-09)
+
+
+### Bug Fixes
+
+* **js:** request the feedback form for the js client version ([#1667](https://github.com/honeybadger-io/honeybadger-js/issues/1667)) ([d0d5c18](https://github.com/honeybadger-io/honeybadger-js/commit/d0d5c185e317c26091e28a53a75dd201b4a7701e))
+
+
+
+
+
+## [6.16.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.1...@honeybadger-io/js@6.16.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* **js:** correct language in user feedback form link title ([#1665](https://github.com/honeybadger-io/honeybadger-js/issues/1665)) ([28385aa](https://github.com/honeybadger-io/honeybadger-js/commit/28385aa5552f08c684cc4ea11cffc8db96bc234b))
+
+
+
+
+
 ## [6.16.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.16.0...@honeybadger-io/js@6.16.1) (2026-08-19)
 
 

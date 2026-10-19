@@ -5,6 +5,7 @@ import {
   makeNotice,
   makeBacktrace,
   runBeforeNotifyHandlers,
+  runBeforeBreadcrumbHandlers,
   runBeforeEventHandlers,
   shouldSampleEvent,
   shallowClone,
@@ -13,6 +14,7 @@ import {
   generateStackTrace,
   filter,
   filterUrl,
+  filterBreadcrumbs,
   formatCGIData,
   getSourceForBacktrace,
   runAfterNotifyHandlers,
@@ -24,6 +26,8 @@ import {
   Logger,
   BeforeNotifyHandler,
   BeforeEventHandler,
+  BeforeBreadcrumbHandler,
+  BreadcrumbRecord,
   AfterNotifyHandler,
   Notice,
   Noticeable,
@@ -51,6 +55,8 @@ export abstract class Client {
   protected __store: HoneybadgerStore = null;
   protected __beforeNotifyHandlers: BeforeNotifyHandler[] = []
   protected __beforeEventHandlers: BeforeEventHandler[] = []
+  protected __beforeBreadcrumbHandlers: BeforeBreadcrumbHandler[] = []
+  protected __runningBeforeBreadcrumbHandlers = false
   protected __afterNotifyHandlers: AfterNotifyHandler[] = []
   protected __pendingEvents: Set<Promise<void>> = new Set()
   protected __getSourceFileHandler: (path: string) => Promise<string>
@@ -148,6 +154,11 @@ export abstract class Client {
 
   beforeEvent(handler: BeforeEventHandler): Client {
     this.__beforeEventHandlers.push(handler)
+    return this
+  }
+
+  beforeBreadcrumb(handler: BeforeBreadcrumbHandler): Client {
+    this.__beforeBreadcrumbHandlers.push(handler)
     return this
   }
 
@@ -376,12 +387,30 @@ export abstract class Client {
     const category = opts.category || 'custom'
     const timestamp = new Date().toISOString()
 
-    this.__store.addBreadcrumb({
+    const breadcrumb: BreadcrumbRecord = {
       category: category as string,
       message,
       metadata: metadata as Record<string, unknown>,
       timestamp
-    })
+    }
+
+    // A handler that logs, or the error we log when a handler throws, goes
+    // through instrumented console methods and lands back here. Skipping the
+    // handlers for those breadcrumbs keeps that from recursing.
+    if (!this.__runningBeforeBreadcrumbHandlers) {
+      this.__runningBeforeBreadcrumbHandlers = true
+      let keep: boolean
+      try {
+        keep = runBeforeBreadcrumbHandlers(breadcrumb, this.__beforeBreadcrumbHandlers, this.logger)
+      } finally {
+        this.__runningBeforeBreadcrumbHandlers = false
+      }
+      if (!keep) {
+        return this
+      }
+    }
+
+    this.__store.addBreadcrumb(breadcrumb)
 
     return this
   }
@@ -474,7 +503,7 @@ export abstract class Client {
       notifier: this.__notifier,
       breadcrumbs: {
         enabled: !!this.config.breadcrumbsEnabled,
-        trail: notice.__breadcrumbs || []
+        trail: filterBreadcrumbs(notice.__breadcrumbs || [], this.config.filters)
       },
       error: {
         class: notice.name,

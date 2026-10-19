@@ -1,7 +1,7 @@
 'use client'; // Error components must be Client Components
 
 import { useEffect } from 'react';
-import { Honeybadger } from '@honeybadger-io/react'
+import Honeybadger from '@honeybadger-io/js'
 
 export default function Error({
   error,

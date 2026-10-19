@@ -3,6 +3,54 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.57](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.56...@honeybadger-io/gatsby-plugin-honeybadger@6.0.57) (2026-10-16)
+
+**Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
+
+
+
+
+
+## [6.0.56](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.55...@honeybadger-io/gatsby-plugin-honeybadger@6.0.56) (2026-10-08)
+
+**Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
+
+
+
+
+
+## [6.0.55](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.54...@honeybadger-io/gatsby-plugin-honeybadger@6.0.55) (2026-09-27)
+
+**Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
+
+
+
+
+
+## [6.0.54](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.53...@honeybadger-io/gatsby-plugin-honeybadger@6.0.54) (2026-09-22)
+
+**Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
+
+
+
+
+
+## [6.0.53](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.52...@honeybadger-io/gatsby-plugin-honeybadger@6.0.53) (2026-09-09)
+
+**Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
+
+
+
+
+
+## [6.0.52](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.51...@honeybadger-io/gatsby-plugin-honeybadger@6.0.52) (2026-09-09)
+
+**Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger
+
+
+
+
+
 ## [6.0.51](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/gatsby-plugin-honeybadger@6.0.50...@honeybadger-io/gatsby-plugin-honeybadger@6.0.51) (2026-08-19)
 
 **Note:** Version bump only for package @honeybadger-io/gatsby-plugin-honeybadger

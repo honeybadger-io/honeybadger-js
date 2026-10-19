@@ -3,6 +3,106 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@6.0.2...@honeybadger-io/nextjs@6.0.3) (2026-10-17)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
+## [6.0.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@6.0.1...@honeybadger-io/nextjs@6.0.2) (2026-10-16)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
+## [6.0.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@6.0.0...@honeybadger-io/nextjs@6.0.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **core:** apply filters to query strings wherever a URL is reported ([#1677](https://github.com/honeybadger-io/honeybadger-js/issues/1677)) ([d49aec8](https://github.com/honeybadger-io/honeybadger-js/commit/d49aec824312da0fe72e1db701a0992ec2905dd5))
+
+
+
+
+
+# [6.0.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.11.6...@honeybadger-io/nextjs@6.0.0) (2026-10-08)
+
+
+### Features
+
+* **nextjs:** support Turbopack via Next.js instrumentation and post-compile hooks ([#1663](https://github.com/honeybadger-io/honeybadger-js/issues/1663)) ([a18c086](https://github.com/honeybadger-io/honeybadger-js/commit/a18c086180d311d2499debf962c6f28ec6d783e5)), closes [#1434](https://github.com/honeybadger-io/honeybadger-js/issues/1434)
+
+
+### BREAKING CHANGES
+
+* **nextjs:** requires Next.js >= 15.4 and Node.js >= 20.9.
+* **nextjs:** `@honeybadger-io/react` is no longer a peer dependency, so package
+managers no longer install it for you. Nothing in this package imports it. If you render
+`HoneybadgerErrorBoundary`, add `@honeybadger-io/react` to your own dependencies.
+* **nextjs:** `setupHoneybadger` is renamed `withHoneybadgerConfig` and no longer
+returns a `webpack` key. `withHoneybadger` is removed — unwrap any handler using it,
+since `onRequestError` now reports those errors automatically.
+* **nextjs:** runtime setup moves to the `instrumentation.ts` and
+`instrumentation-client.ts` conventions. Run `npx honeybadger-copy-config-files` to
+generate them. `honeybadger.browser.config.js` is replaced by
+`instrumentation-client.ts` and should be deleted; nothing imports it any more, so
+leaving it in place means the browser is not instrumented.
+* **nextjs:** source map options move from `webpackPluginOptions: { ... }` to the top
+level of the `withHoneybadgerConfig` options object. The `HoneybadgerWebpackPluginOptions`
+and `NextJsRuntime` types are removed.
+* **nextjs:** source maps are uploaded after the production build rather than by the
+webpack plugin, and `productionBrowserSourceMaps` and `experimental.serverSourceMaps` are
+enabled automatically when upload is configured, unless either is set explicitly.
+* **nextjs:** the deprecated edge route runtime no longer ships a configuration
+template. `honeybadger.edge.config.js` is removed and `register()` no longer branches on
+`NEXT_RUNTIME`. Middleware and instrumentation, which Next.js also compiles for an edge
+context, are unaffected.
+* **nextjs:** `projectRoot` is removed from the configuration templates. Source paths
+are now normalised at upload time instead, so a hardcoded bundler prefix is unnecessary —
+and a stale `webpack://` value is actively wrong under Turbopack. Remove it from your own
+honeybadger config files.
+
+
+
+
+
+## [5.11.6](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.11.5...@honeybadger-io/nextjs@5.11.6) (2026-09-27)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
+## [5.11.5](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.11.4...@honeybadger-io/nextjs@5.11.5) (2026-09-22)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
+## [5.11.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.11.3...@honeybadger-io/nextjs@5.11.4) (2026-09-09)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
+## [5.11.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.11.2...@honeybadger-io/nextjs@5.11.3) (2026-09-09)
+
+**Note:** Version bump only for package @honeybadger-io/nextjs
+
+
+
+
+
 ## [5.11.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/nextjs@5.11.1...@honeybadger-io/nextjs@5.11.2) (2026-08-19)
 
 **Note:** Version bump only for package @honeybadger-io/nextjs

@@ -84,5 +84,23 @@ describe('Transport', () => {
       expect(res.statusCode).toEqual(201)
       expect(JSON.parse(res.body)).toEqual(resBody)
     })
+
+    it('sends a string payload as-is instead of JSON-encoding it again', async () => {
+      // The events worker hands the transport a pre-serialized NDJSON string
+      // (one JSON object per line). Stringifying it again would turn the whole
+      // batch into a single JSON string, which the API rejects as a non-object.
+      const ndjson = '{"event_type":"log","a":1}\n{"event_type":"log","b":2}'
+      fetch.mockResponseOnce('{}', { status: 201 })
+
+      await transport.send({
+        method: 'POST',
+        endpoint,
+        logger: console,
+        headers: { 'Content-Type': 'application/json' },
+      }, ndjson)
+
+      const [, paramsCalledWith] = fetch.mock.lastCall
+      expect(paramsCalledWith.body).toBe(ndjson)
+    })
   })
 })

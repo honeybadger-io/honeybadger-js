@@ -1,13 +1,17 @@
-import { Honeybadger } from '@honeybadger-io/react'
+import Honeybadger from '@honeybadger-io/js'
 
 export const config = {
   apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || process.env.NODE_ENV,
   revision: process.env.NEXT_PUBLIC_HONEYBADGER_REVISION,
-  projectRoot: 'webpack://_N_E/./',
-  // debug: true,
+  debug: true,
   // reportData: true,
 }
 
+// This file runs after the document loads but before React hydrates, so the client is
+// instrumented before any component code can throw.
+//
+// `onRouterTransitionStart` is deliberately not exported here: it is an App Router hook, so
+// it would never be called in this example.
 Honeybadger.configure(config)
 Honeybadger.logger.debug('Honeybadger configured for browser')

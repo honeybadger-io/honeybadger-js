@@ -103,7 +103,7 @@ describe('withHoneybadger', () => {
       ).rejects.toThrow('fetch failed')
 
       expect(waitUntil).toHaveBeenCalled()
-      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error))
+      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error), { url: expect.any(String) })
     })
 
     it('on success, returns handler response without reporting', async () => {
@@ -145,6 +145,83 @@ describe('withHoneybadger', () => {
         method: 'POST',
       })
     })
+
+    // Context is never filtered, so the query string must not be put there. The full url
+    // goes on the notice, where core applies the configured `filters` to it.
+    it('keeps the query string out of the context and puts the full url on the notice', async () => {
+      const env = { HONEYBADGER_API_KEY: 'key' }
+      const boom = new Error('boom')
+      const handler = {
+        fetch: jest.fn().mockRejectedValue(boom),
+      }
+      const wrapped = withHoneybadger(
+        (e: typeof env) => ({ apiKey: e.HONEYBADGER_API_KEY }),
+        handler
+      )
+      const request = new Request('https://example.com/checkout?token=secret&step=2', { method: 'GET' })
+
+      await expect(
+        wrapped.fetch!(request as unknown as Parameters<typeof wrapped.fetch>[0], env, mockCtx as unknown as ExecutionContext)
+      ).rejects.toThrow('boom')
+
+      expect(mockSetContext).toHaveBeenCalledWith({
+        url: 'https://example.com/checkout',
+        method: 'GET',
+      })
+      expect(mockNotifyAsync).toHaveBeenCalledWith(boom, {
+        url: 'https://example.com/checkout?token=secret&step=2',
+      })
+    })
+
+    it('sets request context even when the client is already configured', async () => {
+      // The client is a shared singleton, so another module -- or an earlier request on
+      // the same isolate -- may have configured it already. The request context still
+      // has to be set, or every fault would carry the first request's url and method.
+      HoneybadgerMock.config.apiKey = 'key'
+      const env = { HONEYBADGER_API_KEY: 'key' }
+      const handler = {
+        fetch: jest.fn().mockResolvedValue(new Response('ok')),
+      }
+      const wrapped = withHoneybadger(
+        (e: typeof env) => ({ apiKey: e.HONEYBADGER_API_KEY }),
+        handler
+      )
+      const request = new Request('https://example.com/second', { method: 'PUT' })
+
+      await wrapped.fetch!(request as unknown as Parameters<typeof wrapped.fetch>[0], env, mockCtx as unknown as ExecutionContext)
+
+      expect(mockConfigure).not.toHaveBeenCalled()
+      expect(mockSetContext).toHaveBeenCalledWith({
+        url: 'https://example.com/second',
+        method: 'PUT',
+      })
+    })
+
+    it('configures once but sets context on every request', async () => {
+      const env = { HONEYBADGER_API_KEY: 'key' }
+      const handler = {
+        fetch: jest.fn().mockResolvedValue(new Response('ok')),
+      }
+      const wrapped = withHoneybadger(
+        (e: typeof env) => ({ apiKey: e.HONEYBADGER_API_KEY }),
+        handler
+      )
+
+      for (const path of ['first', 'second']) {
+        await wrapped.fetch!(
+          new Request(`https://example.com/${path}`) as unknown as Parameters<typeof wrapped.fetch>[0],
+          env,
+          mockCtx as unknown as ExecutionContext
+        )
+      }
+
+      expect(mockConfigure).toHaveBeenCalledTimes(1)
+      expect(mockSetContext).toHaveBeenCalledTimes(2)
+      expect(mockSetContext).toHaveBeenLastCalledWith({
+        url: 'https://example.com/second',
+        method: 'GET',
+      })
+    })
   })
 
   describe('scheduled handler', () => {
@@ -166,7 +243,7 @@ describe('withHoneybadger', () => {
       ).rejects.toThrow('scheduled failed')
 
       expect(waitUntil).toHaveBeenCalled()
-      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error))
+      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error), {})
     })
   })
 
@@ -190,7 +267,7 @@ describe('withHoneybadger', () => {
       ).rejects.toThrow('queue failed')
 
       expect(waitUntil).toHaveBeenCalled()
-      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error))
+      expect(mockNotifyAsync).toHaveBeenCalledWith(expect.any(Error), {})
     })
   })
 

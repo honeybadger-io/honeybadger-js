@@ -11,6 +11,7 @@ import { ServerTransport } from './server/transport'
 import { StackedStore } from './server/stacked_store'
 import { CheckInsConfig } from './server/check-ins-manager/types'
 import { CheckInsClient } from './server/check-ins-manager';
+import { getOrCreateSingleton } from './global-singleton'
 
 const { endpoint } = Util
 const DEFAULT_PLUGINS = [
@@ -188,12 +189,15 @@ const userAgent = () => {
   return `Honeybadger JS Server Client ${NOTIFIER.version}, ${os.version()}; ${os.platform()}`
 }
 
-const singleton = new Honeybadger({
-  __plugins: DEFAULT_PLUGINS,
-  ...(readConfigFromFileSystem() ?? {})
-})
+const singleton = getOrCreateSingleton('server', NOTIFIER.version, () => {
+  const client = new Honeybadger({
+    __plugins: DEFAULT_PLUGINS,
+    ...(readConfigFromFileSystem() ?? {})
+  })
+  client.setNotifier(NOTIFIER)
 
-singleton.setNotifier(NOTIFIER)
+  return client
+})
 
 export { Types } from '@honeybadger-io/core'
 
