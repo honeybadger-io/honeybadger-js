@@ -93,7 +93,7 @@
     "rollup-plugin-copy": "^3.4.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.9.3",
-    "undici": "^6.27.0"
+    "undici": "^6.29.1"
   },
   "engines": {
     "node": ">=20.9.0"
