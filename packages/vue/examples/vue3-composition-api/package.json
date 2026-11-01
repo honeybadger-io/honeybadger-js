@@ -11,8 +11,8 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "@honeybadger-io/js": "^6.16.6",
-    "@honeybadger-io/vue": "^6.2.23",
+    "@honeybadger-io/js": "^6.17.0",
+    "@honeybadger-io/vue": "^6.2.24",
     "vue": "^3.5.44"
   },
   "devDependencies": {
@@ -21,8 +21,8 @@
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/tsconfig": "^0.9.1",
     "typescript": "~5.9.3",
-    "vite": "^8.3.4",
+    "vite": "^8.3.5",
     "vite-plugin-vue-devtools": "^8.2.1",
-    "vue-tsc": "^3.3.13"
+    "vue-tsc": "^3.3.14"
   }
 }
