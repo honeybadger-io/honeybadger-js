@@ -1,6 +1,7 @@
 import { expect, td } from './testSetup'
 
 import { Response } from 'node-fetch'
+import { PassThrough, Readable } from 'stream'
 import {
   settlePromiseWithWorkers,
   parseRetryAfter,
@@ -141,6 +142,10 @@ describe('helpers', () => {
       expect(parseRetryAfter('3600', now)).to.equal(3600 * 1000)
     })
 
+    it('should accept the asctime date form as UTC', () => {
+      expect(parseRetryAfter('Thu Jan  1 00:00:10 2026', now)).to.equal(10000)
+    })
+
     it('should accept the RFC 850 date form', () => {
       expect(parseRetryAfter('Thursday, 01-Jan-26 00:00:10 GMT', now)).to.equal(10000)
     })
@@ -173,37 +178,59 @@ describe('helpers', () => {
   describe('buildRetryOptions', () => {
     afterEach(() => td.reset())
 
-    it('should retry network errors and busy responses until retries run out', () => {
+    it('should retry network errors and busy responses until retries run out', async () => {
       const { retries, retryOn } = buildRetryOptions(2, true, 'Testing')
       expect(retries).to.equal(2)
-      expect(retryOn(0, new Error('boom'), null)).to.equal(true)
-      expect(retryOn(0, null, new Response('', { status: 429 }))).to.equal(true)
-      expect(retryOn(0, null, new Response('', { status: 502 }))).to.equal(true)
-      expect(retryOn(1, null, new Response('', { status: 503 }))).to.equal(true)
-      expect(retryOn(1, null, new Response('', { status: 504 }))).to.equal(true)
-      expect(retryOn(2, null, new Response('', { status: 503 }))).to.equal(false)
-      expect(retryOn(2, new Error('boom'), null)).to.equal(false)
+      expect(await retryOn(0, new Error('boom'), null)).to.equal(true)
+      expect(await retryOn(0, null, new Response('', { status: 429 }))).to.equal(true)
+      expect(await retryOn(0, null, new Response('', { status: 502 }))).to.equal(true)
+      expect(await retryOn(1, null, new Response('', { status: 503 }))).to.equal(true)
+      expect(await retryOn(1, null, new Response('', { status: 504 }))).to.equal(true)
+      expect(await retryOn(2, null, new Response('', { status: 503 }))).to.equal(false)
+      expect(await retryOn(2, new Error('boom'), null)).to.equal(false)
     })
 
-    it('should not retry when Retry-After asks for more than the cap', () => {
+    it('should not retry when Retry-After asks for more than the cap', async () => {
       const { retryOn } = buildRetryOptions(3, true, 'Testing')
       const tooLong = String(MAX_RETRY_AFTER_MS / 1000 + 1)
       const atCap = String(MAX_RETRY_AFTER_MS / 1000)
-      expect(retryOn(0, null, new Response('', { status: 503, headers: { 'Retry-After': tooLong } }))).to.equal(false)
-      expect(retryOn(0, null, new Response('', { status: 503, headers: { 'Retry-After': atCap } }))).to.equal(true)
+      expect(await retryOn(0, null, new Response('', { status: 503, headers: { 'Retry-After': tooLong } }))).to.equal(false)
+      expect(await retryOn(0, null, new Response('', { status: 503, headers: { 'Retry-After': atCap } }))).to.equal(true)
     })
 
-    it('should not retry successes or other errors', () => {
+    it('should not retry successes or other errors', async () => {
       const { retryOn } = buildRetryOptions(3, true, 'Testing')
-      ;[200, 201, 400, 401, 403, 404, 413, 422, 500].forEach(status => {
-        expect(retryOn(0, null, new Response('', { status }))).to.equal(false)
-      })
+      for (const status of [200, 201, 400, 401, 403, 404, 413, 422, 500]) {
+        expect(await retryOn(0, null, new Response('', { status }))).to.equal(false)
+      }
     })
 
-    it('should not retry when retries is 0', () => {
+    it('should not retry when retries is 0', async () => {
       const { retryOn } = buildRetryOptions(0, true, 'Testing')
-      expect(retryOn(0, new Error('boom'), null)).to.equal(false)
-      expect(retryOn(0, null, new Response('', { status: 503 }))).to.equal(false)
+      expect(await retryOn(0, new Error('boom'), null)).to.equal(false)
+      expect(await retryOn(0, null, new Response('', { status: 503 }))).to.equal(false)
+    })
+
+    it('should discard the body of a response it retries, and only that one', async () => {
+      // Network responses have stream bodies (a string body would be a Buffer)
+      const streamOf = (text: string) => Readable.from([Buffer.from(text)])
+      const { retryOn } = buildRetryOptions(1, true, 'Testing')
+      const retried = new Response(streamOf('busy'), { status: 503 })
+      expect(await retryOn(0, null, retried)).to.equal(true)
+      expect((retried.body as unknown as Readable).readableFlowing).to.equal(true)
+
+      const final = new Response(streamOf('still busy'), { status: 503 })
+      expect(await retryOn(1, null, final)).to.equal(false)
+      expect((final.body as unknown as Readable).readableFlowing).to.not.equal(true)
+      expect(await final.text()).to.equal('still busy')
+    })
+
+    it('should not wait for a stalled body before retrying', () => {
+      const { retryOn } = buildRetryOptions(1, true, 'Testing')
+      const stalled = new PassThrough() // never ends
+      stalled.write('partial')
+      expect(retryOn(0, null, new Response(stalled, { status: 503 }))).to.equal(true)
+      stalled.destroy()
     })
 
     it('should wait for Retry-After when present', () => {

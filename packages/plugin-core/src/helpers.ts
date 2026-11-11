@@ -74,7 +74,30 @@ export const MAX_BACKOFF_MS = 30 * 1000
 export const MAX_RETRY_AFTER_MS = 60 * 1000
 
 // The parts of a fetch Response the retry policy reads (global or node-fetch)
-type RetryResponse = { status: number; headers: { get(name: string): string | null } }
+type RetryResponse = {
+  status: number;
+  headers: { get(name: string): string | null };
+  body?: unknown;
+}
+
+/**
+ * Throw away the body of a response we're about to retry, so its socket is
+ * released. Doesn't wait: a server that stalls the body mustn't stall the retry.
+ */
+function discardBody(response: RetryResponse): void {
+  const body = response.body as { resume?: () => void; cancel?: () => Promise<void> } | null | undefined
+  try {
+    if (body && typeof body.resume === 'function') {
+      // node-fetch: a Node stream; flowing with no listener discards the data
+      body.resume()
+    } else if (body && typeof body.cancel === 'function') {
+      // WHATWG fetch: a ReadableStream
+      body.cancel().catch(() => undefined)
+    }
+  } catch (_err) {
+    // Nothing to do: we're retrying anyway
+  }
+}
 
 /**
  * Parses a Retry-After header (delay in seconds, or an HTTP date) into
@@ -88,12 +111,20 @@ export function parseRetryAfter(value: string | null | undefined, now: number = 
   if (/^\d+$/.test(trimmed)) {
     return parseInt(trimmed, 10) * 1000
   }
-  // Only accept HTTP dates ("Sun, 06 Nov 1994 08:49:37 GMT", or the RFC 850
-  // form). Date.parse alone accepts things like "1,5" or "-5".
-  if (!/^[A-Za-z]+, .+ \d{2}:\d{2}:\d{2} GMT$/.test(trimmed)) {
+  // Only accept the three HTTP-date forms (RFC 9110 5.6.7). Date.parse alone
+  // accepts things like "1,5" or "-5".
+  let dateString: string
+  if (/^[A-Za-z]+, .+ \d{2}:\d{2}:\d{2} GMT$/.test(trimmed)) {
+    // IMF-fixdate "Sun, 06 Nov 1994 08:49:37 GMT", or RFC 850
+    dateString = trimmed
+  } else if (/^[A-Za-z]{3} [A-Za-z]{3} +\d{1,2} \d{2}:\d{2}:\d{2} \d{4}$/.test(trimmed)) {
+    // asctime "Sun Nov  6 08:49:37 1994" has no zone but means UTC;
+    // Date.parse would read it as local time
+    dateString = `${trimmed} GMT`
+  } else {
     return null
   }
-  const date = Date.parse(trimmed)
+  const date = Date.parse(dateString)
   if (isNaN(date)) {
     return null
   }
@@ -131,7 +162,12 @@ export function buildRetryOptions(retries: number, silent: boolean, description:
       // Don't retry early, and don't stall the build: if the server asks for
       // a longer wait than we're willing to give, fail now.
       const retryAfter = parseRetryAfter(response.headers.get('retry-after'))
-      return retryAfter === null || retryAfter <= MAX_RETRY_AFTER_MS
+      if (retryAfter !== null && retryAfter > MAX_RETRY_AFTER_MS) {
+        return false
+      }
+      // The last response is left unread for the caller's error message
+      discardBody(response)
+      return true
     },
     retryDelay: (attempt: number, error: Error | null, response: RetryResponse | null): number => {
       const retryAfter = response ? parseRetryAfter(response.headers.get('retry-after')) : null
