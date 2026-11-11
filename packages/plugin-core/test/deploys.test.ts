@@ -44,7 +44,8 @@ describe('deploys', () => {
         body: td.matchers.isA(String),
         redirect: 'follow',
         retries: testData.retries,
-        retryDelay: 1000
+        retryOn: td.matchers.isA(Function),
+        retryDelay: td.matchers.isA(Function)
       }))
         .thenResolve(new Response('Ok', { status: 200 }))
 
@@ -120,6 +121,19 @@ describe('deploys', () => {
       td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()), { times: 1 })
         .thenReject(new FetchError('No fetch', 'Nope'))
       
+      const res = await deploys.sendDeployNotification({ ...testData, retries: 3 })
+      expect(res.status).to.equal(201)
+    })
+
+    it('should retry a 503', async () => {
+      const responses = [
+        new Response('', { status: 503, headers: { 'Retry-After': '0' } }),
+        new Response('', { status: 201 })
+      ]
+      td.when(fetchMock(testData.deployEndpoint, td.matchers.anything()))
+        .thenDo(async () => responses.shift())
+      td.replace(console, 'warn')
+
       const res = await deploys.sendDeployNotification({ ...testData, retries: 3 })
       expect(res.status).to.equal(201)
     })

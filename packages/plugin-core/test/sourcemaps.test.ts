@@ -56,7 +56,7 @@ describe('sourcemaps', () => {
       // was called for all 3 files
       td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
         .thenDo(async ( endpoint, { body }) => {
-          const match = body.getBuffer().toString().match(/name="minified_file"; filename=".*"/)
+          const match = body.toString().match(/name="minified_file"; filename=".*"/)
           const jsFilename = match[0].slice(32, -1)
           return new Response(JSON.stringify({ jsFilename }), { status: 200 })
         })
@@ -103,13 +103,15 @@ describe('sourcemaps', () => {
 
     it('should resolve with the response if the response is ok', async () => {
       // Check we called fetch with the expected arguments
-      td.when(fetchMock(hbOptions.endpoint, {
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.contains({
         method: 'POST',
-        body: td.matchers.isA(Object),
+        headers: { 'content-type': td.matchers.contains('multipart/form-data; boundary=') },
+        body: td.matchers.isA(Buffer),
         redirect: 'follow',
         retries: hbOptions.retries,
-        retryDelay: 1000
-      }))
+        retryOn: td.matchers.isA(Function),
+        retryDelay: td.matchers.isA(Function)
+      })))
         .thenResolve(new Response('Ok', { status: 200 }))
 
       const res = await sourcemaps.uploadSourcemap(testData, hbOptions)
@@ -186,6 +188,68 @@ describe('sourcemaps', () => {
       
       const res = await sourcemaps.uploadSourcemap(testData, { ...hbOptions, retries: 3 })
       expect(res.status).to.equal(201)
+    })
+
+    it('should retry a 503 and resend the full body', async () => {
+      const bodies = []
+      const responses = [
+        new Response('', { status: 503, headers: { 'Retry-After': '0' } }),
+        new Response('', { status: 201 })
+      ]
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
+        .thenDo(async (_endpoint, { body }) => {
+          bodies.push(body.toString())
+          return responses.shift()
+        })
+      td.replace(console, 'warn')
+
+      const res = await sourcemaps.uploadSourcemap(testData, { ...hbOptions, retries: 3 })
+      expect(res.status).to.equal(201)
+      expect(bodies).to.have.length(2)
+      expect(bodies[1]).to.include('name="source_map"')
+      expect(bodies[1]).to.equal(bodies[0])
+    })
+
+    it('should retry a 429', async () => {
+      const responses = [
+        new Response('', { status: 429, headers: { 'Retry-After': '0' } }),
+        new Response('', { status: 201 })
+      ]
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
+        .thenDo(async () => responses.shift())
+      td.replace(console, 'warn')
+
+      const res = await sourcemaps.uploadSourcemap(testData, { ...hbOptions, retries: 3 })
+      expect(res.status).to.equal(201)
+    })
+
+    it('should give up after `retries` retries', async () => {
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
+        .thenDo(async () => new Response('', { status: 503, statusText: 'Service Unavailable', headers: { 'Retry-After': '0' } }))
+      td.replace(console, 'warn')
+
+      let error
+      try {
+        await sourcemaps.uploadSourcemap(testData, { ...hbOptions, retries: 2 })
+      } catch (err) {
+        error = err
+      }
+      expect(error.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 503 - Service Unavailable')
+      td.verify(fetchMock(hbOptions.endpoint, td.matchers.anything()), { times: 3 })
+    })
+
+    it('should not retry other client errors', async () => {
+      td.when(fetchMock(hbOptions.endpoint, td.matchers.anything()))
+        .thenDo(async () => new Response(JSON.stringify({ error: 'Invalid API key' }), { status: 403 }))
+
+      let error
+      try {
+        await sourcemaps.uploadSourcemap(testData, { ...hbOptions, retries: 3 })
+      } catch (err) {
+        error = err
+      }
+      expect(error.message).to.equal('Failed to upload sourcemap index.map.js to Honeybadger: 403 - Invalid API key')
+      td.verify(fetchMock(hbOptions.endpoint, td.matchers.anything()), { times: 1 })
     })
   })
 
