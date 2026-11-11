@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.11.0](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.10.4...@honeybadger-io/rollup-plugin@5.11.0) (2026-11-11)
+
+
+### Features
+
+* **rollup-plugin:** expose TypeScript types ([#1693](https://github.com/honeybadger-io/honeybadger-js/issues/1693)) ([9f31526](https://github.com/honeybadger-io/honeybadger-js/commit/9f3152624e6de7e0e7c4652354e6044cf6c25f64))
+
+
+
+
+
 ## [5.10.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/rollup-plugin@5.10.3...@honeybadger-io/rollup-plugin@5.10.4) (2026-07-20)
 
 **Note:** Version bump only for package @honeybadger-io/rollup-plugin
