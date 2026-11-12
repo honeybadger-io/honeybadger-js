@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.5](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/plugin-core@1.4.4...@honeybadger-io/plugin-core@1.4.5) (2026-11-12)
+
+
+### Bug Fixes
+
+* **plugin-core:** retry source map uploads on 429 and 503 ([#1695](https://github.com/honeybadger-io/honeybadger-js/issues/1695)) ([68c09c8](https://github.com/honeybadger-io/honeybadger-js/commit/68c09c888e23d6340ae618c08c19ca4d30ceaff7))
+
+
+
+
+
 ## [1.4.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/plugin-core@1.4.3...@honeybadger-io/plugin-core@1.4.4) (2026-07-20)
 
 **Note:** Version bump only for package @honeybadger-io/plugin-core
