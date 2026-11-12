@@ -65,7 +65,9 @@ jobs:
   integration:
     needs: changes
     if: needs.changes.outputs.core == 'true'
-    runs-on: ubuntu-latest
+    # Playwright 1.51 can't install browsers on ubuntu-latest (26.04).
+    # Remove this pin after upgrading @playwright/test in packages/js.
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout
       uses: actions/checkout@v5
