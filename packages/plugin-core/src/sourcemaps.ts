@@ -1,4 +1,4 @@
-import { settlePromiseWithWorkers, parseResErrorDetails } from './helpers'
+import { settlePromiseWithWorkers, parseResErrorDetails, buildRetryOptions } from './helpers'
 import originalFetch from 'node-fetch'
 import FormData from 'form-data'
 import { promises as fs } from 'fs'
@@ -50,18 +50,19 @@ export async function uploadSourcemap (
   sourcemapData: SourcemapInfo,
   hbOptions: HbPluginOptions
 ): Promise<Response> {
-  const body = await buildBodyForSourcemapUpload(sourcemapData, hbOptions)
+  const form = await buildBodyForSourcemapUpload(sourcemapData, hbOptions)
 
   let res: Response
 
   try {
     res = await fetch(hbOptions.endpoint, {
       method: 'POST',
-      // @ts-ignore
-      body,
+      // fetch-retry resends the same body on each retry. A Buffer can be sent
+      // again; the FormData stream can't.
+      headers: form.getHeaders(),
+      body: form.getBuffer(),
       redirect: 'follow',
-      retries: hbOptions.retries,
-      retryDelay: 1000
+      ...buildRetryOptions(hbOptions.retries, hbOptions.silent, `Uploading sourcemap ${sourcemapData.sourcemapFilename}`)
     })
   } catch (err) {
     // network / operational errors. Does not include 404 / 500 errors

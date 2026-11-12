@@ -1,4 +1,4 @@
-import { parseResErrorDetails } from './helpers'
+import { parseResErrorDetails, buildRetryOptions } from './helpers'
 import originalFetch from 'node-fetch'
 import fetchRetry from 'fetch-retry'
 // @ts-expect-error
@@ -23,8 +23,7 @@ export async function sendDeployNotification(hbOptions: HbPluginOptions): Promis
       },
       body,
       redirect: 'follow',
-      retries: hbOptions.retries,
-      retryDelay: 1000
+      ...buildRetryOptions(hbOptions.retries, hbOptions.silent, 'Sending deploy notification')
     })
   } catch (err) {
     // network / operational errors. Does not include 404 / 500 errors
