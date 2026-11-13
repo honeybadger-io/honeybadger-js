@@ -692,9 +692,41 @@ describe('utils', function () {
     })
 
     it('handles toJSON() returning the object itself', function () {
-      const obj = { a: 1, toJSON() { return this } }
+      let calls = 0
+      const obj = { n: 0, toJSON() { calls++; this.n++; return this } }
+      const payload = sanitize({ obj })
 
-      expect(JSON.parse(JSON.stringify(sanitize({ obj })))).toEqual({ obj: { a: 1 } })
+      expect(payload).toEqual({ obj: { n: 1 } })
+      expect(JSON.stringify(payload)).toEqual('{"obj":{"n":1}}')
+      expect(calls).toEqual(1)
+    })
+
+    it('does not call toJSON() on the value toJSON() returns', function () {
+      let innerCalls = 0
+      const obj = {
+        toJSON() {
+          return {
+            n: 1,
+            toJSON() {
+              innerCalls++
+              throw new Error('boom')
+            },
+            child: { toJSON: () => 'child-json' }
+          }
+        }
+      }
+      const payload = sanitize({ obj })
+
+      expect(payload).toEqual({ obj: { n: 1, child: 'child-json' } })
+      expect(JSON.stringify(payload)).toEqual(JSON.stringify({ obj }))
+      expect(innerCalls).toEqual(0)
+    })
+
+    it('keeps a non-function toJSON property on the value toJSON() returns', function () {
+      const obj = { toJSON: () => ({ toJSON: 'metadata', n: 1 }) }
+
+      expect(sanitize({ obj })).toEqual({ obj: { toJSON: 'metadata', n: 1 } })
+      expect(JSON.stringify(sanitize({ obj }))).toEqual(JSON.stringify({ obj }))
     })
 
     it('reports an error when toJSON() throws', function () {

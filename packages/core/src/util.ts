@@ -376,6 +376,11 @@ export function sanitize(obj, maxDepth = 8) {
       const ret = {}
       for (const k in obj) {
         const v = obj[k]
+        // This object was returned by toJSON(). JSON.stringify never calls
+        // toJSON() on that result, so do not copy the hook for it to run again.
+        if (skipToJSON && k === 'toJSON' && typeof v === 'function') {
+          continue
+        }
         if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
           ret[k] = safeSerialize(v, depth + 1, k)
         }
