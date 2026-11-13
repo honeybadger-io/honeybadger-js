@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.17.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.17.1...@honeybadger-io/js@6.17.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* settle ServerTransport.send() on serialization errors and sanitize BigInt/toJSON values ([#1698](https://github.com/honeybadger-io/honeybadger-js/issues/1698)) ([a1ef35a](https://github.com/honeybadger-io/honeybadger-js/commit/a1ef35a470a4209f49fdedf4be1581d7b72480f0))
+
+
+
+
+
 ## [6.17.1](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.17.0...@honeybadger-io/js@6.17.1) (2026-11-12)
 
 **Note:** Version bump only for package @honeybadger-io/js

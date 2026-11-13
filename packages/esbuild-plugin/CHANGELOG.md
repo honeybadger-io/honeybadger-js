@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.15](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/esbuild-plugin@1.3.14...@honeybadger-io/esbuild-plugin@1.3.15) (2026-11-13)
+
+**Note:** Version bump only for package @honeybadger-io/esbuild-plugin
+
+
+
+
+
 ## [1.3.14](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/esbuild-plugin@1.3.13...@honeybadger-io/esbuild-plugin@1.3.14) (2026-11-12)
 
 **Note:** Version bump only for package @honeybadger-io/esbuild-plugin
