@@ -568,6 +568,13 @@ describe('utils', function () {
       )
     })
 
+    it('converts BigInt values to strings', function () {
+      const payload = sanitize({ big: BigInt('9007199254740993'), list: [BigInt(1)] })
+
+      expect(payload).toEqual({ big: '9007199254740993', list: ['1'] })
+      expect(() => JSON.stringify(payload)).not.toThrow()
+    })
+
     it('drops circular references', function () {
       const obj = { obj: null }
       obj.obj = obj
@@ -631,6 +638,78 @@ describe('utils', function () {
           }
         }
       )
+    })
+
+    it('uses toJSON() inherited from a prototype', function () {
+      class Money {
+        cents = 5
+        toJSON() {
+          return '$0.05'
+        }
+      }
+
+      expect(
+        sanitize({
+          date: new Date('2026-01-01T00:00:00Z'),
+          url: new URL('https://example.com/a?b=1'),
+          money: new Money()
+        })
+      ).toEqual({
+        date: '2026-01-01T00:00:00.000Z',
+        url: 'https://example.com/a?b=1',
+        money: '$0.05'
+      })
+    })
+
+    it('sanitizes the value returned by toJSON()', function () {
+      const payload = sanitize({
+        big: { toJSON: () => BigInt(1) },
+        nested: { toJSON: () => ({ deep: { deeper: 'value' } }) }
+      }, 2)
+
+      expect(payload).toEqual({ big: '1', nested: { deep: '[DEPTH]' } })
+      expect(() => JSON.stringify(payload)).not.toThrow()
+    })
+
+    it('passes the property key to toJSON() like JSON.stringify', function () {
+      const keyed = { toJSON: (key: string) => `key:${key}` }
+
+      expect(sanitize({ a: keyed, list: [keyed] })).toEqual({ a: 'key:a', list: ['key:0'] })
+      expect(sanitize(keyed)).toEqual('key:')
+      expect(JSON.parse(JSON.stringify(sanitize({ a: keyed, list: [keyed] }))))
+        .toEqual(JSON.parse(JSON.stringify({ a: keyed, list: [keyed] })))
+    })
+
+    it('keeps null and undefined returned by toJSON() like JSON.stringify', function () {
+      const input = {
+        invalidDate: new Date('not a date'),
+        nothing: { toJSON: () => undefined },
+        list: [new Date('not a date')]
+      }
+
+      expect(JSON.parse(JSON.stringify(sanitize(input)))).toEqual({ invalidDate: null, list: [null] })
+      expect(JSON.parse(JSON.stringify(sanitize(input)))).toEqual(JSON.parse(JSON.stringify(input)))
+    })
+
+    it('handles toJSON() returning the object itself', function () {
+      const obj = { a: 1, toJSON() { return this } }
+
+      expect(JSON.parse(JSON.stringify(sanitize({ obj })))).toEqual({ obj: { a: 1 } })
+    })
+
+    it('reports an error when toJSON() throws', function () {
+      expect(
+        sanitize({ bad: { toJSON() { throw new Error('boom') } }, ok: 1 })
+      ).toEqual({ bad: '[ERROR] Error: boom', ok: 1 })
+    })
+
+    it('serializes the same Date referenced twice', function () {
+      const date = new Date('2026-01-01T00:00:00Z')
+
+      expect(sanitize({ a: date, b: date })).toEqual({
+        a: '2026-01-01T00:00:00.000Z',
+        b: '2026-01-01T00:00:00.000Z'
+      })
     })
 
     if (typeof Object.create === 'function') {
