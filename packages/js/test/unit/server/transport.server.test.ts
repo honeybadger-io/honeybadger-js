@@ -43,6 +43,45 @@ describe('ServerTransport', function () {
       })
   })
 
+  it('sends POST request with BigInt values in the payload', () => {
+    let body: unknown
+    const request = nock('http://api.honeybadger.io')
+      .post('/v1/notices/js', (b) => { body = b; return true })
+      .reply(201)
+    return transport
+      .send({
+        endpoint: 'http://api.honeybadger.io/v1/notices/js',
+        method: 'POST',
+        logger: console
+      }, { context: { big: BigInt('9007199254740993') } })
+      .then(resp => {
+        expect(request.isDone()).toBe(true)
+        expect(resp.statusCode).toEqual(201)
+        expect(body).toEqual({ context: { big: '9007199254740993' } })
+      })
+  })
+
+  it('rejects when the payload cannot be serialized', async () => {
+    const request = nock('http://api.honeybadger.io')
+      .post('/v1/notices/js')
+      .reply(201)
+    const stringify = jest.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
+      throw new Error('cannot serialize')
+    })
+
+    try {
+      await expect(transport.send({
+        endpoint: 'http://api.honeybadger.io/v1/notices/js',
+        method: 'POST',
+        logger: console
+      }, { context: { foo: 'bar' } })).rejects.toThrow('cannot serialize')
+      expect(request.isDone()).toBe(false)
+    } finally {
+      stringify.mockRestore()
+      nock.cleanAll()
+    }
+  })
+
   it('sends POST request over the network with headers', () => {
     const headers = {
       'X-API-Key': '123',

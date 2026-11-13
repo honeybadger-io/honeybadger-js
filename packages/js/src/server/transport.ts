@@ -71,7 +71,7 @@ export class ServerTransport implements Types.Transport {
           req.write(data)
         }
         req.end()
-      })
+      }).catch(reject)
     })
   }
 
