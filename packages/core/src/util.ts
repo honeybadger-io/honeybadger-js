@@ -336,7 +336,7 @@ export function sanitize(obj, maxDepth = 8) {
     return true
   }
 
-  function serialize(obj: unknown, depth = 0) {
+  function serialize(obj: unknown, depth = 0, key = '', skipToJSON = false) {
     if (depth >= maxDepth) {
       return '[DEPTH]'
     }
@@ -346,6 +346,21 @@ export function sanitize(obj, maxDepth = 8) {
       return Object.prototype.toString.call(obj)
     }
 
+    // BigInt cannot be serialized by JSON.stringify
+    if (typeof obj === 'bigint') {
+      return obj.toString()
+    }
+
+    // Mirror JSON.stringify: use toJSON() when present, including one
+    // inherited from a prototype (Date, URL, Buffer, library value types).
+    // Like JSON.stringify, toJSON() receives the property key. The result is
+    // sanitized too (except null/undefined, which JSON.stringify keeps as
+    // null or omits, e.g. an invalid Date), but toJSON() is not applied again.
+    if (!skipToJSON && typeof obj === 'object' && typeof (obj as { toJSON?: unknown }).toJSON === 'function') {
+      const result = (obj as { toJSON: (key: string) => unknown }).toJSON(key)
+      return result == null ? result : serialize(result, depth, key, true)
+    }
+
     // Halt circular references
     if (seen(obj)) {
       return '[RECURSION]'
@@ -353,7 +368,7 @@ export function sanitize(obj, maxDepth = 8) {
 
     // Serialize inside arrays
     if (Array.isArray(obj)) {
-      return obj.map(o => safeSerialize(o, depth + 1))
+      return obj.map((o, i) => safeSerialize(o, depth + 1, String(i)))
     }
 
     // Serialize inside objects
@@ -361,8 +376,13 @@ export function sanitize(obj, maxDepth = 8) {
       const ret = {}
       for (const k in obj) {
         const v = obj[k]
+        // This object was returned by toJSON(). JSON.stringify never calls
+        // toJSON() on that result, so do not copy the hook for it to run again.
+        if (skipToJSON && k === 'toJSON' && typeof v === 'function') {
+          continue
+        }
         if (Object.prototype.hasOwnProperty.call(obj, k) && (k != null) && (v != null)) {
-          ret[k] = safeSerialize(v, depth + 1)
+          ret[k] = safeSerialize(v, depth + 1, k)
         }
       }
       return ret
@@ -372,9 +392,9 @@ export function sanitize(obj, maxDepth = 8) {
     return obj
   }
 
-  function safeSerialize(obj: unknown, depth = 0) {
+  function safeSerialize(obj: unknown, depth = 0, key = '') {
     try {
-      return serialize(obj, depth)
+      return serialize(obj, depth, key)
     } catch(e) {
       return `[ERROR] ${e}`
     }
