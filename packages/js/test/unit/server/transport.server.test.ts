@@ -43,6 +43,38 @@ describe('ServerTransport', function () {
       })
   })
 
+  it('sends requests to the port specified in the endpoint', () => {
+    const request = nock('http://localhost:3222')
+      .post('/v1/notices/js')
+      .reply(201)
+    return transport
+      .send({
+        endpoint: 'http://localhost:3222/v1/notices/js',
+        method: 'POST',
+        logger: console
+      })
+      .then(resp => {
+        expect(request.isDone()).toBe(true)
+        expect(resp.statusCode).toEqual(201)
+      })
+  })
+
+  it('sends https requests to the port specified in the endpoint', () => {
+    const request = nock('https://api.honeybadger.io:8443')
+      .post('/v1/notices/js')
+      .reply(201)
+    return transport
+      .send({
+        endpoint: 'https://api.honeybadger.io:8443/v1/notices/js',
+        method: 'POST',
+        logger: console
+      })
+      .then(resp => {
+        expect(request.isDone()).toBe(true)
+        expect(resp.statusCode).toEqual(201)
+      })
+  })
+
   it('sends POST request with BigInt values in the payload', () => {
     let body: unknown
     const request = nock('http://api.honeybadger.io')
