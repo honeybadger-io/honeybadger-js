@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@honeybadger-io/js": "^6.16.1",
-    "express": "^4.22.2"
+    "express": "^5.2.1"
   },
   "private": true
 }
