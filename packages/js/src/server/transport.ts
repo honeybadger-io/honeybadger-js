@@ -18,7 +18,7 @@ export class ServerTransport implements Types.Transport {
   }
 
   send<T>(options: Types.TransportOptions, payload?: T): Promise<{ statusCode: number; body: string; }> {
-    const { protocol, hostname, pathname } = new URL(options.endpoint)
+    const { protocol, hostname, port, pathname } = new URL(options.endpoint)
     const transport = (protocol === 'http:' ? http : https)
 
     return new Promise((resolve, reject) => {
@@ -46,6 +46,8 @@ export class ServerTransport implements Types.Transport {
           path: pathname,
           protocol,
           hostname,
+          // URL#port is '' when the endpoint uses the protocol's default port
+          port: port || undefined,
         }
 
         let data: Buffer | undefined = undefined
