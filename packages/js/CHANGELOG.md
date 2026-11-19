@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.17.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.17.2...@honeybadger-io/js@6.17.3) (2026-11-19)
+
+
+### Bug Fixes
+
+* **js:** honor custom port in ServerTransport endpoint ([#1702](https://github.com/honeybadger-io/honeybadger-js/issues/1702)) ([69d2db0](https://github.com/honeybadger-io/honeybadger-js/commit/69d2db03d2fe84f0c40c845bca7f1f6d870dafc0))
+
+
+
+
+
 ## [6.17.2](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.17.1...@honeybadger-io/js@6.17.2) (2026-11-13)
 
 
