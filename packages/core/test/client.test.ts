@@ -22,6 +22,7 @@ describe('client', function () {
 
   beforeEach(function () {
     client = new TestClient({
+      apiKey: 'testing',
       logger: nullLogger(),
       environment: null,
       projectRoot: process.cwd()
@@ -252,6 +253,7 @@ describe('client', function () {
     })
 
     it('doesn\'t send the notice when not configured', function () {
+      client.configure({ apiKey: null })
       expect(client.notify(new Error('test'))).toEqual(false)
     })
 
@@ -1368,6 +1370,51 @@ describe('client', function () {
         }))
         done()
       }, 10)
+    })
+
+    it('does not send the event when reportData is false', async function () {
+      client.configure({ reportData: false })
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+      const transportSpy = jest.spyOn(client.transport(), 'send')
+      const beforeEventSpy = jest.fn()
+      client.beforeEvent(beforeEventSpy)
+      client.event('expected event', { message: 'should not be sent' })
+      await client.flushAsync()
+
+      expect(beforeEventSpy).not.toHaveBeenCalled()
+      expect(logSpy).not.toHaveBeenCalled()
+      expect(transportSpy).not.toHaveBeenCalled()
+    })
+
+    it('does not send the event in development mode', async function () {
+      client.configure({ environment: 'development' })
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+      const transportSpy = jest.spyOn(client.transport(), 'send')
+      client.event('expected event', { message: 'should not be sent' })
+      await client.flushAsync()
+
+      expect(logSpy).not.toHaveBeenCalled()
+      expect(transportSpy).not.toHaveBeenCalled()
+    })
+
+    it('sends the event in development mode when reportData is true', async function () {
+      client.configure({ environment: 'development', reportData: true })
+      const transportSpy = jest.spyOn(client.transport(), 'send')
+      client.event('expected event', { message: 'should be sent' })
+      await client.flushAsync()
+
+      expect(transportSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not send the event when no API key is configured', async function () {
+      client.configure({ apiKey: null })
+      const logSpy = jest.spyOn(client.eventsWorker(), 'log')
+      const transportSpy = jest.spyOn(client.transport(), 'send')
+      client.event('expected event', { message: 'should not be sent' })
+      await client.flushAsync()
+
+      expect(logSpy).not.toHaveBeenCalled()
+      expect(transportSpy).not.toHaveBeenCalled()
     })
 
     describe('sampling', function () {

@@ -1,6 +1,6 @@
 import { Transport, Config, EventsWorker, Logger, EventPayload } from './types'
 import { NdJson } from 'json-nd'
-import { endpoint } from './util'
+import { endpoint, reportingDisabledReason } from './util'
 import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
 export class ThrottledEventsWorker implements EventsWorker {
@@ -156,6 +156,15 @@ export class ThrottledEventsWorker implements EventsWorker {
   private async send(): Promise<void> {
     if (this.queue.length === 0) {
       return;
+    }
+
+    // Events queued before reporting was disabled (or before the API key was
+    // removed) must not leave the process.
+    const disabledReason = reportingDisabledReason(this.config) ?? (this.config.apiKey ? null : 'no API key has been configured')
+    if (disabledReason) {
+      this.logger.debug(`[Honeybadger] Dropping ${this.queue.length} queued event(s): ${disabledReason}`)
+      this.queue.length = 0
+      return
     }
 
     const eventsData = this.queue.splice(0, this.bulkThreshold())

@@ -17,6 +17,7 @@ describe('window.console integration for events logging', function () {
   beforeEach(function () {
     jest.clearAllMocks()
     client = new TestClient({
+      apiKey: 'testing',
       logger: nullLogger()
     }, new TestTransport())
     mockConsole = consoleMocked()
@@ -69,5 +70,16 @@ describe('window.console integration for events logging', function () {
       message: 'testing',
       args: []
     })
+  })
+
+  it('should not send events when reportData is false', async function () {
+    const workerLogSpy = jest.spyOn(client.eventsWorker(), 'log')
+    enableConsoleInsights()
+    client.config.reportData = false
+    const window = { console: mockConsole }
+    eventsLogger(<never>window).load(client)
+    mockConsole.log('testing')
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(workerLogSpy).not.toHaveBeenCalled()
   })
 })

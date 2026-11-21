@@ -226,6 +226,26 @@ export interface ResolvedInsights {
   http: boolean
 }
 
+/**
+ * True when the configured environment is a development environment and
+ * `reportData` hasn't been explicitly forced on.
+ */
+export function isDevelopmentMode(config: Partial<Pick<Config, 'reportData' | 'environment' | 'developmentEnvironments'>>): boolean {
+  if (config.reportData === true) { return false }
+  return !!(config.environment && (config.developmentEnvironments ?? []).includes(config.environment))
+}
+
+/**
+ * Returns why data must not be sent to Honeybadger (`reportData` is false, or
+ * development mode), or null when reporting is allowed. Gates notices,
+ * events and `checkIn()` pings.
+ */
+export function reportingDisabledReason(config: Partial<Pick<Config, 'reportData' | 'environment' | 'developmentEnvironments'>>): string | null {
+  if (config.reportData === false) { return 'reportData is false' }
+  if (isDevelopmentMode(config)) { return `development mode (environment: ${config.environment})` }
+  return null
+}
+
 export function resolveInsights(config: Pick<Config, 'insights'>): ResolvedInsights {
   const insights = config.insights
   if (!insights || insights.enabled !== true) {
