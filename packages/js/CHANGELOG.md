@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.17.4](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.17.3...@honeybadger-io/js@6.17.4) (2026-11-21)
+
+
+### Bug Fixes
+
+* **js:** honor reportData and development mode for events and check-ins ([#1705](https://github.com/honeybadger-io/honeybadger-js/issues/1705)) ([5e70959](https://github.com/honeybadger-io/honeybadger-js/commit/5e7095967edea35ce19a1db597b99873874918da))
+
+
+
+
+
 ## [6.17.3](https://github.com/honeybadger-io/honeybadger-js/compare/@honeybadger-io/js@6.17.2...@honeybadger-io/js@6.17.3) (2026-11-19)
 
 
