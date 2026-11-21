@@ -12,6 +12,7 @@ function makeEvent(name = 'foo') {
 
 function fastWorkerConfig(extra: Record<string, unknown> = {}) {
   return {
+    apiKey: 'testing',
     debug: true,
     events: {
       dispatchIntervalSeconds: 0.05,
@@ -44,6 +45,40 @@ describe('ThrottledEventsWorker', () => {
     // @ts-ignore
     expect(eventsWorker.inFlight).toBeNull()
     expect(consoleLogSpy).toHaveBeenCalledWith('[Honeybadger] Events sent successfully')
+  })
+
+  it('drops queued events instead of sending them when reportData is false', async () => {
+    const transport = new TestTransport()
+    const transportSpy = jest.spyOn(transport, 'send')
+    const eventsWorker = new ThrottledEventsWorker(fastWorkerConfig({ dispatchIntervalSeconds: 10 }), transport)
+    eventsWorker.log(makeEvent('a'))
+    await wait(50)
+    expect(transportSpy).toHaveBeenCalledTimes(1)
+    // Queued during the cooldown window, then reporting is turned off before dispatch.
+    eventsWorker.log(makeEvent('b'))
+    eventsWorker.configure({ reportData: false })
+    await eventsWorker.flushAsync()
+    expect(transportSpy).toHaveBeenCalledTimes(1)
+    // @ts-ignore
+    expect(eventsWorker.queue.length).toBe(0)
+  })
+
+  it.each([
+    ['in development mode', { environment: 'development' }],
+    ['when the API key is removed', { apiKey: null }],
+  ])('drops queued events instead of sending them %s', async (_label, change) => {
+    const transport = new TestTransport()
+    const transportSpy = jest.spyOn(transport, 'send')
+    const eventsWorker = new ThrottledEventsWorker(fastWorkerConfig({ dispatchIntervalSeconds: 10 }), transport)
+    eventsWorker.log(makeEvent('a'))
+    await wait(50)
+    expect(transportSpy).toHaveBeenCalledTimes(1)
+    eventsWorker.log(makeEvent('b'))
+    eventsWorker.configure(change)
+    await eventsWorker.flushAsync()
+    expect(transportSpy).toHaveBeenCalledTimes(1)
+    // @ts-ignore
+    expect(eventsWorker.queue.length).toBe(0)
   })
 
   it('does not hold a pending cooldown timer once the queue drains', async () => {

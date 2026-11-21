@@ -22,6 +22,7 @@ export class CheckInsManager {
       personalAuthToken: config.personalAuthToken ?? undefined,
       checkins: config.checkins ?? [],
       logger: config.logger ?? console,
+      reportData: config.reportData ?? null,
     }
     const transport = new ServerTransport()
     this.logger = Util.logger(this)
@@ -29,11 +30,16 @@ export class CheckInsManager {
       appEndpoint: config.appEndpoint,
       apiKey: config.apiKey,
       personalAuthToken: config.personalAuthToken,
-      logger: this.logger
+      logger: this.logger,
+      reportData: config.reportData,
     }, transport)
   }
 
   public async sync(): Promise<CheckIn[]> {
+    if (this.config.reportData === false) {
+      throw new Error('Check-ins not synchronized: reportData is false')
+    }
+
     // check if app endpoint is set
     if (!this.config.appEndpoint || this.config.appEndpoint === '') {
       throw new Error('appEndpoint is required')

@@ -54,6 +54,11 @@ export type CheckInsConfig = {
     appEndpoint: string
     personalAuthToken: string
     checkins: CheckInDto[]
+    /**
+     * When false, every check-ins API request is refused with an error and
+     * nothing is sent to Honeybadger.
+     */
+    reportData?: boolean
 }
 
 export type CheckInPayload = {
