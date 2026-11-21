@@ -32,6 +32,7 @@ describe('Fastify plugin', function () {
 
   beforeEach(function () {
     client = Singleton.factory({
+      apiKey: 'testing',
       logger: nullLogger(),
       environment: null
     })

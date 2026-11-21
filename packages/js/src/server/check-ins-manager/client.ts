@@ -3,24 +3,22 @@ import { CheckIn } from './check-in'
 import { CheckInDto, CheckInResponsePayload, CheckInsConfig } from './types';
 
 export class CheckInsClient {
-  private config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger'>
+  private config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger' | 'reportData'>
   private readonly logger: Types.Logger
   private readonly transport: Types.Transport
 
-  constructor(config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger'>, transport: Types.Transport) {
+  constructor(config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger' | 'reportData'>, transport: Types.Transport) {
     this.transport = transport
     this.config = config
     this.logger = config.logger
   }
 
-  public configure(config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger'>) {
+  public configure(config: Pick<CheckInsConfig, 'appEndpoint' | 'apiKey' | 'personalAuthToken' | 'logger' | 'reportData'>) {
     this.config = config
   }
 
   public async getProjectId(projectApiKey: string): Promise<string> {
-    if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
-      throw new Error('personalAuthToken is required')
-    }
+    this.assertCanSend()
 
     const response = await this.transport.send({
       method: 'GET',
@@ -39,9 +37,7 @@ export class CheckInsClient {
   }
 
   public async listForProject(projectId: string): Promise<CheckIn[]> {
-    if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
-      throw new Error('personalAuthToken is required')
-    }
+    this.assertCanSend()
 
     const response = await this.transport.send({
       method: 'GET',
@@ -60,9 +56,7 @@ export class CheckInsClient {
   }
 
   public async get(projectId: string, checkInId: string): Promise<CheckIn> {
-    if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
-      throw new Error('personalAuthToken is required')
-    }
+    this.assertCanSend()
 
     const response = await this.transport.send({
       method: 'GET',
@@ -80,9 +74,7 @@ export class CheckInsClient {
   }
 
   public async create(projectId: string, checkIn: CheckIn | CheckInDto): Promise<CheckIn> {
-    if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
-      throw new Error('personalAuthToken is required')
-    }
+    this.assertCanSend()
 
     const checkInTyped = checkIn instanceof CheckIn ? checkIn : new CheckIn(checkIn)
     const response = await this.transport.send({
@@ -102,9 +94,7 @@ export class CheckInsClient {
   }
 
   public async update(projectId: string, checkIn: CheckIn | CheckInDto): Promise<CheckIn> {
-    if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
-      throw new Error('personalAuthToken is required')
-    }
+    this.assertCanSend()
 
     const checkInTyped = checkIn instanceof CheckIn ? checkIn : new CheckIn(checkIn)
     const response = await this.transport.send({
@@ -122,9 +112,7 @@ export class CheckInsClient {
   }
 
   public async remove(projectId: string, checkIn: CheckIn | CheckInDto): Promise<void> {
-    if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
-      throw new Error('personalAuthToken is required')
-    }
+    this.assertCanSend()
 
     const response = await this.transport.send({
       method: 'DELETE',
@@ -135,6 +123,16 @@ export class CheckInsClient {
 
     if (response.statusCode !== 204) {
       throw new Error(`Failed to remove checkin[${checkIn.slug}] for project[${projectId}]: ${this.getErrorMessage(response.body)}`)
+    }
+  }
+
+  private assertCanSend() {
+    if (this.config.reportData === false) {
+      throw new Error('Check-ins API request not sent: reportData is false')
+    }
+
+    if (!this.config.personalAuthToken || this.config.personalAuthToken === '') {
+      throw new Error('personalAuthToken is required')
     }
   }
 

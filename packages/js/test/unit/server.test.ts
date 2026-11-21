@@ -404,6 +404,87 @@ describe('server client', function () {
       await client.checkIn(checkInConfig.slug)
       expect(checkinRequest.isDone()).toBe(true)
     })
+
+    it('does not send a check-in when reportData is false', async function () {
+      client.configure({
+        apiKey: 'testing',
+        endpoint: 'http://api.honeybadger.io',
+        reportData: false,
+      })
+
+      const request = nock('http://api.honeybadger.io')
+        .get('/v1/check_in/123')
+        .reply(201)
+
+      await client.checkIn('123')
+      expect(request.isDone()).toBe(false)
+      nock.cleanAll()
+    })
+
+    it('does not send a check-in in development mode', async function () {
+      client.configure({
+        apiKey: 'testing',
+        endpoint: 'http://api.honeybadger.io',
+        environment: 'development',
+        developmentEnvironments: ['development'],
+      })
+
+      const request = nock('http://api.honeybadger.io')
+        .get('/v1/check_in/123')
+        .reply(201)
+
+      await client.checkIn('123')
+      expect(request.isDone()).toBe(false)
+      nock.cleanAll()
+    })
+
+    it('sends a check-in in development mode when reportData is true', async function () {
+      client.configure({
+        apiKey: 'testing',
+        endpoint: 'http://api.honeybadger.io',
+        environment: 'development',
+        developmentEnvironments: ['development'],
+        reportData: true,
+      })
+
+      const request = nock('http://api.honeybadger.io')
+        .get('/v1/check_in/123')
+        .reply(201)
+
+      await client.checkIn('123')
+      expect(request.isDone()).toBe(true)
+    })
+
+    it('refuses check-ins API requests when reportData is false', async function () {
+      client.configure({
+        apiKey: 'testing',
+        personalAuthToken: 'p123',
+        appEndpoint: 'http://app.honeybadger.io',
+      })
+      client.configure({ reportData: false })
+
+      const request = nock('http://app.honeybadger.io')
+        .get('/v2/project_keys/testing')
+        .reply(200, { project: { id: '11111' } })
+
+      await expect(client.checkInsApi.getProjectId('testing')).rejects.toThrow('reportData is false')
+      expect(request.isDone()).toBe(false)
+      nock.cleanAll()
+    })
+
+    it('sends a check-in by id even without an API key', async function () {
+      client.configure({
+        apiKey: null,
+        endpoint: 'http://api.honeybadger.io',
+      })
+
+      const request = nock('http://api.honeybadger.io')
+        .get('/v1/check_in/123')
+        .reply(201)
+
+      await client.checkIn('123')
+      expect(request.isDone()).toBe(true)
+    })
   })
 
   describe('__plugins', function () {

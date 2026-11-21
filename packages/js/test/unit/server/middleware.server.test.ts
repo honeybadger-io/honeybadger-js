@@ -151,6 +151,11 @@ describe('Express Middleware', function () {
   })
 
   describe('inbound HTTP events', function () {
+    // Events are only queued when an API key is configured.
+    beforeEach(function () {
+      client.configure({ apiKey: 'testing' })
+    })
+
     // The store is `protected` on Client; in tests we read it via `as any`.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const readEventContext = (): Record<string, unknown> => (client as any).__store.getContents('eventContext')

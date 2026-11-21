@@ -53,6 +53,24 @@ describe('CheckinsManager', () => {
     expect(manager.sync()).rejects.toThrow('personalAuthToken is required')
   })
 
+  it('should throw without contacting the API when reportData is false', async () => {
+    const request = nock('https://app.honeybadger.io')
+      .get('/v2/project_keys/hbp_123')
+      .reply(200, { project: { id: '11111' } })
+    const config: CheckInsConfig = {
+      logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
+      apiKey: 'hbp_123',
+      personalAuthToken: 'abc',
+      checkins: [],
+      reportData: false,
+    }
+    const manager = new CheckInsManager(config)
+    await expect(manager.sync()).rejects.toThrow('reportData is false')
+    expect(request.isDone()).toBe(false)
+    nock.cleanAll()
+  })
+
   it('should throw if a check-in configuration is invalid', () => {
     const config: CheckInsConfig = {
       logger: nullLogger(),

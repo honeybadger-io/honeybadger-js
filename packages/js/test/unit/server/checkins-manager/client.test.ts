@@ -183,4 +183,36 @@ describe('CheckinsClient', () => {
     await client.remove(projectId, checkInToBeRemoved)
     expect(request.isDone()).toBe(true)
   })
+
+  describe('when reportData is false', () => {
+    const client = new CheckInsClient({
+      logger: nullLogger(),
+      appEndpoint: 'https://app.honeybadger.io',
+      apiKey: 'hbp_123',
+      personalAuthToken: '123',
+      reportData: false,
+    }, new ServerTransport())
+    const checkIn = new CheckIn({ id: 'c1', slug: 'a-check-in', scheduleType: 'simple', reportPeriod: '1 day' })
+    const calls: Array<[string, () => Promise<unknown>]> = [
+      ['getProjectId', () => client.getProjectId('hbp_123')],
+      ['listForProject', () => client.listForProject('11111')],
+      ['get', () => client.get('11111', 'c1')],
+      ['create', () => client.create('11111', checkIn)],
+      ['update', () => client.update('11111', checkIn)],
+      ['remove', () => client.remove('11111', checkIn)],
+    ]
+
+    it.each(calls)('%s rejects without making a request', async (_name, call) => {
+      nock.disableNetConnect()
+      const scope = nock('https://app.honeybadger.io').persist().get(/.*/).reply(200).post(/.*/).reply(201).put(/.*/).reply(204).delete(/.*/).reply(204)
+      try {
+        await expect(call()).rejects.toThrow('reportData is false')
+        expect(scope.pendingMocks().length).toBeGreaterThan(0)
+        expect(scope.isDone()).toBe(false)
+      } finally {
+        nock.cleanAll()
+        nock.enableNetConnect()
+      }
+    })
+  })
 })

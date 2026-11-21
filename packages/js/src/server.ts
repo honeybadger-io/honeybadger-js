@@ -84,14 +84,12 @@ class Honeybadger extends Client {
   }
 
   configure(opts: Partial<HoneybadgerServerConfig> = {}): this {
-    this.checkInsApi.configure({
-      appEndpoint: opts.appEndpoint,
-      apiKey: opts.apiKey,
-      personalAuthToken: opts.personalAuthToken,
-      logger: opts.logger,
-    })
+    super.configure(opts)
+    // Hand the check-ins API the merged config so settings from earlier
+    // configure() calls (including reportData) are preserved.
+    this.checkInsApi.configure(this.config)
 
-    return super.configure(opts)
+    return this
   }
 
   protected __initStore() {
@@ -104,6 +102,12 @@ class Honeybadger extends Client {
   }
 
   async checkIn(idOrSlug: string): Promise<void> {
+    const disabledReason = Util.reportingDisabledReason(this.config)
+    if (disabledReason) {
+      this.logger.debug(`skipping check-in[${idOrSlug}]: honeybadger.js is disabled (${disabledReason})`)
+      return
+    }
+
     if (this.isCheckInSlug(idOrSlug)) {
       return this.checkInWithSlug(idOrSlug)
     }
