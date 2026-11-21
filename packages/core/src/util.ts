@@ -503,6 +503,36 @@ export function instrument(object: Record<string, any>, name: string, replacemen
 let _consoleAlreadyInstrumented = false
 
 const listeners = []
+
+/**
+ * A logger that writes to the global console with Honeybadger's console
+ * instrumentation stripped (`__hb_original`). Use it for SDK diagnostics on
+ * code paths that console instrumentation can re-enter, such as `event()` and
+ * the events worker; logging those through an instrumented console would turn
+ * each diagnostic into another event, which logs another diagnostic, and so on.
+ *
+ * `debug` messages are written only when `config.debug` is true. Methods are
+ * resolved on every call, so instrumentation added later is still bypassed.
+ */
+export function uninstrumentedLogger(config: { debug?: boolean }): Logger {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const original = (method: string) => (console[method] as any)?.__hb_original ?? console[method]
+  const write = (method: string) => (...args: unknown[]) => original(method)(...args)
+
+  return {
+    log: write('log'),
+    info: write('info'),
+    debug: (...args: unknown[]) => {
+      if (!config.debug) {
+        return
+      }
+      return original('debug')(...args)
+    },
+    warn: write('warn'),
+    error: write('error'),
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function instrumentConsole(_window: any, handler: (method: string, args: unknown[]) => void): void {
   if (!_window || !_window.console || !handler) {

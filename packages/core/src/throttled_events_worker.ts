@@ -1,6 +1,6 @@
 import { Transport, Config, EventsWorker, Logger, EventPayload } from './types'
 import { NdJson } from 'json-nd'
-import { endpoint, reportingDisabledReason } from './util'
+import { endpoint, reportingDisabledReason, uninstrumentedLogger } from './util'
 import { CONFIG as DEFAULT_CONFIG } from './defaults';
 
 export class ThrottledEventsWorker implements EventsWorker {
@@ -20,7 +20,9 @@ export class ThrottledEventsWorker implements EventsWorker {
       ...DEFAULT_CONFIG,
       ...config,
     }
-    this.logger = this.originalLogger()
+    // The events plugin instruments the console, so logging through it from
+    // here could feed back into the event queue.
+    this.logger = uninstrumentedLogger(this.config)
   }
 
   configure(opts: Partial<Config>): void {
@@ -206,33 +208,5 @@ export class ThrottledEventsWorker implements EventsWorker {
       .catch(err => {
         this.logger.error(`[Honeybadger] Error sending events: ${err.message}`)
       })
-  }
-
-  /**
-   * todo: improve this
-   *
-   * The events plugin overrides the console methods to enable automatic instrumentation
-   * of console logs to the Honeybadger API.
-   * So if we want to log something in here we need to use the original methods.
-   */
-  private originalLogger() {
-    return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      log: (<any>console.log).__hb_original ?? console.log,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      info: (<any>console.info).__hb_original ?? console.info,
-      debug: (...args: unknown[]) => {
-        if (!this.config.debug) {
-          return
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const func = (<any>console.debug).__hb_original ?? console.debug
-        return func(...args)
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      warn: (<any>console.warn).__hb_original ?? console.warn,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      error: (<any>console.error).__hb_original ?? console.error,
-    }
   }
 }

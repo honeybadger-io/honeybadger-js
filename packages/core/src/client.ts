@@ -10,6 +10,7 @@ import {
   shouldSampleEvent,
   isDevelopmentMode,
   reportingDisabledReason,
+  uninstrumentedLogger,
   shallowClone,
   logger,
   logDeprecatedMethod,
@@ -74,6 +75,8 @@ export abstract class Client {
 
   config: Config
   logger: Logger
+  // For diagnostics on paths that console instrumentation re-enters (event()).
+  protected __uninstrumentedLogger: Logger
 
   protected constructor(opts: Partial<Config> = {}, transport: Transport) {
     this.config = {
@@ -85,6 +88,7 @@ export abstract class Client {
     this.__transport = transport
     this.__eventsWorker = new ThrottledEventsWorker(this.config, this.__transport)
     this.logger = logger(this)
+    this.__uninstrumentedLogger = uninstrumentedLogger(this.config)
     this.__applyEventsEnabledShim(opts)
   }
 
@@ -430,12 +434,12 @@ export abstract class Client {
   event(type: string | Record<string, unknown>, data?: Record<string, unknown>): void {
     const disabledReason = reportingDisabledReason(this.config)
     if (disabledReason) {
-      this.logger.debug(`skipping event: honeybadger.js is disabled (${disabledReason})`)
+      this.__uninstrumentedLogger.debug(`[Honeybadger] skipping event: honeybadger.js is disabled (${disabledReason})`)
       return
     }
 
     if (!this.config.apiKey) {
-      this.logger.debug('skipping event: no API key has been configured')
+      this.__uninstrumentedLogger.debug('[Honeybadger] skipping event: no API key has been configured')
       return
     }
 
