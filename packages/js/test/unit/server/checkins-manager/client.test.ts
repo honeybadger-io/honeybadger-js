@@ -185,13 +185,14 @@ describe('CheckinsClient', () => {
   })
 
   describe('when reportData is false', () => {
+    const transport = new ServerTransport()
     const client = new CheckInsClient({
       logger: nullLogger(),
       appEndpoint: 'https://app.honeybadger.io',
       apiKey: 'hbp_123',
       personalAuthToken: '123',
       reportData: false,
-    }, new ServerTransport())
+    }, transport)
     const checkIn = new CheckIn({ id: 'c1', slug: 'a-check-in', scheduleType: 'simple', reportPeriod: '1 day' })
     const calls: Array<[string, () => Promise<unknown>]> = [
       ['getProjectId', () => client.getProjectId('hbp_123')],
@@ -203,15 +204,12 @@ describe('CheckinsClient', () => {
     ]
 
     it.each(calls)('%s rejects without making a request', async (_name, call) => {
-      nock.disableNetConnect()
-      const scope = nock('https://app.honeybadger.io').persist().get(/.*/).reply(200).post(/.*/).reply(201).put(/.*/).reply(204).delete(/.*/).reply(204)
+      const sendSpy = jest.spyOn(transport, 'send')
       try {
         await expect(call()).rejects.toThrow('reportData is false')
-        expect(scope.pendingMocks().length).toBeGreaterThan(0)
-        expect(scope.isDone()).toBe(false)
+        expect(sendSpy).not.toHaveBeenCalled()
       } finally {
-        nock.cleanAll()
-        nock.enableNetConnect()
+        sendSpy.mockRestore()
       }
     })
   })
